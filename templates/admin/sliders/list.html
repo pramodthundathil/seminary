@@ -1,0 +1,642 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-purple: #8B5CF6;
+        --purple-light: #F3E8FF;
+        --dark-navy: #1B2845;
+        --cyan-accent: #00CED1;
+        --green-success: #10B981;
+        --red-danger: #EF4444;
+        --blue-info: #3B82F6;
+        --text-gray: #6B7280;
+        --border-gray: #E5E7EB;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .slider-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--purple-light) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px 30px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+    }
+
+    .page-header h1 {
+        color: var(--dark-navy);
+        font-size: 32px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 0;
+    }
+
+    .page-header h1 i {
+        color: var(--primary-purple);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-purple), #A78BFA);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    /* DataTable Styling */
+    table.dataTable {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    table.dataTable thead th {
+        background: linear-gradient(135deg, var(--dark-navy), #2A3F5F);
+        color: white;
+        padding: 18px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 1px;
+        border: none;
+        position: relative;
+    }
+
+    table.dataTable thead th:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+
+    table.dataTable thead th:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    table.dataTable tbody tr {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+        border-radius: 10px;
+    }
+
+    table.dataTable tbody tr:hover {
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
+        transform: translateY(-3px);
+    }
+
+    table.dataTable tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .slider-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .slider-name {
+        font-weight: 700;
+        color: var(--dark-navy);
+        font-size: 16px;
+    }
+
+    .slider-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .code-badge {
+        padding: 5px 12px;
+        background: linear-gradient(135deg, var(--primary-purple), #A78BFA);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dimension-badge {
+        padding: 5px 12px;
+        background: var(--cyan-accent);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .photo-count-badge {
+        padding: 5px 12px;
+        background: var(--green-success);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 38px;
+        height: 38px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 14px;
+    }
+
+    .btn-photos {
+        background: var(--primary-purple);
+    }
+
+    .btn-photos:hover {
+        background: #7C3AED;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .btn-edit {
+        background: var(--blue-info);
+    }
+
+    .btn-edit:hover {
+        background: #2563EB;
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    .btn-delete {
+        background: var(--red-danger);
+    }
+
+    .btn-delete:hover {
+        background: #DC2626;
+        transform: scale(1.1);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(27, 40, 69, 0.85);
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        margin: 4% auto;
+        padding: 0;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-purple), #A78BFA);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .close-modal {
+        color: white;
+        font-size: 28px;
+        font-weight: 300;
+        cursor: pointer;
+        border: none;
+        background: none;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-label.required::after {
+        content: "*";
+        color: var(--red-danger);
+        margin-left: 4px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border-gray);
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-purple);
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .modal-footer {
+        padding: 20px 30px;
+        border-top: 2px solid var(--purple-light);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-cancel {
+        background: var(--text-gray);
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #4B5563;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: var(--dark-navy);
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="slider-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-sliders-h"></i>
+            Slider Management
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus-circle"></i>
+                Create Slider
+            </button>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <table id="sliderTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Slider Info</th>
+                    <th>Dimensions</th>
+                    <th>Photos</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div id="sliderModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle"><i class="fas fa-plus-circle"></i> Create Slider</h2>
+            <button class="close-modal" onclick="closeSliderModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="sliderForm">
+                {% csrf_token %}
+                <input type="hidden" id="sliderId" name="slider_id">
+
+                <div class="form-group">
+                    <label class="form-label required" for="sliderName">Slider Name</label>
+                    <input type="text" class="form-control" id="sliderName" name="slider_name" 
+                           placeholder="e.g., Homepage Banner" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="sliderCode">Slider Code</label>
+                    <input type="text" class="form-control" id="sliderCode" name="code" 
+                           placeholder="e.g., home_banner" required>
+                    <small style="color: var(--text-gray); margin-top: 5px; display: block;">
+                        Unique identifier for this slider (lowercase, no spaces)
+                    </small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required" for="sliderWidth">Width (px)</label>
+                        <input type="number" class="form-control" id="sliderWidth" name="width" 
+                               placeholder="1920" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="sliderHeight">Height (px)</label>
+                        <input type="number" class="form-control" id="sliderHeight" name="height" 
+                               placeholder="1080" min="1" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeSliderModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="saveSlider()">
+                <i class="fas fa-save"></i> Save Slider
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+let sliderTable;
+let isEditMode = false;
+
+$(document).ready(function() {
+    sliderTable = $('#sliderTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{% url "slider_datatable" %}',
+            type: 'GET'
+        },
+        columns: [
+            { data: 'id', width: '60px' },
+            { data: 'slider_info', orderable: false },
+            { data: 'dimensions', width: '120px' },
+            { data: 'photos', width: '80px' },
+            { data: 'created_at', width: '110px' },
+            { data: 'actions', orderable: false, searchable: false, width: '140px' }
+        ],
+        order: [[0, 'desc']],
+        pageLength: 12,
+        lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ items",
+            info: "Showing _START_ to _END_ of _TOTAL_ sliders",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            }
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function openCreateModal() {
+    isEditMode = false;
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create Slider';
+    document.getElementById('sliderForm').reset();
+    document.getElementById('sliderId').value = '';
+    document.getElementById('sliderModal').style.display = 'block';
+}
+
+function closeSliderModal() {
+    document.getElementById('sliderModal').style.display = 'none';
+}
+
+async function editSlider(sliderId) {
+    try {
+        const response = await fetch(`/menu/sliders/get/${sliderId}/`);
+        const result = await response.json();
+
+        if (result.success) {
+            isEditMode = true;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Slider';
+            document.getElementById('sliderId').value = result.data.id;
+            document.getElementById('sliderName').value = result.data.slider_name;
+            document.getElementById('sliderCode').value = result.data.code;
+            document.getElementById('sliderWidth').value = result.data.width;
+            document.getElementById('sliderHeight').value = result.data.height;
+            document.getElementById('sliderModal').style.display = 'block';
+        } else {
+            alert('Error loading slider: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load slider data');
+    }
+}
+
+async function saveSlider() {
+    const form = document.getElementById('sliderForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    const sliderId = document.getElementById('sliderId').value;
+    const url = isEditMode ? `/menu/sliders/update/${sliderId}/` : '{% url "slider_create" %}';
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(isEditMode ? 'Slider updated successfully!' : 'Slider created successfully!');
+            closeSliderModal();
+            sliderTable.ajax.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to save slider');
+    }
+}
+
+async function deleteSlider(sliderId, sliderName) {
+    if (!confirm(`Are you sure you want to delete "${sliderName}"?\n\nThis will also delete all associated photos. This action cannot be undone.`)) {
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(`/menu/sliders/delete/${sliderId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Slider deleted successfully!');
+            sliderTable.ajax.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete slider');
+    }
+}
+
+function managePhotos(sliderId) {
+    window.location.href = `/menu/sliders/${sliderId}/photos/`;
+}
+
+// Close modal on outside click
+window.onclick = function(event) {
+    const modal = document.getElementById('sliderModal');
+    if (event.target === modal) {
+        closeSliderModal();
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,1313 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #3B82F6;
+        --blue-light: #DBEAFE;
+        --dark-navy: #1B2845;
+        --green-success: #10B981;
+        --red-danger: #EF4444;
+        --orange-warning: #F59E0B;
+        --purple-accent: #8B5CF6;
+        --text-gray: #6B7280;
+        --border-gray: #E5E7EB;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .course-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--blue-light) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px 30px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+    }
+
+    .page-header h1 {
+        color: var(--dark-navy);
+        font-size: 32px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 0;
+    }
+
+    .page-header h1 i {
+        color: var(--primary-blue);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), #2563EB);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .filters-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--dark-navy);
+        font-size: 14px;
+    }
+
+    .filter-select {
+        padding: 10px 16px;
+        border: 2px solid var(--border-gray);
+        border-radius: 8px;
+        font-size: 14px;
+        min-width: 150px;
+        font-family: 'Roboto Condensed', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    /* DataTable Styling */
+    table.dataTable {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    table.dataTable thead th {
+        background: linear-gradient(135deg, var(--dark-navy), #2A3F5F);
+        color: white;
+        padding: 18px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 1px;
+        border: none;
+    }
+
+    table.dataTable thead th:first-child {
+        border-radius: 12px 0 0 12px;
+    }
+
+    table.dataTable thead th:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    table.dataTable tbody tr {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+
+    table.dataTable tbody tr:hover {
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+        transform: translateY(-3px);
+    }
+
+    table.dataTable tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .course-thumb {
+        width: 100px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-thumb-placeholder {
+        width: 100px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--primary-blue), #2563EB);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+    }
+
+    .course-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .course-name {
+        font-weight: 700;
+        color: var(--dark-navy);
+        font-size: 16px;
+    }
+
+    .course-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .code-badge {
+        padding: 5px 12px;
+        background: linear-gradient(135deg, var(--primary-blue), #2563EB);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .qual-badge {
+        padding: 5px 12px;
+        background: var(--purple-accent);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .credit-badge {
+        padding: 5px 12px;
+        background: var(--orange-warning);
+        color: white;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: var(--green-success);
+        color: white;
+    }
+
+    .status-inactive {
+        background: var(--red-danger);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 38px;
+        height: 38px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 14px;
+    }
+
+    .btn-view {
+        background: var(--primary-blue);
+    }
+
+    .btn-view:hover {
+        background: #2563EB;
+        transform: scale(1.1);
+    }
+
+    .btn-edit {
+        background: var(--green-success);
+    }
+
+    .btn-edit:hover {
+        background: #059669;
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    .btn-delete {
+        background: var(--red-danger);
+    }
+
+    .btn-delete:hover {
+        background: #DC2626;
+        transform: scale(1.1);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(27, 40, 69, 0.85);
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.3s ease;
+        overflow-y: auto;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        margin: 40px auto;
+        padding: 0;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 900px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-blue), #2563EB);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .close-modal {
+        color: white;
+        font-size: 28px;
+        font-weight: 300;
+        cursor: pointer;
+        border: none;
+        background: none;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 30px;
+        max-height: calc(90vh - 200px);
+        overflow-y: auto;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 2px solid var(--blue-light);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: var(--primary-blue);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-label.required::after {
+        content: "*";
+        color: var(--red-danger);
+        margin-left: 4px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border-gray);
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    /* Media Selector */
+    .media-selector {
+        border: 3px dashed var(--primary-blue);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        background: var(--blue-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .media-selector:hover {
+        border-color: var(--dark-navy);
+        background: #BFDBFE;
+    }
+
+    .media-selector.has-media {
+        border-style: solid;
+        border-color: var(--green-success);
+        background: #ECFDF5;
+    }
+
+    .media-selector-icon {
+        font-size: 48px;
+        color: var(--primary-blue);
+        margin-bottom: 15px;
+    }
+
+    .media-selector-text {
+        font-size: 16px;
+        color: var(--dark-navy);
+        font-weight: 600;
+    }
+
+    .selected-media-preview {
+        display: none;
+        margin-top: 15px;
+    }
+
+    .selected-media-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .modal-footer {
+        padding: 20px 30px;
+        border-top: 2px solid var(--blue-light);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-cancel {
+        background: var(--text-gray);
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #4B5563;
+    }
+
+    /* View Modal */
+    .course-detail-preview {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .course-detail-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .detail-item {
+        padding: 15px;
+        background: var(--blue-light);
+        border-radius: 10px;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        font-size: 15px;
+        color: var(--dark-navy);
+        font-weight: 600;
+    }
+
+    .detail-section {
+        padding: 20px;
+        background: var(--blue-light);
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .detail-section h3 {
+        color: var(--dark-navy);
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+
+    @media (max-width: 768px) {
+        .form-row,
+        .form-row-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-select {
+            width: 100%;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
+<div class="course-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-graduation-cap"></i>
+            Course Management
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus-circle"></i>
+                Create Course
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-card">
+        <div class="filter-group">
+            <label class="filter-label" for="statusFilter">Status:</label>
+            <select id="statusFilter" class="filter-select" onchange="filterByStatus()">
+                <option value="">All Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <table id="courseTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Preview</th>
+                    <th>Course Info</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div id="courseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle"><i class="fas fa-plus-circle"></i> Create Course</h2>
+            <button class="close-modal" onclick="closeCourseModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="courseForm">
+                {% csrf_token %}
+                <input type="hidden" id="courseId" name="course_id">
+                <input type="hidden" id="selectedMediaId" name="media_id">
+
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Basic Information
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="courseName">Course Name</label>
+                        <input type="text" class="form-control" id="courseName" name="course_name" 
+                               placeholder="e.g., Bachelor of Science in Computer Science" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="courseCode">Course Code</label>
+                            <input type="text" class="form-control" id="courseCode" name="course_code" 
+                                   placeholder="e.g., BSC-CS-001" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required" for="creditHours">Credit Hours</label>
+                            <input type="number" step="0.01" class="form-control" id="creditHours" name="credit_hours" 
+                                   placeholder="e.g., 120" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="highestQualification">Qualification Level</label>
+                        <select class="form-control" id="highestQualification" name="highest_qualification" required>
+                            <option value="">Select Level</option>
+                            <option value="1">Certificate</option>
+                            <option value="2">Diploma</option>
+                            <option value="3">Bachelor's Degree</option>
+                            <option value="4">Master's Degree</option>
+                            <option value="5">PhD / Doctorate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="courseDescription">Description</label>
+                        <textarea class="form-control" id="courseDescription" name="description" 
+                                  placeholder="Enter course description"></textarea>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-image"></i>
+                        Featured Image
+                    </div>
+
+                    <div class="form-group">
+                        <div class="media-selector" onclick="openMediaLibrary()">
+                            <div class="media-selector-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="media-selector-text">Click to select course image</div>
+                            <div class="selected-media-preview" id="selectedMediaPreview">
+                                <img id="selectedMediaImg" src="" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Settings -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-search"></i>
+                        SEO Settings
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="browserTitle">Browser Title</label>
+                        <input type="text" class="form-control" id="browserTitle" name="browser_title" 
+                               placeholder="SEO optimized title">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="metaDescription">Meta Description</label>
+                        <textarea class="form-control" id="metaDescription" name="meta_description" 
+                                  placeholder="Brief description for search engines" style="min-height: 80px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="metaKeywords">Meta Keywords</label>
+                        <input type="text" class="form-control" id="metaKeywords" name="meta_keywords" 
+                               placeholder="keyword1, keyword2, keyword3">
+                    </div>
+                </div>
+
+                <!-- Display Settings -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i>
+                        Display Settings
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label" for="status">Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="checkbox-group" style="margin-top: 32px;">
+                                <input type="checkbox" id="applyButtonTop" name="apply_button_top" value="1">
+                                <label for="applyButtonTop">Show Apply Button (Top)</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="checkbox-group" style="margin-top: 32px;">
+                                <input type="checkbox" id="applyButtonBottom" name="apply_button_bottom" value="1">
+                                <label for="applyButtonBottom">Show Apply Button (Bottom)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeCourseModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="saveCourse()">
+                <i class="fas fa-save"></i> Save Course
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Media Library Modal -->
+<div id="mediaLibraryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-photo-video"></i> Select from Media Library</h2>
+            <button class="close-modal" onclick="closeMediaLibrary()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <input type="text" class="form-control" id="mediaSearch" 
+                       placeholder="Search media..." onkeyup="searchMedia()">
+            </div>
+            <div class="media-grid" id="mediaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto; padding: 10px;">
+                <!-- Media items loaded dynamically -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeMediaLibrary()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-primary" onclick="selectMedia()">
+                <i class="fas fa-check"></i> Select
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Course Modal -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-eye"></i> Course Details</h2>
+            <button class="close-modal" onclick="closeViewModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="viewModalContent">
+            <!-- Content loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+let courseTable;
+let isEditMode = false;
+let ckeditorInstance = null;
+let selectedMedia = null;
+let mediaLibraryData = [];
+
+$(document).ready(function() {
+    courseTable = $('#courseTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{% url "course_datatable" %}',
+            type: 'GET',
+            data: function(d) {
+                d.status = $('#statusFilter').val();
+            },
+            error: function(xhr, error, code) {
+                console.error('DataTables Error:', error);
+                console.error('Response:', xhr.responseText);
+            }
+        },
+        columns: [
+            { data: 'id', width: '60px' },
+            { data: 'preview', orderable: false, searchable: false, width: '120px' },
+            { data: 'course_info' },
+            { data: 'status', width: '100px' },
+            { data: 'created_at', width: '110px' },
+            { data: 'actions', orderable: false, searchable: false, width: '140px' }
+        ],
+        order: [[0, 'desc']],
+        pageLength: 12,
+        lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ items",
+            info: "Showing _START_ to _END_ of _TOTAL_ courses"
+        }
+    });
+
+    // Initialize CKEditor
+    initCKEditor();
+});
+
+function initCKEditor() {
+    if (ckeditorInstance) {
+        ckeditorInstance.destroy();
+    }
+    
+    ckeditorInstance = CKEDITOR.replace('courseDescription', {
+        height: 200,
+        toolbar: [
+            { name: 'document', items: ['Source'] },
+            { name: 'clipboard', items: ['Undo', 'Redo'] },
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight'] },
+            { name: 'links', items: ['Link', 'Unlink'] },
+            { name: 'styles', items: ['Format'] }
+        ]
+    });
+}
+
+function filterByStatus() {
+    courseTable.ajax.reload();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function openCreateModal() {
+    isEditMode = false;
+    selectedMedia = null;
+    
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create Course';
+    document.getElementById('courseForm').reset();
+    document.getElementById('courseId').value = '';
+    document.getElementById('selectedMediaId').value = '';
+    
+    // Reset media selector
+    const mediaSelector = document.querySelector('.media-selector');
+    mediaSelector.classList.remove('has-media');
+    document.getElementById('selectedMediaPreview').style.display = 'none';
+    
+    // Reset CKEditor
+    if (ckeditorInstance) {
+        ckeditorInstance.setData('');
+    }
+    
+    document.getElementById('courseModal').style.display = 'block';
+}
+
+function closeCourseModal() {
+    document.getElementById('courseModal').style.display = 'none';
+}
+
+async function editCourse(courseId) {
+    try {
+        const response = await fetch(`/menu/courses/get/${courseId}/`);
+        const result = await response.json();
+
+        if (result.success) {
+            isEditMode = true;
+            const data = result.data;
+            
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Course';
+            document.getElementById('courseId').value = data.id;
+            document.getElementById('courseName').value = data.course_name;
+            document.getElementById('courseCode').value = data.course_code;
+            document.getElementById('highestQualification').value = data.highest_qualification;
+            document.getElementById('creditHours').value = data.credit_hours;
+            document.getElementById('browserTitle').value = data.browser_title;
+            document.getElementById('metaDescription').value = data.meta_description;
+            document.getElementById('metaKeywords').value = data.meta_keywords;
+            document.getElementById('status').value = data.status;
+            document.getElementById('applyButtonTop').checked = data.apply_button_top == 1;
+            document.getElementById('applyButtonBottom').checked = data.apply_button_bottom == 1;
+            
+            // Set CKEditor content
+            if (ckeditorInstance) {
+                ckeditorInstance.setData(data.description);
+            }
+            
+            // Show selected media
+            if (data.media) {
+                selectedMedia = {
+                    id: data.media_id,
+                    url: data.media.url
+                };
+                
+                document.getElementById('selectedMediaId').value = data.media_id;
+                const mediaSelector = document.querySelector('.media-selector');
+                mediaSelector.classList.add('has-media');
+                document.getElementById('selectedMediaImg').src = data.media.url;
+                document.getElementById('selectedMediaPreview').style.display = 'block';
+            }
+            
+            document.getElementById('courseModal').style.display = 'block';
+        } else {
+            alert('Error loading course: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load course data');
+    }
+}
+
+async function saveCourse() {
+    const form = document.getElementById('courseForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    
+    // Get CKEditor content
+    if (ckeditorInstance) {
+        formData.set('description', ckeditorInstance.getData());
+    }
+    
+    // Handle checkboxes
+    formData.set('apply_button_top', document.getElementById('applyButtonTop').checked ? 1 : 0);
+    formData.set('apply_button_bottom', document.getElementById('applyButtonBottom').checked ? 1 : 0);
+    
+    const courseId = document.getElementById('courseId').value;
+    const url = isEditMode ? `/menu/courses/update/${courseId}/` : '{% url "course_create" %}';
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(isEditMode ? 'Course updated successfully!' : 'Course created successfully!');
+            closeCourseModal();
+            courseTable.ajax.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to save course');
+    }
+}
+
+async function deleteCourse(courseId, courseName) {
+    if (!confirm(`Are you sure you want to delete "${courseName}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(`/menu/courses/delete/${courseId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Course deleted successfully!');
+            courseTable.ajax.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete course');
+    }
+}
+
+async function viewCourse(courseId) {
+    try {
+        const response = await fetch(`/menu/courses/get/${courseId}/`);
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            
+            const qualLevels = {
+                1: 'Certificate',
+                2: 'Diploma',
+                3: "Bachelor's Degree",
+                4: "Master's Degree",
+                5: 'PhD / Doctorate'
+            };
+            
+            let previewHTML = '';
+            if (data.media) {
+                previewHTML = `<div class="course-detail-preview">
+                    <img src="${data.media.url}" alt="${data.course_name}">
+                </div>`;
+            }
+            
+            const content = `
+                ${previewHTML}
+                
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Course Name</div>
+                        <div class="detail-value">${data.course_name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Course Code</div>
+                        <div class="detail-value">${data.course_code}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Qualification Level</div>
+                        <div class="detail-value">${qualLevels[data.highest_qualification]}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Credit Hours</div>
+                        <div class="detail-value">${data.credit_hours}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">${data.status == 1 ? '<span class="status-badge status-active">Active</span>' : '<span class="status-badge status-inactive">Inactive</span>'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value">${data.created_at}</div>
+                    </div>
+                </div>
+                
+                ${data.description ? `
+                    <div class="detail-section">
+                        <h3>Description</h3>
+                        <div>${data.description}</div>
+                    </div>
+                ` : ''}
+                
+                ${data.browser_title || data.meta_description || data.meta_keywords ? `
+                    <div class="detail-section">
+                        <h3>SEO Information</h3>
+                        ${data.browser_title ? `<p><strong>Browser Title:</strong> ${data.browser_title}</p>` : ''}
+                        ${data.meta_description ? `<p><strong>Meta Description:</strong> ${data.meta_description}</p>` : ''}
+                        ${data.meta_keywords ? `<p><strong>Meta Keywords:</strong> ${data.meta_keywords}</p>` : ''}
+                    </div>
+                ` : ''}
+                
+                <div class="detail-section">
+                    <h3>Display Settings</h3>
+                    <p><strong>Apply Button (Top):</strong> ${data.apply_button_top == 1 ? 'Enabled' : 'Disabled'}</p>
+                    <p><strong>Apply Button (Bottom):</strong> ${data.apply_button_bottom == 1 ? 'Enabled' : 'Disabled'}</p>
+                </div>
+            `;
+            
+            document.getElementById('viewModalContent').innerHTML = content;
+            document.getElementById('viewModal').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load course details');
+    }
+}
+
+function closeViewModal() {
+    document.getElementById('viewModal').style.display = 'none';
+}
+
+// Media Library Functions
+async function openMediaLibrary() {
+    try {
+        const response = await fetch('/menu/media/datatable/?length=1000');
+        const result = await response.json();
+        
+        if (result.data) {
+            mediaLibraryData = result.data;
+            renderMediaGrid();
+            document.getElementById('mediaLibraryModal').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load media library');
+    }
+}
+
+function closeMediaLibrary() {
+    document.getElementById('mediaLibraryModal').style.display = 'none';
+}
+
+function renderMediaGrid(filteredData = null) {
+    const data = filteredData || mediaLibraryData;
+    const grid = document.getElementById('mediaGrid');
+    grid.innerHTML = '';
+    
+    data.forEach(item => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = item.preview;
+        const img = tempDiv.querySelector('img');
+        
+        if (img) {
+            const mediaItem = document.createElement('div');
+            mediaItem.style.cssText = 'position: relative; border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent;';
+            mediaItem.dataset.mediaId = item.id;
+            mediaItem.dataset.mediaUrl = img.src;
+            
+            if (selectedMedia && selectedMedia.id == item.id) {
+                mediaItem.style.borderColor = '#10B981';
+                mediaItem.style.transform = 'scale(1.05)';
+            }
+            
+            mediaItem.innerHTML = `
+                <img src="${img.src}" alt="" style="width: 100%; height: 150px; object-fit: cover;">
+                <div style="position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; background: #10B981; border-radius: 50%; display: ${selectedMedia && selectedMedia.id == item.id ? 'flex' : 'none'}; align-items: center; justify-content: center; color: white; font-size: 14px;">
+                    <i class="fas fa-check"></i>
+                </div>
+            `;
+            
+            mediaItem.onclick = function() {
+                document.querySelectorAll('#mediaGrid > div').forEach(el => {
+                    el.style.borderColor = 'transparent';
+                    el.style.transform = 'scale(1)';
+                    el.querySelector('div').style.display = 'none';
+                });
+                
+                this.style.borderColor = '#10B981';
+                this.style.transform = 'scale(1.05)';
+                this.querySelector('div').style.display = 'flex';
+                
+                selectedMedia = {
+                    id: this.dataset.mediaId,
+                    url: this.dataset.mediaUrl
+                };
+            };
+            
+            grid.appendChild(mediaItem);
+        }
+    });
+}
+
+function searchMedia() {
+    const searchTerm = document.getElementById('mediaSearch').value.toLowerCase();
+    
+    if (!searchTerm) {
+        renderMediaGrid();
+        return;
+    }
+    
+    const filtered = mediaLibraryData.filter(item => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = item.info;
+        const text = tempDiv.textContent.toLowerCase();
+        return text.includes(searchTerm);
+    });
+    
+    renderMediaGrid(filtered);
+}
+
+function selectMedia() {
+    if (!selectedMedia) {
+        alert('Please select an image');
+        return;
+    }
+    
+    document.getElementById('selectedMediaId').value = selectedMedia.id;
+    document.getElementById('selectedMediaImg').src = selectedMedia.url;
+    document.getElementById('selectedMediaPreview').style.display = 'block';
+    
+    const mediaSelector = document.querySelector('.media-selector');
+    mediaSelector.classList.add('has-media');
+    
+    closeMediaLibrary();
+}
+
+// Close modals on outside click
+window.onclick = function(event) {
+    const courseModal = document.getElementById('courseModal');
+    const mediaModal = document.getElementById('mediaLibraryModal');
+    const viewModal = document.getElementById('viewModal');
+    
+    if (event.target === courseModal) {
+        closeCourseModal();
+    }
+    if (event.target === mediaModal) {
+        closeMediaLibrary();
+    }
+    if (event.target === viewModal) {
+        closeViewModal();
+    }
+}
+</script>
+
+{% endblock %}

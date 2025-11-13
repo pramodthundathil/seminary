@@ -1,0 +1,340 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .menus-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .menus-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .menus-header h1 {
+        color: var(--dark-navy);
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .menus-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 25px;
+    }
+
+    .menu-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border-top: 4px solid var(--primary-cyan);
+    }
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+    }
+
+    .menu-info {
+        flex: 1;
+    }
+
+    .menu-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 8px;
+    }
+
+    .menu-code {
+        font-size: 13px;
+        color: var(--text-gray);
+        background: var(--light-cyan);
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+
+    .menu-status {
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-enabled {
+        background: var(--green-card);
+        color: #2d6a2d;
+    }
+
+    .status-disabled {
+        background: #ffcccb;
+        color: #8b0000;
+    }
+
+    .menu-position {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .menu-items-count {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    .items-count-number {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary-cyan);
+    }
+
+    .items-count-label {
+        color: var(--text-gray);
+        font-size: 14px;
+    }
+
+    .menu-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 13px;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+    }
+
+    .btn-edit {
+        background: var(--blue-button);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #3557c7;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #ee5a52;
+        transform: translateY(-2px);
+    }
+
+    .no-menus {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 12px;
+        color: var(--text-gray);
+    }
+
+    .no-menus i {
+        font-size: 72px;
+        color: var(--primary-cyan);
+        margin-bottom: 25px;
+    }
+
+    .no-menus h3 {
+        font-size: 24px;
+        color: var(--dark-navy);
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .menus-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .menus-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+
+<div class="menus-container">
+    <div class="menus-header">
+        <h1>🎯 Menu Management</h1>
+        <a href="{% url 'menu_engineer_new' %}" class="btn btn-create">
+            <i class="fas fa-plus"></i> Create New Menu
+        </a>
+    </div>
+
+    {% if menus %}
+    <div class="menus-grid">
+        {% for menu in menus %}
+        <div class="menu-card">
+            <div class="menu-card-header">
+                <div class="menu-info">
+                    <div class="menu-name">{{ menu.name }}</div>
+                    <span class="menu-code">{{ menu.code }}</span>
+                </div>
+                <span class="menu-status {% if menu.status == 1 %}status-enabled{% else %}status-disabled{% endif %}">
+                    {% if menu.status == 1 %}Enabled{% else %}Disabled{% endif %}
+                </span>
+            </div>
+
+            <div class="menu-position">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ menu.menu_position|title }}</span>
+            </div>
+
+            <div class="menu-items-count">
+                <div class="items-count-number">{{ menu.items.count }}</div>
+                <div class="items-count-label">
+                    Menu Item{{ menu.items.count|pluralize }}
+                </div>
+            </div>
+
+            <div class="menu-actions">
+                <a href="{% url 'menu_engineer' menu.id %}" class="btn-action btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button class="btn-action btn-delete" onclick="deleteMenu({{ menu.id }}, '{{ menu.name }}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-menus">
+        <i class="fas fa-bars"></i>
+        <h3>No Menus Created Yet</h3>
+        <p>Start building your navigation by creating your first menu</p>
+        <a href="{% url 'menu_engineer_new' %}" class="btn btn-create" style="margin-top: 20px;">
+            <i class="fas fa-plus"></i> Create Your First Menu
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function deleteMenu(menuId, menuName) {
+    if (!confirm(`Are you sure you want to delete the menu "${menuName}"?\n\nThis will also delete all menu items associated with it.`)) {
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(`/admin/menus/delete/${menuId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Menu deleted successfully!');
+            location.reload();
+        } else {
+            alert('Error deleting menu: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the menu');
+    }
+}
+</script>
+
+{% endblock %}

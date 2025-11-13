@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title %}
+    <title>Trinity Theological Seminary</title>
+    {% endblock %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{%static 'css/styles.css' %}">
+    <style>
+        .section-title {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--purple-gradient-start), var(--purple-gradient-end));
+        }
+
+        .highlight {
+            color: var(--primary-cyan);
+        }
+
+        /* Why Trinity Section */
+        .why-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+
+        .feature-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            height: 100%;
+            border-top: 4px solid var(--primary-cyan);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-cyan);
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark-navy);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        .stats-row {
+            margin-top: 60px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-item h4 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-item p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            padding: 80px 0;
+            background-color: var(--light-gray);
+        }
+
+        .course-card {
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .course-image {
+            height: 180px;
+            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3.5rem;
+        }
+
+        .course-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-content h3 {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark-navy);
+        }
+
+        .course-content p {
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .btn-view-more {
+            background-color: var(--blue-button);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .btn-view-more:hover {
+            background-color: var(--dark-navy);
+            transform: translateY(-2px);
+        }
+
+        .green-card .course-image {
+            background: linear-gradient(135deg, var(--green-card), #7CFC00);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .why-section, .courses-section {
+                padding: 50px 0;
+            }
+            
+            .feature-card, .course-card {
+                margin-bottom: 20px;
+            }
+        }
+        .highlight {
+            color: var(--primary-cyan);
+        }
+
+        /* About Us Section */
+        .about-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .about-subtitle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark-navy);
+        }
+
+        .about-description {
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .about-highlight {
+            background: var(--light-cyan);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid var(--primary-cyan);
+        }
+
+        .about-highlight p {
+            margin: 0;
+            font-style: italic;
+            color: var(--dark-navy);
+            line-height: 1.6;
+        }
+
+        .btn-read-more {
+            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-read-more:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(167, 139, 250, 0.4);
+            color: white;
+        }
+
+        .about-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-cyan);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .about-image {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .about-stats {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .stat-box {
+                flex: 0 0 calc(50% - 10px);
+            }
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg  sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static 'img/Trinity_final-nobg.png'%}" style="max-width: 100px;" alt="">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#admissions">Admissions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#academics">Academics Programme</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
+                    <li class="nav-item ms-2"><a class="btn btn-login" href="{% url 'signin' %}">Log in</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% block content %}
+    <!-- Hero Section -->
+
+    <div id="trinityCarousel" class="carousel slide" data-bs-ride="carousel">
+        <!-- Indicators -->
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="2"></button>
+        </div>
+
+        <!-- Slides -->
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <img src="{% static 'img/slide1.jpg' %}" alt="Holy Bible">
+                <div class="carousel-caption">
+                    <div class="slide-content">
+                        <div class="left-content">
+                            <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
+                        </div>
+                        <div class="right-content">
+                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
+                            <p>Online mode of course completion saving time and money for aspirants.</p>
+                            <button class="learn-more-btn">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <img src="{% static 'img/slide2.jpg' %}" alt="Bible with Cross">
+                <div class="carousel-caption">
+                    <div class="slide-content">
+                        <div class="left-content">
+                            <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
+                        </div>
+                        <div class="right-content">
+                            <h2>YOUR ONE STOP PLATFORM <span class="highlight-green">FOR COURSES RELATED TO
+                                    THEOLOGY.</span></h2>
+                            <p>From certificate and diploma to master's courses available.</p>
+                            <button class="learn-more-btn">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+                <img src="{% static 'img/slide3.jpg' %}" alt="Holy Bible Reading">
+                <div class="carousel-caption">
+                    <div class="slide-content">
+                        <div class="left-content">
+                            <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
+                        </div>
+                        <div class="right-content">
+                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
+                            <p>Online mode of course completion saving time and money for aspirants.</p>
+                            <button class="learn-more-btn">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#trinityCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#trinityCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- Why Trinity Section -->
+    <section class="why-section">
+        <div class="container">
+            <h2 class="section-title">Why <span class="highlight">Trinity</span> Theological Seminary?</h2>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-laptop"></i></div>
+                        <h3>Online Mode of Courses</h3>
+                        <p>Exclusive online availability of courses makes it unique with cost and time saving solution
+                            for the aspirants.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-users"></i></div>
+                        <h3>Experienced Faculty</h3>
+                        <p>Faculties in Trinity have a vision to prepare leaders for tomorrow and are subject experts to
+                            mould their leadership qualities for ministry fields.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <h3>Scholarships</h3>
+                        <p>Trinity acknowledges aspirants who have a strong profile but do not have enough sources to
+                            fund their education. There are scholarships and grants for needy applicants.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <h4>1.5K</h4>
+                            <p>Students</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-book"></i></div>
+                            <h4>15</h4>
+                            <p>Courses</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-chalkboard"></i></div>
+                            <h4>483</h4>
+                            <p>Classes</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <h4>35</h4>
+                            <p>Trainers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <!-- Courses Section -->
+<section class="courses-section" id="courses">
+  <div class="container text-center">
+    <h2 class="section-title">Our Courses</h2>
+
+    <div class="row justify-content-center g-4 mt-4">
+      <!-- M.Div -->
+      <div class="col-md-4">
+        <div class="course-card course-blue">
+          <div class="badge-icon">
+            <i class="fas fa-medal"></i>
+          </div>
+          <img src="images/mdiv.jpg" alt="M.Div" class="course-img">
+          <h3 class="course-title">M.Div</h3>
+          <p class="course-desc">
+            Master of Divinity (M. Div) is used to define the study of different faiths and belief systems. In Christian theology, this degree prepares students to work as...
+          </p>
+          <button class="btn btn-join">Join Now</button>
+        </div>
+      </div>
+
+      <!-- INTRODUCTION TO BIBLE -->
+      <div class="col-md-4">
+        <div class="course-card course-green">
+          <div class="badge-icon">
+            <i class="fas fa-award"></i>
+          </div>
+          <img src="images/bible.jpg" alt="Introduction to Bible" class="course-img">
+          <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
+          <p class="course-desc">
+            INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow format, presents all the important themes of the entire Bible and ties both Old...
+          </p>
+          <button class="btn btn-join">Join Now</button>
+        </div>
+      </div>
+
+      <!-- B.Th -->
+      <div class="col-md-4">
+        <div class="course-card course-purple">
+          <div class="badge-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <img src="images/bth.jpg" alt="B.Th" class="course-img">
+          <h3 class="course-title">B.Th</h3>
+          <p class="course-desc">
+            The Graduate Certificate in Ministry is a one-year Bible training program. It equips candidates with a non-theology background to prepare themselves for postgraduate study as...
+          </p>
+          <button class="btn btn-join">Join Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CSS -->
+<style>
+.courses-section {
+  background-color: #f5faff;
+  padding: 60px 0;
+}
+
+.section-title {
+  font-weight: 700;
+  color: #1d1d1d;
+  font-size: 2rem;
+}
+
+.course-card {
+  background: #fff;
+  border-radius: 25px;
+  padding: 30px 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.course-img {
+  width: 100%;
+  max-width: 100px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+}
+
+.badge-icon {
+  position: absolute;
+  top: -15px;
+  left: 15px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.badge-icon i {
+  color: #f9b233;
+  font-size: 18px;
+}
+
+.course-title {
+  font-weight: 700;
+  margin: 10px 0;
+  font-size: 1.2rem;
+}
+
+.course-desc {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.btn-join {
+  background: #2b5cff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.btn-join:hover {
+  background: #1d3ecc;
+}
+
+.course-blue {
+  background: linear-gradient(145deg, #d6f2ff, #a3e4ff);
+}
+
+.course-green {
+  background: linear-gradient(145deg, #d8f6d5, #a4e6a1);
+}
+
+.course-purple {
+  background: linear-gradient(145deg, #e3ddff, #c8bfff);
+}
+</style>
+
+<!-- Font Awesome -->
+<script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
+
+
+    <!-- Scholarship Section -->
+    <section class="scholarship-section">
+        <div class="container">
+            <h2>Financial Scholarships are available to reduce<br>the tuition for your degree.</h2>
+            <p>Your life learning experiences and previous education are used to reduce the degree cost.</p>
+            <button class="btn btn-apply">Apply for Scholarship</button>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2 class="section-title">About <span class="highlight">Us</span></h2>
+            
+            <div class="about-content">
+                <div class="about-text">
+                    <h3 class="about-subtitle">Who We Are?</h3>
+                    <p class="about-description">
+                        At Trinity Theological Seminary, you will not be a normal aspirant who takes admission, completes the course and leaves. Instead, we believe in building a relationship that lasts longer than most things do.
+                    </p>
+                    
+                    <div class="about-highlight">
+                        <p>
+                            Our aim is to build a leader out of the aspirant, preparing for the world that needs God's grace. That is the reason our faculties are trained in such a way to bring the best of leadership qualities from you, building a strong foundation of faith and faith based skills to be a change in this world. With that, we will be there to...
+                        </p>
+                    </div>
+                    
+                    <button class="btn-read-more">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </button>
+                    
+                    <div class="about-stats">
+                        <div class="stat-box">
+                            <div class="stat-number">25+</div>
+                            <div class="stat-label">Years of Excellence</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">Countries Reached</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Graduate Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <!-- This would be replaced with an actual image in production -->
+                    <div style="background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)); height: 100%; min-height: 400px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fas fa-university" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                            <h3>Trinity Theological Seminary</h3>
+                            <p>Building Leaders for Tomorrow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    {% endblock%}
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <h3>Reach Us</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Trinity Theological Seminary</p>
+                    <p><i class="fas fa-envelope"></i> info@trinityseminary.edu</p>
+                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                </div>
+                <div class="col-md-3">
+                    <h3>Company</h3>
+                    <a href="#about">About</a>
+                    <a href="#courses">Courses</a>
+                    <a href="#admissions">Admissions</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="col-md-3">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-envelope"></i> info@trinityseminary.edu</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h3>Newsletter</h3>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="Email address">
+                        <input type="text" placeholder="Name">
+                        <button class="btn btn-subscribe">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Add this to your base template head section -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-cyan: #00CED1;
+            --light-cyan: #E0F7F7;
+            --dark-navy: #1B2845;
+            --purple-gradient-start: #A78BFA;
+            --purple-gradient-end: #C084FC;
+            --green-card: #90EE90;
+            --blue-button: #4169E1;
+            --text-gray: #666666;
+        }
+
+        /* Success Alert */
+        .swal2-popup.swal-success {
+            border-left: 5px solid var(--green-card);
+        }
+
+        /* Error Alert */
+        .swal2-popup.swal-error {
+            border-left: 5px solid #ff6b6b;
+        }
+
+        /* Warning Alert */
+        .swal2-popup.swal-warning {
+            border-left: 5px solid #ffa726;
+        }
+
+        /* Info Alert */
+        .swal2-popup.swal-info {
+            border-left: 5px solid var(--primary-cyan);
+        }
+
+        /* Custom styling for all alerts */
+        .swal2-popup {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .swal2-title {
+            color: var(--dark-navy);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .swal2-html-container {
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)) !important;
+            border: none !important;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+        }
+
+        .swal2-confirm:hover {
+            background: linear-gradient(135deg, var(--purple-gradient-end), var(--purple-gradient-start)) !important;
+        }
+
+        .swal2-cancel {
+            background-color: #e5e7eb !important;
+            color: var(--text-gray) !important;
+            border: none !important;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+        .swal2-icon {
+            border-width: 3px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% if messages %}
+            {% for message in messages %}
+            let icon = 'info';
+            let customClass = 'swal-info';
+
+            {% if message.tags == 'success' %}
+            icon = 'success';
+            customClass = 'swal-success';
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+            icon = 'error';
+            customClass = 'swal-error';
+            {% elif message.tags == 'warning' %}
+            icon = 'warning';
+            customClass = 'swal-warning';
+            {% elif message.tags == 'info' %}
+            icon = 'info';
+            customClass = 'swal-info';
+            {% endif %}
+
+            Swal.fire({
+                icon: icon,
+                title: '{{ message.tags|title }}',
+                text: '{{ message|safe }}',
+                customClass: {
+                    popup: customClass
+                },
+                confirmButtonText: 'OK',
+                timer: 5000,
+                timerProgressBar: true,
+                showClass: {
+                    popup: 'swal2-show',
+                    backdrop: 'swal2-backdrop-show'
+                },
+                hideClass: {
+                    popup: 'swal2-hide',
+                    backdrop: 'swal2-backdrop-hide'
+                }
+            });
+            {% endfor %}
+            {% endif %}
+        });
+    </script>
+
+    <!-- 
+USAGE IN DJANGO VIEWS:
+from django.contrib import messages
+
+# Success message
+messages.success(request, 'Login successful!')
+
+# Error message
+messages.error(request, 'Invalid credentials!')
+
+# Warning message
+messages.warning(request, 'Your session is about to expire.')
+
+# Info message
+messages.info(request, 'Please verify your email.')
+-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,391 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .news-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .news-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .news-header h1 {
+        color: var(--dark-navy);
+        font-size: 28px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .datatable-container {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* DataTables Custom Styling */
+    .dataTables_wrapper {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        padding: 8px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        margin: 0 8px;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-left: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+    }
+
+    table.dataTable {
+        width: 100% !important;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    table.dataTable thead th {
+        background: linear-gradient(135deg, var(--dark-navy), #2a3f5f);
+        color: white;
+        padding: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    table.dataTable thead th:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+
+    table.dataTable thead th:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+
+    table.dataTable tbody tr {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    table.dataTable tbody tr:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    table.dataTable tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .table-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-image {
+        width: 60px;
+        height: 60px;
+        background: var(--light-cyan);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: var(--text-gray);
+        text-align: center;
+    }
+
+    .news-title {
+        font-weight: 700;
+        color: var(--dark-navy);
+        font-size: 15px;
+        margin-bottom: 5px;
+    }
+
+    .news-code {
+        font-size: 12px;
+        color: var(--text-gray);
+        background: var(--light-cyan);
+        padding: 3px 10px;
+        border-radius: 12px;
+        display: inline-block;
+    }
+
+    .badge-enabled {
+        background: var(--green-card);
+        color: #2d6a2d;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-disabled {
+        background: #ffcccb;
+        color: #8b0000;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-edit {
+        background: var(--blue-button);
+    }
+
+    .btn-edit:hover {
+        background: #3557c7;
+        transform: scale(1.1);
+    }
+
+    .btn-delete {
+        background: #ff6b6b;
+    }
+
+    .btn-delete:hover {
+        background: #ee5a52;
+        transform: scale(1.1);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 8px 14px;
+        margin: 0 4px;
+        border-radius: 6px;
+        border: none;
+        background: var(--light-cyan);
+        color: var(--dark-navy);
+        font-weight: 600;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-cyan);
+        color: white;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--primary-cyan);
+        color: white;
+        border: none;
+    }
+
+    .dataTables_info {
+        color: var(--text-gray);
+        font-weight: 600;
+    }
+</style>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="news-container">
+    <div class="news-header">
+        <h1>
+            <i class="fas fa-newspaper"></i>
+            News & Press Release Management
+        </h1>
+        <a href="{% url 'news_create' %}" class="btn btn-create">
+            <i class="fas fa-plus-circle"></i>
+            Create News
+        </a>
+    </div>
+
+    <div class="datatable-container">
+        <table id="newsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#newsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{% url "news_datatable" %}',
+            type: 'GET'
+        },
+        columns: [
+            { data: 'id', width: '50px' },
+            { data: 'media', orderable: false, searchable: false, width: '80px' },
+            { data: 'title', width: '250px' },
+            { data: 'description' },
+            { data: 'status', width: '100px' },
+            { data: 'created_at', width: '120px' },
+            { data: 'actions', orderable: false, searchable: false, width: '120px' }
+        ],
+        order: [[0, 'desc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            }
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function editNews(newsId) {
+    window.location.href = `/admin/news/edit/${newsId}/`;
+}
+
+async function deleteNews(newsId, newsTitle) {
+    if (!confirm(`Are you sure you want to delete "${newsTitle}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+        const response = await fetch(`/admin/news/delete/${newsId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Reload DataTable
+            $('#newsTable').DataTable().ajax.reload();
+            alert('News deleted successfully!');
+        } else {
+            alert('Error deleting  ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the news');
+    }
+}
+</script>
+
+{% endblock %}

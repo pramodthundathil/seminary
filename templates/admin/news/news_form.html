@@ -1,0 +1,397 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .form-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-header h1 {
+        color: var(--dark-navy);
+        font-size: 28px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-back {
+        background: var(--text-gray);
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #555;
+        transform: translateY(-2px);
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .form-content {
+        background: white;
+        border-radius: 12px;
+        padding: 35px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        margin-bottom: 35px;
+        padding-bottom: 35px;
+        border-bottom: 2px solid var(--light-cyan);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: var(--primary-cyan);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .form-grid.single-column {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: #ff6b6b;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-help {
+        font-size: 12px;
+        color: var(--text-gray);
+        margin-top: 6px;
+        display: block;
+    }
+
+    .error-message {
+        color: #ff6b6b;
+        font-size: 12px;
+        margin-top: 6px;
+        display: block;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 2px solid var(--light-cyan);
+    }
+
+    .current-media {
+        margin-top: 15px;
+        padding: 15px;
+        background: var(--light-cyan);
+        border-radius: 8px;
+    }
+
+    .current-media img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1>
+            <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %}"></i>
+            {% if is_edit %}Edit News{% else %}Create News{% endif %}
+        </h1>
+        <div class="header-actions">
+            <a href="{% url 'news_list' %}" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back to List
+            </a>
+            <button type="submit" form="newsForm" class="btn btn-save">
+                <i class="fas fa-save"></i>
+                Save News
+            </button>
+        </div>
+    </div>
+
+    <div class="form-content">
+        <form id="newsForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required" for="{{ form.code.id_for_label }}">Code</label>
+                        {{ form.code }}
+                        {% if form.code.errors %}
+                            <span class="error-message">{{ form.code.errors.0 }}</span>
+                        {% endif %}
+                        <span class="form-help">Unique identifier for this news item</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="{{ form.status.id_for_label }}">Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <span class="error-message">{{ form.status.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-grid single-column">
+                    <div class="form-group">
+                        <label class="form-label required" for="{{ form.title.id_for_label }}">Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <span class="error-message">{{ form.title.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <span class="error-message">{{ form.description.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-image"></i>
+                    Featured Image
+                </h3>
+                
+                <div class="form-grid single-column">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.media.id_for_label }}">Media</label>
+                        {{ form.media }}
+                        {% if form.media.errors %}
+                            <span class="error-message">{{ form.media.errors.0 }}</span>
+                        {% endif %}
+                        <span class="form-help">Select an image from media library</span>
+
+                        {% if news and news.media %}
+                        <div class="current-media">
+                            <strong>Current Image:</strong><br>
+                            <img src="{{ news.media.path }}" alt="Current media">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-search"></i>
+                    SEO Settings
+                </h3>
+                
+                <div class="form-grid single-column">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.browser_title.id_for_label }}">Browser Title</label>
+                        {{ form.browser_title }}
+                        {% if form.browser_title.errors %}
+                            <span class="error-message">{{ form.browser_title.errors.0 }}</span>
+                        {% endif %}
+                        <span class="form-help">Title that appears in browser tab and search results (50-60 characters recommended)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.meta_description.id_for_label }}">Meta Description</label>
+                        {{ form.meta_description }}
+                        {% if form.meta_description.errors %}
+                            <span class="error-message">{{ form.meta_description.errors.0 }}</span>
+                        {% endif %}
+                        <span class="form-help">Brief description for search engines (150-160 characters recommended)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.meta_keywords.id_for_label }}">Meta Keywords</label>
+                        {{ form.meta_keywords }}
+                        {% if form.meta_keywords.errors %}
+                            <span class="error-message">{{ form.meta_keywords.errors.0 }}</span>
+                        {% endif %}
+                        <span class="form-help">Keywords separated by commas (e.g., news, press release, announcement)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'news_list' %}" class="btn btn-back">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i>
+                    {% if is_edit %}Update News{% else %}Create News{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('newsForm').addEventListener('submit', function(e) {
+    // Add any client-side validation here if needed
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+});
+
+// Character counter for SEO fields
+const browserTitle = document.querySelector('#{{ form.browser_title.id_for_label }}');
+const metaDesc = document.querySelector('#{{ form.meta_description.id_for_label }}');
+
+if (browserTitle) {
+    const browserTitleHelp = browserTitle.nextElementSibling.nextElementSibling;
+    browserTitle.addEventListener('input', function() {
+        const count = this.value.length;
+        const color = count > 60 ? 'color: #ff6b6b;' : count > 50 ? 'color: #ffa500;' : 'color: #2d6a2d;';
+        browserTitleHelp.innerHTML = `Title that appears in browser tab and search results (<span style="${color}">${count} characters</span> - 50-60 recommended)`;
+    });
+}
+
+if (metaDesc) {
+    const metaDescHelp = metaDesc.nextElementSibling.nextElementSibling;
+    metaDesc.addEventListener('input', function() {
+        const count = this.value.length;
+        const color = count > 160 ? 'color: #ff6b6b;' : count > 150 ? 'color: #ffa500;' : 'color: #2d6a2d;';
+        metaDescHelp.innerHTML = `Brief description for search engines (<span style="${color}">${count} characters</span> - 150-160 recommended)`;
+    });
+}
+</script>
+
+{% endblock %}

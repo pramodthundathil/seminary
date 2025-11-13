@@ -1,0 +1,263 @@
+{% extends 'site_pages/index.html' %}
+{% block content %}
+
+<style>
+    .success-container {
+        max-width: 700px;
+        margin: 80px auto;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 16px;
+        padding: 60px 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .success-icon i {
+        font-size: 3rem;
+        color: white;
+    }
+
+    @keyframes scaleIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 20px;
+    }
+
+    .success-message {
+        font-size: 1.1rem;
+        color: var(--text-gray);
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .student-id-box {
+        background: var(--light-cyan);
+        border: 2px solid var(--primary-cyan);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .student-id-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        margin-bottom: 5px;
+    }
+
+    .student-id {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        letter-spacing: 2px;
+    }
+
+    .info-list {
+        text-align: left;
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 25px 30px;
+        margin: 30px 0;
+    }
+
+    .info-list h3 {
+        font-size: 1.2rem;
+        color: var(--dark-navy);
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .info-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li {
+        padding: 10px 0;
+        color: var(--text-gray);
+        display: flex;
+        align-items: start;
+    }
+
+    .info-list li i {
+        color: var(--primary-cyan);
+        margin-right: 12px;
+        margin-top: 3px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 40px;
+    }
+
+    .btn {
+        padding: 14px 32px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+        color: white;
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--dark-navy);
+        border: 2px solid #e5e7eb;
+    }
+
+    .btn-outline:hover {
+        border-color: var(--primary-cyan);
+        color: var(--primary-cyan);
+        background: var(--light-cyan);
+    }
+
+    @media (max-width: 768px) {
+        .success-card {
+            padding: 40px 25px;
+        }
+
+        .success-title {
+            font-size: 2rem;
+        }
+
+        .student-id {
+            font-size: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+        <!-- Success Icon -->
+        <div class="success-icon">
+            <i class="bi bi-check-lg"></i>
+        </div>
+
+        <!-- Success Title -->
+        <h1 class="success-title">Application Submitted!</h1>
+
+        <!-- Success Message -->
+        <p class="success-message">
+            Thank you for submitting your student application. We have received your information 
+            and our admissions team will review it shortly.
+        </p>
+
+        <!-- Student ID Display -->
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'Student ID' in message.message %}
+                    <div class="student-id-box">
+                        <div class="student-id-label">Your Student ID</div>
+                        <div class="student-id">
+                            {{ message.message|slice:"50:60" }}
+                        </div>
+                        <small style="color: var(--text-gray); margin-top: 10px; display: block;">
+                            Please save this ID for future reference
+                        </small>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <!-- What's Next Info -->
+        <div class="info-list">
+            <h3>What Happens Next?</h3>
+            <ul>
+                <li>
+                    <i class="bi bi-envelope-check"></i>
+                    <span>You will receive a confirmation email within 24 hours</span>
+                </li>
+                <li>
+                    <i class="bi bi-clock-history"></i>
+                    <span>Our admissions team will review your application within 3-5 business days</span>
+                </li>
+                <li>
+                    <i class="bi bi-person-check"></i>
+                    <span>You'll be contacted via email regarding your application status</span>
+                </li>
+                <li>
+                    <i class="bi bi-telephone"></i>
+                    <span>If we need additional information, we'll reach out to you</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                <i class="bi bi-house-door" style="margin-right: 8px;"></i>
+                Go to Homepage
+            </a>
+            <a href="mailto:admissions@yourdomain.com" class="btn btn-outline">
+                <i class="bi bi-envelope" style="margin-right: 8px;"></i>
+                Contact Support
+            </a>
+        </div>
+
+        <!-- Additional Help -->
+        <p style="margin-top: 40px; color: var(--text-gray); font-size: 0.95rem;">
+            Have questions? Email us at 
+            <a href="mailto:admissions@yourdomain.com" style="color: var(--primary-cyan); text-decoration: none; font-weight: 600;">
+                admissions@yourdomain.com
+            </a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

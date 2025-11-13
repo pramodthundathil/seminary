@@ -1,0 +1,653 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+    }
+
+    * {
+        font-family: 'Roboto Condensed', sans-serif;
+    }
+
+    .menu-engineer-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .engineer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .engineer-header h1 {
+        color: var(--dark-navy);
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .btn-success {
+        background: var(--green-card);
+        color: #2d6a2d;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(144, 238, 144, 0.4);
+    }
+
+    .engineer-content {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 30px;
+    }
+
+    .menu-settings-panel {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        height: fit-content;
+    }
+
+    .panel-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--light-cyan);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+    }
+
+    .pages-library {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .pages-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .page-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        background: var(--light-cyan);
+        border-radius: 8px;
+        cursor: grab;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-item:hover {
+        background: var(--primary-cyan);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    .page-item.dragging {
+        opacity: 0.5;
+        cursor: grabbing;
+    }
+
+    .menu-builder {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        min-height: 600px;
+    }
+
+    .menu-items-list {
+        min-height: 400px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border: 2px dashed #ddd;
+    }
+
+    .menu-items-list.drag-over {
+        background: var(--light-cyan);
+        border-color: var(--primary-cyan);
+    }
+
+    .menu-item {
+        background: white;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border-left: 4px solid var(--blue-button);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: move;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .menu-item:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transform: translateX(5px);
+    }
+
+    .menu-item.dragging {
+        opacity: 0.5;
+    }
+
+    .menu-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .menu-item-title {
+        font-weight: 600;
+        color: var(--dark-navy);
+        font-size: 16px;
+    }
+
+    .menu-item-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit {
+        background: var(--blue-button);
+        color: white;
+    }
+
+    .btn-delete {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .btn-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .menu-item-meta {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--text-gray);
+    }
+
+    .sub-menu-item {
+        margin-left: 40px;
+        border-left-color: var(--purple-gradient-start);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-gray);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        color: var(--primary-cyan);
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .engineer-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="menu-engineer-container">
+    <div class="engineer-header">
+        <h1>🎨 Menu Engineer</h1>
+        <div class="header-actions">
+            <a href="{% url 'menu_list' %}" class="btn btn-primary">
+                <i class="fas fa-list"></i> All Menus
+            </a>
+            <button type="button" class="btn btn-success" onclick="saveMenu()">
+                <i class="fas fa-save"></i> Save Menu
+            </button>
+        </div>
+    </div>
+
+    <div class="engineer-content">
+        <!-- Left Panel: Menu Settings -->
+        <div>
+            <div class="menu-settings-panel">
+                <h3 class="panel-title">Menu Settings</h3>
+                
+                <form id="menuForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="menuId" name="menu_id" value="{% if menu %}{{ menu.id }}{% endif %}">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="status">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="1" {% if menu and menu.status == 1 %}selected{% endif %}>Enabled</option>
+                            <option value="0" {% if menu and menu.status == 0 %}selected{% endif %}>Disabled</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="menuPosition">Menu Position</label>
+                        <select class="form-control" id="menuPosition" name="menu_position">
+                            <option value="header" {% if menu and menu.menu_position == 'header' %}selected{% endif %}>Header</option>
+                            <option value="footer" {% if menu and menu.menu_position == 'footer' %}selected{% endif %}>Footer</option>
+                            <option value="sidebar" {% if menu and menu.menu_position == 'sidebar' %}selected{% endif %}>Sidebar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="menuName">Name</label>
+                        <input type="text" class="form-control" id="menuName" name="name" 
+                               value="{% if menu %}{{ menu.name }}{% endif %}" 
+                               placeholder="Header1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="menuCode">Code</label>
+                        <input type="text" class="form-control" id="menuCode" name="code" 
+                               value="{% if menu %}{{ menu.code }}{% endif %}" 
+                               placeholder="header-menu" required>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pages Library -->
+            <div class="pages-library">
+                <h3 class="panel-title">Pages Library</h3>
+                <div class="pages-list">
+                    {% for page in pages %}
+                    <div class="page-item" draggable="true" 
+                         data-page-id="{{ page.id }}" 
+                         data-page-title="{{ page.title }}"
+                         data-page-code="{{ page.code }}"
+                         ondragstart="handleDragStart(event)">
+                        <span>{{ page.title }}</span>
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Menu Builder -->
+        <div class="menu-builder">
+            <h3 class="panel-title">Menu Structure (Drag & Drop Pages)</h3>
+            
+            <div class="menu-items-list" id="menuItemsList" 
+                 ondrop="handleDrop(event)" 
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)">
+                
+                {% if menu_items %}
+                    {% for item in menu_items %}
+                    <div class="menu-item {% if item.parent_id > 0 %}sub-menu-item{% endif %}" 
+                         draggable="true"
+                         data-item-id="{{ item.id }}"
+                         data-page-id="{% if item.pages %}{{ item.pages.id }}{% endif %}"
+                         data-parent-id="{{ item.parent_id }}"
+                         ondragstart="handleMenuItemDragStart(event)">
+                        <div class="menu-item-header">
+                            <div class="menu-item-title">
+                                <i class="fas fa-bars"></i> {{ item.title }}
+                            </div>
+                            <div class="menu-item-actions">
+                                <button class="btn-icon btn-delete" onclick="removeMenuItem(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="menu-item-meta">
+                            <span><i class="fas fa-link"></i> {{ item.url|default:"Auto-generated" }}</span>
+                            {% if item.pages %}
+                            <span><i class="fas fa-file"></i> Page: {{ item.pages.code }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>Start Building Your Menu</h3>
+                    <p>Drag and drop pages from the library to create your menu structure</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let draggedElement = null;
+let menuItemsData = [];
+
+// Load existing menu items
+{% if menu_items %}
+menuItemsData = [
+    {% for item in menu_items %}
+    {
+        id: {{ item.id }},
+        title: "{{ item.title|escapejs }}",
+        url: "{{ item.url|escapejs }}",
+        page_id: {% if item.pages %}{{ item.pages.id }}{% else %}null{% endif %},
+        page_title: "{% if item.pages %}{{ item.pages.title|escapejs }}{% endif %}",
+        menu_type: "{{ item.menu_type }}",
+        parent_id: {{ item.parent_id }},
+        target_blank: {{ item.target_blank }},
+        menu_order: {{ item.menu_order }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+{% endif %}
+
+// Drag handlers for page items
+function handleDragStart(e) {
+    draggedElement = e.target;
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/html', e.target.innerHTML);
+    e.target.classList.add('dragging');
+}
+
+function handleMenuItemDragStart(e) {
+    draggedElement = e.target;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.target.innerHTML);
+    e.target.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'copy';
+    e.currentTarget.classList.add('drag-over');
+    return false;
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    e.preventDefault();
+    
+    const container = document.getElementById('menuItemsList');
+    container.classList.remove('drag-over');
+    
+    // Remove empty state if exists
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    if (draggedElement.classList.contains('page-item')) {
+        // Adding new page from library
+        const pageId = draggedElement.dataset.pageId;
+        const pageTitle = draggedElement.dataset.pageTitle;
+        const pageCode = draggedElement.dataset.pageCode;
+        
+        addMenuItem(pageId, pageTitle, pageCode);
+    } else if (draggedElement.classList.contains('menu-item')) {
+        // Reordering existing menu items
+        const dropTarget = e.target.closest('.menu-item');
+        if (dropTarget && dropTarget !== draggedElement) {
+            const allItems = [...container.querySelectorAll('.menu-item')];
+            const draggedIndex = allItems.indexOf(draggedElement);
+            const targetIndex = allItems.indexOf(dropTarget);
+            
+            if (draggedIndex < targetIndex) {
+                dropTarget.parentNode.insertBefore(draggedElement, dropTarget.nextSibling);
+            } else {
+                dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
+            }
+        }
+    }
+    
+    draggedElement.classList.remove('dragging');
+    draggedElement = null;
+    
+    return false;
+}
+
+function addMenuItem(pageId, pageTitle, pageCode) {
+    const container = document.getElementById('menuItemsList');
+    
+    const menuItem = document.createElement('div');
+    menuItem.className = 'menu-item';
+    menuItem.draggable = true;
+    menuItem.dataset.pageId = pageId;
+    menuItem.dataset.parentId = 0;
+    menuItem.ondragstart = handleMenuItemDragStart;
+    
+    menuItem.innerHTML = `
+        <div class="menu-item-header">
+            <div class="menu-item-title">
+                <i class="fas fa-bars"></i> ${pageTitle}
+            </div>
+            <div class="menu-item-actions">
+                <button class="btn-icon btn-delete" onclick="removeMenuItem(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="menu-item-meta">
+            <span><i class="fas fa-link"></i> Auto-generated</span>
+            <span><i class="fas fa-file"></i> Page: ${pageCode}</span>
+        </div>
+    `;
+    
+    container.appendChild(menuItem);
+}
+
+function removeMenuItem(button) {
+    if (confirm('Are you sure you want to remove this menu item?')) {
+        const menuItem = button.closest('.menu-item');
+        menuItem.remove();
+        
+        // Show empty state if no items left
+        const container = document.getElementById('menuItemsList');
+        if (container.querySelectorAll('.menu-item').length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-hand-pointer"></i>
+                    <h3>Start Building Your Menu</h3>
+                    <p>Drag and drop pages from the library to create your menu structure</p>
+                </div>
+            `;
+        }
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function saveMenu() {
+    const form = document.getElementById('menuForm');
+    const formData = new FormData(form);
+    
+    // Validate form
+    if (!formData.get('name') || !formData.get('code')) {
+        alert('Please fill in all required fields (Name and Code)');
+        return;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    
+    try {
+        // Save menu settings first
+        const menuResponse = await fetch('{% url "save_menu" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        });
+        
+        const menuResult = await menuResponse.json();
+        
+        if (!menuResult.success) {
+            alert('Error saving menu: ' + menuResult.message);
+            return;
+        }
+        
+        const menuId = menuResult.menu_id;
+        document.getElementById('menuId').value = menuId;
+        
+        // Collect menu items
+        const container = document.getElementById('menuItemsList');
+        const menuItems = container.querySelectorAll('.menu-item');
+        const itemsData = [];
+        
+        menuItems.forEach((item, index) => {
+            const pageId = item.dataset.pageId;
+            const title = item.querySelector('.menu-item-title').textContent.trim();
+            const parentId = item.dataset.parentId || 0;
+            
+            itemsData.push({
+                page_id: pageId,
+                title: title,
+                url: '',
+                menu_type: 'page',
+                parent_id: parentId,
+                target_blank: 0,
+                original_title: title,
+                menu_order: index + 1
+            });
+        });
+        
+        // Save menu items
+        const itemsFormData = new FormData();
+        itemsFormData.append('menu_id', menuId);
+        itemsFormData.append('items', JSON.stringify(itemsData));
+        
+        const itemsResponse = await fetch('{% url "save_menu_items" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: itemsFormData
+        });
+        
+        const itemsResult = await itemsResponse.json();
+        
+        if (itemsResult.success) {
+            alert('Menu saved successfully!');
+            window.location.href = '{% url "menu_list" %}';
+        } else {
+            alert('Error saving menu items: ' + itemsResult.message);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while saving the menu');
+    }
+}
+
+// Prevent default drag behavior on document
+document.addEventListener('dragover', function(e) {
+    e.preventDefault();
+}, false);
+
+document.addEventListener('drop', function(e) {
+    e.preventDefault();
+}, false);
+</script>
+
+{% endblock %}
