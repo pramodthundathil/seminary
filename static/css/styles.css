@@ -601,3 +601,68 @@ footer i {
         height: 230px;
     }
 }
+
+
+/*Accreditation styling*/
+/* Accreditation Page Styling */
+.accreditation-section .content-box {
+    padding: 25px 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 1.8rem;
+}
+
+.accreditation-section p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #333;  
+    margin-bottom: 0.5rem;
+}
+
+.accreditation-section .about-subtitle {
+    font-size: 1.6rem;
+    color:  #00B8BB;
+    font-weight: 700;
+    margin-top: 3rem;
+}    
+
+.accreditation-section .inner-box {
+    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    height: 100%;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.accreditation-section .inner-box i {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+.accreditation-section .section-title {
+    padding-top: 4rem 0;      
+}
+
+.accreditation-section .inner-box h3 {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+}
+
+.about-section.accreditation-section {
+    padding: 4rem 0;   
+}
+
+.accreditation-section .about-text p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.55;    /* reduce */
+    margin-bottom: 0.6rem; /* reduce */
+}

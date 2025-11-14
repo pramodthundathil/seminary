@@ -22,6 +22,28 @@ def index(request):
 def about_us(request):
     return render(request,"site_pages/about_us.html")
 
+def accreditation(request):
+    return render(request,"site_pages/accreditation.html")
+
+def admission_process(request):
+    return render(request,"site_pages/admission_process.html")
+
+def fees_structure(request):
+    return render(request,"site_pages/fees_structure.html")
+
+def scholarship(request):
+    return render(request,"site_pages/scholarship.html")
+
+def new_admission_form(request):
+    return render(request,"site_pages/new_admission_form.html")
+
+def reference_form(request):
+    return render(request,"site_pages/reference_form.html")
+
+def payment_options(request):
+    return render(request,"site_pages/payment_options.html")
+
+
 def signin(request):
     users =  Users.objects.all()
     print(users)
@@ -166,7 +188,7 @@ def signup_student(request):
                     course_applied=int(request.POST.get('course_applied')) if request.POST.get('course_applied') else None,
                     associate_degree=int(request.POST.get('associate_degree')) if request.POST.get('associate_degree') else None,
                     starting_year=int(request.POST.get('starting_year')) if request.POST.get('starting_year') else None,
-                    language=language,
+                    language_id=language,
                     ministerial_status=request.POST.get('ministerial_status') or None,
                     church_affiliation=request.POST.get('church_affiliation') or None,
                     

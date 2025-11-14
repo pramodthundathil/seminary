@@ -329,7 +329,21 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#admissions">Admissions</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="admissionsDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                            Admissions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="admissionsDropdown">
+                            <li><a class="dropdown-item" href="{% url 'accreditation' %}">Accreditation</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admission_process' %}">Admission Process</a></li>
+                            <li><a class="dropdown-item" href="{% url 'fees_structure' %}">Fees Structure</a></li>
+                            <li><a class="dropdown-item" href="{% url 'scholarship' %}">Scholarships</a></li>
+                            <li><a class="dropdown-item" href="{% url 'new_admission_form' %}">New Admission Form</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reference_form' %}">Reference Form</a></li>
+                            <li><a class="dropdown-item" href="{% url 'payment_options' %}">Payment Options</a></li>
+                        </ul>
+                    </li>                   
                     <li class="nav-item"><a class="nav-link" href="#academics">Academics Programme</a></li>
                     <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
