@@ -334,7 +334,7 @@ class StaffsSubjects(models.Model):
 class Students(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.CharField(max_length=250, blank=True, null=True)
-    user_id = models.IntegerField(null=True, blank=True, db_column='user_id')
+    user_id = models.ForeignKey('Users', on_delete=models.SET_NULL, null=True, blank=True, db_column='user_id', related_name='student_profiles')   
     first_name = models.CharField(max_length=250)
     middle_name = models.CharField(max_length=250, blank=True, null=True)
     last_name = models.CharField(max_length=250, blank=True, null=True)
