@@ -23,5 +23,11 @@ urlpatterns = [
     path('admissions/reference-form/', views.reference_form, name='reference_form'),
     path('admissions/payment-options/', views.payment_options, name='payment_options'),
 
+    # Admissions dropdown pages
+    path('admissions/doctoral-program/', views.doctoral_program, name='doctoral_program'),
+    path('admissions/masters-program/', views.masters_program, name='masters_program'),       
+    path('admissions/bachelors-program/', views.bachelors_program, name='bachelors_program'),
+    path('admissions/diploma-program/', views.diploma_program, name='diploma_program'),
+    path('admissions/certificate-program/', views.certificate_program, name='certificate_program'),
     
 ]

@@ -673,3 +673,33 @@ def student_index(request):
         student = None
     print(student,"--------------")
     return render(request, 'student/index.html')
+
+def doctoral_program(request):
+    """
+    Accademics Programs-Doctoral Program-D.Min Details
+    """
+    return render(request,"site_pages/doctoral_program.html")
+
+def masters_program(request):
+    """
+    Accademics Programs-Master's Program-M.Div Details
+    """
+    return render(request,"site_pages/masters_program.html")
+
+def bachelors_program(request):
+    """
+    Accademics Programs-Bachelor's Program-B.Th Details
+    """
+    return render(request,"site_pages/bachelors_program.html")
+
+def diploma_program(request):
+    """
+    Accademics Programs-Diploma Program-Dip.Th Details
+    """
+    return render(request,"site_pages/diploma_program.html")
+
+def certificate_program(request):
+    """
+    Accademics Programs-Certificate Program-C.Th Details
+    """
+    return render(request,"site_pages/certificate_program.html")

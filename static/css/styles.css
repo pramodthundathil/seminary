@@ -673,6 +673,19 @@ footer i {
 }
 
 /* ================================
+   SCHOLARSHIP PAGE STYLES
+   ================================ */
+.admission-section .content-box p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
+}
+
+/* ================================
    ADMISSION PROCESS PAGE STYLES
    ================================ */
 
@@ -698,6 +711,7 @@ footer i {
     line-height: 1.55;
     margin-bottom: 0.6rem;
 }
+
 .admission-section .content-box p {
     color: var(--text-gray);
     font-size: 0.95rem;
@@ -708,10 +722,11 @@ footer i {
 /* Keep the strong tag (Note:) styled */
 .admission-section .content-box p strong {
     font-weight: 600;
-    color: #333; /* Slightly darker for emphasis */
+    color: #333;
+    /* Slightly darker for emphasis */
 }
 
-.admission-section .process-steps > p {
+.admission-section .process-steps>p {
     color: var(--text-gray);
     font-size: 0.95rem;
     line-height: 1.55;
@@ -822,17 +837,21 @@ footer i {
 .admission-section .section-title .highlight {
     color: var(--primary-cyan);
 }
+
 .content-box {
     padding: 25px 30px;
-    background: #fffbf0; /* Light yellow background for emphasis */
-    border-left: 4px solid #00CED1; /* Cyan accent border */
+    background: #f0f9ff;
+    /* Light yellow background for emphasis */
+    border-left: 4px solid #00CED1;
+    /* Cyan accent border */
     border-radius: 8px;
     margin-bottom: 2.5rem;
     margin-top: 2rem;
 }
 
 .content-box p strong {
-    color: #00CED1; /* Make "Note:" stand out */
+    color: #00CED1;
+    /* Make "Note:" stand out */
 }
 
 /* CTA Title Styling */
@@ -900,6 +919,16 @@ footer i {
     color: #1B2845;
 }
 
+.payment-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
+}
+
 /* Page Header */
 .page-header {
     background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
@@ -955,7 +984,7 @@ footer i {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-    border: 2px solid #f0f0f0; 
+    border: 2px solid #f0f0f0;
 }
 
 .fees-table thead {
@@ -981,13 +1010,13 @@ footer i {
 
 .fees-table td {
     padding: 20px 25px;
-    border: 1px solid #e8e8e8; 
+    border: 1px solid #e8e8e8;
     color: #333;
     font-size: 0.95rem;
     line-height: 1.5;
     text-align: center;
     border-left: none;
-    border-right: 1px solid #f5f5f5; 
+    border-right: 1px solid #f5f5f5;
 }
 
 /* Remove border on last column */
@@ -1014,11 +1043,11 @@ footer i {
 
 .fees-table tbody tr:last-child td {
     font-style: italic;
-     color: #333;
+    color: #333;
     font-size: 0.9rem;
     padding-bottom: 28px;
     padding-top: 10px;
-    border-bottom: none;    
+    border-bottom: none;
 }
 
 /* Additional Information */
@@ -1038,16 +1067,17 @@ footer i {
     font-size: 0.95rem;
     line-height: 1.75;
     margin-bottom: 1rem;
-    font-weight: 400; /* Explicitly set to normal */
+    font-weight: 400;
+    /* Explicitly set to normal */
 }
 
 .contact-note {
     font-style: italic;
     color: #555;
     font-size: 0.95rem !important;
-  margin-top: 2rem;
+    margin-top: 2rem;
     margin-bottom: 0.6rem;
-    line-height: 1.75; 
+    line-height: 1.75;
 }
 
 .contact-note em {
@@ -1055,16 +1085,21 @@ footer i {
 }
 
 .contact-cta {
-    margin-top: 3rem; /* Increase spacing from above content */
-    padding: 2.5rem 2rem; /* Add more vertical padding */
-    background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%); /* Subtle gradient */
+    margin-top: 3rem;
+    /* Increase spacing from above content */
+    padding: 2.5rem 2rem;
+    /* Add more vertical padding */
+    background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+    /* Subtle gradient */
     border-radius: 10px;
     text-align: center;
-    border: 1px solid #e8ecff; /* Subtle border */
+    border: 1px solid #e8ecff;
+    /* Subtle border */
 }
 
 .contact-cta p {
-    font-size: 1.05rem; /* Slightly larger for emphasis */
+    font-size: 1.05rem;
+    /* Slightly larger for emphasis */
     color: #555;
     margin-bottom: 1.5rem;
 }
@@ -1145,7 +1180,7 @@ footer i {
 
     .fees-table tbody tr:last-child td {
         font-size: 0.8rem;
-    }  
+    }
 
 }
 
@@ -1188,9 +1223,11 @@ footer i {
     margin: 0 auto;
     padding: 3rem;
     background: #fff;
-    border: 2px solid #d1d5db; /* Subtle gray instead of cyan */
+    border: 2px solid #d1d5db;
+    /* Subtle gray instead of cyan */
     border-radius: 12px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1); /* Match fees table shadow */
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    /* Match fees table shadow */
 }
 
 /* Form Rows */
@@ -1214,9 +1251,9 @@ footer i {
 /* Labels */
 .payment-form label {
     font-size: 0.95rem;
-    color: #666;
+    color: #4b5563;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Input Fields */
@@ -1228,7 +1265,7 @@ footer i {
 .payment-form select,
 .payment-form textarea {
     padding: 0.8rem 1rem;
-    border: 1px solid #d1d5db; 
+    border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 0.95rem;
     color: #333;
@@ -1240,7 +1277,8 @@ footer i {
 .payment-form select:focus,
 .payment-form textarea:focus {
     outline: none;
-    border-color: #A78BFA; /* Purple focus - matches table header */
+    border-color: #A78BFA;
+    /* Purple focus - matches table header */
     box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
 }
 
@@ -1310,9 +1348,11 @@ footer i {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
 }
+
 /* Required field asterisk styling */
 .required {
-    color: #dc3545; /* Red color for visibility */
+    color: #dc3545;
+    /* Red color for visibility */
     font-weight: 700;
     margin-left: 3px;
 }
@@ -1332,6 +1372,7 @@ footer i {
     margin-left: 0;
     margin-right: 3px;
 }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .payment-form-wrapper {
@@ -1405,9 +1446,13 @@ footer i {
 }
 
 .application-section .intro-section p {
-    color: var(--text-gray);
+    color: #4b5563;
     font-size: 0.95rem;
     line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
     margin-bottom: 1rem;
 }
 
@@ -1670,6 +1715,7 @@ footer i {
     transform: translateY(-3px);
     box-shadow: 0 6px 25px rgba(167, 139, 250, 0.5);
 }
+
 .error-msg {
     color: red;
     font-size: 0.85rem;
@@ -1760,4 +1806,182 @@ button:disabled {
     .btn-apply-submit {
         font-size: 1rem;
     }
+}
+
+/*==============================*/
+/* Reference Form Page Styles */
+/*==============================*/
+.reference-section {
+    padding: 4rem 0;
+    background-color: #f8f9fa;
+}
+
+.reference-section .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+.reference-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    text-align: center;
+}
+
+.reference-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
+}
+
+.reference-form-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 3rem;
+}
+
+.form-section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1B2845;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid #00CED1;
+    display: inline-block;
+}
+
+/* Form Row Grid */
+.reference-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.reference-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.reference-form label {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.reference-form input,
+.reference-form select,
+.reference-form textarea {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.reference-form input:focus,
+.reference-form select:focus,
+.reference-form textarea:focus {
+    outline: none;
+    border-color: #00CED1;
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+}
+
+.input-error {
+    border: 2px solid red !important;
+    background: #ffecec !important;
+}
+
+.input-valid {
+    border: 2px solid #28a745 !important;
+    background: #f0fff4 !important;
+}
+
+/* Submit Button */
+.form-submit {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: right;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    padding: 1.1rem 4.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4);
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #8A6EF6, #AA6FFC);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(167, 139, 250, 0.5);
+}
+
+.character-count {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+@media (max-width: 768px) {
+    .reference-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/*Accademics Programes
+/* Multi-level dropdown */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: .1rem;
+    display: none;
+    position: absolute;
+}
+
+/* SHOW submenu on HOVER */
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+/* Small arrow on right side */
+.dropdown-submenu>a::after {
+    content: "›";
+    float: right;
+    margin-top: 4px;
 }

@@ -12,91 +12,285 @@
 
         <div class="intro-section">
             <p>
-                Complete the form below to process your payment. For questions regarding payments,
-                please contact our admissions office.
+                Complete the form below to process your payment. All fields marked with <span class="required">*</span> are required. 
+                For questions regarding payments, please contact our admissions office.
             </p>
         </div>
 
         <!-- Payment Form -->
         <div class="payment-form-wrapper">
-            <p class="form-note">
-                Fields marked with <span class="required">*</span> are required
-            </p>
             
-            <form method="POST" action="" class="payment-form">
+            <form method="POST" action="" class="payment-form" novalidate>
                 {% csrf_token %}
 
-                <!-- Row 1: Name and Email -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="name">Name <span class="required">*</span></label>
-                        <input type="text" id="name" name="name" required>
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> PERSONAL INFORMATION
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" required>
+                    
+                    <!-- Row 1: First Name, Middle Name, Last Name -->
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label for="first_name">Full Name <span class="required">*</span></label>
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                name="first_name" 
+                                placeholder="Enter your fullname"
+                                autocomplete="given-name"
+                                required
+                                aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>                  
+                        
                     </div>
-                </div>
 
-                <!-- Row 2: Contact Number and Student ID -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="contact">Contact Number</label>
-                        <input type="tel" id="contact" name="contact">
+                    <!-- Row 2: Email and Contact Number -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="example@email.com"
+                                autocomplete="email"
+                                required
+                                aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">Contact Number <span class="required">*</span></label>
+                            <input 
+                                type="tel" 
+                                id="contact" 
+                                name="contact" 
+                                placeholder="+1 (555) 123-4567"
+                                autocomplete="tel"
+                                required
+                                aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="student_id">Student ID (if applicable)</label>
-                        <input type="text" id="student_id" name="student_id">
-                    </div>
-                </div>
 
-                <!-- Row 3: Payment Type and Course -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="payment_type">Payment Type <span class="required">*</span></label>
-                        <select id="payment_type" name="payment_type" required>
-                            <option value="">--- Select ---</option>
-                            <option value="tuition">Tuition Fee</option>
-                            <option value="enrollment">Enrollment Fee</option>
-                            <option value="course">Course Fee</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="course">Course/Program</label>
-                        <select id="course" name="course">
-                            <option value="">--- Select ---</option>
-                            <option value="undergraduate">Undergraduate Level</option>
-                            <option value="masters">Master's Level</option>
-                            <option value="doctoral">Doctoral Level</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Row 4: Amount -->
-                <div class="form-row">
-                    <div class="form-group form-group-amount">
-                        <label for="amount">Amount <span class="required">*</span></label>
-                        <div class="amount-input-wrapper">
-                            <span class="currency-symbol">$</span>
-                            <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+                    <!-- Row 3: Student ID (if applicable) -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student_id">Student ID <span class="optional-text">(if applicable)</span></label>
+                            <input 
+                                type="text" 
+                                id="student_id" 
+                                name="student_id"
+                                placeholder="Enter your student ID">
+                            <small class="field-help">Leave blank if you're not currently enrolled</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Message/Notes -->
-                <div class="form-group full-width">
-                    <label for="message">Message/Notes (Optional)</label>
-                    <textarea id="message" name="message" rows="5"></textarea>
+                <!-- Payment Details Section -->
+                <div class="form-section">
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> PAYMENT DETAILS
+                    </div>
+                    
+                    <!-- Row 4: Payment Type and Course -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="payment_type">Payment Type <span class="required">*</span></label>
+                            <select 
+                                id="payment_type" 
+                                name="payment_type" 
+                                required
+                                aria-required="true">
+                                <option value="">--- Select Payment Type ---</option>
+                                <option value="tuition">Tuition Fee</option>
+                                <option value="enrollment">Enrollment Fee</option>
+                                <option value="application">Application Fee</option>
+                                <option value="course">Course Fee</option>
+                                <option value="library">Library Fee</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="course">Course/Program</label>
+                            <select id="course" name="course">
+                                <option value="">--- Select Program Level ---</option>
+                                <option value="undergraduate">Undergraduate Level</option>
+                                <option value="masters">Master's Level</option>
+                                <option value="doctoral">Doctoral Level</option>
+                                <option value="certificate">Certificate Program</option>
+                                <option value="continuing">Continuing Education</option>
+                            </select>
+                            <small class="field-help">Select if payment is for a specific program</small>
+                        </div>
+                    </div>
+
+                    <!-- Row 5: Amount -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Payment Amount <span class="required">*</span></label>
+                            <div class="amount-input-wrapper">
+                                <span class="currency-symbol">$</span>
+                                <input 
+                                    type="number" 
+                                    id="amount" 
+                                    name="amount" 
+                                    step="0.01" 
+                                    min="1"
+                                    placeholder="0.00"
+                                    required
+                                    aria-required="true">
+                            </div>
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Additional Information Section -->
+                <div class="form-section">
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> ADDITIONAL INFORMATION
+                    </div>
+                    
+                    <!-- Message/Notes -->
+                    <div class="form-group full-width">
+                        <label for="message">Message/Notes <span class="optional-text">(Optional)</span></label>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            rows="5"
+                            placeholder="Add any additional information or special instructions here..."
+                            maxlength="500"></textarea>
+                        <small class="character-count">0 / 500 characters</small>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->                 
                 <div class="form-submit">
-                    <button type="submit" class="btn-submit">SUBMIT PAYMENT</button>
+                    <button type="submit" class="btn-apply-submit">
+                        <span class="btn-text">PROCEED TO PAYMENT</span>
+                        <span class="btn-icon">→</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </section>
+
+<script>
+// Form validation and UX enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.payment-form');
+    const messageTextarea = document.getElementById('message');
+    const charCount = document.querySelector('.character-count');
+    
+    // Character counter for textarea
+    if (messageTextarea && charCount) {
+        messageTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = `${count} / 500 characters`;
+            if (count > 450) {
+                charCount.style.color = '#dc3545';
+            } else {
+                charCount.style.color = '#666';
+            }
+        });
+    }
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input[required], select[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateField(this);
+            }
+        });
+    });
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+        
+        if (isValid) {
+            // Submit the form
+            this.submit();
+        } else {
+            // Scroll to first error
+            const firstError = form.querySelector('.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    function validateField(field) {
+        const errorSpan = field.parentElement.querySelector('.error-message');
+        let isValid = true;
+        let errorMessage = '';
+        
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            isValid = false;
+            errorMessage = 'This field is required';
+        } else if (field.type === 'email' && field.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(field.value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid email address';
+            }
+        } else if (field.type === 'number' && field.value) {
+            if (parseFloat(field.value) < 1) {
+                isValid = false;
+                errorMessage = 'Amount must be at least $1.00';
+            }
+        }
+        
+        if (!isValid) {
+            field.classList.add('error');
+            if (errorSpan) {
+                errorSpan.textContent = errorMessage;
+                errorSpan.style.display = 'block';
+            }
+        } else {
+            field.classList.remove('error');
+            if (errorSpan) {
+                errorSpan.textContent = '';
+                errorSpan.style.display = 'none';
+            }
+        }
+        
+        return isValid;
+    }
+    
+    // Phone number formatting (basic)
+    const phoneInput = document.getElementById('contact');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+            
+            if (value.length >= 6) {
+                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+            } else if (value.length >= 3) {
+                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+            } else {
+                e.target.value = value;
+            }
+        });
+    }
+});
+</script>
 
 {% endblock %}

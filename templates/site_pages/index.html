@@ -176,14 +176,18 @@
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
-            .why-section, .courses-section {
+
+            .why-section,
+            .courses-section {
                 padding: 50px 0;
             }
-            
-            .feature-card, .course-card {
+
+            .feature-card,
+            .course-card {
                 margin-bottom: 20px;
             }
         }
+
         .highlight {
             color: var(--primary-cyan);
         }
@@ -294,7 +298,7 @@
             .about-content {
                 flex-direction: column;
             }
-            
+
             .about-image {
                 order: -1;
             }
@@ -305,13 +309,11 @@
                 flex-wrap: wrap;
                 gap: 20px;
             }
-            
+
             .stat-box {
                 flex: 0 0 calc(50% - 10px);
             }
         }
-
-
     </style>
 </head>
 
@@ -331,7 +333,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About us</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="admissionsDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             Admissions
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="admissionsDropdown">
@@ -339,12 +341,65 @@
                             <li><a class="dropdown-item" href="{% url 'admission_process' %}">Admission Process</a></li>
                             <li><a class="dropdown-item" href="{% url 'fees_structure' %}">Fees Structure</a></li>
                             <li><a class="dropdown-item" href="{% url 'scholarship' %}">Scholarships</a></li>
-                            <li><a class="dropdown-item" href="{% url 'new_admission_form' %}">New Admission Form</a></li>
+                            <li><a class="dropdown-item" href="{% url 'new_admission_form' %}">New Admission Form</a>
+                            </li>
                             <li><a class="dropdown-item" href="{% url 'reference_form' %}">Reference Form</a></li>
                             <li><a class="dropdown-item" href="{% url 'payment_options' %}">Payment Options</a></li>
                         </ul>
-                    </li>                   
-                    <li class="nav-item"><a class="nav-link" href="#academics">Academics Programme</a></li>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="academicsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Academic Programmes
+                        </a>
+
+                        <ul class="dropdown-menu" aria-labelledby="academicsDropdown">
+
+                            <!-- Doctoral -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">Doctoral Program</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'doctoral_program' %}">D.Min</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Masters -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">Masters Program</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'masters_program' %}">M.Div</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Bachelors -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">Bachelors Program</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#bth">B.Th</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Diploma -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">Diploma Program</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#dipth">Dip.Th</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Certificate -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">Certificate Program</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#cth">C.Th</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Associate -->
+                            <li><a class="dropdown-item" href="#associate">Associate Degree</a></li>
+
+                        </ul>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
                     <li class="nav-item ms-2"><a class="btn btn-login" href="{% url 'signin' %}">Log in</a></li>
@@ -496,151 +551,154 @@
         </div>
     </section>
 
-   <!-- Courses Section -->
-<section class="courses-section" id="courses">
-  <div class="container text-center">
-    <h2 class="section-title">Our Courses</h2>
+    <!-- Courses Section -->
+    <section class="courses-section" id="courses">
+        <div class="container text-center">
+            <h2 class="section-title">Our Courses</h2>
 
-    <div class="row justify-content-center g-4 mt-4">
-      <!-- M.Div -->
-      <div class="col-md-4">
-        <div class="course-card course-blue">
-          <div class="badge-icon">
-            <i class="fas fa-medal"></i>
-          </div>
-          <img src="images/mdiv.jpg" alt="M.Div" class="course-img">
-          <h3 class="course-title">M.Div</h3>
-          <p class="course-desc">
-            Master of Divinity (M. Div) is used to define the study of different faiths and belief systems. In Christian theology, this degree prepares students to work as...
-          </p>
-          <button class="btn btn-join">Join Now</button>
+            <div class="row justify-content-center g-4 mt-4">
+                <!-- M.Div -->
+                <div class="col-md-4">
+                    <div class="course-card course-blue">
+                        <div class="badge-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <img src="images/mdiv.jpg" alt="M.Div" class="course-img">
+                        <h3 class="course-title">M.Div</h3>
+                        <p class="course-desc">
+                            Master of Divinity (M. Div) is used to define the study of different faiths and belief
+                            systems. In Christian theology, this degree prepares students to work as...
+                        </p>
+                        <button class="btn btn-join">Join Now</button>
+                    </div>
+                </div>
+
+                <!-- INTRODUCTION TO BIBLE -->
+                <div class="col-md-4">
+                    <div class="course-card course-green">
+                        <div class="badge-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <img src="images/bible.jpg" alt="Introduction to Bible" class="course-img">
+                        <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
+                        <p class="course-desc">
+                            INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow
+                            format, presents all the important themes of the entire Bible and ties both Old...
+                        </p>
+                        <button class="btn btn-join">Join Now</button>
+                    </div>
+                </div>
+
+                <!-- B.Th -->
+                <div class="col-md-4">
+                    <div class="course-card course-purple">
+                        <div class="badge-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <img src="images/bth.jpg" alt="B.Th" class="course-img">
+                        <h3 class="course-title">B.Th</h3>
+                        <p class="course-desc">
+                            The Graduate Certificate in Ministry is a one-year Bible training program. It equips
+                            candidates with a non-theology background to prepare themselves for postgraduate study as...
+                        </p>
+                        <button class="btn btn-join">Join Now</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <!-- INTRODUCTION TO BIBLE -->
-      <div class="col-md-4">
-        <div class="course-card course-green">
-          <div class="badge-icon">
-            <i class="fas fa-award"></i>
-          </div>
-          <img src="images/bible.jpg" alt="Introduction to Bible" class="course-img">
-          <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
-          <p class="course-desc">
-            INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow format, presents all the important themes of the entire Bible and ties both Old...
-          </p>
-          <button class="btn btn-join">Join Now</button>
-        </div>
-      </div>
+    <!-- CSS -->
+    <style>
+        .courses-section {
+            background-color: #f5faff;
+            padding: 60px 0;
+        }
 
-      <!-- B.Th -->
-      <div class="col-md-4">
-        <div class="course-card course-purple">
-          <div class="badge-icon">
-            <i class="fas fa-graduation-cap"></i>
-          </div>
-          <img src="images/bth.jpg" alt="B.Th" class="course-img">
-          <h3 class="course-title">B.Th</h3>
-          <p class="course-desc">
-            The Graduate Certificate in Ministry is a one-year Bible training program. It equips candidates with a non-theology background to prepare themselves for postgraduate study as...
-          </p>
-          <button class="btn btn-join">Join Now</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+        .section-title {
+            font-weight: 700;
+            color: #1d1d1d;
+            font-size: 2rem;
+        }
 
-<!-- CSS -->
-<style>
-.courses-section {
-  background-color: #f5faff;
-  padding: 60px 0;
-}
+        .course-card {
+            background: #fff;
+            border-radius: 25px;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
 
-.section-title {
-  font-weight: 700;
-  color: #1d1d1d;
-  font-size: 2rem;
-}
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
 
-.course-card {
-  background: #fff;
-  border-radius: 25px;
-  padding: 30px 20px;
-  text-align: center;
-  position: relative;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
-}
+        .course-img {
+            width: 100%;
+            max-width: 100px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
 
-.course-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-}
+        .badge-icon {
+            position: absolute;
+            top: -15px;
+            left: 15px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-.course-img {
-  width: 100%;
-  max-width: 100px;
-  border-radius: 15px;
-  margin-bottom: 15px;
-}
+        .badge-icon i {
+            color: #f9b233;
+            font-size: 18px;
+        }
 
-.badge-icon {
-  position: absolute;
-  top: -15px;
-  left: 15px;
-  background: #fff;
-  border-radius: 50%;
-  padding: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+        .course-title {
+            font-weight: 700;
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
 
-.badge-icon i {
-  color: #f9b233;
-  font-size: 18px;
-}
+        .course-desc {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-.course-title {
-  font-weight: 700;
-  margin: 10px 0;
-  font-size: 1.2rem;
-}
+        .btn-join {
+            background: #2b5cff;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
 
-.course-desc {
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 20px;
-}
+        .btn-join:hover {
+            background: #1d3ecc;
+        }
 
-.btn-join {
-  background: #2b5cff;
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 20px;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
+        .course-blue {
+            background: linear-gradient(145deg, #d6f2ff, #a3e4ff);
+        }
 
-.btn-join:hover {
-  background: #1d3ecc;
-}
+        .course-green {
+            background: linear-gradient(145deg, #d8f6d5, #a4e6a1);
+        }
 
-.course-blue {
-  background: linear-gradient(145deg, #d6f2ff, #a3e4ff);
-}
+        .course-purple {
+            background: linear-gradient(145deg, #e3ddff, #c8bfff);
+        }
+    </style>
 
-.course-green {
-  background: linear-gradient(145deg, #d8f6d5, #a4e6a1);
-}
-
-.course-purple {
-  background: linear-gradient(145deg, #e3ddff, #c8bfff);
-}
-</style>
-
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
 
 
     <!-- Scholarship Section -->
@@ -656,24 +714,29 @@
     <section class="about-section" id="about">
         <div class="container">
             <h2 class="section-title">About <span class="highlight">Us</span></h2>
-            
+
             <div class="about-content">
                 <div class="about-text">
                     <h3 class="about-subtitle">Who We Are?</h3>
                     <p class="about-description">
-                        At Trinity Theological Seminary, you will not be a normal aspirant who takes admission, completes the course and leaves. Instead, we believe in building a relationship that lasts longer than most things do.
+                        At Trinity Theological Seminary, you will not be a normal aspirant who takes admission,
+                        completes the course and leaves. Instead, we believe in building a relationship that lasts
+                        longer than most things do.
                     </p>
-                    
+
                     <div class="about-highlight">
                         <p>
-                            Our aim is to build a leader out of the aspirant, preparing for the world that needs God's grace. That is the reason our faculties are trained in such a way to bring the best of leadership qualities from you, building a strong foundation of faith and faith based skills to be a change in this world. With that, we will be there to...
+                            Our aim is to build a leader out of the aspirant, preparing for the world that needs God's
+                            grace. That is the reason our faculties are trained in such a way to bring the best of
+                            leadership qualities from you, building a strong foundation of faith and faith based skills
+                            to be a change in this world. With that, we will be there to...
                         </p>
                     </div>
-                    
+
                     <button class="btn-read-more">
                         Read More <i class="fas fa-arrow-right"></i>
                     </button>
-                    
+
                     <div class="about-stats">
                         <div class="stat-box">
                             <div class="stat-number">25+</div>
@@ -689,10 +752,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="about-image">
                     <!-- This would be replaced with an actual image in production -->
-                    <div style="background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)); height: 100%; min-height: 400px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <div
+                        style="background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)); height: 100%; min-height: 400px; display: flex; align-items: center; justify-content: center; color: white;">
                         <div style="text-align: center; padding: 20px;">
                             <i class="fas fa-university" style="font-size: 4rem; margin-bottom: 20px;"></i>
                             <h3>Trinity Theological Seminary</h3>
@@ -888,6 +952,7 @@ messages.info(request, 'Please verify your email.')
 -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 
 </html>
