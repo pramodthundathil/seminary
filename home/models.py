@@ -83,7 +83,7 @@ class Payments(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     message = models.TextField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
-    student_id = models.IntegerField(null=True, blank=True, db_column='student_id')
+    student_id = models.ForeignKey('Students', on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='payments')    
     church_admin_id = models.IntegerField(null=True, blank=True, db_column='church_admin_id')
     subjects_id = models.IntegerField(blank=True, null=True, db_column='subjects_id')
     updated_at = models.DateTimeField(auto_now=True)
@@ -334,7 +334,7 @@ class StaffsSubjects(models.Model):
 class Students(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.CharField(max_length=250, blank=True, null=True)
-    user_id = models.IntegerField(null=True, blank=True, db_column='user_id')
+    user_id = models.ForeignKey('Users', on_delete=models.SET_NULL, null=True, blank=True, db_column='user_id', related_name='student_profiles')   
     first_name = models.CharField(max_length=250)
     middle_name = models.CharField(max_length=250, blank=True, null=True)
     last_name = models.CharField(max_length=250, blank=True, null=True)
@@ -357,8 +357,8 @@ class Students(models.Model):
     timezone = models.CharField(max_length=250)
     highest_education = models.CharField(max_length=100, blank=True, null=True)
     course_applied = models.IntegerField(blank=True, null=True, db_column='course_applied')
-    associate_degree = models.IntegerField(blank=True, null=True)
-    language_id = models.IntegerField(db_column='language_id')
+    associate_degree = models.IntegerField(blank=True, null=True)    
+    language_id = models.ForeignKey('Languages', on_delete=models.SET_NULL, null=True,  blank=True, db_column='language_id')
     starting_year = models.IntegerField(blank=True, null=True)
     ministerial_status = models.CharField(max_length=50, blank=True, null=True)
     church_affiliation = models.CharField(max_length=250, blank=True, null=True)
@@ -395,7 +395,7 @@ class Students(models.Model):
 
 class StudentsAssignment(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='assignments')
     assignment_id = models.IntegerField(db_column='assignment_id')
     submission_date = models.DateTimeField(blank=True, null=True)
     submitted_on = models.DateTimeField(blank=True, null=True)
@@ -413,7 +413,7 @@ class StudentsAssignment(models.Model):
 
 class StudentsBooks(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='books')
     book_id = models.IntegerField(db_column='book_id')
     updated_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -428,7 +428,7 @@ class StudentsBooks(models.Model):
 
 class StudentsExams(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='exams')
     exam_id = models.IntegerField(db_column='exam_id')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
@@ -453,7 +453,7 @@ class StudentsExams(models.Model):
 
 class StudentsInstructor(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='instructor')
     instructor_id = models.IntegerField(db_column='instructor_id')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -468,7 +468,7 @@ class StudentsInstructor(models.Model):
 
 class StudentsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='subjects')    
     subject_id = models.IntegerField(db_column='subject_id')
     requested_by = models.IntegerField(blank=True, null=True, db_column='requested_by')
     is_approved = models.BooleanField(default=False)
@@ -487,7 +487,7 @@ class StudentsSubjects(models.Model):
 
 class StudentsUploads(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='uploads')
     upload_id = models.IntegerField(db_column='upload_id')
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -521,7 +521,7 @@ class Subjects(models.Model):
 
 class Support(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, db_column='student_id', related_name='support', null=True, blank=True)
     doubt_question = models.CharField(max_length=1000)
     doubt_answer = models.CharField(max_length=1000)
     category = models.CharField(max_length=50)
@@ -767,7 +767,7 @@ class Assignments(models.Model):
 class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
     assignment_id = models.IntegerField(db_column='assignment_id')
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='answers')    
     answer_file = models.CharField(max_length=255, blank=True, null=True)
     answer_text = models.TextField(blank=True, null=True)
     marks_optained = models.FloatField(blank=True, null=True)
@@ -885,7 +885,7 @@ class Categories(models.Model):
 
 class ChurchAdmins(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(null=True, blank=True, db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='churchadmins')    
     name_of_church = models.CharField(max_length=250, blank=True, null=True)
     name_of_paster = models.CharField(max_length=250, blank=True, null=True)
     church_address = models.TextField(blank=True, null=True)
@@ -1175,7 +1175,7 @@ class News(models.Model):
 
 class Notifications(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.IntegerField(db_column='student_id')
+    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='notifications')
     notification_type = models.CharField(max_length=50)
     message = models.CharField(max_length=250)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1278,3 +1278,4 @@ class Pages(models.Model):
     class Meta:
         managed = True
         db_table = 'pages'
+

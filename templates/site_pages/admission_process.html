@@ -1,0 +1,46 @@
+{% extends "site_pages/index.html" %}
+
+{% block title %}
+<title>Accreditation - Trinity Theological Seminary</title>
+{% endblock %}
+{% block content %}
+<!-- Main Content -->
+<section class="about-section admission-section">
+    <div class="container">
+        <h2 class="section-title">Admission <span class="highlight">Process</span></h2>
+        <div class="intro-section">
+            <p>
+                Applicants who want to enrol for a course with Trinity Theological Seminary shall submit an application,
+                available in English and Hindi.
+            </p>
+        </div>
+        <!-- Process Steps -->
+        <div class="process-steps">
+            <ol class="admission-steps-list">
+                <li>Complete online form available on website
+                    <a href="{% url 'index' %}" class="step-link">www.mytts.org</a>
+                </li>
+                <li>Upload supporting documents for specific course opted.</li>
+                <li>Pay enrolment fee and course fee for the program opted.</li>
+                <li>On successful completion of application, Trinity will mail Student Registration Number, login id
+                    with password to access account which includes course details, materials and assignments to begin
+                    the program with.</li>
+                <li>There is a minimum duration for all the programs and courses, if a student fails to complete the
+                    course in stipulated duration then they will have to re-register for the course opted as a new
+                    student.</li>
+            </ol>
+
+        </div>
+    </div>
+    <div class="container">
+        <div class="cta-content">
+            <h3 class="cta-title">Ready to Begin Your Journey?</h3>
+            <p>Take the first step toward your calling. Apply to Trinity Theological Seminary today.</p>
+            <a href="{% url 'new_admission_form' %}" class="btn-cta">
+                <i class="fas fa-edit"></i> Start Your Application Now
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

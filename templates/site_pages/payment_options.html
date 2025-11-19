@@ -25,22 +25,29 @@
 
                 <!-- Personal Information Section -->
                 <div class="form-section">
-                    <h3 class="form-section-title">Personal Information</h3>
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> PERSONAL INFORMATION
+                    </div>
                     
-                    <!-- Row 1: Full Name -->
-                    <div class="form-row">
+                    <!-- Row 1: First Name, Middle Name, Last Name -->
+                    <div class="form-row form-row-3">
                         <div class="form-group">
-                            <label for="full_name">Full Name <span class="required">*</span></label>
+                            <label for="first_name">Full Name <span class="required">*</span></label>
                             <input 
                                 type="text" 
-                                id="full_name" 
-                                name="full_name" 
-                                placeholder="Enter your full name"
-                                autocomplete="name"
+                                id="first_name" 
+                                name="first_name" 
+                                placeholder="Enter your fullname"
+                                autocomplete="given-name"
                                 required
                                 aria-required="true">
                             <span class="error-message" role="alert"></span>
-                        </div>
+                        </div>                  
+                        
+                    </div>
+
+                    <!-- Row 2: Email and Contact Number -->
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="email">Email Address <span class="required">*</span></label>
                             <input 
@@ -53,22 +60,22 @@
                                 aria-required="true">
                             <span class="error-message" role="alert"></span>
                         </div>
-                    </div>
-
-                    <!-- Row 2: Contact Number and Student ID -->
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="contact">Contact Number <span class="required">*</span></label>
                             <input 
                                 type="tel" 
                                 id="contact" 
                                 name="contact" 
-                                placeholder="(555) 123-4567"
+                                placeholder="+1 (555) 123-4567"
                                 autocomplete="tel"
                                 required
                                 aria-required="true">
                             <span class="error-message" role="alert"></span>
                         </div>
+                    </div>
+
+                    <!-- Row 3: Student ID (if applicable) -->
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="student_id">Student ID <span class="optional-text">(if applicable)</span></label>
                             <input 
@@ -83,9 +90,11 @@
 
                 <!-- Payment Details Section -->
                 <div class="form-section">
-                    <h3 class="form-section-title">Payment Details</h3>
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> PAYMENT DETAILS
+                    </div>
                     
-                    <!-- Row 3: Payment Type and Course -->
+                    <!-- Row 4: Payment Type and Course -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="payment_type">Payment Type <span class="required">*</span></label>
@@ -118,7 +127,7 @@
                         </div>
                     </div>
 
-                    <!-- Row 4: Amount -->
+                    <!-- Row 5: Amount -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="amount">Payment Amount <span class="required">*</span></label>
@@ -141,7 +150,9 @@
 
                 <!-- Additional Information Section -->
                 <div class="form-section">
-                    <h3 class="form-section-title">Additional Information</h3>
+                     <div class="section-header">
+                        <i class="fas fa-referee"></i> ADDITIONAL INFORMATION
+                    </div>
                     
                     <!-- Message/Notes -->
                     <div class="form-group full-width">
@@ -156,9 +167,9 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Submit Button -->                 
                 <div class="form-submit">
-                    <button type="submit" class="btn-submit">
+                    <button type="submit" class="btn-apply-submit">
                         <span class="btn-text">PROCEED TO PAYMENT</span>
                         <span class="btn-icon">→</span>
                     </button>
@@ -243,13 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (parseFloat(field.value) < 1) {
                 isValid = false;
                 errorMessage = 'Amount must be at least $1.00';
-            }
-        } else if (field.id === 'full_name' && field.value.trim()) {
-            // Basic full name validation - should have at least 2 words
-            const nameParts = field.value.trim().split(/\s+/);
-            if (nameParts.length < 2) {
-                isValid = false;
-                errorMessage = 'Please enter your full name (first and last name)';
             }
         }
         

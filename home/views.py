@@ -1,18 +1,39 @@
-from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib import messages
-from django.shortcuts import render
-from django.db.models import Count, Q
-from django.contrib.auth.decorators import login_required
+# -------------------------------
+# Python Standard Library Imports
+# -------------------------------
+import os
+import uuid
 from datetime import datetime, timedelta
+
+# -------------------------------
+# Django Core Imports
+# -------------------------------
+from django.shortcuts import render, redirect, HttpResponse
+from django.contrib import messages
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.utils.crypto import get_random_string
+from django.db.models import Q, Count
+from django.core.files.storage import FileSystemStorage
+from django.utils import timezone
+from django.db import transaction
+
+# -------------------------------
+# Local App Imports
+# -------------------------------
 from .models import (
-    Students, Courses, StudentsExams, ReferenceForm, 
-    StudentsSubjects, Assignments, StudentsAssignment
+    Students,
+    Courses,
+    StudentsExams,
+    ReferenceForm,
+    StudentsSubjects,
+    Assignments,
+    StudentsAssignment,
+    Pages,
+    Languages
 )
 from .decorators import role_redirection
 
-# Create your views here.
-from .models import *
 
 def index(request): 
     pages = Pages.objects.all()
@@ -20,7 +41,239 @@ def index(request):
     return render(request,"site_pages/index.html",context)
 
 def about_us(request):
+    """
+    Details about Trinity Theological Seminary. 
+    """
     return render(request,"site_pages/about_us.html")
+
+def accreditation(request):
+    """
+    Seminary accreditation details. 
+    """
+    return render(request,"site_pages/accreditation.html")
+
+def admission_process(request):
+    """
+    Admission process details for students
+    """
+    return render(request,"site_pages/admission_process.html")
+
+def fees_structure(request):
+    """
+    Fee structure for students
+    """
+    return render(request,"site_pages/fees_structure.html")
+
+def scholarship(request):
+    """
+    Scholarship details for students
+    """
+    return render(request,"site_pages/scholarship.html")
+
+def new_admission_form(request):
+    """
+    New admission form for students with full error handling
+    """
+    if request.method == "POST":
+
+        # -------------------------------
+        # READ FORM DATA SAFELY
+        # -------------------------------
+        try:
+            first_name = request.POST.get("first_name")
+            middle_name = request.POST.get("middle_name")
+            last_name = request.POST.get("last_name")
+            email = request.POST.get("email")
+            gender = request.POST.get("gender")
+            citizenship = request.POST.get("citizenship")
+            phone_code = request.POST.get("country_code")
+            phone = request.POST.get("phone")
+            dob = request.POST.get("dob")
+            marital_status = request.POST.get("marital_status")
+            spouse_name = request.POST.get("spouse_name")
+            children = request.POST.get("children")
+            mailing_address = request.POST.get("mailing_address")
+            city = request.POST.get("city")
+            state = request.POST.get("state")
+            country = request.POST.get("country")
+            zipcode = request.POST.get("zipcode")
+            timezone = request.POST.get("timezone")
+            education = request.POST.get("education")
+            course_applied = request.POST.get("course")
+            language = request.POST.get("language")
+            starting_year = request.POST.get("start_year")
+            ministerial_status = request.POST.get("ministerial_status")
+            church = request.POST.get("church")
+            scholarship = request.POST.get("scholarship")
+            employed = request.POST.get("employed")
+            income = request.POST.get("income")
+            afford = request.POST.get("afford")
+            message = request.POST.get("message")
+
+            # Reference information
+            ref1_name = request.POST.get("ref1_name")
+            ref1_email = request.POST.get("ref1_email")
+            ref1_phone = request.POST.get("ref1_phone")
+
+            ref2_name = request.POST.get("ref2_name")
+            ref2_email = request.POST.get("ref2_email")
+            ref2_phone = request.POST.get("ref2_phone")
+
+            ref3_name = request.POST.get("ref3_name")
+            ref3_email = request.POST.get("ref3_email")
+            ref3_phone = request.POST.get("ref3_phone")
+
+        except Exception as e:
+            messages.error(request, f"Error reading form fields: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+
+        # -------------------------------
+        # FILE UPLOAD HANDLING
+        # -------------------------------
+        try:
+            profile_pic = request.FILES.get("profile_pic")
+            cert1 = request.FILES.get("cert1")
+            cert2 = request.FILES.get("cert2")
+            cert3 = request.FILES.get("cert3")
+            cert4 = request.FILES.get("cert4")
+            cert5 = request.FILES.get("cert5")
+
+        except Exception as e:
+            messages.error(request, f"File upload error: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+
+        # Function to save file
+        def save_file(f):
+            try:
+                if not f:
+                    return None
+
+                # Generate unique file name
+                file_path = f"uploads/students/{get_random_string(8)}_{f.name}"
+                full_path = os.path.join("media", file_path)
+
+                # Save file manually
+                with open(full_path, "wb+") as destination:
+                    for chunk in f.chunks():
+                        destination.write(chunk)
+
+                return file_path
+
+            except Exception as e:
+                messages.error(request, f"Error saving file '{f.name}' : {e}")
+                return None
+
+        # Try saving all files
+        try:
+            photo_path = save_file(profile_pic)
+            c1 = save_file(cert1)
+            c2 = save_file(cert2)
+            c3 = save_file(cert3)
+            c4 = save_file(cert4)
+            c5 = save_file(cert5)
+
+        except Exception as e:
+            messages.error(request, f"Error processing uploaded files: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+
+        # -------------------------------
+        # LANGUAGE FOREIGN KEY
+        # -------------------------------
+        try:
+            lang_obj = None
+            if language:
+                lang_obj = Languages.objects.filter(name__icontains=language).first()
+
+        except Exception as e:
+            messages.error(request, f"Language lookup error: {e}")
+            lang_obj = None  # Prevent crash
+
+        # -------------------------------
+        # GENERATE STUDENT ID
+        # -------------------------------
+        try:
+            student_id = "STD-" + get_random_string(6).upper()
+        except Exception as e:
+            messages.error(request, f"Error generating student ID: {e}")
+            student_id = "STD-000000"
+
+        # -------------------------------
+        # SAVE INTO DATABASE
+        # -------------------------------
+        try:
+            Students.objects.create(
+                student_id=student_id,
+                first_name=first_name,
+                middle_name=middle_name,
+                last_name=last_name,
+                email=email,
+                gender=gender,
+                citizenship=citizenship,
+                phone_code=phone_code.replace("+", "") if phone_code else None,
+                phone_number=phone,
+                date_of_birth=dob,
+                mrital_status=marital_status,
+                spouse_name=spouse_name,
+                children=children,
+                mailing_address=mailing_address,
+                city=city,
+                state=state,
+                country=country,
+                zip_code=zipcode,
+                timezone=timezone,
+                highest_education=education,
+                course_applied=course_applied,
+                language_id=lang_obj,
+                starting_year=starting_year,
+                ministerial_status=ministerial_status,
+                church_affiliation=church,
+                scholarship_needed=scholarship,
+                currently_employed=employed,
+                income=income,
+                affordable_amount=afford,
+                message=message,
+
+                # References
+                reference_name1=ref1_name,
+                reference_email1=ref1_email,
+                reference_phone1=ref1_phone,
+
+                reference_name2=ref2_name,
+                reference_email2=ref2_email,
+                reference_phone2=ref2_phone,
+
+                reference_name3=ref3_name,
+                reference_email3=ref3_email,
+                reference_phone3=ref3_phone,
+
+                # Files
+                photo=photo_path,
+                certificate1=c1,
+                certificate2=c2,
+                certificate3=c3,
+                certificate4=c4,
+                certificate5=c5,
+            )
+
+        except Exception as e:
+            messages.error(request, f"Database save error: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+
+        # -------------------------------
+        # SUCCESS
+        # -------------------------------
+        messages.success(request, "Your application has been submitted successfully!")
+        return redirect("new_admission_form")
+
+    # Default GET
+    return render(request, "site_pages/new_admission_form.html")
+
+def reference_form(request):
+    return render(request,"site_pages/reference_form.html")
+
+def payment_options(request):
+    return render(request,"site_pages/payment_options.html")
+
 
 def signin(request):
     users =  Users.objects.all()
@@ -41,16 +294,6 @@ def signin(request):
 def signout(request):
     logout(request)
     return redirect("index")
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.core.files.storage import FileSystemStorage
-from django.utils import timezone
-from django.db import transaction
-from .models import Students, Languages
-import uuid
-import os
-
 
 def signup_student(request):
     """
@@ -166,7 +409,7 @@ def signup_student(request):
                     course_applied=int(request.POST.get('course_applied')) if request.POST.get('course_applied') else None,
                     associate_degree=int(request.POST.get('associate_degree')) if request.POST.get('associate_degree') else None,
                     starting_year=int(request.POST.get('starting_year')) if request.POST.get('starting_year') else None,
-                    language=language,
+                    language_id=language,
                     ministerial_status=request.POST.get('ministerial_status') or None,
                     church_affiliation=request.POST.get('church_affiliation') or None,
                     
@@ -430,3 +673,33 @@ def student_index(request):
         student = None
     print(student,"--------------")
     return render(request, 'student/index.html')
+
+def doctoral_program(request):
+    """
+    Accademics Programs-Doctoral Program-D.Min Details
+    """
+    return render(request,"site_pages/doctoral_program.html")
+
+def masters_program(request):
+    """
+    Accademics Programs-Master's Program-M.Div Details
+    """
+    return render(request,"site_pages/masters_program.html")
+
+def bachelors_program(request):
+    """
+    Accademics Programs-Bachelor's Program-B.Th Details
+    """
+    return render(request,"site_pages/bachelors_program.html")
+
+def diploma_program(request):
+    """
+    Accademics Programs-Diploma Program-Dip.Th Details
+    """
+    return render(request,"site_pages/diploma_program.html")
+
+def certificate_program(request):
+    """
+    Accademics Programs-Certificate Program-C.Th Details
+    """
+    return render(request,"site_pages/certificate_program.html")
