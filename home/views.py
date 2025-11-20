@@ -30,7 +30,8 @@ from .models import (
     Assignments,
     StudentsAssignment,
     Pages,
-    Languages
+    Languages,
+    Users
 )
 from .decorators import role_redirection
 
@@ -268,8 +269,61 @@ def new_admission_form(request):
     # Default GET
     return render(request, "site_pages/new_admission_form.html")
 
-def reference_form(request):
-    return render(request,"site_pages/reference_form.html")
+def reference_form(request):    
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        middle_name = request.POST.get("middle_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        contact = request.POST.get("contact")
+        nationality = request.POST.get("nationality")
+
+        applicant_name = request.POST.get("applicant_name")
+        relationship = request.POST.get("relationship")
+        known_since = request.POST.get("known_since")
+
+        spiritual_commitment = request.POST.get("spiritual_commitment")
+        learning_capacity = request.POST.get("learning_capacity")
+        dedication = request.POST.get("dedication")
+        leadership = request.POST.get("leadership")
+        church_involvement = request.POST.get("church_involvement")
+        biblical_knowledge = request.POST.get("biblical_knowledge")
+        moral_standard = request.POST.get("moral_standard")
+        recommendation = request.POST.get("recommendation")
+        financial_condition = request.POST.get("financial_condition")
+
+        comments = request.POST.get("comments")
+
+        # Save to DB
+        ReferenceForm.objects.create(
+            first_name=first_name,
+            middle_name=middle_name,
+            last_name=last_name,
+            email=email,
+            contact_number=contact,
+            nationality=nationality,
+
+            applicant_name=applicant_name,
+            relation_with_applicant=relationship,
+            since_know_applicant=known_since,
+
+            spiritual_commitment=spiritual_commitment,
+            learning_capacity=learning_capacity,
+            dedication_for_loard=dedication,
+            leadership_skills=leadership,
+            church_involvement=church_involvement,
+            biblical_knowledge=biblical_knowledge,
+            moral_standard=moral_standard,
+            how_do_you_recommend=recommendation,
+            financial_condition=financial_condition,
+
+            personal_comment=comments
+        )
+
+        messages.success(request, "Reference Form submitted successfully!")
+        return redirect("reference_form")
+
+    return render(request, "site_pages/reference_form.html")    
 
 def payment_options(request):
     return render(request,"site_pages/payment_options.html")

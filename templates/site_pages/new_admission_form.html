@@ -262,7 +262,7 @@
                 </div>
 
                 <!-- Things to be Done Section -->
-                <div class="section-header">THINGS TO BE DONE</div>
+                <div class="section-header"><i class="fas fa-tasks"></i> THINGS TO BE DONE</div>
 
                 <div class="instructions">
                     <p><strong>1.</strong> Please complete the project questionnaire form below so we can prepare a
@@ -329,7 +329,7 @@
 
                 <!-- Upload Certificates Section -->
                 <div class="section-header">
-                    <i class="fas fa-certificate"></i> UPLOAD YOUR CERTIFICATES
+                    <i class="fas fa-upload"></i> UPLOAD YOUR CERTIFICATES
                 </div>
 
                 <div class="form-row certificates-row">
@@ -394,6 +394,9 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const countryEl = document.getElementById("country");
+        const stateEl = document.getElementById("state");
+        const cityEl = document.getElementById("city");
         const form = document.querySelector(".application-form");
         const fields = [
             "first_name", "last_name", "email", "gender", "citizenship", "phone", "dob",
@@ -525,6 +528,17 @@
         cityEl.addEventListener("change", function () {
             validateField("city");
         });
+        fields.forEach(id => {
+        let el = document.getElementById(id);
+
+        el.addEventListener("input", function () {
+            validateField(id);
+        });
+
+        el.addEventListener("change", function () {
+            validateField(id);
+        });
+    });
 
         /* ----------------------------------------------------------
            LIVE VALIDATION
