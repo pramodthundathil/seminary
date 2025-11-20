@@ -90,6 +90,14 @@ def new_admission_form(request):
     
     # Debug logging
     logger.info(f"Request method: {request.method}")
+    # Get all countries for dropdown
+    countries = Countries.objects.all().order_by('name')  # sort alphabetically
+
+    # Get all courses for dropdown
+    courses = Courses.objects.all().order_by('course_name')
+
+    # Get all courses for dropdown
+    languages = Languages.objects.all().order_by('language_name')    
     
     if request.method == "POST":
         
@@ -153,7 +161,9 @@ def new_admission_form(request):
         # -------------------------------
         # CONVERT STRING VALUES TO OBJECTS
         # -------------------------------
-        try:
+        try:         
+            if children == '':
+                children = None
             # Convert citizenship string to Country OBJECT
             citizenship_obj = None
             if citizenship_str:
@@ -342,13 +352,13 @@ def new_admission_form(request):
             )
             
             logger.info(f"Student saved successfully!")
-            logger.info(f"   - Database ID: {student.id}")
-            logger.info(f"   - Student ID: {student.student_id}")
-            logger.info(f"   - Name: {student.first_name} {student.last_name}")
-            logger.info(f"   - Email: {student.email}")
-            logger.info(f"   - Citizenship: {student.citizenship}")
-            logger.info(f"   - Country: {student.country}")
-            logger.info(f"   - Course: {student.course_applied}")
+            logger.info(f"Database ID: {student.id}")
+            logger.info(f"Student ID: {student.student_id}")
+            logger.info(f"Name: {student.first_name} {student.last_name}")
+            logger.info(f"Email: {student.email}")
+            logger.info(f"Citizenship: {student.citizenship}")
+            logger.info(f"Country: {student.country}")
+            logger.info(f"Course: {student.course_applied}")
 
         except IntegrityError as e:
             logger.error(f" Database integrity error: {e}", exc_info=True)
@@ -379,7 +389,10 @@ def new_admission_form(request):
 
     # Default GET
     logger.info("Rendering new admission form (GET request)")
-    return render(request, "site_pages/new_admission_form.html")
+    return render(request, "site_pages/new_admission_form.html",
+        {"countries": countries,
+         "courses": courses,
+         "languages":languages,})
 
 
 def reference_form(request):    

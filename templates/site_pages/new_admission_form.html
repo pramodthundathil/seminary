@@ -1,4 +1,5 @@
 {% extends "site_pages/index.html" %}
+{% load static %}
 
 {% block title %}
 <title>New Application Form - Trinity Theological Seminary</title>
@@ -62,7 +63,9 @@
                         <label for="citizenship">Citizenship <span class="required">*</span></label>
                         <select id="citizenship" name="citizenship" required>
                             <option value="">--- Select Country ---</option>
-
+                            {% for country in countries %}
+                            <option value="{{ country.id }}">{{ country.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -128,11 +131,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="country">Country <span class="required">*</span></label>
-                        <select id="country" name="country" required>
+                        <label for="citizenship">Country <span class="required">*</span></label>
+                        <select id="citizenship" name="citizenship" required>
                             <option value="">--- Select Country ---</option>
+                            {% for country in countries %}
+                            <option value="{{ country.id }}" {% if
+                                request.POST.citizenship|default_if_none:''==country.id|stringformat:"s" %}selected{%
+                                endif %}>
+                                {{ country.name }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label for="zipcode">Zipcode <span class="required">*</span></label>
                         <input type="text" id="zipcode" name="zipcode" placeholder="Postal code" required>
@@ -161,21 +172,29 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="course">Course Applied <span class="required">*</span></label>
+                        <label for="course">Course <span class="required">*</span></label>
                         <select id="course" name="course" required>
-                            <option value="">--- Select a Course ---</option>
-                            <option value="undergraduate">Undergraduate Level</option>
-                            <option value="masters">Master's Level</option>
-                            <option value="doctoral">Doctoral Level</option>
+                            <option value="">--- Select Course ---</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" {% if
+                                request.POST.course|default_if_none:''==course.id|stringformat:"s" %}selected{% endif
+                                %}>
+                                {{ course.course_name }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="language">Language Medium <span class="required">*</span></label>
+                   <div class="form-group">
+                        <label for="language">Language <span class="required">*</span></label>
                         <select id="language" name="language" required>
                             <option value="">--- Select Language ---</option>
-                            <option value="english">English</option>
-                            <option value="hindi">Hindi</option>
-                            <option value="spanish">Spanish</option>
+                            {% for language in languages %}
+                            <option value="{{ language.id }}" {% if
+                                request.POST.language|default_if_none:''==language.id|stringformat:"s" %}selected{% endif
+                                %}>
+                                {{ language.language_name }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -240,10 +259,10 @@
                                 class="required">*</span></label>
                         <select id="afford" name="afford" required>
                             <option value="">--- Select Affordable Amount ---</option>
-                            <option value="0-100">$0 - $100</option>
-                            <option value="100-200">$100 - $200</option>
-                            <option value="200-500">$200 - $500</option>
-                            <option value="500+">$500+</option>
+                            <option value="25%">25%</option>
+                            <option value="50%">50%</option>
+                            <option value="75%">75%</option>
+                            <option value="100%">100%</option>
                         </select>
                     </div>
                 </div>
@@ -341,6 +360,7 @@
                             <button type="button" class="file-btn"
                                 onclick="document.getElementById('cert1').click()">Select file</button>
                         </div>
+                        <span class="error-msg" id="cert1_error"></span>
                     </div>
                     <div class="form-group">
                         <label for="cert2">Certificate2</label>
@@ -350,6 +370,7 @@
                             <button type="button" class="file-btn"
                                 onclick="document.getElementById('cert2').click()">Select file</button>
                         </div>
+                        <span class="error-msg" id="cert2_error"></span>
                     </div>
                     <div class="form-group">
                         <label for="cert3">Certificate3</label>
@@ -359,6 +380,7 @@
                             <button type="button" class="file-btn"
                                 onclick="document.getElementById('cert3').click()">Select file</button>
                         </div>
+                        <span class="error-msg" id="cert3_error"></span>
                     </div>
                 </div>
 
@@ -371,6 +393,7 @@
                             <button type="button" class="file-btn"
                                 onclick="document.getElementById('cert4').click()">Select file</button>
                         </div>
+                        <span class="error-msg" id="cert4_error"></span>
                     </div>
                     <div class="form-group">
                         <label for="cert5">Certificate5</label>
@@ -380,6 +403,7 @@
                             <button type="button" class="file-btn"
                                 onclick="document.getElementById('cert5').click()">Select file</button>
                         </div>
+                        <span class="error-msg" id="cert5_error"></span>
                     </div>
                 </div>
 
@@ -391,92 +415,18 @@
         </div>
     </div>
 </section>
-
+<script src="{% static 'js/timezone.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const countryEl = document.getElementById("country");
-        const stateEl = document.getElementById("state");
-        const cityEl = document.getElementById("city");
         const form = document.querySelector(".application-form");
         const fields = [
             "first_name", "last_name", "email", "gender", "citizenship", "phone", "dob",
-            "marital_status", "mailing_address", "city", "state", "country", "zipcode",
+            "marital_status", "mailing_address", "city", "state", "zipcode",
             "timezone", "education", "course", "language", "start_year", "ministerial_status",
             "church", "afford", "ref1_name", "ref1_email", "ref2_name", "ref2_email",
             "ref3_name", "ref3_email", "ref1_phone", "ref2_phone", "ref3_phone"
         ];
-        /* -------------------------------------------
-         AUTO-LOAD ALL COUNTRIES INTO SELECT BOX
-        -------------------------------------------- */
 
-        const allCountries = [
-            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
-            "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
-            "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
-            "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana",
-            "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
-            "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic",
-            "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)",
-            "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
-            "Denmark", "Djibouti", "Dominica", "Dominican Republic",
-            "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia",
-            "Eswatini", "Ethiopia",
-            "Fiji", "Finland", "France",
-            "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
-            "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
-            "Haiti", "Honduras", "Hungary",
-            "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
-            "Jamaica", "Japan", "Jordan",
-            "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan",
-            "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
-            "Liechtenstein", "Lithuania", "Luxembourg",
-            "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta",
-            "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia",
-            "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
-            "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua",
-            "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
-            "Oman",
-            "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru",
-            "Philippines", "Poland", "Portugal",
-            "Qatar",
-            "Romania", "Russia", "Rwanda",
-            "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines",
-            "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal",
-            "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia",
-            "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan",
-            "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland",
-            "Syria",
-            "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste",
-            "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
-            "Turkmenistan", "Tuvalu",
-            "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom",
-            "United States", "Uruguay", "Uzbekistan",
-            "Vanuatu", "Vatican City", "Venezuela", "Vietnam",
-            "Yemen",
-            "Zambia", "Zimbabwe"
-        ];
-
-        // Load into select box
-        const citizenshipSelect = document.getElementById("citizenship");
-        const countrySelect = document.getElementById("country");
-
-        // Sort alphabetically
-        allCountries.sort();
-
-        allCountries.forEach(country => {
-            // Option for citizenship
-            const option1 = document.createElement("option");
-            option1.value = country.toLowerCase().replace(/ /g, "_");
-            option1.textContent = country;
-
-            // Option for country
-            const option2 = document.createElement("option");
-            option2.value = country.toLowerCase().replace(/ /g, "_");
-            option2.textContent = country;
-
-            citizenshipSelect.appendChild(option1);
-            countrySelect.appendChild(option2);
-        });
         /* Starting year select*/
         const startYearSelect = document.getElementById("start_year");
         const currentYear = new Date().getFullYear();
@@ -489,19 +439,12 @@
             startYearSelect.appendChild(option);
         }
 
-        // ------------------------
         // Load Timezones Dynamically
-        // ------------------------
         function loadTimezones() {
             const timezoneSelect = document.getElementById("timezone");
-
-            // List of IANA time zones
             const timezones = Intl.supportedValuesOf('timeZone');
-
-            // Sort alphabetically
             timezones.sort();
 
-            // Populate select
             timezones.forEach(tz => {
                 const option = document.createElement("option");
                 option.value = tz;
@@ -510,61 +453,38 @@
             });
         }
 
-        // Call function
         loadTimezones();
 
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        countryEl.addEventListener("change", function () {
-            updateStates();
-            validateField("country");
-        });
-
-        stateEl.addEventListener("change", function () {
-            updateCities();
-            validateField("state");
-        });
-
-        cityEl.addEventListener("change", function () {
-            validateField("city");
-        });
-        fields.forEach(id => {
-        let el = document.getElementById(id);
-
-        el.addEventListener("input", function () {
-            validateField(id);
-        });
-
-        el.addEventListener("change", function () {
-            validateField(id);
-        });
-    });
-
-        /* ----------------------------------------------------------
-           LIVE VALIDATION
-        ---------------------------------------------------------- */
+        /* LIVE VALIDATION */
         fields.forEach(id => {
             let el = document.getElementById(id);
-            el.addEventListener("input", function () {
-                validateField(id);
-                validateForm();
-            });
+            if (el) {
+                el.addEventListener("input", function () {
+                    validateField(id);
+                });
+                el.addEventListener("change", function () {
+                    validateField(id);
+                });
+            }
         });
 
-        /* ----------------------------------------------------------
-           PROFILE PIC VALIDATION
-        ---------------------------------------------------------- */
+        /* PROFILE PIC VALIDATION */
         const profilePic = document.getElementById("profile_pic");
         if (profilePic) {
             profilePic.addEventListener("change", function () {
                 validateProfilePic();
-                validateForm();
             });
         }
 
         function validateField(id) {
             let el = document.getElementById(id);
+            if (!el) return true;
+
             let errorBox = document.getElementById(id + "_error");
+            if (!errorBox) return true;
+
             let value = el.value.trim();
             let error = "";
 
@@ -591,6 +511,7 @@
                 if (isNaN(year) || year < 1950 || year > currentYear + 1)
                     error = "Invalid start year";
             }
+
             if (error) {
                 el.classList.add("input-error");
                 el.classList.remove("input-valid");
@@ -609,7 +530,7 @@
             const errorBox = document.getElementById("profile_pic_error");
 
             if (!fileInput || fileInput.files.length === 0) {
-                errorBox.textContent = "";
+                if (errorBox) errorBox.textContent = "";
                 return true;
             }
 
@@ -617,53 +538,82 @@
             const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
 
             if (!validTypes.includes(file.type)) {
-                errorBox.textContent = "Only JPG, PNG, WEBP or GIF allowed";
+                if (errorBox) errorBox.textContent = "Only JPG, PNG, WEBP or GIF allowed";
                 return false;
             }
 
             if (file.size > 2 * 1024 * 1024) {
-                errorBox.textContent = "Image must be less than 2 MB";
+                if (errorBox) errorBox.textContent = "Image must be less than 2 MB";
                 return false;
             }
 
-            errorBox.textContent = "";
+            if (errorBox) errorBox.textContent = "";
             return true;
         }
 
-        /* ----------------------------------------------------------
-           CERTIFICATE VALIDATION
-        ---------------------------------------------------------- */
+        /* CERTIFICATE VALIDATION */
         function validateCertificate(inputId, required = false) {
             const input = document.getElementById(inputId);
             const errorBox = document.getElementById(inputId + "_error");
 
-            if (required && input.files.length === 0) {
-                errorBox.textContent = "This certificate is required";
+            if (required && input && input.files.length === 0) {
+                if (errorBox) errorBox.textContent = "This certificate is required";
                 return false;
             }
 
-            if (input.files.length > 0) {
+            if (input && input.files.length > 0) {
                 const file = input.files[0];
                 const validTypes = ["application/pdf", "image/jpeg", "image/png"];
 
                 if (!validTypes.includes(file.type)) {
-                    errorBox.textContent = "Only PDF, JPG, or PNG allowed";
+                    if (errorBox) errorBox.textContent = "Only PDF, JPG, or PNG allowed";
                     return false;
                 }
                 if (file.size > 3 * 1024 * 1024) {
-                    errorBox.textContent = "File must be under 3 MB";
+                    if (errorBox) errorBox.textContent = "File must be under 3 MB";
                     return false;
                 }
             }
 
-            errorBox.textContent = "";
+            if (errorBox) errorBox.textContent = "";
             return true;
         }
 
-        /* ----------------------------------------------------------
-           FORM VALIDATION ON SUBMIT
-        ---------------------------------------------------------- */
-        function validateForm() {
+        /* CERTIFICATE FILE INPUT HANDLERS */
+        ['cert1', 'cert2', 'cert3', 'cert4', 'cert5'].forEach(certId => {
+            const fileInput = document.getElementById(certId);
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    console.log('File selected for ' + certId + ':', this.files[0]?.name);
+
+                    // Find the text input in the same file-input-group
+                    const textInput = this.parentElement.querySelector('input[type="text"]');
+
+                    if (!textInput) {
+                        console.error('Text input not found for ' + certId);
+                        return;
+                    }
+
+                    if (this.files.length > 0) {
+                        textInput.value = this.files[0].name;
+                        textInput.style.color = '#333';
+                        console.log('Text input updated:', textInput.value);
+                    } else {
+                        textInput.value = '';
+                        textInput.placeholder = 'No file selected';
+                    }
+
+                    // Validate certificate
+                    validateCertificate(certId, certId === 'cert1');
+                });
+
+                console.log('Event listener attached to:', certId);
+            }
+        });
+
+        /* FORM VALIDATION ON SUBMIT */
+        form.addEventListener("submit", function (e) {
             let allValid = true;
 
             fields.forEach(id => {
@@ -678,11 +628,7 @@
             if (!validateCertificate("cert4")) allValid = false;
             if (!validateCertificate("cert5")) allValid = false;
 
-            return allValid;
-        }
-
-        form.addEventListener("submit", function (e) {
-            if (!validateForm()) {
+            if (!allValid) {
                 e.preventDefault();
                 alert("Please fix the highlighted errors before submitting.");
             }
