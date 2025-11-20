@@ -4,6 +4,7 @@
 import os
 import uuid
 from datetime import datetime, timedelta
+import logging
 
 # -------------------------------
 # Django Core Imports
@@ -17,6 +18,9 @@ from django.db.models import Q, Count
 from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from django.db import transaction
+from django.conf import settings
+from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 
 # -------------------------------
 # Local App Imports
@@ -24,6 +28,7 @@ from django.db import transaction
 from .models import (
     Students,
     Courses,
+    Countries,
     StudentsExams,
     ReferenceForm,
     StudentsSubjects,
@@ -34,6 +39,11 @@ from .models import (
     Users
 )
 from .decorators import role_redirection
+
+
+# Set up logger
+logger = logging.getLogger(__name__)
+
 
 
 def index(request): 
@@ -71,11 +81,20 @@ def scholarship(request):
     """
     return render(request,"site_pages/scholarship.html")
 
+
+
 def new_admission_form(request):
     """
     New admission form for students with full error handling
     """
+    
+    # Debug logging
+    logger.info(f"Request method: {request.method}")
+    
     if request.method == "POST":
+        
+        logger.info(f"POST data received: {list(request.POST.keys())}")
+        logger.info(f"FILES received: {list(request.FILES.keys())}")
 
         # -------------------------------
         # READ FORM DATA SAFELY
@@ -86,7 +105,7 @@ def new_admission_form(request):
             last_name = request.POST.get("last_name")
             email = request.POST.get("email")
             gender = request.POST.get("gender")
-            citizenship = request.POST.get("citizenship")
+            citizenship_str = request.POST.get("citizenship")  # String from form
             phone_code = request.POST.get("country_code")
             phone = request.POST.get("phone")
             dob = request.POST.get("dob")
@@ -96,11 +115,11 @@ def new_admission_form(request):
             mailing_address = request.POST.get("mailing_address")
             city = request.POST.get("city")
             state = request.POST.get("state")
-            country = request.POST.get("country")
+            country_str = request.POST.get("country")  # String from form
             zipcode = request.POST.get("zipcode")
-            timezone = request.POST.get("timezone")
+            timezone_str = request.POST.get("timezone")
             education = request.POST.get("education")
-            course_applied = request.POST.get("course")
+            course_str = request.POST.get("course")  # String from form
             language = request.POST.get("language")
             starting_year = request.POST.get("start_year")
             ministerial_status = request.POST.get("ministerial_status")
@@ -123,9 +142,56 @@ def new_admission_form(request):
             ref3_name = request.POST.get("ref3_name")
             ref3_email = request.POST.get("ref3_email")
             ref3_phone = request.POST.get("ref3_phone")
+            
+            logger.info("Form data read successfully")
 
         except Exception as e:
+            logger.error(f"Error reading form fields: {e}", exc_info=True)
             messages.error(request, f"Error reading form fields: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+
+        # -------------------------------
+        # CONVERT STRING VALUES TO OBJECTS
+        # -------------------------------
+        try:
+            # Convert citizenship string to Country OBJECT
+            citizenship_obj = None
+            if citizenship_str:
+                citizenship_name = citizenship_str.replace('_', ' ').title()
+                citizenship_obj = Countries.objects.filter(name__iexact=citizenship_name).first()
+                if citizenship_obj:
+                    logger.info(f" Citizenship converted: {citizenship_str} -> {citizenship_obj.name} (ID: {citizenship_obj.id})")
+                else:
+                    logger.warning(f" Citizenship not found: {citizenship_str}")
+            
+            # Convert country string to Country OBJECT
+            country_obj = None
+            if country_str:
+                country_name = country_str.replace('_', ' ').title()
+                country_obj = Countries.objects.filter(name__iexact=country_name).first()
+                if country_obj:
+                    logger.info(f"Country converted: {country_str} -> {country_obj.name} (ID: {country_obj.id})")
+                else:
+                    logger.warning(f"Country not found: {country_str}")
+            
+            # Convert course string to Course OBJECT
+            course_obj = None
+            if course_str:
+                # Try to match by course_code or course_name
+                course_obj = Courses.objects.filter(
+                    Q(course_code__iexact=course_str) | 
+                    Q(course_name__icontains=course_str)
+                ).first()
+                
+                if course_obj:
+                    logger.info(f" Course converted: {course_str} -> {course_obj.course_name} (ID: {course_obj.id})")
+                else:
+                    logger.warning(f"Course not found: {course_str}")
+                    messages.warning(request, f"Course '{course_str}' not found in database. Please contact admin.")
+
+        except Exception as e:
+            logger.error(f" Error converting values to objects: {e}", exc_info=True)
+            messages.error(request, f"Error processing form data: {e}")
             return render(request, "site_pages/new_admission_form.html")
 
         # -------------------------------
@@ -138,8 +204,11 @@ def new_admission_form(request):
             cert3 = request.FILES.get("cert3")
             cert4 = request.FILES.get("cert4")
             cert5 = request.FILES.get("cert5")
+            
+            logger.info(f"Files received - Profile: {bool(profile_pic)}, Certs: {bool(cert1)}, {bool(cert2)}, {bool(cert3)}, {bool(cert4)}, {bool(cert5)}")
 
         except Exception as e:
+            logger.error(f" File upload error: {e}", exc_info=True)
             messages.error(request, f"File upload error: {e}")
             return render(request, "site_pages/new_admission_form.html")
 
@@ -151,17 +220,22 @@ def new_admission_form(request):
 
                 # Generate unique file name
                 file_path = f"uploads/students/{get_random_string(8)}_{f.name}"
-                full_path = os.path.join("media", file_path)
+                full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+                
+                # Create directory if it doesn't exist
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
 
                 # Save file manually
                 with open(full_path, "wb+") as destination:
                     for chunk in f.chunks():
                         destination.write(chunk)
-
+                
+                logger.info(f"File saved: {file_path}")
                 return file_path
 
             except Exception as e:
-                messages.error(request, f"Error saving file '{f.name}' : {e}")
+                logger.error(f" Error saving file '{f.name}': {e}", exc_info=True)
+                messages.error(request, f"Error saving file '{f.name}': {e}")
                 return None
 
         # Try saving all files
@@ -172,8 +246,11 @@ def new_admission_form(request):
             c3 = save_file(cert3)
             c4 = save_file(cert4)
             c5 = save_file(cert5)
+            
+            logger.info("All files processed")
 
         except Exception as e:
+            logger.error(f" Error processing uploaded files: {e}", exc_info=True)
             messages.error(request, f"Error processing uploaded files: {e}")
             return render(request, "site_pages/new_admission_form.html")
 
@@ -183,18 +260,26 @@ def new_admission_form(request):
         try:
             lang_obj = None
             if language:
-                lang_obj = Languages.objects.filter(name__icontains=language).first()
+                lang_obj = Languages.objects.filter(language_name__icontains=language).first()
+                if lang_obj:
+                    logger.info(f" Language lookup: {lang_obj.language_name} (ID: {lang_obj.id})")
+                else:
+                    logger.warning(f" Language not found: {language}")
 
         except Exception as e:
+            logger.error(f" Language lookup error: {e}", exc_info=True)
             messages.error(request, f"Language lookup error: {e}")
-            lang_obj = None  # Prevent crash
+            lang_obj = None
 
         # -------------------------------
         # GENERATE STUDENT ID
         # -------------------------------
         try:
             student_id = "STD-" + get_random_string(6).upper()
+            logger.info(f"Generated student ID: {student_id}")
+            
         except Exception as e:
+            logger.error(f" Error generating student ID: {e}", exc_info=True)
             messages.error(request, f"Error generating student ID: {e}")
             student_id = "STD-000000"
 
@@ -202,14 +287,14 @@ def new_admission_form(request):
         # SAVE INTO DATABASE
         # -------------------------------
         try:
-            Students.objects.create(
+            student = Students.objects.create(
                 student_id=student_id,
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
                 email=email,
                 gender=gender,
-                citizenship=citizenship,
+                citizenship=citizenship_obj,  # Pass OBJECT not string/ID
                 phone_code=phone_code.replace("+", "") if phone_code else None,
                 phone_number=phone,
                 date_of_birth=dob,
@@ -219,11 +304,11 @@ def new_admission_form(request):
                 mailing_address=mailing_address,
                 city=city,
                 state=state,
-                country=country,
+                country=country_obj,  # Pass OBJECT not string/ID
                 zip_code=zipcode,
-                timezone=timezone,
+                timezone=timezone_str,
                 highest_education=education,
-                course_applied=course_applied,
+                course_applied=course_obj,  # Pass OBJECT not string/ID
                 language_id=lang_obj,
                 starting_year=starting_year,
                 ministerial_status=ministerial_status,
@@ -255,19 +340,47 @@ def new_admission_form(request):
                 certificate4=c4,
                 certificate5=c5,
             )
+            
+            logger.info(f"Student saved successfully!")
+            logger.info(f"   - Database ID: {student.id}")
+            logger.info(f"   - Student ID: {student.student_id}")
+            logger.info(f"   - Name: {student.first_name} {student.last_name}")
+            logger.info(f"   - Email: {student.email}")
+            logger.info(f"   - Citizenship: {student.citizenship}")
+            logger.info(f"   - Country: {student.country}")
+            logger.info(f"   - Course: {student.course_applied}")
 
+        except IntegrityError as e:
+            logger.error(f" Database integrity error: {e}", exc_info=True)
+            messages.error(request, f"Database integrity error: This email or student ID may already exist. {e}")
+            return render(request, "site_pages/new_admission_form.html")
+            
+        except ValidationError as e:
+            logger.error(f" Validation error: {e}", exc_info=True)
+            messages.error(request, f"Validation error: {e}")
+            return render(request, "site_pages/new_admission_form.html")
+            
+        except TypeError as e:
+            logger.error(f"Type error (probably wrong data type): {e}", exc_info=True)
+            messages.error(request, f"Data type error: {e}. Please check your form inputs.")
+            return render(request, "site_pages/new_admission_form.html")
+            
         except Exception as e:
+            logger.error(f"Database save error: {e}", exc_info=True)
             messages.error(request, f"Database save error: {e}")
             return render(request, "site_pages/new_admission_form.html")
 
         # -------------------------------
         # SUCCESS
         # -------------------------------
+        logger.info(f" Application submitted successfully for {first_name} {last_name}")
         messages.success(request, "Your application has been submitted successfully!")
         return redirect("new_admission_form")
 
     # Default GET
+    logger.info("Rendering new admission form (GET request)")
     return render(request, "site_pages/new_admission_form.html")
+
 
 def reference_form(request):    
     if request.method == "POST":
