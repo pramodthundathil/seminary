@@ -100,7 +100,6 @@ def new_admission_form(request):
     languages = Languages.objects.all().order_by('language_name')    
     
     if request.method == "POST":
-        
         logger.info(f"POST data received: {list(request.POST.keys())}")
         logger.info(f"FILES received: {list(request.FILES.keys())}")
 
@@ -113,7 +112,7 @@ def new_admission_form(request):
             last_name = request.POST.get("last_name")
             email = request.POST.get("email")
             gender = request.POST.get("gender")
-            citizenship_str = request.POST.get("citizenship")  # String from form
+            citizenship_str = request.POST.get("citizenship")
             phone_code = request.POST.get("country_code")
             phone = request.POST.get("phone")
             dob = request.POST.get("dob")
@@ -123,11 +122,11 @@ def new_admission_form(request):
             mailing_address = request.POST.get("mailing_address")
             city = request.POST.get("city")
             state = request.POST.get("state")
-            country_str = request.POST.get("country")  # String from form
+            country_str = request.POST.get("country")
             zipcode = request.POST.get("zipcode")
             timezone_str = request.POST.get("timezone")
             education = request.POST.get("education")
-            course_str = request.POST.get("course")  # String from form
+            course_str = request.POST.get("course")
             language = request.POST.get("language")
             starting_year = request.POST.get("start_year")
             ministerial_status = request.POST.get("ministerial_status")
@@ -138,19 +137,17 @@ def new_admission_form(request):
             afford = request.POST.get("afford")
             message = request.POST.get("message")
 
-            # Reference information
+            # References
             ref1_name = request.POST.get("ref1_name")
             ref1_email = request.POST.get("ref1_email")
             ref1_phone = request.POST.get("ref1_phone")
-
             ref2_name = request.POST.get("ref2_name")
             ref2_email = request.POST.get("ref2_email")
             ref2_phone = request.POST.get("ref2_phone")
-
             ref3_name = request.POST.get("ref3_name")
             ref3_email = request.POST.get("ref3_email")
             ref3_phone = request.POST.get("ref3_phone")
-            
+
             logger.info("Form data read successfully")
 
         except Exception as e:
@@ -187,15 +184,10 @@ def new_admission_form(request):
             # Convert course string to Course OBJECT
             course_obj = None
             if course_str:
-                # Try to match by course_code or course_name
-                course_obj = Courses.objects.filter(
-                    Q(course_code__iexact=course_str) | 
-                    Q(course_name__icontains=course_str)
-                ).first()
-                
-                if course_obj:
-                    logger.info(f" Course converted: {course_str} -> {course_obj.course_name} (ID: {course_obj.id})")
-                else:
+                try:
+                    course_obj = Courses.objects.get(id=int(course_str))
+                    logger.info(f"Course converted: {course_str} -> {course_obj.course_name} (ID: {course_obj.id})")
+                except Courses.DoesNotExist:
                     logger.warning(f"Course not found: {course_str}")
                     messages.warning(request, f"Course '{course_str}' not found in database. Please contact admin.")
 
@@ -385,14 +377,15 @@ def new_admission_form(request):
         # -------------------------------
         logger.info(f" Application submitted successfully for {first_name} {last_name}")
         messages.success(request, "Your application has been submitted successfully!")
-        return redirect("new_admission_form")
+        return redirect("new_admission_form")  # <--- POST/Redirect/GET
 
     # Default GET
     logger.info("Rendering new admission form (GET request)")
-    return render(request, "site_pages/new_admission_form.html",
-        {"countries": countries,
-         "courses": courses,
-         "languages":languages,})
+    return render(request, "site_pages/new_admission_form.html", {
+        "countries": Countries.objects.all(),
+        "courses": Courses.objects.all(),
+        "languages": Languages.objects.all(),        
+    })
 
 
 def reference_form(request):    

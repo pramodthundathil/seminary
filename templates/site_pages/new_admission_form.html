@@ -184,14 +184,14 @@
                             {% endfor %}
                         </select>
                     </div>
-                   <div class="form-group">
+                    <div class="form-group">
                         <label for="language">Language <span class="required">*</span></label>
                         <select id="language" name="language" required>
                             <option value="">--- Select Language ---</option>
                             {% for language in languages %}
                             <option value="{{ language.id }}" {% if
-                                request.POST.language|default_if_none:''==language.id|stringformat:"s" %}selected{% endif
-                                %}>
+                                request.POST.language|default_if_none:''==language.id|stringformat:"s" %}selected{%
+                                endif %}>
                                 {{ language.language_name }}
                             </option>
                             {% endfor %}
@@ -295,17 +295,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="ref1_name">Reference No.1 (Name) <span class="required">*</span></label>
-                        <input type="text" id="ref1_name" name="ref1_name" placeholder="Pastor's full name" required>
+                        <input type="text" id="ref1_name" name="ref1_name" placeholder="Pastor's full name"  value="{{ form_data.ref1_name|default_if_none:'' }}" required>
                     </div>
                     <div class="form-group">
                         <label for="ref1_email">Email <span class="required">*</span></label>
-                        <input type="email" id="ref1_email" name="ref1_email" placeholder="pastor@church.com" required>
+                        <input type="email" id="ref1_email" name="ref1_email" placeholder="pastor@church.com" value="{{ form_data.ref1_email|default_if_none:'' }}" required>
                         <span class="error-msg" id="ref1_email_error"></span>
 
                     </div>
                     <div class="form-group">
                         <label for="ref1_phone">Phone Number</label>
-                        <input type="tel" id="ref1_phone" name="ref1_phone" placeholder="(555) 123-4567">
+                        <input type="tel" id="ref1_phone" name="ref1_phone" placeholder="(555) 123-4567" value="{{ form_data.ref1_phone|default_if_none:'' }}">
                         <span class="error-msg" id="ref1_phone_error"></span>
                     </div>
                 </div>
@@ -314,16 +314,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="ref2_name">Reference No.2 (Name) <span class="required">*</span></label>
-                        <input type="text" id="ref2_name" name="ref2_name" placeholder="Friend's full name" required>
+                        <input type="text" id="ref2_name" name="ref2_name" placeholder="Friend's full name" value="{{ form_data.ref2_name|default_if_none:'' }}" required>
                     </div>
                     <div class="form-group">
                         <label for="ref2_email">Email <span class="required">*</span></label>
-                        <input type="email" id="ref2_email" name="ref2_email" placeholder="friend@email.com" required>
+                        <input type="email" id="ref2_email" name="ref2_email" placeholder="friend@email.com" value="{{ form_data.ref2_email|default_if_none:'' }}" required>
                         <span class="error-msg" id="ref2_email_error"></span>
                     </div>
                     <div class="form-group">
                         <label for="ref2_phone">Phone Number</label>
-                        <input type="tel" id="ref2_phone" name="ref2_phone" placeholder="(555) 123-4567">
+                        <input type="tel" id="ref2_phone" name="ref2_phone" placeholder="(555) 123-4567"  value="{{ form_data.ref2_phone|default_if_none:'' }}">
                         <span class="error-msg" id="ref2_phone_error"></span>
                     </div>
                 </div>
@@ -332,16 +332,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="ref3_name">Reference No.3 (Name) <span class="required">*</span></label>
-                        <input type="text" id="ref3_name" name="ref3_name" placeholder="Relative's full name" required>
+                        <input type="text" id="ref3_name" name="ref3_name" placeholder="Relative's full name" value="{{ form_data.ref3_name|default_if_none:'' }}" required>
                     </div>
                     <div class="form-group">
                         <label for="ref3_email">Email <span class="required">*</span></label>
-                        <input type="email" id="ref3_email" name="ref3_email" placeholder="relative@email.com" required>
+                        <input type="email" id="ref3_email" name="ref3_email" placeholder="relative@email.com"  value="{{ form_data.ref3_email|default_if_none:'' }}" required>
                         <span class="error-msg" id="ref3_email_error"></span>
                     </div>
                     <div class="form-group">
                         <label for="ref3_phone">Phone Number</label>
-                        <input type="tel" id="ref3_phone" name="ref3_phone" placeholder="(555) 123-4567">
+                        <input type="tel" id="ref3_phone" name="ref3_phone" placeholder="(555) 123-4567" value="{{ form_data.ref3_phone|default_if_none:'' }}">
                         <span class="error-msg" id="ref3_phone_error"></span>
                     </div>
                 </div>
@@ -636,5 +636,11 @@
 
     });
 </script>
-
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
 {% endblock %}
