@@ -2217,7 +2217,6 @@ body {
 
 
 
-
 /* ================================
    BEAUTIFUL ADMISSION FORM STYLES
    ================================ */
@@ -2227,12 +2226,10 @@ body {
     box-sizing: border-box;
 }
 
-/* Main Section with Beautiful Background */
+/* Main Section with Professional Seminary Background */
 .application-section-modern {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
+    background: #2c5f7f;
     padding: 3rem 1rem;
     display: flex;
     justify-content: center;
@@ -2241,14 +2238,7 @@ body {
     overflow: hidden;
 }
 
-/* Animated Background */
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Floating Particles Background Effect */
+/* Subtle Pattern Overlay */
 .application-section-modern::before {
     content: '';
     position: absolute;
@@ -2257,16 +2247,9 @@ body {
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-    animation: floatParticles 20s ease-in-out infinite;
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
     pointer-events: none;
-}
-
-@keyframes floatParticles {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
 }
 
 /* Form Container */
@@ -2302,9 +2285,9 @@ body {
     }
 }
 
-/* Modal Header with Gradient */
+/* Modal Header - Deep Blue */
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563EB;
     padding: 1.75rem 2.5rem;
     color: white;
     position: relative;
@@ -2318,8 +2301,8 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    animation: shimmer 3s infinite;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: shimmer 4s infinite;
 }
 
 @keyframes shimmer {
@@ -2353,7 +2336,7 @@ body {
     max-height: 75vh;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #667eea #f0f0f0;
+    scrollbar-color: #2563EB #f0f0f0;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -2366,13 +2349,13 @@ body {
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    background: #2563EB;
     border-radius: 10px;
     border: 2px solid #f5f7fa;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+    background: #1d4ed8;
 }
 
 /* Form Section */
@@ -2406,7 +2389,7 @@ body {
     padding-bottom: 0;
 }
 
-/* Section Header with Gradient */
+/* Section Header - Deep Blue Style */
 .section-header {
     display: flex;
     align-items: center;
@@ -2415,16 +2398,13 @@ body {
     padding: 1rem 1.25rem;
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
     border-radius: 12px;
-    border-left: 4px solid #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    border-left: 4px solid #2563EB;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
 }
 
 .section-header i {
     font-size: 1.35rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #2563EB;
 }
 
 .section-header h3 {
@@ -2488,7 +2468,7 @@ body {
 }
 
 .form-field:focus-within label {
-    color: #667eea;
+    color: #2563EB;
 }
 
 .form-field .required {
@@ -2527,11 +2507,11 @@ body {
 .form-field select:focus,
 .form-field textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #2563EB;
     background: #ffffff;
     box-shadow: 
-        0 0 0 4px rgba(102, 126, 234, 0.1),
-        0 4px 12px rgba(102, 126, 234, 0.15);
+        0 0 0 4px rgba(37, 99, 235, 0.1),
+        0 4px 12px rgba(37, 99, 235, 0.15);
     transform: translateY(-1px);
 }
 
@@ -2543,7 +2523,7 @@ body {
 
 .form-field select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%23667eea' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%232563EB' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     padding-right: 3rem;
@@ -2560,7 +2540,7 @@ body {
 
 .form-field input[type="file"]::file-selector-button {
     padding: 0.5rem 1.25rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563EB;
     color: white;
     border: none;
     border-radius: 8px;
@@ -2569,13 +2549,13 @@ body {
     font-weight: 600;
     margin-right: 1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .form-field input[type="file"]::file-selector-button:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    background: #1d4ed8;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 
 /* Radio Group with Beautiful Design */
@@ -2600,14 +2580,14 @@ body {
 
 .radio-label:hover {
     background: #f7fafc;
-    color: #667eea;
+    color: #2563EB;
 }
 
 .radio-label input[type="radio"] {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: #667eea;
+    accent-color: #2563EB;
 }
 
 /* Checkbox with Beautiful Design */
@@ -2627,21 +2607,21 @@ body {
 }
 
 .checkbox-label:hover {
-    border-color: #667eea;
+    border-color: #2563EB;
     background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .checkbox-label input[type="checkbox"] {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: #667eea;
+    accent-color: #2563EB;
 }
 
 .checkbox-label input[type="checkbox"]:checked + span {
-    color: #667eea;
+    color: #2563EB;
     font-weight: 600;
 }
 
@@ -2712,9 +2692,9 @@ body {
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563EB;
     color: white;
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
 }
 
 .btn-save::before {
@@ -2724,7 +2704,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s ease;
 }
 
@@ -2733,9 +2713,9 @@ body {
 }
 
 .btn-save:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    background: #1d4ed8;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
 }
 
 .btn-cancel:active,
@@ -2885,7 +2865,7 @@ body {
 .form-field input:focus-visible,
 .form-field select:focus-visible,
 .form-field textarea:focus-visible {
-    outline: 3px solid #667eea;
+    outline: 3px solid #2563EB;
     outline-offset: 2px;
 }
 
@@ -2900,7 +2880,7 @@ body {
     }
 
     .modal-header {
-        background: #667eea;
+        background: #2563EB;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }

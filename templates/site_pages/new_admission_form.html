@@ -166,7 +166,7 @@
                     <!-- Academic Information Section -->
                     <div class="form-section">
                         <div class="section-header">
-                            <i class="fas fa-graduation-cap"></i>
+                            <i class="fas fa-book-open"></i>
                             <h3>Academic Information</h3>
                         </div>
 
@@ -430,29 +430,224 @@
 <script src="{% static 'js/timezone.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Populate starting years
+        const form = document.querySelector(".application-form");
+        const fields = [
+            "first_name", "last_name", "email", "gender", "citizenship", "phone", "dob",
+            "marital_status", "mailing_address", "city", "state", "zipcode",
+            "timezone", "education", "course", "language", "start_year", "ministerial_status",
+            "church", "afford", "ref1_name", "ref1_email", "ref2_name", "ref2_email",
+            "ref3_name", "ref3_email", "ref1_phone", "ref2_phone", "ref3_phone"
+        ];
+
+        /* Starting year select*/
         const startYearSelect = document.getElementById("start_year");
         const currentYear = new Date().getFullYear();
-        for (let i = currentYear; i <= currentYear + 10; i++) {
+        const yearsAhead = 10;
+
+        for (let i = currentYear; i <= currentYear + yearsAhead; i++) {
             const option = document.createElement("option");
             option.value = i;
             option.textContent = i;
             startYearSelect.appendChild(option);
         }
 
-        // Load timezones
-        const timezoneSelect = document.getElementById("timezone");
-        const timezones = Intl.supportedValuesOf('timeZone');
-        timezones.sort();
-        timezones.forEach(tz => {
-            const option = document.createElement("option");
-            option.value = tz;
-            option.textContent = tz;
-            timezoneSelect.appendChild(option);
+        // Load Timezones Dynamically
+        function loadTimezones() {
+            const timezoneSelect = document.getElementById("timezone");
+            const timezones = Intl.supportedValuesOf('timeZone');
+            timezones.sort();
+
+            timezones.forEach(tz => {
+                const option = document.createElement("option");
+                option.value = tz;
+                option.textContent = tz;
+                timezoneSelect.appendChild(option);
+            });
+        }
+
+        loadTimezones();
+
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        /* LIVE VALIDATION */
+        fields.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.addEventListener("input", function () {
+                    validateField(id);
+                });
+                el.addEventListener("change", function () {
+                    validateField(id);
+                });
+            }
         });
+
+        /* PROFILE PIC VALIDATION */
+        const profilePic = document.getElementById("profile_pic");
+        if (profilePic) {
+            profilePic.addEventListener("change", function () {
+                validateProfilePic();
+            });
+        }
+
+        function validateField(id) {
+            let el = document.getElementById(id);
+            if (!el) return true;
+
+            let errorBox = document.getElementById(id + "_error");
+            if (!errorBox) return true;
+
+            let value = el.value.trim();
+            let error = "";
+
+            if (!value) error = "This field is required";
+
+            if (["email", "ref1_email", "ref2_email", "ref3_email"].includes(id)) {
+                if (value && !emailPattern.test(value))
+                    error = "Invalid email format";
+            }
+
+            if (["phone", "ref1_phone", "ref2_phone", "ref3_phone"].includes(id)) {
+                if (!/^[0-9]+$/.test(value)) error = "Digits only";
+                else if (value.length < 7 || value.length > 15)
+                    error = "Phone number must be 7–15 digits";
+            }
+
+            if (id === "zipcode" && !/^[0-9]{4,10}$/.test(value)) {
+                error = "Zipcode must be 4–10 digits";
+            }
+
+            if (id === "start_year") {
+                const year = parseInt(value);
+                let currentYear = new Date().getFullYear();
+                if (isNaN(year) || year < 1950 || year > currentYear + 1)
+                    error = "Invalid start year";
+            }
+
+            if (error) {
+                el.classList.add("input-error");
+                el.classList.remove("input-valid");
+                errorBox.textContent = error;
+                return false;
+            } else {
+                el.classList.remove("input-error");
+                el.classList.add("input-valid");
+                errorBox.textContent = "";
+                return true;
+            }
+        }
+
+        function validateProfilePic() {
+            const fileInput = document.getElementById("profile_pic");
+            const errorBox = document.getElementById("profile_pic_error");
+
+            if (!fileInput || fileInput.files.length === 0) {
+                if (errorBox) errorBox.textContent = "";
+                return true;
+            }
+
+            const file = fileInput.files[0];
+            const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
+
+            if (!validTypes.includes(file.type)) {
+                if (errorBox) errorBox.textContent = "Only JPG, PNG, WEBP or GIF allowed";
+                return false;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                if (errorBox) errorBox.textContent = "Image must be less than 2 MB";
+                return false;
+            }
+
+            if (errorBox) errorBox.textContent = "";
+            return true;
+        }
+
+        /* CERTIFICATE VALIDATION */
+        function validateCertificate(inputId, required = false) {
+            const input = document.getElementById(inputId);
+            const errorBox = document.getElementById(inputId + "_error");
+
+            if (required && input && input.files.length === 0) {
+                if (errorBox) errorBox.textContent = "This certificate is required";
+                return false;
+            }
+
+            if (input && input.files.length > 0) {
+                const file = input.files[0];
+                const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+
+                if (!validTypes.includes(file.type)) {
+                    if (errorBox) errorBox.textContent = "Only PDF, JPG, or PNG allowed";
+                    return false;
+                }
+                if (file.size > 3 * 1024 * 1024) {
+                    if (errorBox) errorBox.textContent = "File must be under 3 MB";
+                    return false;
+                }
+            }
+
+            if (errorBox) errorBox.textContent = "";
+            return true;
+        }
+
+        /* CERTIFICATE FILE INPUT HANDLERS */
+        ['cert1', 'cert2', 'cert3', 'cert4', 'cert5'].forEach(certId => {
+            const fileInput = document.getElementById(certId);
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    console.log('File selected for ' + certId + ':', this.files[0]?.name);
+
+                    // Find the text input in the same file-input-group
+                    const textInput = this.parentElement.querySelector('input[type="text"]');
+
+                    if (!textInput) {
+                        console.error('Text input not found for ' + certId);
+                        return;
+                    }
+
+                    if (this.files.length > 0) {
+                        textInput.value = this.files[0].name;
+                        textInput.style.color = '#333';
+                        console.log('Text input updated:', textInput.value);
+                    } else {
+                        textInput.value = '';
+                        textInput.placeholder = 'No file selected';
+                    }
+
+                    // Validate certificate
+                    validateCertificate(certId, certId === 'cert1');
+                });
+
+                console.log('Event listener attached to:', certId);
+            }
+        });
+
+        /* FORM VALIDATION ON SUBMIT */
+        form.addEventListener("submit", function (e) {
+            let allValid = true;
+
+            fields.forEach(id => {
+                if (!validateField(id)) allValid = false;
+            });
+
+            if (!validateProfilePic()) allValid = false;
+
+            if (!validateCertificate("cert1", true)) allValid = false;
+            if (!validateCertificate("cert2")) allValid = false;
+            if (!validateCertificate("cert3")) allValid = false;
+            if (!validateCertificate("cert4")) allValid = false;
+            if (!validateCertificate("cert5")) allValid = false;
+
+            if (!allValid) {
+                e.preventDefault();
+                alert("Please fix the highlighted errors before submitting.");
+            }
+        });
+
     });
 </script>
-
 {% if messages %}
   {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">
