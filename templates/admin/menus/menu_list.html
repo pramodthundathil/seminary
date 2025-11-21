@@ -314,7 +314,7 @@ async function deleteMenu(menuId, menuName) {
     const csrftoken = getCookie('csrftoken');
 
     try {
-        const response = await fetch(`/admin/menus/delete/${menuId}/`, {
+        const response = await fetch(`/menu/menus/delete/${menuId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
