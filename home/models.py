@@ -41,9 +41,22 @@ class Users(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=250, unique=True)
     image = models.CharField(max_length=250, blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
-    locked_exam = models.IntegerField(blank=True, null=True)
+    locked_exam = models.ForeignKey(
+        "Exams",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='locked_exam'
+    )
     banned_at = models.DateTimeField(blank=True, null=True)
-    church_admin_id = models.IntegerField(null=True, blank=True, db_column='church_admin_id')
+    church_admin_id = models.ForeignKey(
+        "ChurchAdmins",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='church_admin_id',
+        related_name='users'
+    )
     last_login = models.DateTimeField(blank=True, null=True)
     expired_at = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=0)
@@ -84,8 +97,22 @@ class Payments(models.Model):
     message = models.TextField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
     student_id = models.ForeignKey('Students', on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='payments')    
-    church_admin_id = models.IntegerField(null=True, blank=True, db_column='church_admin_id')
-    subjects_id = models.IntegerField(blank=True, null=True, db_column='subjects_id')
+    church_admin_id = models.ForeignKey(
+        "ChurchAdmins",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='church_admin_id',
+        related_name='users_payments'
+    )
+    subjects_id = models.ForeignKey(
+        "Subjects",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='subjects_id',
+        related_name='payments'
+    )
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -97,8 +124,20 @@ class Payments(models.Model):
 
 class PaymentSubjects(models.Model):
     id = models.AutoField(primary_key=True)
-    payment_id = models.IntegerField(db_column='payment_id')
-    subject_id = models.IntegerField(db_column='subject_id')
+    payment_id = models.ForeignKey(
+        "Payments",
+        on_delete=models.CASCADE,
+        db_column='payment_id',
+        related_name='payment_subjects_payment'
+    )
+    subject_id = models.ForeignKey(
+        "Subjects",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='subjects_id',
+        related_name='payment_subjects'
+    )
     amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -126,8 +165,13 @@ class PhotoGallery(models.Model):
     gallery_name = models.CharField(max_length=250)
     code = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
-    category_id = models.IntegerField(db_column='category_id')
-    media_id = models.IntegerField(db_column='media_id')
+    category_id = models.ForeignKey(
+        "Categories",
+        on_delete=models.CASCADE,
+        db_column='category_id',
+        related_name='photo_galleries_category'
+    )
+    media_id = models.ForeignKey("MediaLibrary", on_delete=models.CASCADE, db_column='media_id', related_name='photo_gallery_media')
     status = models.BooleanField(default=False)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -141,8 +185,13 @@ class PhotoGallery(models.Model):
 
 class PhotoGalleryPhotos(models.Model):
     id = models.AutoField(primary_key=True)
-    photo_gallery_id = models.IntegerField(db_column='photo_gallery_id')
-    media_id = models.IntegerField(db_column='media_id')
+    photo_gallery_id = models.ForeignKey(
+        PhotoGallery,
+        on_delete=models.CASCADE,
+        db_column='photo_gallery_id',
+        related_name='photos_gallery_id'
+    )
+    media_id = models.ForeignKey("MediaLibrary", on_delete=models.CASCADE, db_column='media_id', related_name='photo_gallery_photo_media')
     title = models.CharField(max_length=250, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
@@ -159,11 +208,18 @@ class PhotoGalleryPhotos(models.Model):
 
 class Photos(models.Model):
     id = models.AutoField(primary_key=True)
-    media_id = models.IntegerField(db_column='media_id')
+    media_id = models.ForeignKey("MediaLibrary", on_delete=models.CASCADE, db_column='media_id', related_name='photos_medias')
     title = models.CharField(max_length=250, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
-    categories_id = models.IntegerField(null=True, blank=True, db_column='categories_id')
+    categories_id = models.ForeignKey(
+        "Categories",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='categories_id',
+        related_name='categories_id_photo'
+    )
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -183,7 +239,13 @@ class Posts(models.Model):
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
+    media_id = models.ForeignKey(
+        "MediaLibrary", 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,     
+        db_column='media_id', 
+        related_name='media_post_id')
     status = models.BooleanField(default=True)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -270,8 +332,8 @@ class Sliders(models.Model):
 
 class SliderPhotos(models.Model):
     id = models.AutoField(primary_key=True)
-    sliders_id = models.ForeignKey("Sliders",on_delete=models.CASCADE, db_column='sliders_id', related_name='sliders_photos')
-    media_id = models.ForeignKey("MediaLibrary", on_delete=models.CASCADE, db_column='media_id', related_name='sliders_media')
+    sliders_id = models.ForeignKey(Sliders,on_delete=models.CASCADE, db_column='sliders_id', related_name='sliders_photos_slider')
+    media_id = models.ForeignKey("MediaLibrary", on_delete=models.CASCADE, db_column='media_id', related_name='media_slider_photo')
     title = models.CharField(max_length=250, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
@@ -292,7 +354,12 @@ class SliderPhotos(models.Model):
 
 class Staffs(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.IntegerField(db_column='user_id')
+    user_id = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,  # deletes staff if the user is deleted
+        db_column='user_id',
+        related_name='staff_records'
+    )
     staff_id = models.CharField(max_length=250, blank=True, null=True)
     staff_name = models.CharField(max_length=250)
     title = models.CharField(max_length=250)
@@ -318,8 +385,20 @@ class Staffs(models.Model):
 
 class StaffsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
-    staff_id = models.IntegerField(db_column='staff_id')
-    subject_id = models.IntegerField(db_column='subject_id')
+    staff_id = models.ForeignKey(
+        Staffs,
+        on_delete=models.CASCADE,  # deletes the assignment if staff is deleted
+        db_column='staff_id',
+        related_name='subjects_staff'
+    )    
+    subject_id = models.ForeignKey(
+        "Subjects",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='subjects_id',
+        related_name='staff_subjects_id'
+    )
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField(db_column='created_by')
@@ -341,7 +420,14 @@ class Students(models.Model):
     email = models.CharField(max_length=250, blank=True, null=True)
     course_completed_email = models.CharField(max_length=250, blank=True, null=True)
     gender = models.CharField(max_length=10, blank=True, null=True)
-    citizenship = models.IntegerField(blank=True, null=True, db_column='citizenship')
+    citizenship = models.ForeignKey(
+        'Countries', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='citizens',
+        db_column='citizenship'
+    )
     phone_code = models.IntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
@@ -351,14 +437,33 @@ class Students(models.Model):
     mailing_address = models.CharField(max_length=500, blank=True, null=True)
     city = models.CharField(max_length=250, blank=True, null=True)
     state = models.CharField(max_length=250, blank=True, null=True)
-    country = models.IntegerField(blank=True, null=True, db_column='country')
+    country = models.ForeignKey(
+        'Countries', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='residents',
+        db_column='country'
+    )
     photo = models.CharField(max_length=205, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
     timezone = models.CharField(max_length=250)
     highest_education = models.CharField(max_length=100, blank=True, null=True)
-    course_applied = models.IntegerField(blank=True, null=True, db_column='course_applied')
+    course_applied = models.ForeignKey(
+        'Courses', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='applicants',
+        db_column='course_applied'
+    )
     associate_degree = models.IntegerField(blank=True, null=True)    
-    language_id = models.ForeignKey('Languages', on_delete=models.SET_NULL, null=True,  blank=True, db_column='language_id')
+    language_id = models.ForeignKey(
+        'Languages', on_delete=models.SET_NULL, 
+        null=True,  
+        blank=True, 
+        db_column='language_id'
+        )
     starting_year = models.IntegerField(blank=True, null=True)
     ministerial_status = models.CharField(max_length=50, blank=True, null=True)
     church_affiliation = models.CharField(max_length=250, blank=True, null=True)
@@ -395,8 +500,16 @@ class Students(models.Model):
 
 class StudentsAssignment(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='assignments')
-    assignment_id = models.IntegerField(db_column='assignment_id')
+    student_id = models.ForeignKey(
+        Students, on_delete=models.CASCADE, 
+        db_column='student_id', 
+        related_name='assignments')    
+    assignment_id = models.ForeignKey(
+        "Assignments",
+        on_delete=models.CASCADE,
+        db_column='assignment_id',
+        related_name='student_assignment_id'
+    )
     submission_date = models.DateTimeField(blank=True, null=True)
     submitted_on = models.DateTimeField(blank=True, null=True)
     total_marks = models.FloatField(blank=True, null=True)
@@ -413,8 +526,18 @@ class StudentsAssignment(models.Model):
 
 class StudentsBooks(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='books')
-    book_id = models.IntegerField(db_column='book_id')
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.CASCADE, 
+        db_column='student_id', 
+        related_name='books'
+        )    
+    book_id = models.ForeignKey(
+        "Books",
+        on_delete=models.CASCADE,
+        db_column='book_id',
+        related_name='student_books_id'
+    )
     updated_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.IntegerField(db_column='created_by')
@@ -428,8 +551,13 @@ class StudentsBooks(models.Model):
 
 class StudentsExams(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='exams')
-    exam_id = models.IntegerField(db_column='exam_id')
+    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='exams')   
+    exam_id = models.ForeignKey(
+        "Exams",
+        on_delete=models.CASCADE,
+        db_column='exam_id',
+        related_name='student_exam_id'
+    )
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     exam_duration = models.IntegerField()
@@ -469,7 +597,12 @@ class StudentsInstructor(models.Model):
 class StudentsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='subjects')    
-    subject_id = models.IntegerField(db_column='subject_id')
+    subject_id = models.ForeignKey(
+        "Subjects",
+        on_delete=models.CASCADE,
+        db_column='subject_id',
+        related_name='students_subject_id'
+    )
     requested_by = models.IntegerField(blank=True, null=True, db_column='requested_by')
     is_approved = models.BooleanField(default=False)
     reject_reason = models.TextField(blank=True, null=True)
@@ -487,8 +620,18 @@ class StudentsSubjects(models.Model):
 
 class StudentsUploads(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='uploads')
-    upload_id = models.IntegerField(db_column='upload_id')
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.CASCADE, 
+        db_column='student_id', 
+        related_name='uploads'
+        )    
+    upload_id = models.ForeignKey(
+        "Uploads",
+        on_delete=models.CASCADE,
+        db_column='upload_id',
+        related_name='student_uploads_id'
+        )
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.IntegerField(db_column='created_by')
@@ -501,8 +644,13 @@ class StudentsUploads(models.Model):
 
 
 class Subjects(models.Model):
-    id = models.AutoField(primary_key=True)
-    branches_id = models.IntegerField(db_column='branches_id')
+    id = models.AutoField(primary_key=True)    
+    branches_id = models.ForeignKey(
+        "Branches",
+        on_delete=models.CASCADE,
+        db_column='branches_id',
+        related_name='subjects_branch_id'
+        )
     subject_name = models.CharField(max_length=250)
     subject_code = models.CharField(max_length=250)
     no_of_exams = models.IntegerField()
@@ -521,11 +669,25 @@ class Subjects(models.Model):
 
 class Support(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, db_column='student_id', related_name='support', null=True, blank=True)
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.SET_NULL, 
+        db_column='student_id', 
+        related_name='support_student', 
+        null=True, 
+        blank=True
+        )
     doubt_question = models.CharField(max_length=1000)
     doubt_answer = models.CharField(max_length=1000)
     category = models.CharField(max_length=50)
-    subjects_id = models.IntegerField(null=True, blank=True, db_column='subjects_id')
+    subjects_id = models.ForeignKey(
+        Subjects,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='subjects_id',
+        related_name='support_entries'
+    )
     status = models.CharField(max_length=1)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -538,8 +700,13 @@ class Support(models.Model):
 
 
 class SupportReplies(models.Model):
-    id = models.AutoField(primary_key=True)
-    support_id = models.IntegerField(db_column='support_id')
+    id = models.AutoField(primary_key=True)    
+    support_id = models.ForeignKey(
+        Support,
+        on_delete=models.CASCADE,
+        db_column='support_id',
+        related_name='replies_support'
+    )
     doubt_answer = models.CharField(max_length=1000)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -575,11 +742,36 @@ class Uploads(models.Model):
     upload_name = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
     format = models.CharField(max_length=5)
-    video_id = models.IntegerField(blank=True, null=True, db_column='video_id')
-    youtube_id = models.IntegerField(null=True, blank=True, db_column='youtube_id')
+    video_id = models.ForeignKey(
+        "Videos",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='video_id',
+        related_name='uploads_video'
+    )    
+    youtube_id = models.ForeignKey(
+        "YoutubeVideos",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='youtube_id',
+        related_name='youtube_uploads'
+    )   
     aws_url = models.CharField(max_length=250, blank=True, null=True)
-    subject_id = models.IntegerField(db_column='subject_id')
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
+    subject_id = models.ForeignKey(
+        Subjects,
+        on_delete=models.CASCADE,
+        db_column='subject_id',
+        related_name='subjects_uploads'
+    )    
+    media_id = models.ForeignKey(
+        "MediaLibrary",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id'
+    )
     status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -593,11 +785,31 @@ class Uploads(models.Model):
 
 class Videos(models.Model):
     id = models.AutoField(primary_key=True)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
-    youtube_id = models.IntegerField(null=True, blank=True, db_column='youtube_id')
+    media_id = models.ForeignKey(
+        "MediaLibrary",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id'
+    )
+    youtube_id = models.ForeignKey(
+        "YoutubeVideos",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='youtube_id',
+        related_name='youtube_videos'
+    )      
     title = models.CharField(max_length=250, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    categories_id = models.IntegerField(null=True, blank=True, db_column='categories_id')
+    categories_id = models.ForeignKey(
+        "Categories",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='categories_id',
+        related_name='videos_categories'
+    )    
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -701,8 +913,18 @@ class YoutubeVideos(models.Model):
 
 class RoleUsers(models.Model):
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(Users,on_delete=models.CASCADE,db_column='user_id', related_name='user_roles')
-    role_id = models.ForeignKey("Roles",on_delete=models.CASCADE,db_column='role_id', related_name="role_user")
+    user_id = models.ForeignKey(
+        Users,
+        on_delete=models.CASCADE,
+        db_column='user_id', 
+        related_name='user_roles'
+        )
+    role_id = models.ForeignKey(
+        "Roles",
+        on_delete=models.CASCADE,
+        db_column='role_id', 
+        related_name="role_user"
+        )    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -731,8 +953,15 @@ class AdminPages(models.Model):
     slug = models.CharField(max_length=250)
     permission = models.CharField(max_length=250)
     target = models.CharField(max_length=10, blank=True, null=True)
-    icon = models.CharField(max_length=50)
-    parent_id = models.IntegerField(null=True, blank=True, db_column='parent_id')
+    icon = models.CharField(max_length=50)    
+    parent_id = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="parent_id",
+        related_name="children"
+    )    
     menu_order = models.IntegerField(default=0)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -750,7 +979,14 @@ class AdminPages(models.Model):
 class Assignments(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
-    subject_id = models.IntegerField(db_column='subject_id')
+    subject_id = models.ForeignKey(
+        Subjects,
+        on_delete=models.SET_NULL,  # or CASCADE if you want to delete assignments when subject is deleted
+        null=True,
+        blank=True,
+        db_column='subject_id',
+        related_name='assignments_subjects'
+    )    
     assignment_name = models.CharField(max_length=250)
     assignment_type = models.CharField(max_length=250)
     total_score = models.SmallIntegerField()
@@ -767,7 +1003,18 @@ class Assignments(models.Model):
 class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
     assignment_id = models.IntegerField(db_column='assignment_id')
-    student_id = models.ForeignKey(Students, on_delete=models.CASCADE, db_column='student_id', related_name='answers')    
+    assignment_id = models.ForeignKey(
+        Assignments, 
+        on_delete=models.CASCADE, 
+        db_column='assignment_id', 
+        related_name='assignment_answers'
+        )  
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.CASCADE, 
+        db_column='student_id', 
+        related_name='student_answers'
+        )    
     answer_file = models.CharField(max_length=255, blank=True, null=True)
     answer_text = models.TextField(blank=True, null=True)
     marks_optained = models.FloatField(blank=True, null=True)
@@ -782,7 +1029,12 @@ class AssignmentAnswers(models.Model):
 
 class AssignmentQuestions(models.Model):
     id = models.AutoField(primary_key=True)
-    assignment_id = models.IntegerField(db_column='assignment_id')
+    assignment_id = models.ForeignKey(
+        Assignments, 
+        on_delete=models.CASCADE, 
+        db_column='assignment_id', 
+        related_name='assignment_questions'
+        )  
     question = models.TextField()
     mark = models.IntegerField()
     updated_at = models.DateTimeField(blank=True, null=True)
@@ -816,7 +1068,14 @@ class Books(models.Model):
     id = models.AutoField(primary_key=True)
     book_name = models.CharField(max_length=250)
     auther_name = models.CharField(max_length=250)
-    course_id = models.IntegerField(db_column='course_id')
+    course_id = models.ForeignKey(
+        "Courses",
+        on_delete=models.SET_NULL,  # or CASCADE if you want books deleted when course is deleted
+        null=True,
+        blank=True,
+        db_column='course_id',
+        related_name='books'
+    )    
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -830,7 +1089,14 @@ class BookReferences(models.Model):
     code = models.CharField(max_length=250)
     title = models.CharField(max_length=250)
     auther_name = models.CharField(max_length=250, blank=True, null=True)
-    subject_id = models.IntegerField(db_column='subject_id')
+    subject_id = models.ForeignKey(
+        Subjects,
+        on_delete=models.SET_NULL,  # or CASCADE depending on your requirement
+        null=True,
+        blank=True,
+        db_column='subject_id',
+        related_name='book_references_subject'
+    )    
     format = models.CharField(max_length=5)
     reference_file = models.CharField(max_length=250, blank=True, null=True)
     reference_note = models.TextField(blank=True, null=True)
@@ -866,10 +1132,24 @@ class Categories(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
     name = models.CharField(max_length=250)
-    description = models.TextField(blank=True, null=True)
-    parent_id = models.IntegerField()
+    description = models.TextField(blank=True, null=True)   
+    parent_id = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="parent_id",
+        related_name="children"
+    )    
     type = models.CharField(max_length=50)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
+    media_id = models.ForeignKey(
+        "MediaLibrary",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id',
+        related_name='categories_media'
+    )
     table_color = models.CharField(max_length=50, blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
     created_by = models.IntegerField(db_column='created_by')
@@ -885,7 +1165,13 @@ class Categories(models.Model):
 
 class ChurchAdmins(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='churchadmins')    
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True, 
+        db_column='student_id', 
+        related_name='churchadmins'
+        )    
     name_of_church = models.CharField(max_length=250, blank=True, null=True)
     name_of_paster = models.CharField(max_length=250, blank=True, null=True)
     church_address = models.TextField(blank=True, null=True)
@@ -905,8 +1191,15 @@ class ChurchAdmins(models.Model):
 
 
 class ChurchLoginCodeSettings(models.Model):
-    id = models.AutoField(primary_key=True)
-    branches_id = models.IntegerField(db_column='branches_id')
+    id = models.AutoField(primary_key=True)    
+    branches_id = models.ForeignKey(
+        Branches,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='branches_id',
+        related_name='login_code_settings_branch'
+    )
     name = models.CharField(max_length=250)
     max_user_no = models.IntegerField()
     amount = models.FloatField()
@@ -959,8 +1252,15 @@ class Courses(models.Model):
     description = models.TextField(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
-    meta_keywords = models.TextField(blank=True, null=True)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
+    meta_keywords = models.TextField(blank=True, null=True)    
+    media_id = models.ForeignKey(
+        "MediaLibrary",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id',
+        related_name='courses_media'
+    )
     status = models.IntegerField()
     apply_button_top = models.BooleanField(default=True)
     apply_button_bottom = models.BooleanField(default=True)
@@ -976,8 +1276,18 @@ class Courses(models.Model):
 
 class DescriptiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
-    assignment_id = models.IntegerField(db_column='assignment_id')
-    question_id = models.IntegerField(db_column='question_id')
+    assignment_id = models.ForeignKey(
+        "Assignments",
+        on_delete=models.CASCADE,
+        db_column='assignment_id',
+        related_name='assignment_descriptive_answers'
+    )
+    question_id = models.ForeignKey(
+        "DescriptiveQuestions",
+        on_delete=models.CASCADE,
+        db_column='question_id',
+        related_name='descriptive_questions_answers'
+    )    
     answer = models.TextField(blank=True, null=True)
     mark = models.DecimalField(max_digits=10, decimal_places=0)
     created_at = models.DateTimeField(blank=True, null=True)
@@ -991,7 +1301,12 @@ class DescriptiveAnswers(models.Model):
 
 class DescriptiveQuestions(models.Model):
     id = models.AutoField(primary_key=True)
-    exam_id = models.IntegerField(db_column='exam_id')
+    exam_id = models.ForeignKey(
+        "Exams",
+        on_delete=models.CASCADE,
+        db_column='exam_id',
+        related_name='exam_descriptive_questions'
+    )    
     question = models.TextField()
     mark = models.IntegerField()
     updated_at = models.DateTimeField(blank=True, null=True)
@@ -1007,7 +1322,12 @@ class DescriptiveQuestions(models.Model):
 class Exams(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
-    subject_id = models.IntegerField(db_column='subject_id')
+    subject_id = models.ForeignKey(
+        Subjects,
+        on_delete=models.CASCADE,
+        db_column='subject_id',
+        related_name='exams_subject'
+    )    
     exam_name = models.CharField(max_length=250)
     exam_type = models.CharField(max_length=20)
     status = models.BooleanField(default=True)
@@ -1099,13 +1419,32 @@ class Menus(models.Model):
 
 class MenuItems(models.Model):
     id = models.AutoField(primary_key=True)
-    menus_id = models.IntegerField(db_column='menus_id')
+    menus_id = models.ForeignKey(
+        Menus,
+        on_delete=models.CASCADE,
+        related_name='menu_items',
+        db_column='menus_id'
+    )   
     title = models.CharField(max_length=250)
     url = models.CharField(max_length=250, blank=True, null=True)
-    pages_id = models.IntegerField(null=True, blank=True, db_column='pages_id')
+    pages_id = models.ForeignKey(
+        "Pages",
+        on_delete=models.SET_NULL,
+        db_column="pages_id",
+        null=True,
+        blank=True,
+        related_name="menu_items_pages"
+    )   
     menu_type = models.CharField(max_length=50, blank=True, null=True)
     menu_order = models.IntegerField()
-    parent_id = models.IntegerField(db_column='parent_id')
+    parent_id = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        db_column="parent_id",
+        null=True,
+        blank=True,
+        related_name="children"
+    )   
     target_blank = models.BooleanField(default=False)
     original_title = models.CharField(max_length=250, blank=True, null=True)
     menu_nextable_id = models.CharField(max_length=250, blank=True, null=True)
@@ -1159,8 +1498,15 @@ class News(models.Model):
     description = models.TextField(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
-    meta_keywords = models.TextField(blank=True, null=True)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
+    meta_keywords = models.TextField(blank=True, null=True)    
+    media_id = models.ForeignKey(
+        "MediaLibrary",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id',
+        related_name='news_media'
+    )
     status = models.BooleanField(default=True)
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
@@ -1175,7 +1521,12 @@ class News(models.Model):
 
 class Notifications(models.Model):
     id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey(Students, on_delete=models.SET_NULL, null=True, blank=True, db_column='student_id', related_name='notifications')
+    student_id = models.ForeignKey(
+        Students, 
+        on_delete=models.SET_NULL,
+        null=True, blank=True, 
+        db_column='student_id', 
+        related_name='student_notifications')
     notification_type = models.CharField(max_length=50)
     message = models.CharField(max_length=250)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1189,8 +1540,19 @@ class Notifications(models.Model):
 
 class ObjectiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
-    assignment_id = models.IntegerField(db_column='assignment_id')
-    question_id = models.IntegerField(db_column='question_id')
+    assignment_id = models.ForeignKey(
+        Assignments,
+        on_delete=models.CASCADE,
+        db_column='assignment_id',
+        related_name='assignment_objective_answers'
+    )
+
+    question_id = models.ForeignKey(
+        "ObjectiveQuestions",
+        on_delete=models.CASCADE,
+        db_column='question_id',
+        related_name='objective_question_answers'
+    )    
     answer = models.CharField(max_length=250, blank=True, null=True)
     mark = models.DecimalField(max_digits=10, decimal_places=0)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1204,7 +1566,12 @@ class ObjectiveAnswers(models.Model):
 
 class ObjectiveQuestions(models.Model):
     id = models.AutoField(primary_key=True)
-    exam_id = models.IntegerField(db_column='exam_id')
+    exam_id = models.ForeignKey(
+        Exams,
+        on_delete=models.CASCADE,
+        db_column='exam_id',
+        related_name='exam_objective_questions'
+    )    
     question = models.CharField(max_length=500)
     option1 = models.CharField(max_length=250, blank=True, null=True)
     option2 = models.CharField(max_length=250, blank=True, null=True)
@@ -1225,8 +1592,17 @@ class ObjectiveQuestions(models.Model):
 
 class PageMediaLibrary(models.Model):
     id = models.AutoField(primary_key=True)
-    pages_id = models.IntegerField(db_column='pages_id')
-    media_id = models.IntegerField(db_column='media_id')
+    pages_id = models.ForeignKey(
+        "Pages",
+        on_delete=models.CASCADE,  
+        db_column='pages_id',
+        related_name='pages_media_library'
+    )    
+    media_id = models.ForeignKey(
+        MediaLibrary, 
+        on_delete=models.CASCADE, 
+        db_column='media_id', 
+        related_name='page_media_library')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -1261,14 +1637,42 @@ class Pages(models.Model):
     description = RichTextField(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
-    meta_keywords = models.TextField(blank=True, null=True)
-    media_id = models.IntegerField(null=True, blank=True, db_column='media_id')
-    video_id = models.IntegerField(null=True, blank=True, db_column='video_id')
-    youtube_id = models.IntegerField(null=True, blank=True, db_column='youtube_id')
+    meta_keywords = models.TextField(blank=True, null=True)   
+    media_id = models.ForeignKey(
+        MediaLibrary,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='media_id',
+        related_name='pages_media'
+    )  
+    video_id = models.ForeignKey(
+        "Videos",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="video_id",
+        related_name="video_pages"
+    )    
+    youtube_id = models.ForeignKey(
+        "YoutubeVideos",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="youtube_id",
+        related_name="youtube_pages"
+    )
     status = models.IntegerField(blank=True, null=True)
     apply_button_top = models.BooleanField(default=False)
     apply_button_bottom = models.BooleanField(default=False)
-    parent_id = models.IntegerField(null=True, blank=True, db_column='parent_id')
+    parent_id = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="parent_id",
+        related_name="children"
+    )    
     created_by = models.IntegerField(db_column='created_by')
     updated_by = models.IntegerField(db_column='updated_by')
     created_at = models.DateTimeField(auto_now_add=True)
