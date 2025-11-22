@@ -1,303 +1,317 @@
 {% extends "site_pages/index.html" %}
+{% load static %}
 
 {% block title %}
 <title>Reference Form - Trinity Theological Seminary</title>
 {% endblock %}
 
 {% block content %}
-<section class="reference-section">
-    <div class="container">
-        <h2 class="section-title">Reference <span class="highlight">Form</span></h2>
-
-        <!-- Intro -->
-        <div class="intro-section">
-            <p>
-                Please complete the following reference form to help us evaluate the applicant’s suitability for study
-                at Trinity Theological Seminary. All information will remain confidential. Required fields are marked
-                with <span class='required'>*</span>.
-            </p>
-        </div>
-
-        <!-- Form Wrapper -->
-        <div class="reference-form-wrapper">
-            <form method="POST" action="" class="reference-form" novalidate>
-                {% csrf_token %}
-
-                <!-- Referee Information -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="fas fa-user"></i> REFEREE INFORMATION
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="first_name">First Name <span class="required">*</span></label>
-                            <input type="text" id="first_name" name="first_name" placeholder="Enter your first name"
-                                required>
-                            <span class="error-msg" id="first_name_error"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="middle_name">Middle Name</label>
-                            <input type="text" id="middle_name" name="middle_name" placeholder="Optional">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="last_name">Last Name <span class="required">*</span></label>
-                            <input type="text" id="last_name" name="last_name" placeholder="Enter your last name"
-                                required>
-                            <span class="error-msg" id="last_name_error"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email <span class="required">*</span></label>
-                            <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-                            <span class="error-msg" id="email_error"></span>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contact">Contact Number<span class="required">*</span></label>
-                            <input type="tel" id="contact" name="contact" placeholder="(555) 123-4567" required>
-                            <span class="error-msg" id="contact_error"></span>
-                        </div>
-                        <div class="form-group">
-                        <label for="nationality">Nationality <span class="required">*</span></label>
-                        <select id="nationality" name="nationality" required>
-                            <option value="">--- Select Nationality ---</option>
-                            {% for country in countries %}
-                            <option value="{{ country.id }}" {% if
-                                request.POST.nationality|default_if_none:''==country.id|stringformat:"s" %}selected{%
-                                endif %}>
-                                {{ country.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    </div>
+<section class="application-section-modern">
+    <div class="form-container-modern">
+        <div class="form-modal">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fas fa-user-graduate"></i>
+                    <h2>Reference Form</h2>
                 </div>
+            </div>
 
-                <!-- Applicant Information -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="fas fa-user-graduate"></i> APPLICANT INFORMATION
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="applicant_name">Name of Applicant <span class="required">*</span></label>
-                            <input type="text" id="applicant_name" name="applicant_name"
-                                placeholder="Full name of the applicant" required>
-                            <span class="error-msg" id="applicant_name_error"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="relationship">Your Relationship with the Applicant
-                                ></label>
-                            <select id="relationship" name="relationship" required>
-                                <option value="">--- Select ---</option>
-                                <option value="pastor">Pastor</option>
-                                <option value="teacher">Teacher/Professor</option>
-                                <option value="employer">Employer</option>
-                                <option value="colleague">Colleague</option>
-                                <option value="friend">Friend</option>
-                                <option value="relative">Relative</option>
-                                <option value="mentor">Mentor</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <span class="error-msg" id="relationship_error"></span>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="known_since">Since when you know this Applicant</label>
-                            <input type="text" id="known_since" name="known_since"
-                                placeholder="e.g., January 2020 or 5 years" required>
-                            <span class="error-msg" id="known_since_error"></span>
-                        </div>
-                    </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
                 </div>
+                {% endfor %}
+                {% endif %}
 
-                <!-- Assessment Section -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="fas fa-clipboard-check"></i> APPLICANT ASSESSMENT
-                    </div>
+                <form method="POST" action="" class="reference-form" novalidate>
+                    {% csrf_token %}
 
-                    <!-- Row 1 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="spiritual_commitment">How do you rate Applicant's Spiritual Commitment? <span
-                                    class="required">*</span></label>
-                            <select id="spiritual_commitment" name="spiritual_commitment" required>
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
-                            <span class="error-msg" id="spiritual_commitment_error"></span>
+                    <!-- Referee Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>Referee Information</h3>
                         </div>
-                        <div class="form-group">
-                            <label for="learning_capacity">How do you rate Applicant's Learning Capacity?</label>
-                            <select id="learning_capacity" name="learning_capacity">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="first_name">First Name <span class="required">*</span></label>
+                                <input type="text" id="first_name" name="first_name" placeholder="Enter your first name"
+                                    required>
+                                <small class="error-message" id="first_name_error"></small>
+                            </div>
+                            <div class="form-field">
+                                <label for="middle_name">Middle Name</label>
+                                <input type="text" id="middle_name" name="middle_name" placeholder="Optional">
+                                <small class="error-message"></small>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Row 2 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dedication">What do think about Applicant's Dedication for Lord's
-                                Ministry?</label>
-                            <select id="dedication" name="dedication">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="last_name">Last Name <span class="required">*</span></label>
+                                <input type="text" id="last_name" name="last_name" placeholder="Enter your last name"
+                                    required>
+                                <small class="error-message" id="last_name_error"></small>
+                            </div>
+                            <div class="form-field">
+                                <label for="email">Email <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="your.email@example.com"
+                                    required>
+                                    <small id="email_error" class="error-message"></small>                                
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="leadership">How do you rate Applicant's Leadership skills?</label>
-                            <select id="leadership" name="leadership">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="contact">Contact Number <span class="required">*</span></label>
+                                <input type="tel" id="contact" name="contact" placeholder="(555) 123-4567" required>
+                                <small id="contact_error" class="error-message"></small>
+                            </div>
+                            <div class="form-field">
+                                <label for="nationality">Nationality <span class="required">*</span></label>
+                                <select id="nationality" name="nationality">
+                                    <option value="">Select Country</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country.id }}">{{ country.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="error-message" id="nationality_error"></small>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Row 3 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="church_involvement">How do you rate Applicant's Church involvement?</label>
-                            <select id="church_involvement" name="church_involvement">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
+                    <!-- Applicant Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-id-card"></i>
+                            <h3>Applicant Information</h3>
                         </div>
-                        <div class="form-group">
-                            <label for="biblical_knowledge">What do you think about Applicant's Biblical Knowledge?
-                                <span class="required">*</span></label>
-                            <select id="biblical_knowledge" name="biblical_knowledge" required>
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
-                            <span class="error-msg" id="biblical_knowledge_error"></span>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="applicant_name">Name of Applicant <span class="required">*</span></label>
+                                <input type="text" id="applicant_name" name="applicant_name"
+                                    placeholder="Full name of the applicant" required>
+                                <small class="error-message" id="applicant_name_error"></small>
+                            </div>
+                            <div class="form-field">
+                                <label for="relationship">Your Relationship with the Applicant</label>
+                                <select id="relationship" name="relationship" required>
+                                    <option value="">--- Select ---</option>
+                                    <option value="pastor">Pastor</option>
+                                    <option value="teacher">Teacher/Professor</option>
+                                    <option value="employer">Employer</option>
+                                    <option value="colleague">Colleague</option>
+                                    <option value="friend">Friend</option>
+                                    <option value="relative">Relative</option>
+                                    <option value="mentor">Mentor</option>
+                                    <option value="other">Other</option>
+                                </select>                               
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Row 4 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="moral_standard">How do you rate Applicant's Moral Standard?</label>
-                            <select id="moral_standard" name="moral_standard">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="recommendation">How do you recommend this Applicant</label>
-                            <select id="recommendation" name="recommendation">
-                                <option value="">--- Select ---</option>
-                                <option value="highly_recommend">Highly Recommend</option>
-                                <option value="recommend">Recommend</option>
-                                <option value="recommend_with_reservation">Recommend with Reservation</option>
-                                <option value="do_not_recommend">Do Not Recommend</option>
-                            </select>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="known_since">Since when you know this Applicant</label>
+                                <input type="text" id="known_since" name="known_since"
+                                    placeholder="e.g., January 2020 or 5 years" required>                                
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Row 5 -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="financial_condition">What do you think about Financial Condition of the
-                                Applicant</label>
-                            <select id="financial_condition" name="financial_condition">
-                                <option value="">--- Select ---</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="very_good">Very Good</option>
-                                <option value="good">Good</option>
-                                <option value="average">Average</option>
-                                <option value="below_average">Below Average</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Comments -->
-                <div class="form-section">
-                    <div class="section-header">
-                        <i class="fas fa-comments"></i> ADDITIONAL COMMENTS
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="comments">Write your personal comment for this Applicant.</label>
-                        <textarea id="comments" name="comments" rows="6" maxlength="1000"
-                            placeholder="Additional insights about the applicant"></textarea>
-                        <small class="character-count">0 / 1000 characters</small>
-                    </div>
-                </div>
-
-                <!-- reCAPTCHA -->
-                <div class="form-section verification-section">
-                    <div class="recaptcha-box">
-                        <div class="recaptcha-left">
-                            <input type="checkbox" id="notRobot" required>
-                            <label for="notRobot">I'm not a robot</label>
+                    <!-- Applicant Assessment -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-clipboard-check"></i>
+                            <h3>Applicant Assessment</h3>
                         </div>
 
-                        <div class="recaptcha-right">
-                            <span class="recaptcha-title">reCAPTCHA</span>
-                            <span class="recaptcha-links">Privacy – Terms</span>
+                        <!-- Row 1 -->
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="spiritual_commitment">How do you rate Applicant's Spiritual Commitment?
+                                    <span class="required">*</span></label>
+                                <select id="spiritual_commitment" name="spiritual_commitment" required>
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                                <small class="error-message" id="spiritual_commitment_error"></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="learning_capacity">How do you rate Applicant's Learning Capacity?</label>
+                                <select id="learning_capacity" name="learning_capacity">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>                                
+                            </div>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="dedication">What do think about Applicant's Dedication for Lord's
+                                    Ministry?</label>
+                                <select id="dedication" name="dedication">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="leadership">How do you rate Applicant's Leadership skills?</label>
+                                <select id="leadership" name="leadership">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="church_involvement">How do you rate Applicant's Church involvement?</label>
+                                <select id="church_involvement" name="church_involvement">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="biblical_knowledge">What do you think about Applicant's Biblical Knowledge?
+                                    <span class="required">*</span></label>
+                                <select id="biblical_knowledge" name="biblical_knowledge" required>
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                                <span class="error-msg" id="biblical_knowledge_error"></span>
+                            </div>
+                        </div>
+
+                        <!-- Row 4 -->
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="moral_standard">How do you rate Applicant's Moral Standard?</label>
+                                <select id="moral_standard" name="moral_standard">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="recommendation">How do you recommend this Applicant</label>
+                                <select id="recommendation" name="recommendation">
+                                    <option value="">--- Select ---</option>
+                                    <option value="highly_recommend">Highly Recommend</option>
+                                    <option value="recommend">Recommend</option>
+                                    <option value="recommend_with_reservation">Recommend with Reservation</option>
+                                    <option value="do_not_recommend">Do Not Recommend</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Row 5 -->
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="financial_condition">What do you think about Financial Condition of the
+                                    Applicant</label>
+                                <select id="financial_condition" name="financial_condition">
+                                    <option value="">--- Select ---</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="very_good">Very Good</option>
+                                    <option value="good">Good</option>
+                                    <option value="average">Average</option>
+                                    <option value="below_average">Below Average</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-                        This Reference Form will be strictly confidential and will not be shown to Applicant or any
-                        other person at any cause.
-                        By clicking "Submit", you agree to stay with your sincere statement that all the information
-                        given is true to your knowledge and is reliable.
-                    </p>
-                </div>
 
-                <!-- Submit -->
-                <div class="form-submit">
-                    <button type="submit" class="btn-submit" id="submitBtn">
-                        SUBMIT
-                    </button>
-                </div>
-            </form>
+                    <!-- Additional Comments -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-comments"></i>
+                            <h3>Additional Comments</h3>
+                        </div>
+                        <div class="form-field full-width">
+                            <label for="comments">Write your personal comment for this Applicant.</label>
+                            <textarea id="comments" name="comments" rows="6" maxlength="1000"
+                                placeholder="Additional insights about the applicant"></textarea>
+                            <small class="character-count">0 / 1000 characters</small>
+                        </div>
+                    </div>
+
+                    <!-- reCAPTCHA -->
+                    <div class="form-section verification-section">
+                        <div class="recaptcha-box">
+                            <div class="recaptcha-left">
+                                <input type="checkbox" id="notRobot" required>
+                                <label for="notRobot">I'm not a robot</label>
+                            </div>
+                            <div class="recaptcha-right">
+                                <span class="recaptcha-title">reCAPTCHA</span>
+                                <span class="recaptcha-links">Privacy – Terms</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                            This Reference Form will be strictly confidential and will not be shown to Applicant or any
+                            other person at any cause.
+                            By clicking "Submit", you agree to stay with your sincere statement that all the information
+                            given is true to your knowledge and is reliable.
+                        </p>
+                    </div>
+
+                    <!-- Submit & Cancel -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 </section>
-
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.querySelector('.reference-form');
-        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = form.querySelector('.btn-cancel');
+        const submitBtn = form.querySelector('.btn-save');
         const commentsTextarea = document.getElementById('comments');
         const charCount = document.querySelector('.character-count');
-
         // ======= Required fields =======
         const requiredFields = [
             'first_name', 'last_name', 'email', 'nationality',
@@ -305,8 +319,18 @@
             'spiritual_commitment', 'biblical_knowledge'
         ];
 
-        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;      
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        // Cancel button resets form
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                form.reset();
 
+                if (charCount) charCount.textContent = '0 / 500 characters';
+
+                form.querySelectorAll('.input-error').forEach(f => f.classList.remove('input-error'));
+                form.querySelectorAll('.error-message').forEach(e => e.textContent = '');
+            });
+        }
         // Character counter for comments
         if (commentsTextarea && charCount) {
             commentsTextarea.addEventListener('input', function () {
@@ -486,4 +510,11 @@
         }
     });
 </script>
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
 {% endblock %}
