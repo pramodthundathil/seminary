@@ -21,13 +21,13 @@
             <!-- Modal Body -->
             <div class="modal-body">
                 {% if messages %}
-                  {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                  {% endfor %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
                 {% endif %}
-                
+
                 <form method="POST" action="" class="modern-form" enctype="multipart/form-data">
                     {% csrf_token %}
 
@@ -36,31 +36,27 @@
                         <div class="section-header">
                             <i class="fas fa-user"></i>
                             <h3>Personal Information</h3>
-                        </div>                     
+                        </div>
 
                         <div class="form-row-modern">
                             <div class="form-field">
                                 <label for="first_name">First Name <span class="required">*</span></label>
-                                <input type="text" id="first_name" name="first_name" 
-                                       placeholder="First name" required>
+                                <input type="text" id="first_name" name="first_name" placeholder="First name" required>
                             </div>
                             <div class="form-field">
                                 <label for="middle_name">Middle Name</label>
-                                <input type="text" id="middle_name" name="middle_name" 
-                                       placeholder="Middle name">
+                                <input type="text" id="middle_name" name="middle_name" placeholder="Middle name">
                             </div>
                             <div class="form-field">
                                 <label for="last_name">Last Name <span class="required">*</span></label>
-                                <input type="text" id="last_name" name="last_name" 
-                                       placeholder="Last name" required>
+                                <input type="text" id="last_name" name="last_name" placeholder="Last name" required>
                             </div>
                         </div>
 
                         <div class="form-row-modern">
                             <div class="form-field">
                                 <label for="email">Email <span class="required">*</span></label>
-                                <input type="email" id="email" name="email" 
-                                       placeholder="student@example.com" required>
+                                <input type="email" id="email" name="email" placeholder="student@example.com" required>
                                 <span class="error-msg" id="email_error"></span>
                             </div>
                             <div class="form-field">
@@ -99,8 +95,7 @@
                             </div>
                             <div class="form-field">
                                 <label for="spouse_name">Spouse Name</label>
-                                <input type="text" id="spouse_name" name="spouse_name" 
-                                       placeholder="If married">
+                                <input type="text" id="spouse_name" name="spouse_name" placeholder="If married">
                             </div>
                         </div>
 
@@ -116,8 +111,7 @@
                             </div>
                             <div class="form-field">
                                 <label for="children">Children</label>
-                                <input type="text" id="children" name="children" 
-                                       placeholder="Number of children">
+                                <input type="text" id="children" name="children" placeholder="Number of children">
                             </div>
                         </div>
                     </div>
@@ -131,8 +125,8 @@
 
                         <div class="form-field full-width">
                             <label for="mailing_address">Mailing Address</label>
-                            <textarea id="mailing_address" name="mailing_address" rows="3" 
-                                      placeholder="Street address"></textarea>
+                            <textarea id="mailing_address" name="mailing_address" rows="3"
+                                placeholder="Street address"></textarea>
                         </div>
 
                         <div class="form-row-modern">
@@ -166,7 +160,7 @@
                     <!-- Academic Information Section -->
                     <div class="form-section">
                         <div class="section-header">
-                            <i class="fas fa-graduation-cap"></i>
+                            <i class="fas fa-book-open"></i>
                             <h3>Academic Information</h3>
                         </div>
 
@@ -231,14 +225,13 @@
 
                         <div class="form-field full-width">
                             <label for="church">Church Affiliation</label>
-                            <input type="text" id="church" name="church" 
-                                   placeholder="Enter your church name">
+                            <input type="text" id="church" name="church" placeholder="Enter your church name">
                         </div>
 
                         <div class="form-field full-width">
                             <label for="message">Additional Message</label>
-                            <textarea id="message" name="message" rows="4" 
-                                      placeholder="Any additional information"></textarea>
+                            <textarea id="message" name="message" rows="4"
+                                placeholder="Any additional information"></textarea>
                         </div>
                     </div>
 
@@ -316,18 +309,17 @@
                         <div class="form-row-modern">
                             <div class="form-field">
                                 <label for="ref1_name">Name <span class="required">*</span></label>
-                                <input type="text" id="ref1_name" name="ref1_name" 
-                                       placeholder="Pastor's full name" required>
+                                <input type="text" id="ref1_name" name="ref1_name" placeholder="Pastor's full name"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref1_email">Email <span class="required">*</span></label>
-                                <input type="email" id="ref1_email" name="ref1_email" 
-                                       placeholder="pastor@church.com" required>
+                                <input type="email" id="ref1_email" name="ref1_email" placeholder="pastor@church.com"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref1_phone">Phone Number</label>
-                                <input type="tel" id="ref1_phone" name="ref1_phone" 
-                                       placeholder="+1234567890">
+                                <input type="tel" id="ref1_phone" name="ref1_phone" placeholder="+1234567890">
                             </div>
                         </div>
 
@@ -336,18 +328,17 @@
                         <div class="form-row-modern">
                             <div class="form-field">
                                 <label for="ref2_name">Name <span class="required">*</span></label>
-                                <input type="text" id="ref2_name" name="ref2_name" 
-                                       placeholder="Friend's full name" required>
+                                <input type="text" id="ref2_name" name="ref2_name" placeholder="Friend's full name"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref2_email">Email <span class="required">*</span></label>
-                                <input type="email" id="ref2_email" name="ref2_email" 
-                                       placeholder="friend@email.com" required>
+                                <input type="email" id="ref2_email" name="ref2_email" placeholder="friend@email.com"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref2_phone">Phone Number</label>
-                                <input type="tel" id="ref2_phone" name="ref2_phone" 
-                                       placeholder="+1234567890">
+                                <input type="tel" id="ref2_phone" name="ref2_phone" placeholder="+1234567890">
                             </div>
                         </div>
 
@@ -356,18 +347,17 @@
                         <div class="form-row-modern">
                             <div class="form-field">
                                 <label for="ref3_name">Name <span class="required">*</span></label>
-                                <input type="text" id="ref3_name" name="ref3_name" 
-                                       placeholder="Relative's full name" required>
+                                <input type="text" id="ref3_name" name="ref3_name" placeholder="Relative's full name"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref3_email">Email <span class="required">*</span></label>
-                                <input type="email" id="ref3_email" name="ref3_email" 
-                                       placeholder="relative@email.com" required>
+                                <input type="email" id="ref3_email" name="ref3_email" placeholder="relative@email.com"
+                                    required>
                             </div>
                             <div class="form-field">
                                 <label for="ref3_phone">Phone Number</label>
-                                <input type="tel" id="ref3_phone" name="ref3_phone" 
-                                       placeholder="+1234567890">
+                                <input type="tel" id="ref3_phone" name="ref3_phone" placeholder="+1234567890">
                             </div>
                         </div>
                     </div>
@@ -410,7 +400,7 @@
                             <label for="cert5">Certificate 5</label>
                             <input type="file" id="cert5" name="cert5">
                         </div>
-                    </div>                   
+                    </div>
 
                     <!-- Form Actions -->
                     <div class="form-actions">
@@ -418,7 +408,7 @@
                             <i class="fas fa-times"></i> Cancel
                         </button>
                         <button type="submit" class="btn-save">
-                            <i class="fas fa-save"></i> Save Student
+                            <i class="fas fa-save"></i> Apply
                         </button>
                     </div>
                 </form>
@@ -430,34 +420,232 @@
 <script src="{% static 'js/timezone.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Populate starting years
+        const form = document.querySelector(".application-form");
+        const fields = [
+            "first_name", "last_name", "email", "gender", "citizenship", "phone", "dob",
+            "marital_status", "mailing_address", "city", "state", "zipcode",
+            "timezone", "education", "course", "language", "start_year", "ministerial_status",
+            "church", "afford", "ref1_name", "ref1_email", "ref2_name", "ref2_email",
+            "ref3_name", "ref3_email", "ref1_phone", "ref2_phone", "ref3_phone"
+        ];
+
+        /* Starting year select*/
         const startYearSelect = document.getElementById("start_year");
         const currentYear = new Date().getFullYear();
-        for (let i = currentYear; i <= currentYear + 10; i++) {
+        const yearsAhead = 10;
+
+        for (let i = currentYear; i <= currentYear + yearsAhead; i++) {
             const option = document.createElement("option");
             option.value = i;
             option.textContent = i;
             startYearSelect.appendChild(option);
         }
 
-        // Load timezones
-        const timezoneSelect = document.getElementById("timezone");
-        const timezones = Intl.supportedValuesOf('timeZone');
-        timezones.sort();
-        timezones.forEach(tz => {
-            const option = document.createElement("option");
-            option.value = tz;
-            option.textContent = tz;
-            timezoneSelect.appendChild(option);
+        // Load Timezones Dynamically
+        function loadTimezones() {
+            const timezoneSelect = document.getElementById("timezone");
+            const timezones = Intl.supportedValuesOf('timeZone');
+            timezones.sort();
+
+            timezones.forEach(tz => {
+                const option = document.createElement("option");
+                option.value = tz;
+                option.textContent = tz;
+                timezoneSelect.appendChild(option);
+            });
+        }
+
+        loadTimezones();
+
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        /* LIVE VALIDATION */
+        fields.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.addEventListener("input", function () {
+                    validateField(id);
+                });
+                el.addEventListener("change", function () {
+                    validateField(id);
+                });
+            }
         });
+
+        /* PROFILE PIC VALIDATION */
+        const profilePic = document.getElementById("profile_pic");
+        if (profilePic) {
+            profilePic.addEventListener("change", function () {
+                validateProfilePic();
+            });
+        }
+
+        function validateField(id) {
+            let el = document.getElementById(id);
+            if (!el) return true;
+
+            let errorBox = document.getElementById(id + "_error");
+            if (!errorBox) return true;
+
+            let value = el.value.trim();
+            let error = "";
+
+            if (!value) error = "This field is required";
+
+            if (["email", "ref1_email", "ref2_email", "ref3_email"].includes(id)) {
+                if (value && !emailPattern.test(value))
+                    error = "Invalid email format";
+            }
+
+            if (["phone", "ref1_phone", "ref2_phone", "ref3_phone"].includes(id)) {
+                if (!/^[0-9]+$/.test(value)) error = "Digits only";
+                else if (value.length < 7 || value.length > 15)
+                    error = "Phone number must be 7–15 digits";
+            }
+
+            if (id === "zipcode" && !/^[0-9]{4,10}$/.test(value)) {
+                error = "Zipcode must be 4–10 digits";
+            }
+
+            if (id === "start_year") {
+                const year = parseInt(value);
+                let currentYear = new Date().getFullYear();
+                if (isNaN(year) || year < 1950 || year > currentYear + 1)
+                    error = "Invalid start year";
+            }
+
+            if (error) {
+                el.classList.add("input-error");
+                el.classList.remove("input-valid");
+                errorBox.textContent = error;
+                return false;
+            } else {
+                el.classList.remove("input-error");
+                el.classList.add("input-valid");
+                errorBox.textContent = "";
+                return true;
+            }
+        }
+
+        function validateProfilePic() {
+            const fileInput = document.getElementById("profile_pic");
+            const errorBox = document.getElementById("profile_pic_error");
+
+            if (!fileInput || fileInput.files.length === 0) {
+                if (errorBox) errorBox.textContent = "";
+                return true;
+            }
+
+            const file = fileInput.files[0];
+            const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
+
+            if (!validTypes.includes(file.type)) {
+                if (errorBox) errorBox.textContent = "Only JPG, PNG, WEBP or GIF allowed";
+                return false;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                if (errorBox) errorBox.textContent = "Image must be less than 2 MB";
+                return false;
+            }
+
+            if (errorBox) errorBox.textContent = "";
+            return true;
+        }
+
+        /* CERTIFICATE VALIDATION */
+        function validateCertificate(inputId, required = false) {
+            const input = document.getElementById(inputId);
+            const errorBox = document.getElementById(inputId + "_error");
+
+            if (required && input && input.files.length === 0) {
+                if (errorBox) errorBox.textContent = "This certificate is required";
+                return false;
+            }
+
+            if (input && input.files.length > 0) {
+                const file = input.files[0];
+                const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+
+                if (!validTypes.includes(file.type)) {
+                    if (errorBox) errorBox.textContent = "Only PDF, JPG, or PNG allowed";
+                    return false;
+                }
+                if (file.size > 3 * 1024 * 1024) {
+                    if (errorBox) errorBox.textContent = "File must be under 3 MB";
+                    return false;
+                }
+            }
+
+            if (errorBox) errorBox.textContent = "";
+            return true;
+        }
+
+        /* CERTIFICATE FILE INPUT HANDLERS */
+        ['cert1', 'cert2', 'cert3', 'cert4', 'cert5'].forEach(certId => {
+            const fileInput = document.getElementById(certId);
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    console.log('File selected for ' + certId + ':', this.files[0]?.name);
+
+                    // Find the text input in the same file-input-group
+                    const textInput = this.parentElement.querySelector('input[type="text"]');
+
+                    if (!textInput) {
+                        console.error('Text input not found for ' + certId);
+                        return;
+                    }
+
+                    if (this.files.length > 0) {
+                        textInput.value = this.files[0].name;
+                        textInput.style.color = '#333';
+                        console.log('Text input updated:', textInput.value);
+                    } else {
+                        textInput.value = '';
+                        textInput.placeholder = 'No file selected';
+                    }
+
+                    // Validate certificate
+                    validateCertificate(certId, certId === 'cert1');
+                });
+
+                console.log('Event listener attached to:', certId);
+            }
+        });
+        document.querySelector('.btn-cancel').addEventListener('click', function () {
+            document.querySelector('.modern-form').reset();
+        });
+
+        /* FORM VALIDATION ON SUBMIT */
+        form.addEventListener("submit", function (e) {
+            let allValid = true;
+
+            fields.forEach(id => {
+                if (!validateField(id)) allValid = false;
+            });
+
+            if (!validateProfilePic()) allValid = false;
+
+            if (!validateCertificate("cert1", true)) allValid = false;
+            if (!validateCertificate("cert2")) allValid = false;
+            if (!validateCertificate("cert3")) allValid = false;
+            if (!validateCertificate("cert4")) allValid = false;
+            if (!validateCertificate("cert5")) allValid = false;
+
+            if (!allValid) {
+                e.preventDefault();
+                alert("Please fix the highlighted errors before submitting.");
+            }
+        });
+
     });
 </script>
-
 {% if messages %}
-  {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-    </div>
-  {% endfor %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">
+    {{ message }}
+</div>
+{% endfor %}
 {% endif %}
 {% endblock %}
