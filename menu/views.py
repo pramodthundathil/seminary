@@ -49,7 +49,10 @@ def menu_engineer(request, menu_id=None):
     menu_items = []
     if menu:
         menu_items = MenuItems.objects.filter(
-            menus=menu, 
+            # menus=menu, 
+            # menus_id = models.IntegerField(db_column='menus_id'),
+            menus_id=menu.id,
+
             deleted_at__isnull=True
         ).order_by('menu_order')
     
@@ -129,7 +132,7 @@ def save_menu_items(request):
         
         with transaction.atomic():
             # Delete existing items
-            MenuItems.objects.filter(menus=menu).update(deleted_at=timezone.now())
+            MenuItems.objects.filter(menus_id=menu.id).update(deleted_at=timezone.now())
             
             # Create new items
             for idx, item_data in enumerate(items_data):
@@ -173,7 +176,7 @@ def delete_menu(request, menu_id):
         menu.save()
         
         # Also delete menu items
-        MenuItems.objects.filter(menus=menu).update(deleted_at=timezone.now())
+        MenuItems.objects.filter(menus_id=menu.id).update(deleted_at=timezone.now())
         
         return JsonResponse({
             'success': True,
@@ -515,7 +518,12 @@ def media_datatable(request):
     data = []
     for media in media_query:
         # Get proper URLs
-        file_url = media.file_path.url if media.file_path else ''
+        # file_url = media.file_path.url if media.file_path else ''
+        try:
+            file_url = media.file_path.url if media.file_path else ''
+        except:
+            file_url = ""   # avoid S3 error locally
+
         thumb_url = media.thumb_file_path if media.thumb_file_path else file_url
         
         # Determine file icon/preview
@@ -830,7 +838,9 @@ def slider_datatable(request):
         order_column = f'-{order_column}'
 
     # Query sliders
-    sliders = Sliders.objects.annotate(photo_count=Count('photos'))
+    # sliders = Sliders.objects.annotate(photo_count=Count('photos'))
+    sliders = Sliders.objects.annotate(photo_count=Count('sliders_photos'))
+
     
     # Apply search
     if search_value:
@@ -1211,7 +1221,9 @@ def course_datatable(request):
             order_column = f'-{order_column}'
 
         # Query courses
-        courses = Courses.objects.select_related('media')
+        # courses = Courses.objects.select_related('media')
+        courses = Courses.objects.all()
+
         
         # Apply status filter
         if status_filter:
@@ -1514,7 +1526,7 @@ def student_datatable(request):
         course_filter = request.GET.get('course', '')
         
         # Base queryset
-        students = Students.objects.select_related('user', 'language').all()
+        students = Students.objects.select_related('user_id', 'language_id').all()
         
         # Apply filters
         if status_filter:
@@ -1589,7 +1601,7 @@ def student_datatable(request):
                     </span>
                 </div>
             '''
-            
+            safe_name=full_name.replace("'", "\\'")
             # Actions - responsive
             actions_html = f'''
                 <div class="action-buttons">
@@ -1612,7 +1624,7 @@ def student_datatable(request):
                         <i class="fas fa-{'times-circle' if student.status else 'check-circle'}"></i>
                         <span class="btn-text">{'Disapprove' if student.status else 'Approve'}</span>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteStudent({student.id}, '{full_name.replace("'", "\\'")}  ')" title="Delete Student">
+                    <button class="btn-action btn-delete" onclick="deleteStudent({student.id}, '{safe_name}  ')" title="Delete Student">
                         <i class="fas fa-trash"></i>
                         <span class="btn-text">Delete</span>
                     </button>
