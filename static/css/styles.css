@@ -672,17 +672,316 @@ footer i {
     /* reduce */
 }
 
-/* ================================
-   SCHOLARSHIP PAGE STYLES
-   ================================ */
-.admission-section .content-box p {
+/*==============================*/
+/* Scholarship Page Styles */
+/*=============================*/
+
+/* Page Header - Same as Fees */
+.scholarship-section .section-title {
+    padding-top: 4rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+/* Main Section */
+.scholarship-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+/* Intro Section - Same styling as fees */
+.scholarship-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.scholarship-section .intro-section p {
     color: #4b5563;
     font-size: 0.95rem;
     line-height: 1.75;
-    padding: 1rem 2rem;
-    background: #f0f9ff;
-    border-left: 4px solid #00CED1;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.scholarship-section .intro-section .step-link {
+    color: #A78BFA;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.scholarship-section .intro-section .step-link:hover {
+    color: #8B5CF6;
+    text-decoration: underline;
+}
+
+/* Process Steps Section */
+.scholarship-section .process-steps {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: #f8f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #A78BFA;
+}
+
+.scholarship-section .about-subtitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00B8BB;
+    margin-bottom: 1.5rem;
+}
+
+.scholarship-section .process-steps>p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* Admission Steps List - Enhanced Styling */
+.scholarship-section .admission-steps-list {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-left: 0;
+    margin-top: 2rem;
+}
+
+.scholarship-section .admission-steps-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 1.2rem 1.5rem 1.2rem 4rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
     border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    border: 1px solid #e8e8e8;
+    text-align: left;
+}
+
+.scholarship-section .admission-steps-list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+    border-color: #A78BFA;
+}
+
+.scholarship-section .admission-steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Content Box - Important Note */
+.scholarship-section .content-box {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2rem 2rem;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff5eb 100%);
+    border-radius: 10px;
+    border: 1px solid #ffe4cc;
+    border-left: 4px solid #ff9f43;
+    text-align: left;
+}
+
+.scholarship-section .content-box p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+.scholarship-section .content-box strong {
+    color: #ff9f43;
+    font-weight: 700;
+}
+
+/* Call to Action Section */
+.scholarship-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.scholarship-section .cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.scholarship-section .cta-content>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: left;
+}
+
+.scholarship-section .btn-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: #ffffff;
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.scholarship-section .btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: #f8f9ff;
+}
+
+.scholarship-section .btn-cta i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .scholarship-section {
+        padding: 3rem 0;
+    }
+
+    .scholarship-section .section-title {
+        font-size: 1.75rem;
+    }
+
+    .scholarship-section .process-steps {
+        padding: 2rem 1.5rem;
+    }
+
+    .scholarship-section .about-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .scholarship-section .admission-steps-list li {
+        padding: 1rem 1rem 1rem 3.5rem;
+        font-size: 0.9rem;
+    }
+
+    .scholarship-section .admission-steps-list li::before {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+        left: 1rem;
+    }
+
+    .scholarship-section .content-box {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .scholarship-section .cta-content {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .scholarship-section .cta-title {
+        font-size: 1.6rem;
+    }
+
+    .scholarship-section .btn-cta {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .scholarship-section .section-title {
+        font-size: 1.5rem;
+    }
+
+    /* Add this to the main intro section styles */
+    .scholarship-section .intro-section p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .process-steps>p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1.5rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .content-box p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 0;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .process-steps {
+        padding: 1.5rem 1rem;
+    }
+
+    .scholarship-section .admission-steps-list li {
+        padding: 0.9rem 0.8rem 0.9rem 3rem;
+        font-size: 0.85rem;
+    }
+
+    .scholarship-section .admission-steps-list li::before {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+        left: 0.8rem;
+    }
+
+    .scholarship-section .cta-content {
+        padding: 2rem 1.2rem;
+    }
+
+    .scholarship-section .cta-title {
+        font-size: 1.4rem;
+    }
+
+    .scholarship-section .cta-content>p {
+        font-size: 0.95rem;
+    }
+
+    .scholarship-section .btn-cta {
+        padding: 0.85rem 1.8rem;
+        font-size: 0.95rem;
+    }
 }
 
 
@@ -876,6 +1175,24 @@ footer i {
     border: 1px solid #e8ecff;
     /* Subtle border */
 }
+.fees-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+.fees-section .cta-content>p {
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: center;
+}
 
 .contact-cta p {
     font-size: 1.05rem;
@@ -886,7 +1203,7 @@ footer i {
 
 .contact-link {
     display: inline-block;
-    color: #A78BFA;
+    color: cyan;
     font-weight: 600;
     font-size: 1.05rem;
     text-decoration: none;
@@ -894,7 +1211,7 @@ footer i {
 }
 
 .contact-link:hover {
-    color: #8B5CF6;
+    color: #0a7c64;
     transform: translateX(5px);
 }
 
@@ -963,6 +1280,7 @@ footer i {
     }
 
 }
+
 /* ================================
    MODERN PAYMENT FORM STYLES
    ================================ */
@@ -973,9 +1291,11 @@ footer i {
     margin: 0;
     padding: 0;
 }
+
 /* Error message styling */
 .error-message {
-    color: #dc3545; /* Bootstrap red color */
+    color: #dc3545;
+    /* Bootstrap red color */
     font-size: 0.85rem;
     margin-top: 0.25rem;
     display: block;
@@ -1840,7 +2160,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
+    background-image:
         radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
     pointer-events: none;
@@ -1860,7 +2180,7 @@ body {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
     border-radius: 24px;
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.5) inset;
     overflow: hidden;
@@ -1873,6 +2193,7 @@ body {
         opacity: 0;
         transform: translateY(-40px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1900,8 +2221,13 @@ body {
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .header-content {
@@ -1960,17 +2286,32 @@ body {
     animation: fadeInUp 0.6s ease-out backwards;
 }
 
-.form-section:nth-child(1) { animation-delay: 0.1s; }
-.form-section:nth-child(2) { animation-delay: 0.15s; }
-.form-section:nth-child(3) { animation-delay: 0.2s; }
-.form-section:nth-child(4) { animation-delay: 0.25s; }
-.form-section:nth-child(5) { animation-delay: 0.3s; }
+.form-section:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.form-section:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.form-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.form-section:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.form-section:nth-child(5) {
+    animation-delay: 0.3s;
+}
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2103,7 +2444,7 @@ body {
     outline: none;
     border-color: #2563EB;
     background: #ffffff;
-    box-shadow: 
+    box-shadow:
         0 0 0 4px rgba(37, 99, 235, 0.1),
         0 4px 12px rgba(37, 99, 235, 0.15);
     transform: translateY(-1px);
@@ -2214,7 +2555,7 @@ body {
     accent-color: #2563EB;
 }
 
-.checkbox-label input[type="checkbox"]:checked + span {
+.checkbox-label input[type="checkbox"]:checked+span {
     color: #2563EB;
     font-weight: 600;
 }
@@ -2235,10 +2576,23 @@ body {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    50% { transform: translateX(8px); }
-    75% { transform: translateX(-8px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    50% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-8px);
+    }
 }
 
 .input-valid {
@@ -2338,6 +2692,7 @@ body {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2441,8 +2796,15 @@ body {
 
 /* Loading Animation */
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 .form-field input:disabled,
@@ -2575,6 +2937,7 @@ body {
     color: #dc3545;
     margin-top: 0.25rem;
 }
+
 .section-header {
     display: flex;
     align-items: center;
@@ -2715,4 +3078,355 @@ body {
     .recaptcha-right {
         text-align: center;
     }
+}
+
+
+/*  Academic Programmes :- Enable submenu open on hover/click */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: 0.1rem;
+    margin-right: 0.1rem;
+}
+
+
+/*==============================*/
+/* Admission Process Page Styles */
+/*=============================*/
+
+/* Page Header - Same as Scholarship */
+.admission-section .section-title {
+    padding-top: 4rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+/* Main Section */
+.admission-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+/* Intro Section - Same styling as scholarship */
+.admission-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.admission-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.admission-section .intro-section .step-link {
+    color: #A78BFA;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.admission-section .intro-section .step-link:hover {
+    color: #8B5CF6;
+    text-decoration: underline;
+}
+
+/* Process Steps Section */
+.admission-section .process-steps {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: #f8f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #A78BFA;
+}
+
+.admission-section .about-subtitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00B8BB;
+    margin-bottom: 1.5rem;
+}
+
+.admission-section .process-steps>p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* Admission Steps List - Enhanced Styling */
+.admission-section .admission-steps-list {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-left: 0;
+    margin-top: 2rem;
+}
+
+.admission-section .admission-steps-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 1.2rem 1.5rem 1.2rem 4rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    border: 1px solid #e8e8e8;
+    text-align: left;
+}
+
+.admission-section .admission-steps-list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+    border-color: #A78BFA;
+}
+
+.admission-section .admission-steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Content Box - Important Note */
+.admission-section .content-box {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2rem 2rem;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff5eb 100%);
+    border-radius: 10px;
+    border: 1px solid #ffe4cc;
+    border-left: 4px solid #ff9f43;
+    text-align: left;
+}
+
+.admission-section .content-box p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+.admission-section .content-box strong {
+    color: #ff9f43;
+    font-weight: 700;
+}
+
+/* Call to Action Section */
+.admission-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.admission-section .cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.admission-section .cta-content>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: left;
+}
+
+.admission-section .btn-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: #ffffff;
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admission-section .btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: #f8f9ff;
+}
+
+.admission-section .btn-cta i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admission-section {
+        padding: 3rem 0;
+    }
+
+    .admission-section .section-title {
+        font-size: 1.75rem;
+    }
+
+    .admission-section .process-steps {
+        padding: 2rem 1.5rem;
+    }
+
+    .admission-section .about-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .admission-section .admission-steps-list li {
+        padding: 1rem 1rem 1rem 3.5rem;
+        font-size: 0.9rem;
+    }
+
+    .admission-section .admission-steps-list li::before {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+        left: 1rem;
+    }
+
+    .admission-section .content-box {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .admission-section .cta-content {
+        padding: 2.5rem 1.5rem;        
+    }
+    .admission-section .cta-content p {
+       text-align: center;     
+    }
+
+
+    .admission-section .cta-title {
+        font-size: 1.6rem;
+    }
+
+    .admission-section .btn-cta {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admission-section .section-title {
+        font-size: 1.5rem;
+    }
+
+    /* Add this to the main intro section styles */
+    .admission-section .intro-section p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .process-steps>p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1.5rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .content-box p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 0;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .process-steps {
+        padding: 1.5rem 1rem;
+    }
+
+    .admission-section .admission-steps-list li {
+        padding: 0.9rem 0.8rem 0.9rem 3rem;
+        font-size: 0.85rem;
+    }
+
+    .admission-section .admission-steps-list li::before {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+        left: 0.8rem;
+    }
+
+    .admission-section .cta-content {
+        padding: 2rem 1.2rem;
+    }
+
+    .admission-section .cta-title {
+        font-size: 1.4rem;
+    }
+
+    .admission-section .cta-content>p {
+        font-size: 0.95rem;
+    }
+
+    .admission-section .btn-cta {
+        padding: 0.85rem 1.8rem;
+        font-size: 0.95rem;
+    }
+}
+
+/*Admission-process styling
+/* Call to Action Section */
+.scholarship-section .cta-contents {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.scholarship-section .cta-contents>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: center;
 }
