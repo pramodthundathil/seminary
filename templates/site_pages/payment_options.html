@@ -1,4 +1,5 @@
 {% extends "site_pages/index.html" %}
+{% load static %}
 
 {% block title %}
 <title>Payment - Trinity Theological Seminary</title>
@@ -6,257 +7,210 @@
 
 {% block content %}
 <!-- Payment Form Section -->
-<section class="about-section payment-section">
-    <div class="container">
-        <h2 class="section-title">Make a <span class="highlight">Payment</span></h2>
-
-        <div class="intro-section">
-            <p>
-                Complete the form below to process your payment. All fields marked with <span class="required">*</span> are required. 
-                For questions regarding payments, please contact our admissions office.
-            </p>
-        </div>
-
-        <!-- Payment Form -->
-        <div class="payment-form-wrapper">
-            
-            <form method="POST" action="" class="payment-form" novalidate>
-                {% csrf_token %}
-
-                <!-- Personal Information Section -->
-                <div class="form-section">
-                     <div class="section-header">
-                        <i class="fas fa-referee"></i> PERSONAL INFORMATION
-                    </div>
-                    
-                    <!-- Row 1: First Name, Middle Name, Last Name -->
-                    <div class="form-row form-row-3">
-                        <div class="form-group">
-                            <label for="first_name">Full Name <span class="required">*</span></label>
-                            <input 
-                                type="text" 
-                                id="first_name" 
-                                name="first_name" 
-                                placeholder="Enter your fullname"
-                                autocomplete="given-name"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>                  
-                        
-                    </div>
-
-                    <!-- Row 2: Email and Contact Number -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="email">Email Address <span class="required">*</span></label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="example@email.com"
-                                autocomplete="email"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="contact">Contact Number <span class="required">*</span></label>
-                            <input 
-                                type="tel" 
-                                id="contact" 
-                                name="contact" 
-                                placeholder="+1 (555) 123-4567"
-                                autocomplete="tel"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Student ID (if applicable) -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="student_id">Student ID <span class="optional-text">(if applicable)</span></label>
-                            <input 
-                                type="text" 
-                                id="student_id" 
-                                name="student_id"
-                                placeholder="Enter your student ID">
-                            <small class="field-help">Leave blank if you're not currently enrolled</small>
-                        </div>
-                    </div>
+<section class="application-section-modern">
+    <div class="form-container-modern">
+        <div class="form-modal">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h2>Payment Form</h2>
                 </div>
+            </div>
 
-                <!-- Payment Details Section -->
-                <div class="form-section">
-                     <div class="section-header">
-                        <i class="fas fa-referee"></i> PAYMENT DETAILS
-                    </div>
-                    
-                    <!-- Row 4: Payment Type and Course -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="payment_type">Payment Type <span class="required">*</span></label>
-                            <select 
-                                id="payment_type" 
-                                name="payment_type" 
-                                required
-                                aria-required="true">
-                                <option value="">--- Select Payment Type ---</option>
-                                <option value="tuition">Tuition Fee</option>
-                                <option value="enrollment">Enrollment Fee</option>
-                                <option value="application">Application Fee</option>
-                                <option value="course">Course Fee</option>
-                                <option value="library">Library Fee</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="course">Course/Program</label>
-                            <select id="course" name="course">
-                                <option value="">--- Select Program Level ---</option>
-                                <option value="undergraduate">Undergraduate Level</option>
-                                <option value="masters">Master's Level</option>
-                                <option value="doctoral">Doctoral Level</option>
-                                <option value="certificate">Certificate Program</option>
-                                <option value="continuing">Continuing Education</option>
-                            </select>
-                            <small class="field-help">Select if payment is for a specific program</small>
-                        </div>
-                    </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
 
-                    <!-- Row 5: Amount -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="amount">Payment Amount <span class="required">*</span></label>
-                            <div class="amount-input-wrapper">
-                                <span class="currency-symbol">$</span>
-                                <input 
-                                    type="number" 
-                                    id="amount" 
-                                    name="amount" 
-                                    step="0.01" 
-                                    min="1"
-                                    placeholder="0.00"
-                                    required
-                                    aria-required="true">
+                <form method="POST" action="" class="modern-form" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-user"></i>
+                            <h3>Personal Information</h3>
+                        </div>
+
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="full_name">Full Name <span class="required">*</span></label>
+                                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name"
+                                    required>
                             </div>
-                            <span class="error-message" role="alert"></span>
+                            <div class="form-field">
+                                <label for="email">Email Address <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                                <small class="error-message"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="contact">Contact Number <span class="required">*</span></label>
+                                <input type="tel" id="contact" name="contact" placeholder="+1 (555) 123-4567" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="student_id">Student ID <span class="optional-text">(if
+                                        applicable)</span></label>
+                                <input type="text" id="student_id" name="student_id"
+                                    placeholder="Enter your student ID">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Additional Information Section -->
-                <div class="form-section">
-                     <div class="section-header">
-                        <i class="fas fa-referee"></i> ADDITIONAL INFORMATION
-                    </div>
-                    
-                    <!-- Message/Notes -->
-                    <div class="form-group full-width">
-                        <label for="message">Message/Notes <span class="optional-text">(Optional)</span></label>
-                        <textarea 
-                            id="message" 
-                            name="message" 
-                            rows="5"
-                            placeholder="Add any additional information or special instructions here..."
-                            maxlength="500"></textarea>
-                        <small class="character-count">0 / 500 characters</small>
-                    </div>
-                </div>
+                    <!-- Payment Details Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-credit-card"></i>
+                            <h3>Payment Details</h3>
+                        </div>
 
-                <!-- Submit Button -->                 
-                <div class="form-submit">
-                    <button type="submit" class="btn-apply-submit">
-                        <span class="btn-text">PROCEED TO PAYMENT</span>
-                        <span class="btn-icon">→</span>
-                    </button>
-                </div>
-            </form>
+                        <div class="form-row-modern">
+                            <div class="form-field">
+                                <label for="payment_type">Payment Type <span class="required">*</span></label>
+                                <select id="payment_type" name="payment_type" required>
+                                    <option value="">--- Select Payment Type ---</option>
+                                    <option value="tuition">Tuition Fee</option>
+                                    <option value="enrollment">Enrollment Fee</option>
+                                    <option value="application">Application Fee</option>
+                                    <option value="course">Course Fee</option>
+                                    <option value="library">Library Fee</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="course">Course/Program</label>
+                                <select id="course" name="course">
+                                    <option value="">--- Select Program Level ---</option>
+                                    <option value="undergraduate">Undergraduate Level</option>
+                                    <option value="masters">Master's Level</option>
+                                    <option value="doctoral">Doctoral Level</option>
+                                    <option value="certificate">Certificate Program</option>
+                                    <option value="continuing">Continuing Education</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-modern">
+                            <div class="form-field full-width">
+                                <label for="amount">Payment Amount <span class="required">*</span></label>
+                                <div class="amount-input-wrapper">
+                                    <span class="currency-symbol">$</span>
+                                    <input type="number" id="amount" name="amount" step="0.01" min="1"
+                                        placeholder="0.00" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Additional Information</h3>
+                        </div>
+
+                        <div class="form-field full-width">
+                            <label for="message">Message/Notes <span class="optional-text">(Optional)</span></label>
+                            <textarea id="message" name="message" rows="5"
+                                placeholder="Add any additional information or special instructions..."></textarea>
+                            <small class="character-count">0 / 500 characters</small>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-paper-plane"></i> Proceed to Payment
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 </section>
-
 <script>
-// Form validation and UX enhancements
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.payment-form');
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.modern-form');
+    const cancelBtn = form.querySelector('.btn-cancel');
+    const charCount = form.querySelector('.character-count');
     const messageTextarea = document.getElementById('message');
-    const charCount = document.querySelector('.character-count');
-    
-    // Character counter for textarea
-    if (messageTextarea && charCount) {
-        messageTextarea.addEventListener('input', function() {
-            const count = this.value.length;
-            charCount.textContent = `${count} / 500 characters`;
-            if (count > 450) {
-                charCount.style.color = '#dc3545';
-            } else {
-                charCount.style.color = '#666';
-            }
+
+    const requiredFields = ['full_name', 'email', 'contact', 'payment_type', 'amount'];
+
+    // Email regex (more robust)
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    // Cancel button resets form
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function () {
+            form.reset();
+            if (charCount) charCount.textContent = '0 / 500 characters';
+
+            form.querySelectorAll('.error').forEach(f => f.classList.remove('error'));
+            form.querySelectorAll('.error-message').forEach(e => e.textContent = '');
         });
     }
-    
-    // Real-time validation
-    const inputs = form.querySelectorAll('input[required], select[required]');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            validateField(this);
+
+    // Character counter
+    if (messageTextarea && charCount) {
+        messageTextarea.addEventListener('input', function () {
+            const count = this.value.length;
+            charCount.textContent = `${count} / 500 characters`;
+            charCount.style.color = count > 450 ? '#dc3545' : '#666';
         });
-        
-        input.addEventListener('input', function() {
-            if (this.classList.contains('error')) {
-                validateField(this);
-            }
-        });
-    });
-    
-    // Form submission validation
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        let isValid = true;
-        
-        inputs.forEach(input => {
-            if (!validateField(input)) {
-                isValid = false;
-            }
-        });
-        
-        if (isValid) {
-            // Submit the form
-            this.submit();
-        } else {
-            // Scroll to first error
-            const firstError = form.querySelector('.error');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
-    
+    }
+
+    // Field validation
     function validateField(field) {
+        const value = field.value.trim();
         const errorSpan = field.parentElement.querySelector('.error-message');
         let isValid = true;
         let errorMessage = '';
-        
-        if (field.hasAttribute('required') && !field.value.trim()) {
+
+        // Required
+        if (requiredFields.includes(field.id) && !value) {
             isValid = false;
             errorMessage = 'This field is required';
-        } else if (field.type === 'email' && field.value) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(field.value)) {
+        }
+
+        // Email validation
+        if (field.id === 'email' && value) {
+            if (!emailPattern.test(value)) {
                 isValid = false;
                 errorMessage = 'Please enter a valid email address';
             }
-        } else if (field.type === 'number' && field.value) {
-            if (parseFloat(field.value) < 1) {
+        }
+
+        // Phone validation
+        if (field.id === 'contact' && value) {
+            const digits = value.replace(/\D/g, '');
+            if (!/^\d{7,15}$/.test(digits)) {
+                isValid = false;
+                errorMessage = 'Phone number must be 7–15 digits';
+            }
+        }
+
+        // Amount validation
+        if (field.id === 'amount' && value) {
+            if (parseFloat(value) < 1) {
                 isValid = false;
                 errorMessage = 'Amount must be at least $1.00';
             }
         }
-        
+
+        // Show/hide error
         if (!isValid) {
             field.classList.add('error');
             if (errorSpan) {
@@ -270,27 +224,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorSpan.style.display = 'none';
             }
         }
-        
+
         return isValid;
     }
-    
-    // Phone number formatting (basic)
+
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', () => validateField(input));
+        input.addEventListener('input', () => {
+            if (input.classList.contains('error')) validateField(input);
+        });
+    });
+
+    // Phone formatting
     const phoneInput = document.getElementById('contact');
     if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
+        phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 10) value = value.slice(0, 10);
-            
             if (value.length >= 6) {
-                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
+                e.target.value = `(${value.slice(0,3)}) ${value.slice(3,6)}-${value.slice(6)}`;
             } else if (value.length >= 3) {
-                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                e.target.value = `(${value.slice(0,3)}) ${value.slice(3)}`;
             } else {
                 e.target.value = value;
             }
         });
     }
+
+    // Submit validation
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        let isFormValid = true;
+        inputs.forEach(input => {
+            if (!validateField(input)) isFormValid = false;
+        });
+
+        if (isFormValid) {
+            this.submit();
+        } else {
+            const firstError = form.querySelector('.error');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
 });
 </script>
-
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
 {% endblock %}

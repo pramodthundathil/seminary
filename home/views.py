@@ -89,18 +89,11 @@ def new_admission_form(request):
     """
     
     # Debug logging
-    logger.info(f"Request method: {request.method}")
-    # Get all countries for dropdown
-    countries = Countries.objects.all().order_by('name')  # sort alphabetically
-
-    # Get all courses for dropdown
-    courses = Courses.objects.all().order_by('course_name')
-
-    # Get all courses for dropdown
-    languages = Languages.objects.all().order_by('language_name')    
+    logger.info(f"Request method: {request.method}")  
+    # Determine the user (if logged in)
+    user_obj = request.user if request.user.is_authenticated else None
     
     if request.method == "POST":
-        
         logger.info(f"POST data received: {list(request.POST.keys())}")
         logger.info(f"FILES received: {list(request.FILES.keys())}")
 
@@ -110,10 +103,10 @@ def new_admission_form(request):
         try:
             first_name = request.POST.get("first_name")
             middle_name = request.POST.get("middle_name")
-            last_name = request.POST.get("last_name")
+            last_name = request.POST.get("last_name")            
             email = request.POST.get("email")
             gender = request.POST.get("gender")
-            citizenship_str = request.POST.get("citizenship")  # String from form
+            citizenship_str = request.POST.get("citizenship")
             phone_code = request.POST.get("country_code")
             phone = request.POST.get("phone")
             dob = request.POST.get("dob")
@@ -123,11 +116,11 @@ def new_admission_form(request):
             mailing_address = request.POST.get("mailing_address")
             city = request.POST.get("city")
             state = request.POST.get("state")
-            country_str = request.POST.get("country")  # String from form
+            country_str = request.POST.get("country")
             zipcode = request.POST.get("zipcode")
             timezone_str = request.POST.get("timezone")
             education = request.POST.get("education")
-            course_str = request.POST.get("course")  # String from form
+            course_str = request.POST.get("course")
             language = request.POST.get("language")
             starting_year = request.POST.get("start_year")
             ministerial_status = request.POST.get("ministerial_status")
@@ -138,19 +131,17 @@ def new_admission_form(request):
             afford = request.POST.get("afford")
             message = request.POST.get("message")
 
-            # Reference information
+            # References
             ref1_name = request.POST.get("ref1_name")
             ref1_email = request.POST.get("ref1_email")
             ref1_phone = request.POST.get("ref1_phone")
-
             ref2_name = request.POST.get("ref2_name")
             ref2_email = request.POST.get("ref2_email")
             ref2_phone = request.POST.get("ref2_phone")
-
             ref3_name = request.POST.get("ref3_name")
             ref3_email = request.POST.get("ref3_email")
             ref3_phone = request.POST.get("ref3_phone")
-            
+
             logger.info("Form data read successfully")
 
         except Exception as e:
@@ -187,15 +178,10 @@ def new_admission_form(request):
             # Convert course string to Course OBJECT
             course_obj = None
             if course_str:
-                # Try to match by course_code or course_name
-                course_obj = Courses.objects.filter(
-                    Q(course_code__iexact=course_str) | 
-                    Q(course_name__icontains=course_str)
-                ).first()
-                
-                if course_obj:
-                    logger.info(f" Course converted: {course_str} -> {course_obj.course_name} (ID: {course_obj.id})")
-                else:
+                try:
+                    course_obj = Courses.objects.get(id=int(course_str))
+                    logger.info(f"Course converted: {course_str} -> {course_obj.course_name} (ID: {course_obj.id})")
+                except Courses.DoesNotExist:
                     logger.warning(f"Course not found: {course_str}")
                     messages.warning(request, f"Course '{course_str}' not found in database. Please contact admin.")
 
@@ -302,6 +288,7 @@ def new_admission_form(request):
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
+                user_id = user_obj,
                 email=email,
                 gender=gender,
                 citizenship=citizenship_obj,  # Pass OBJECT not string/ID
@@ -385,72 +372,109 @@ def new_admission_form(request):
         # -------------------------------
         logger.info(f" Application submitted successfully for {first_name} {last_name}")
         messages.success(request, "Your application has been submitted successfully!")
-        return redirect("new_admission_form")
+        return redirect("new_admission_form")  # <--- POST/Redirect/GET
 
     # Default GET
     logger.info("Rendering new admission form (GET request)")
-    return render(request, "site_pages/new_admission_form.html",
-        {"countries": countries,
-         "courses": courses,
-         "languages":languages,})
+    return render(request, "site_pages/new_admission_form.html", {
+        "countries": Countries.objects.all(),
+        "courses": Courses.objects.all(),
+        "languages": Languages.objects.all(),        
+    })
 
 
-def reference_form(request):    
+def reference_form(request):
+    # -------------------------------
+    # Reference Details of the student
+    # -------------------------------
+    try:        
+        logger.info("Countries fetched successfully for dropdown")
+    except Exception as e:
+        logger.error(f"Error fetching countries: {e}", exc_info=True)
+        messages.error(request, "Could not load country list. Please try again later.")
+        countries = []
+
+    # -------------------------------
+    # Handle POST request
+    # -------------------------------
     if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        middle_name = request.POST.get("middle_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        contact = request.POST.get("contact")
-        nationality = request.POST.get("nationality")
+        try:
+            # -------------------------------
+            # Get form data
+            # -------------------------------
+            first_name = request.POST.get("first_name")
+            middle_name = request.POST.get("middle_name")
+            last_name = request.POST.get("last_name")
+            email = request.POST.get("email")
+            contact = request.POST.get("contact")
+            nationality = request.POST.get("nationality")
 
-        applicant_name = request.POST.get("applicant_name")
-        relationship = request.POST.get("relationship")
-        known_since = request.POST.get("known_since")
+            applicant_name = request.POST.get("applicant_name")
+            relationship = request.POST.get("relationship")
+            known_since = request.POST.get("known_since")
 
-        spiritual_commitment = request.POST.get("spiritual_commitment")
-        learning_capacity = request.POST.get("learning_capacity")
-        dedication = request.POST.get("dedication")
-        leadership = request.POST.get("leadership")
-        church_involvement = request.POST.get("church_involvement")
-        biblical_knowledge = request.POST.get("biblical_knowledge")
-        moral_standard = request.POST.get("moral_standard")
-        recommendation = request.POST.get("recommendation")
-        financial_condition = request.POST.get("financial_condition")
+            spiritual_commitment = request.POST.get("spiritual_commitment")
+            learning_capacity = request.POST.get("learning_capacity")
+            dedication = request.POST.get("dedication")
+            leadership = request.POST.get("leadership")
+            church_involvement = request.POST.get("church_involvement")
+            biblical_knowledge = request.POST.get("biblical_knowledge")
+            moral_standard = request.POST.get("moral_standard")
+            recommendation = request.POST.get("recommendation")
+            financial_condition = request.POST.get("financial_condition")
 
-        comments = request.POST.get("comments")
+            comments = request.POST.get("comments")
 
-        # Save to DB
-        ReferenceForm.objects.create(
-            first_name=first_name,
-            middle_name=middle_name,
-            last_name=last_name,
-            email=email,
-            contact_number=contact,
-            nationality=nationality,
+            logger.info(f"Received Reference Form submission from {first_name} {last_name}")
 
-            applicant_name=applicant_name,
-            relation_with_applicant=relationship,
-            since_know_applicant=known_since,
+            # -------------------------------
+            # Save to database
+            # -------------------------------
+            try:
+                ReferenceForm.objects.create(
+                    first_name=first_name,
+                    middle_name=middle_name,
+                    last_name=last_name,
+                    email=email,
+                    contact_number=contact,
+                    nationality=nationality,
 
-            spiritual_commitment=spiritual_commitment,
-            learning_capacity=learning_capacity,
-            dedication_for_loard=dedication,
-            leadership_skills=leadership,
-            church_involvement=church_involvement,
-            biblical_knowledge=biblical_knowledge,
-            moral_standard=moral_standard,
-            how_do_you_recommend=recommendation,
-            financial_condition=financial_condition,
+                    applicant_name=applicant_name,
+                    relation_with_applicant=relationship,
+                    since_know_applicant=known_since,
 
-            personal_comment=comments
-        )
+                    spiritual_commitment=spiritual_commitment,
+                    learning_capacity=learning_capacity,
+                    dedication_for_loard=dedication,
+                    leadership_skills=leadership,
+                    church_involvement=church_involvement,
+                    biblical_knowledge=biblical_knowledge,
+                    moral_standard=moral_standard,
+                    how_do_you_recommend=recommendation,
+                    financial_condition=financial_condition,
 
-        messages.success(request, "Reference Form submitted successfully!")
-        return redirect("reference_form")
+                    personal_comment=comments
+                )
+                logger.info(f"Reference Form saved successfully for {first_name} {last_name}")
+                messages.success(request, "Reference Form submitted successfully!")
+                return redirect("reference_form")
+            except Exception as e:
+                logger.error(f"Error saving Reference Form: {e}", exc_info=True)
+                messages.error(request, f"Could not save form: {e}")
+        
+        except Exception as e:
+            logger.error(f"Error processing Reference Form submission: {e}", exc_info=True)
+            messages.error(request, f"Error processing form: {e}")
 
-    return render(request, "site_pages/reference_form.html")    
-
+    # -------------------------------
+    # Default GET request
+    # -------------------------------
+    try:
+        return render(request, "site_pages/reference_form.html", {"countries": Countries.objects.all()})
+    except Exception as e:
+        logger.error(f"Error rendering reference form page: {e}", exc_info=True)
+        messages.error(request, "Could not load the reference form page.")
+        return render(request, "site_pages/reference_form.html")
 def payment_options(request):
     return render(request,"site_pages/payment_options.html")
 

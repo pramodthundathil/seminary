@@ -432,7 +432,7 @@
                             <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
                             <p>Online mode of course completion saving time and money for aspirants.</p>
                             <!-- <button class="learn-more-btn">Learn More</button> -->
-                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
                         </div>
                     </div>
                 </div>
@@ -451,7 +451,7 @@
                                     THEOLOGY.</span></h2>
                             <p>From certificate and diploma to master's courses available.</p>
                             <!-- <button class="learn-more-btn">Learn More</button> -->
-                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
                         </div>
                     </div>
                 </div>
@@ -469,7 +469,7 @@
                             <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
                             <p>Online mode of course completion saving time and money for aspirants.</p>
                             <!-- <button class="learn-more-btn">Learn More</button> -->
-                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
                         </div>
                     </div>
                 </div>
@@ -955,7 +955,23 @@ messages.info(request, 'Please verify your email.')
 -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    
+    <script>
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
+            element.addEventListener("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                let submenu = this.nextElementSibling;
+                submenu.classList.toggle('show');
+
+                // close other open submenus
+                let siblings = this.parentElement.parentElement.querySelectorAll(".dropdown-menu.show");
+                siblings.forEach(function (submenuItem) {
+                    if (submenuItem !== submenu) submenuItem.classList.remove('show');
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>
