@@ -36,14 +36,36 @@ from .models import (
     StudentsAssignment,
     Pages,
     Languages,
-    Users
+    Users,
+    AdminPages
 )
-from .decorators import role_redirection
+
 
 
 # Set up logger
 logger = logging.getLogger(__name__)
 
+
+def student_home(request):
+    return render(request, "student/home.html")
+
+def student_subjects(request):
+    return render(request, "student/subjects.html")
+
+def student_view_post(request):
+    return render(request, "student/view_posts.html")
+
+def student_exam_hall(request):
+    return render(request, "student/exam_hall.html")
+
+def student_score_card(request):
+    return render(request, "student/score_card.html")
+
+def student_class_recordings(request):
+    return render(request, "student/class_recordings.html")
+
+def student_submitted_assignment(request):
+    return render(request, "student/submitted_assignment.html")
 
 
 def index(request): 
@@ -773,101 +795,7 @@ def admin_functions():
     print(AdminPages.objects.all())
 
 
-@role_redirection
-@login_required
-def admin_index(request):
-    # admin_functions()
-    # Get total students
-    total_students = Students.objects.filter(active=1).count()
-    admin_pages = AdminPages.objects.all().order_by('menu_order')
-    
-    # Get new students (last 30 days)
-    thirty_days_ago = datetime.now() - timedelta(days=30)
-    new_students = Students.objects.filter(
-        created_at__gte=thirty_days_ago,
-        active=1
-    ).order_by('-created_at')[:10]
-    
-    # Gender statistics
-    male_count = Students.objects.filter(gender='Male', active=1).count()
-    female_count = Students.objects.filter(gender='Female', active=1).count()
-    
-    if total_students > 0:
-        male_percentage = round((male_count / total_students) * 100)
-        female_percentage = round((female_count / total_students) * 100)
-        # Calculate SVG circle offsets (314 is circumference for r=50)
-        male_offset = 314 - (314 * male_percentage / 100)
-        female_offset = 314 - (314 * female_percentage / 100)
-    else:
-        male_percentage = female_percentage = 0
-        male_offset = female_offset = 314
-    
-    # Get courses with student count using course_applied field
-    courses_list = []
-    for course in Courses.objects.filter(status=1)[:6]:
-        # Count students who applied for this course
-        student_count = Students.objects.filter(
-            course_applied=course.id,
-            active=1
-        ).count()
-        
-        # Add student_count as an attribute to the course object
-        course.student_count = student_count
-        courses_list.append(course)
-    
-    # Get pending exam requests
-   
-    # Get recent references
-    references = ReferenceForm.objects.order_by('-created_at')[:10]
-    
-    # Get pending subject requests
-    
-    # Calculate assignments in progress
-    total_assignments = Assignments.objects.count()
-    completed_assignments = StudentsAssignment.objects.filter(
-        submitted_on__isnull=False
-    ).count()
-    
-    if total_assignments > 0:
-        tasks_in_progress = round(((total_assignments - completed_assignments) / total_assignments) * 100)
-    else:
-        tasks_in_progress = 0
-    
-    # Calculate total exams completed
-    total_exams_completed = StudentsExams.objects.filter(
-        is_exam_ended=1
-    ).count()
-    
-    # Attendance calculation (example - customize based on your logic)
-    # You can calculate this based on actual attendance records if you have them
-    total_classes = 100  # Example
-    attended_classes = 80  # Example
-    attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
-    
-    context = {
-        'total_students': total_students,
-        'new_students': new_students,
-        'male_count': male_count,
-        'female_count': female_count,
-        'male_percentage': male_percentage,
-        'female_percentage': female_percentage,
-        'male_offset': male_offset,
-        'female_offset': female_offset,
-        'courses': courses_list,
-        # 'exam_requests': exam_requests,
-        'references': references,
-        # 'subject_requests': subject_requests,
-        'attendance_percentage': attendance_percentage,
-        'tasks_in_progress': tasks_in_progress,
-        'total_exams_completed': total_exams_completed,
-        'students_start': 1,
-        'students_end': min(10, len(new_students)),
-        'subjects_start': 1,
-        # 'subjects_end': min(10, len(subject_requests)),
-        'admin_pages':admin_pages
-    }
-    
-    return render(request,"admin/index.html",context)
+
 
 @login_required
 def student_index(request):
