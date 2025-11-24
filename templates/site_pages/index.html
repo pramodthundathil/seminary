@@ -87,7 +87,7 @@
             position: relative;
             /* required for absolutely positioned frames inside */
             min-width: 220px;
-            height: 280px;
+            height: 350px;
             /* adjust as needed */
             display: flex;
             justify-content: center;
@@ -217,10 +217,11 @@
             align-items: center;
             gap: 40px;
             max-width: 900px;
-            height: 110px;
+            height: 120px;
             margin: 0 auto;
             overflow: visible;
             /* allow circles to show outside if any */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         /* Left decorative circle */
@@ -304,12 +305,10 @@
         }
 
         .stat-label {
-            font-size: 1.4rem;
-            font-weight: 900;
-            /* maximum bold */
-            color: #000000;
-            /* valid dark color */
-            margin-bottom: 4px;
+            font-size: 1rem !important;
+            font-weight: 900 !important;
+            color: #000000 !important;
+            margin-bottom: 8px !important;
         }
 
         /* Responsive Design */
@@ -372,6 +371,198 @@
 
             .stat-label {
                 font-size: 0.95rem;
+            }
+        }
+
+        /*course section*/
+
+        .courses-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #d7eaff;
+            /* light blue background */
+            padding: 60px 20px;
+            /* spacing so cards don’t touch edges */
+            border-radius: 20px;
+            /* optional: soft rounded corners */
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .section-title {
+            font-size: 35px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 0 !important;
+            margin-bottom: 20px !important;
+            text-align: center;
+            text-decoration: none !important;
+            border: none !important;
+            padding-top: 15px;
+        }
+
+        .section-title::after,
+        .section-title::before {
+            content: none !important;
+            /* removes decorative line under title */
+        }
+
+        .courses-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .course-card {
+            position: relative;
+            width: 360px;
+            padding: 40px 30px 30px;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            overflow: visible !important;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .course-blue {
+            background: linear-gradient(135deg, #a8e6e3 0%, #c8e6e3 100%);
+        }
+
+        .course-green {
+            background: linear-gradient(135deg, #a8d5a8 0%, #c1e1c1 100%);
+        }
+
+        .course-purple {
+            background: linear-gradient(135deg, #c8d5e8 0%, #d8e3f0 100%);
+        }
+
+        .badge-icon {
+            position: absolute;
+            top: -60px;
+            /* moves badge upward to the edge */
+            left: -45px;
+            /* moves badge to the left edge */
+            width: 70px;
+            height: 70px;
+
+            background:#d9d9d9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+            z-index: 10;
+            overflow: visible !important;
+            position: relative;
+        }
+
+        .badge-icon i {
+            font-size: 32px;
+            color: #ffc107;
+        }
+        /* INNER LIGHT BLUE CIRCLE */
+.badge-icon::after {
+    content: "";
+    position: absolute;
+    width: 55px;      /* Inner circle size */
+    height: 55px;
+    background:white; /* Light blue shade */
+    border-radius: 50%;
+    z-index: -1;      /* Keep it behind the image/icon */
+}
+
+        .course-img-container {
+            width: 80%;
+            height: 200px;
+            background: white;
+            border-radius: 40px;
+            overflow: hidden;
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            align-items: center;
+        }
+
+        .course-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .course-desc {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #34495e;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .btn-join {
+            background: #4169e1;
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-join:hover {
+            background: #3154c4;
+        }
+
+        /* Connector dots */
+        .dot-connector {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-top: 150px;
+        }
+
+        .dot-cyan {
+            background: #00bcd4;
+        }
+
+        .dot-red {
+            background: #f44336;
+        }
+
+        @media (max-width: 1200px) {
+            .courses-container {
+                gap: 20px;
+            }
+
+            .dot-connector {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+
+            .course-card {
+                width: 100%;
+                max-width: 400px;
             }
         }
     </style>
@@ -651,58 +842,65 @@
             </div>
         </div>
     </section>
+
     <!-- Courses Section -->
-    <section class="courses-section" id="courses">
-        <div class="container text-center">
-            <h2 class="section-title">Our Courses</h2>
+    <section class="courses-section">
+        <h2 class="section-title">Our Courses</h2>
 
-            <div class="row justify-content-center g-4 mt-4">
-                <!-- M.Div -->
-                <div class="col-md-4">
-                    <div class="course-card course-blue">
-                        <div class="badge-icon">
-                            <i class="fas fa-medal"></i>
-                        </div>
-                        <img src="{% static 'img/mdiv.jpg' %}" alt="M.Div" class="course-img">
-                        <h3 class="course-title">M.Div</h3>
-                        <p class="course-desc">
-                            Master of Divinity (M. Div) is used to define the study of different faiths and belief
-                            systems. In Christian theology, this degree prepares students to work as...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
+        <div class="courses-container">
+            <!-- M.Div Card -->
+            <div class="course-card course-blue">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
                 </div>
-                <!-- INTRODUCTION TO BIBLE -->
-                <div class="col-md-4">
-                    <div class="course-card course-green">
-                        <div class="badge-icon">
-                            <i class="fas fa-medal"></i>
-                        </div>
-                        <img src="{% static 'img/bible.png' %}" alt="Introduction to Bible" class="course-img">
-                        <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
-                        <p class="course-desc">
-                            INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow
-                            format, presents all the important themes of the entire Bible and ties both Old...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/mdiv.jpg' %}" alt="M.Div" class="course-img">
                 </div>
+                <h3 class="course-title">M.Div</h3>
+                <p class="course-desc">
+                    Master of Divinity (M. Div) Master of Divinity is used to define the study of different faiths and
+                    belief systems. In Christian theology, this degree prepares students to work as...
+                </p>
+                <button class="btn-join">Join Now</button>
+            </div>
 
-                <!-- B.Th -->
-                <div class="col-md-4">
-                    <div class="course-card course-purple">
-                        <div class="badge-icon">
-                            <i class="fas fa-medal"></i>
-                        </div>
-                        <img src="{% static 'img/bth.jpg' %}" alt="B.Th" class="course-img">
-                        <h3 class="course-title">B.Th</h3>
-                        <p class="course-desc">
-                            The Graduate Certificate in Ministry is a one-year Bible training program. It equips
-                            candidates with a non-theology background to prepare themselves for postgraduate study as...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
+            <!-- Cyan Dot -->
+            <div class="dot-connector dot-cyan"></div>
+
+            <!-- Introduction to Bible Card -->
+            <div class="course-card course-green">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
                 </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/bible.png' %}" alt="Introduction to Bible" class="course-img">
+                </div>
+                <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
+                <p class="course-desc">
+                    INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow format,
+                    presents all the important themes of the entire Bible and ties both Old...
+                </p>
+                <button class="btn-join">Join Now</button>
+            </div>
+
+            <!-- Red Dot -->
+            <div class="dot-connector dot-red"></div>
+
+            <!-- B.Th Card -->
+            <div class="course-card course-purple">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/bth.jpg' %}" alt="B.Th" class="course-img">
+                </div>
+                <h3 class="course-title">B.Th</h3>
+                <p class="course-desc">
+                    The Graduate Certificate in Ministry is a One-year Bible training program. The aim of the graduate
+                    certificate is to equip candidates with a non-theology background to prepare themselves for
+                    postgraduate study as...
+                </p>
+                <button class="btn-join">Join Now</button>
             </div>
         </div>
     </section>
