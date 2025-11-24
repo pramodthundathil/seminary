@@ -13,7 +13,7 @@ def role_redirection(view_func):
             if role == "Admin":
                 return view_func(request, *args, **kwargs)
             else:
-                return redirect("student_index")
+                return redirect("home/")
         else:
             messages.info(request,"Please login to continue")
             return redirect('signin')

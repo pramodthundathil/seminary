@@ -1,0 +1,307 @@
+{% extends "student/index.html" %}
+
+{% block title %}Video Lessons{% endblock %}
+
+{% block middle %}
+
+<div class="details-card" style="padding:0; background:transparent; box-shadow:none; border:none;">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header" style="
+        background:white;
+        padding:25px 30px;
+        border-radius:15px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom:30px;
+    ">
+        <h1 style="color:#2c3e50;font-size:28px;font-weight:600;">🎬 Video Lessons</h1>
+    </div>
+
+    <!-- VIDEO GRID (3 per row) -->
+    <div class="video-grid" style="
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:25px;
+        margin-bottom:30px;
+    ">
+        <!-- Video Card 1 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Building Theology</h3>
+            </div>
+        </div>
+
+        <!-- Video Card 2 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Introduction to Biblical Theology 1</h3>
+            </div>
+        </div>
+
+        <!-- Video Card 3 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Understanding New Testament</h3>
+            </div>
+        </div>
+
+        <!-- Video Card 4 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#fccb90 0%,#d57eeb 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Old Testament Foundations</h3>
+            </div>
+        </div>
+
+        <!-- Video Card 5 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#fa709a 0%,#fee140 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Advanced Biblical Studies</h3>
+            </div>
+        </div>
+
+        <!-- Video Card 6 -->
+        <div class="video-card" style="
+            background:white;
+            border-radius:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.08);
+            overflow:hidden;
+            transition:transform 0.3s ease, box-shadow 0.3s ease;
+            cursor:pointer;
+        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
+            
+            <!-- Thumbnail -->
+            <div class="video-thumbnail" style="
+                position:relative;
+                background:linear-gradient(135deg,#30cfd0 0%,#330867 100%);
+                height:200px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
+                    <rect x="5" y="1" width="2" height="2" fill="white"/>
+                    <rect x="9" y="1" width="2" height="2" fill="white"/>
+                    <rect x="13" y="1" width="2" height="2" fill="white"/>
+                    <rect x="17" y="1" width="2" height="2" fill="white"/>
+                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                </svg>
+            </div>
+
+            <!-- Card Content -->
+            <div style="padding:20px;text-align:center;">
+                <h3 style="
+                    color:#2c3e50; font-size:18px; font-weight:600;
+                    margin:0;
+                ">Theological Perspectives</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" style="
+        background:white; padding:20px 30px; border-radius:15px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.08);
+        display:flex; justify-content:space-between; align-items:center;
+    ">
+        <div style="color:#666;">Showing 1 to 6 of 18 videos</div>
+        <div class="pagination-controls" style="display:flex; gap:10px;">
+            <button class="pagination-btn" style="
+                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
+                background:white;color:#666;cursor:pointer;font-weight:500;
+            ">Previous</button>
+            <button class="pagination-btn active" style="
+                padding:8px 16px;border-radius:8px;border:none;color:white;
+                background:linear-gradient(135deg,#4facfe,#00f2fe);cursor:pointer;
+                font-weight:600;
+            ">1</button>
+            <button class="pagination-btn" style="
+                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
+                background:white;color:#666;cursor:pointer;font-weight:500;
+            ">2</button>
+            <button class="pagination-btn" style="
+                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
+                background:white;color:#666;cursor:pointer;font-weight:500;
+            ">3</button>
+            <button class="pagination-btn" style="
+                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
+                background:white;color:#666;cursor:pointer;font-weight:500;
+            ">Next</button>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block right %}
+<div class="alerts-card">
+    <div class="card-header"><h3 class="card-title">🔔 Notifications & Alerts</h3></div>
+
+    <div class="alert-item"><p class="alert-text">⭐ <strong>Exam:</strong> OT UNIT 1 assigned</p></div>
+    <div class="alert-item"><p class="alert-text">⭐ <strong>Exam:</strong> Biblical Theology 1 approved</p></div>
+    <div class="alert-item"><p class="alert-text">📚 <strong>Subject:</strong> Old Testament assigned</p></div>
+    <div class="alert-item"><p class="alert-text">📊 <strong>Exam Score:</strong> NT UNIT 2 assigned</p></div>
+</div>
+{% endblock %}

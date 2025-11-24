@@ -1,0 +1,346 @@
+{% extends "student/index.html" %}
+
+{% block title %}Query Management{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+
+{% block middle %}
+
+<style>
+    .page-header {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .request-btn {
+        background: var(--primary);
+        color: white;
+        padding: 0.625rem 1.5rem;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+    .request-btn:hover {
+        background: var(--primary-dark);
+    }
+
+    .controls-section {
+        background: var(--bg-card);
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .show-entries, .search-box {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .controls-section select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .controls-section select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .subjects-table {
+        background: var(--bg-card);
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .subjects-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .subjects-table thead {
+        background: var(--primary);
+        color: white;
+    }
+
+    .subjects-table th {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-weight: 500;
+        font-size: 0.875rem;
+        letter-spacing: 0.025em;
+    }
+
+    .subjects-table th:last-child {
+        text-align: center;
+    }
+
+    .subjects-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+    }
+
+    .subjects-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .subjects-table tbody tr:hover {
+        background: var(--bg-page);
+    }
+
+    .subjects-table td {
+        padding: 1rem 1.25rem;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .subjects-table td:last-child {
+        text-align: center;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        border-radius: 1rem;
+        background: #fef3c7;
+        color: #92400e;
+        font-weight: 500;
+        font-size: 0.8125rem;
+    }
+
+    .status-badge.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .pagination {
+        background: var(--bg-card);
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-top: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--border);
+        border-radius: 0.375rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .pagination-btn:hover {
+        background: var(--bg-page);
+        border-color: var(--primary);
+    }
+
+    .pagination-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Mobile Responsive */
+    @media screen and (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-header h1 {
+            font-size: 1.25rem;
+        }
+
+        .request-btn {
+            width: 100%;
+        }
+
+        .controls-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .show-entries, .search-box {
+            justify-content: space-between;
+        }
+
+        .subjects-table {
+            overflow-x: auto;
+        }
+
+        .subjects-table table {
+            min-width: 500px;
+        }
+
+        .pagination {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .pagination-controls {
+            justify-content: center;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .page-header, .controls-section, .pagination {
+            padding: 1rem;
+        }
+
+        .subjects-table th,
+        .subjects-table td {
+            padding: 0.75rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.125rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.625rem;
+            font-size: 0.8125rem;
+        }
+    }
+</style>
+
+<div style="padding:0; background:transparent; box-shadow:none; border:none;">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1>📚 My Subjects</h1>
+        <button class="request-btn">Request a Subject</button>
+    </div>
+
+    <!-- FILTERS SECTION -->
+    <div class="controls-section">
+        <div class="show-entries">
+            <span>Show</span>
+            <select>
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </select>
+            <span>entries</span>
+        </div>
+
+        <div class="search-box">
+            <span>Search:</span>
+            <select>
+                <option value="all">All</option>
+                <option value="biblical">Biblical Theology</option>
+                <option value="new">New Testament</option>
+                <option value="old">Old Testament</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- SUBJECT TABLE -->
+    <div class="subjects-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BIBLICAL THEOLOGY</td>
+                    <td>
+                        <span class="status-badge">In Progress</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>NEW TESTAMENT</td>
+                    <td>
+                        <span class="status-badge">In Progress</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>OLD TESTAMENT</td>
+                    <td>
+                        <span class="status-badge">In Progress</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+        <div>Showing 1 to 3 of 3 entries</div>
+        <div class="pagination-controls">
+            <button class="pagination-btn" disabled>Previous</button>
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn" disabled>Next</button>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block right %}
+<!-- Notifications section removed as requested -->
+{% endblock %}
