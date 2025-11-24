@@ -839,7 +839,7 @@ def slider_datatable(request):
 
     # Query sliders
     # sliders = Sliders.objects.annotate(photo_count=Count('photos'))
-    sliders = Sliders.objects.annotate(photo_count=Count('sliders_photos'))
+    sliders = Sliders.objects.annotate(photo_count=Count('sliders_photos_slider'))
 
     
     # Apply search
