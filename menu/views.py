@@ -19,10 +19,106 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 from home.models import *
 from .forms import MediaLibraryForm
+from home.decorators import role_redirection
+from datetime import datetime, timedelta
+
+@role_redirection
+@login_required
+def admin_index(request):
+    # Get total students
+    total_students = Students.objects.filter(active=1).count()
+    
+    # Get dynamic admin pages for navigation - organized by parent
+    admin_pages = AdminPages.objects.filter(parent__isnull=True).order_by('menu_order')
+    
+    # Get child pages for each parent
+    for page in admin_pages:
+        page.children = AdminPages.objects.filter(parent=page).order_by('menu_order')
+    
+    # Get new students (last 30 days)
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    new_students = Students.objects.filter(
+        created_at__gte=thirty_days_ago,
+        active=1
+    ).order_by('-created_at')[:10]
+    
+    # Gender statistics
+    male_count = Students.objects.filter(gender='Male', active=1).count()
+    female_count = Students.objects.filter(gender='Female', active=1).count()
+    
+    if total_students > 0:
+        male_percentage = round((male_count / total_students) * 100)
+        female_percentage = round((female_count / total_students) * 100)
+        # Calculate SVG circle offsets (314 is circumference for r=50)
+        male_offset = 314 - (314 * male_percentage / 100)
+        female_offset = 314 - (314 * female_percentage / 100)
+    else:
+        male_percentage = female_percentage = 0
+        male_offset = female_offset = 314
+    
+    # Get courses with student count using course_applied field
+    courses_list = []
+    for course in Courses.objects.filter(status=1)[:6]:
+        # Count students who applied for this course
+        student_count = Students.objects.filter(
+            course_applied=course.id,
+            active=1
+        ).count()
+        
+        # Add student_count as an attribute to the course object
+        course.student_count = student_count
+        courses_list.append(course)
+    
+    # Get recent references
+    references = ReferenceForm.objects.order_by('-created_at')[:10]
+    
+    # Calculate assignments in progress
+    total_assignments = Assignments.objects.count()
+    completed_assignments = StudentsAssignment.objects.filter(
+        submitted_on__isnull=False
+    ).count()
+    
+    if total_assignments > 0:
+        tasks_in_progress = round(((total_assignments - completed_assignments) / total_assignments) * 100)
+    else:
+        tasks_in_progress = 0
+    
+    # Calculate total exams completed
+    total_exams_completed = StudentsExams.objects.filter(
+        is_exam_ended=1
+    ).count()
+    
+    # Attendance calculation (example - customize based on your logic)
+    total_classes = 100  # Example
+    attended_classes = 80  # Example
+    attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
+    
+    context = {
+        'total_students': total_students,
+        'new_students': new_students,
+        'male_count': male_count,
+        'female_count': female_count,
+        'male_percentage': male_percentage,
+        'female_percentage': female_percentage,
+        'male_offset': male_offset,
+        'female_offset': female_offset,
+        'courses': courses_list,
+        'references': references,
+        'attendance_percentage': attendance_percentage,
+        'tasks_in_progress': tasks_in_progress,
+        'total_exams_completed': total_exams_completed,
+        'students_start': 1,
+        'students_end': min(10, len(new_students)),
+        'admin_pages': admin_pages,  # Dynamic navigation pages
+    }
+    
+    return render(request, "admin/index.html", context)
+
 
 #######@login_required
 def menu_list(request):
@@ -815,10 +911,30 @@ def photo_gallery(request):
 
 
 
-####@login_required
+
+
+@login_required
 def slider_list(request):
-    """Main slider list view"""
-    return render(request, 'admin/sliders/list.html')
+    """Main slider list view with pagination"""
+    sliders_list = Sliders.objects.all().order_by('-id')
+    
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(sliders_list, 12)  # 12 items per page
+    
+    try:
+        sliders = paginator.page(page)
+    except PageNotAnInteger:
+        sliders = paginator.page(1)
+    except EmptyPage:
+        sliders = paginator.page(paginator.num_pages)
+
+    context = {
+        "sliders": sliders,
+        "total_sliders": sliders_list.count()
+    }
+
+    return render(request, 'admin/sliders/list.html', context)
 
 ####@login_required
 def slider_datatable(request):

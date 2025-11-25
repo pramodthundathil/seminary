@@ -882,7 +882,7 @@ class SliderPhotos(models.Model):
     sliders = models.ForeignKey('Sliders', on_delete=models.CASCADE, related_name='photos')
     media = models.ForeignKey(MediaLibrary, on_delete=models.CASCADE, related_name='slider_photos')
     title = models.CharField(max_length=250, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    description = RichTextField(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
     button_text = models.CharField(max_length=250, blank=True, null=True)
     button_link = models.CharField(max_length=250, blank=True, null=True)

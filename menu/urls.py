@@ -4,8 +4,11 @@ from . import views
 
 
 urlpatterns = [
+
+    #admin index
+    path("admin/dashboard",views.admin_index,name="admin_index"),
     # Menu Management
-    path('menus/', views.menu_list, name='menu_list'),
+    path('admin/menus/', views.menu_list, name='menu_list'),
     path('menus/engineer/', views.menu_engineer, name='menu_engineer_new'),
     path('menus/engineer/<int:menu_id>/', views.menu_engineer, name='menu_engineer'),
     path('menus/save/', views.save_menu, name='save_menu'),
@@ -14,11 +17,11 @@ urlpatterns = [
     path('menus/get-items/<int:menu_id>/', views.get_menu_items, name='get_menu_items'),
     
     # Pages Management
-    path('pages/', views.pages_list, name='pages_list'),
+    path('admin/pages/', views.pages_list, name='pages_list'),
 
 
     # News Management
-    path('news_list', views.news_list, name='news_list'),
+    path('admin/news', views.news_list, name='news_list'),
     path('datatable/', views.news_datatable, name='news_datatable'),
     path('create/', views.news_create, name='news_create'),
     path('edit/<int:news_id>/', views.news_edit, name='news_edit'),
@@ -27,7 +30,7 @@ urlpatterns = [
     path('toggle-status/<int:news_id>/', views.news_toggle_status, name='news_toggle_status'),
 
     # Media Library Management
-    path('media/', views.media_list, name='media_list'),
+    path('admin/media/', views.media_list, name='admin/media/'),
     path('media/datatable/', views.media_datatable, name='media_datatable'),
     path('media/upload/', views.media_upload, name='media_upload'),
     path('media/get/<int:media_id>/', views.media_get, name='media_get'),
@@ -37,12 +40,12 @@ urlpatterns = [
 
     #photo gallery
 
-    path("photo_gallery",views.photo_gallery,name="photo_gallery"),
+    path("admin/photos",views.photo_gallery,name="photo_gallery"),
 
 
 
     # Slider management
-    path('sliders/', views.slider_list, name='slider_list'),
+    path('admin/sliders', views.slider_list, name='slider_list'),
     path('sliders/datatable/', views.slider_datatable, name='slider_datatable'),
     path('sliders/create/', views.slider_create, name='slider_create'),
     path('sliders/get/<int:slider_id>/', views.slider_get, name='slider_get'),
@@ -59,7 +62,7 @@ urlpatterns = [
 
 
     # Course management
-    path('courses/', views.course_list, name='course_list'),
+    path('admin/courses/', views.course_list, name='course_list'),
     path('courses/datatable/', views.course_datatable, name='course_datatable'),
     path('courses/create/', views.course_create, name='course_create'),
     path('courses/get/<int:course_id>/', views.course_get, name='course_get'),
@@ -68,7 +71,7 @@ urlpatterns = [
 
 
      # Student Management
-    path('students/', views.student_list_view, name='student_list'),
+    path('admin/students/', views.student_list_view, name='student_list'),
     path('students/datatable/', views.student_datatable, name='student_datatable'),
     path('students/create/', views.student_create, name='student_create'),
     path('students/get/<int:student_id>/', views.student_get, name='student_get'),
@@ -76,4 +79,7 @@ urlpatterns = [
     path('students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
     path('students/toggle-active/<int:student_id>/', views.student_toggle_active, name='student_toggle_active'),
     path('students/toggle-approval/<int:student_id>/', views.student_toggle_approval, name='student_toggle_approval'),
+
+
+
 ]
