@@ -377,13 +377,13 @@
         /*course section*/
 
         .courses-section {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
             background: #d7eaff;
             /* light blue background */
             padding: 60px 20px;
             /* spacing so cards don’t touch edges */
-            border-radius: 20px;
+            border-radius: 0;
             /* optional: soft rounded corners */
             padding-top: 0 !important;
             margin-top: 0 !important;
@@ -432,15 +432,15 @@
         }
 
         .course-blue {
-            background: linear-gradient(135deg, #a8e6e3 0%, #c8e6e3 100%);
+            background: linear-gradient(135deg, #6aadaa 0%, #c8e6e3 100%);
         }
 
         .course-green {
-            background: linear-gradient(135deg, #a8d5a8 0%, #c1e1c1 100%);
+            background: linear-gradient(135deg, #7cca7c 0%, #c1e1c1 100%);
         }
 
         .course-purple {
-            background: linear-gradient(135deg, #c8d5e8 0%, #d8e3f0 100%);
+            background: linear-gradient(135deg, #9eaec6 0%, #d8e3f0 100%);
         }
 
         .badge-icon {
@@ -452,7 +452,7 @@
             width: 70px;
             height: 70px;
 
-            background:#d9d9d9;
+            background: #d9d9d9;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -467,16 +467,20 @@
             font-size: 32px;
             color: #ffc107;
         }
+
         /* INNER LIGHT BLUE CIRCLE */
-.badge-icon::after {
-    content: "";
-    position: absolute;
-    width: 55px;      /* Inner circle size */
-    height: 55px;
-    background:white; /* Light blue shade */
-    border-radius: 50%;
-    z-index: -1;      /* Keep it behind the image/icon */
-}
+        .badge-icon::after {
+            content: "";
+            position: absolute;
+            width: 55px;
+            /* Inner circle size */
+            height: 55px;
+            background: white;
+            /* Light blue shade */
+            border-radius: 50%;
+            z-index: -1;
+            /* Keep it behind the image/icon */
+        }
 
         .course-img-container {
             width: 80%;
@@ -484,7 +488,7 @@
             background: white;
             border-radius: 40px;
             overflow: hidden;
-            margin: 0 auto 20px auto;
+            margin: -50px auto 20px auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -498,7 +502,7 @@
         }
 
         .course-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: #2c3e50;
             margin-bottom: 15px;
@@ -565,6 +569,307 @@
                 max-width: 400px;
             }
         }
+
+        /*scholarship-section */
+        /* Scholarship section — keep background image safe */
+        .scholarship-section {
+            position: relative;
+            overflow: visible;
+            background-image: url('{% static "img/bibleopen.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            image-rendering: -webkit-optimize-contrast;
+            /* improves clarity */
+            image-rendering: crisp-edges;
+        }
+
+
+        /* Button */
+        .oval-wrapper {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 4px;
+            /* thickness of outer ring */
+            background: rgba(152, 151, 151, 0.8);
+            /* very light grey */
+            border-radius: 45px;
+            backdrop-filter: blur(4px);
+            /* soft blur effect */
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+            /* soft glow */
+        }
+
+        /* Actual button */
+        .btn-new-admission {
+            background-color: #3154c4;
+            /* your button color */
+            border: none;
+            border-radius: 30px;
+            height: 35px;
+            width: 250px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transition: 0.3s ease;
+        }
+
+        .btn-new-admission:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.30);
+            transform: translateY(-2px);
+        }
+
+        .btn-new-admission i {
+            color: white
+        }
+
+        .scholarship-title {
+            font-size: 22px;
+            /* reduced size */
+            font-weight: 600;
+            /* slightly bold but clean */
+            color: #000;
+            /* pure black */
+            line-height: 1.6;
+            /* better paragraph readability */
+            text-align: center;
+            /* keeps it centered */
+            max-width: 900px;
+            /* prevents extremely long line width */
+            margin: 0 auto 20px auto;
+            /* clean spacing */
+        }
+
+
+
+        /* About Section */
+        .about-section {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f4f8 100%);
+            padding: 80px 20px;
+            position: relative;
+            overflow: hidden;
+            margin-top: -45px;
+        }
+
+        /* Decorative dots */
+        .dot-decoration {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .dot-cyan {
+            background: #4dd0e1;
+            top: 50px;
+            right: 100px;
+        }
+
+        .dot-red {
+            background: #ff6b6b;
+            top: 90px;
+            right: 60px;
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-title {
+            font-size: 35px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            text-decoration: none !important;
+            border: none !important;
+            padding-top: 15px;
+
+            margin: -30px auto 20px auto;
+        }
+
+        /* Who We Are Section */
+
+
+        .who-we-are-content {
+            flex: 1;
+        }
+
+        .who-we-are-title {
+            font-size: 30px;
+            font-weight: 700;
+            color: #2c3e50;
+
+            text-align: left;
+            text-decoration: none !important;
+            border: none !important;
+            padding-top: 15px;
+            margin-bottom: 4px;
+        }
+
+        .who-we-are-title .we-text {
+            color: #4dd0e1;
+        }
+
+        .who-we-are-description {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .who-we-are {
+            display: flex;
+            align-items: flex-start;
+            gap: 0px;
+            /* Change from 5px to 0px */
+            margin-bottom: 60px;
+        }
+
+        .who-we-are-image {
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: -200px;
+            margin-left: -350px;
+            /* Add this to pull image to the left closer to text */
+        }
+
+        .who-we-are-image img {
+            max-width: 600px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Our Aim Section */
+       /* Our Aim Section */
+.our-aim-section {
+    display: flex;
+    gap: 30px; /* Reduced from 50px */
+    align-items: flex-start; /* Changed from center to flex-start */
+    margin-top: -70px;
+}
+
+.church-card {
+    position: relative;
+    flex-shrink: 0;
+    margin-top: -30px; /* Changed from -30px */
+}
+
+.church-card-inner {
+    background: white;
+    border-radius: 25px; /* Reduced from 30px */
+    padding: 20px; /* Reduced from 30px */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.church-card::before {
+    content: '';
+    position: absolute;
+    top: -15px; /* Reduced from -20px */
+    left: -15px; /* Reduced from -20px */
+    width: 40px; /* Reduced from 50px */
+    height: 40px; /* Reduced from 50px */
+    background: #5865f2;
+    border-radius: 50%;
+}
+
+.church-card::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; /* Adjusted from -8px */
+    right: -2px; /* Adjusted from -3px */
+    width: 16px; /* Reduced from 20px */
+    height: 16px; /* Reduced from 20px */
+    background: #ff6b9d;
+    border-radius: 50%;
+    overflow: visible;
+}
+
+.dot-green {
+    position: absolute;
+    top: -12px; /* Adjusted from -15px */
+    left: -20px; /* Adjusted from -25px */
+    width: 12px; /* Reduced from 15px */
+    height: 12px; /* Reduced from 15px */
+    background: #4dd0e1;
+    border-radius: 50%;
+}
+
+.church-image {
+    width: 180px; /* Reduced from 250px */
+    height: 180px; /* Reduced from 250px */
+    border-radius: 20px; /* Reduced from 25px */
+    overflow: hidden;
+}
+
+.church-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.our-aim-content {
+    flex: 1;
+    padding-top: 10px; /* Added to align text better with image */
+}
+
+.our-aim-description {
+    font-size: 18px; /* Reduced from 20px */
+    font-weight: 700;
+    line-height: 1.8;
+    color: #2c3e50;
+    margin-bottom: 20px; /* Added spacing before button */
+}
+
+.btn-read-more {
+    background: transparent;
+    color: #4dd0e1;
+    border: 2px solid #4dd0e1;
+    padding: 10px 30px; /* Slightly reduced from 12px 35px */
+    border-radius: 30px;
+    font-size: 15px; /* Reduced from 16px */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-read-more:hover {
+    background: #4dd0e1;
+    color: white;
+}
+
+.btn-read-more i {
+    font-size: 14px;
+}
+
+@media (max-width: 992px) {
+    .our-aim-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .church-card {
+        align-self: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .church-image {
+        width: 150px; /* Further reduced for mobile */
+        height: 150px;
+    }
+
+    .our-aim-description {
+        font-size: 16px;
+    }
+}
     </style>
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
@@ -740,9 +1045,6 @@
         </button>
     </div>
 
-
-
-
     {% endblock%}
     <!-- Why Trinity Section -->
     <section class="why-section">
@@ -901,6 +1203,74 @@
                     postgraduate study as...
                 </p>
                 <button class="btn-join">Join Now</button>
+            </div>
+        </div>
+    </section>
+    <!-- Scholarship Section -->
+    <section class="scholarship-section">
+        <div class="scholarship-content">
+            <h2 class="scholarship-title">
+                Financial Scholarships are available to reduce the tuition for your degree . Your Life Learning
+                experiences and previous education are used to reduce the degree requirements...
+            </h2>
+            <div class="oval-wrapper">
+                <button class="btn-new-admission">
+                    <i class="fas fa-id-card"></i>
+                    New Admission
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <!-- Decorative dots -->
+        <div class="dot-decoration dot-cyan"></div>
+        <div class="dot-decoration dot-red"></div>
+
+        <div class="about-container">
+            <h2 class="about-title">About Us</h2>
+
+            <!-- Who We Are -->
+            <div class="who-we-are">
+                <div class="who-we-are-content">
+                    <h3 class="who-we-are-title">Who <span class="we-text">We</span> are?</h3>
+                    <p class="who-we-are-description">
+                        At Trinity Theological Seminary, you will not be a normal aspirant who takes admission,
+                        completes the course and leaves. Instead, we believe in building a relationship that lasts
+                        longer than most things do.
+                    </p>
+                </div>
+                <div class="who-we-are-image">
+                    <img src="{% static 'img/group.png' %}" alt="Team Discussion">
+                </div>
+            </div>
+
+            <!-- Our Aim -->
+            <div class="our-aim-section">
+                <div class="church-card">
+                    <div class="dot-green"></div>
+                    <div class="church-card-inner">
+                        <div class="church-image">
+                            <img src="{% static 'img/church.jpg' %}" alt="Church">
+                        </div>
+                    </div>
+                </div>
+                <div class="our-aim-content">
+                    <p class="our-aim-description">
+                        Our aim is to build a leader out of the aspirant, preparing for the world that needs God&rsquo;s
+                        grace. That is the reason our faculties are trained in such a way to bring the best of
+                        leadership qualities from you, building a strong foundation of faith and faith based skills to
+                        be a change in this world. With that, we will be there to...
+                    </p>
+                    <button class="btn-read-more">
+                        Read More
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </section>
