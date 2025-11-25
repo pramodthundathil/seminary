@@ -36,7 +36,8 @@ from .models import (
     StudentsAssignment,
     Pages,
     Languages,
-    Users
+    Users,
+    AdminPages
 )
 from .decorators import role_redirection
 
