@@ -1,4 +1,3 @@
-
 :root {
     --primary-cyan: #00CED1;
     --light-cyan: #E0F7F7;
@@ -8,10 +7,13 @@
     --green-card: #90EE90;
     --blue-button: #4169E1;
     --text-gray: #666666;
+    --primary-cyan-dark: #00B8BB;
 }
+
 * {
-            font-family: 'Roboto Condensed', sans-serif;
-        }
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -19,7 +21,7 @@
 }
 
 body {
-   
+
     color: #333;
     overflow-x: hidden;
 }
@@ -27,7 +29,7 @@ body {
 /* Navigation */
 .navbar {
     background: white !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 10px 0;
 }
 
@@ -73,152 +75,152 @@ body {
 
 /* Hero Section */
 .carousel-item {
-            height: 600px;
-            position: relative;
-        }
+    height: 600px;
+    position: relative;
+}
 
-        .carousel-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.8);
-        }
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8);
+}
 
-        .carousel-caption {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            transform: translateY(-50%);
-            text-align: left;
-            padding: 0 5%;
-        }
+.carousel-caption {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    text-align: left;
+    padding: 0 5%;
+}
 
-        .carousel-caption h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: var(--dark-navy);
-            margin-bottom: 2rem;
-            letter-spacing: 2px;
-        }
+.carousel-caption h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--dark-navy);
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+}
 
-        .carousel-caption h1 .highlight {
-            color: var(--primary-cyan);
-        }
+.carousel-caption h1 .highlight {
+    color: var(--primary-cyan);
+}
 
-        .slide-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+.slide-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-        .left-content {
-            flex: 1;
-            padding-right: 3rem;
-        }
+.left-content {
+    flex: 1;
+    padding-right: 3rem;
+}
 
-        .right-content {
-            flex: 1;
-            /* background: rgba(255, 255, 255, 0.95); */
-            padding: 2.5rem;
-            /* border-radius: 15px;
+.right-content {
+    flex: 1;
+    /* background: rgba(255, 255, 255, 0.95); */
+    padding: 2.5rem;
+    /* border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
-        }
+}
 
-        .right-content h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--dark-navy);
-            margin-bottom: 1.5rem;
-            line-height: 1.3;
-            letter-spacing: 1px;
-        }
+.right-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-navy);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    letter-spacing: 1px;
+}
 
-        .right-content h2 .highlight-green {
-            color: var(--green-card);
-        }
+.right-content h2 .highlight-green {
+    color: var(--green-card);
+}
 
-        .right-content p {
-            font-size: 1.1rem;
-            color: var(--text-gray);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
+.right-content p {
+    font-size: 1.1rem;
+    color: var(--text-gray);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
 
-        .learn-more-btn {
-            background-color: var(--primary-cyan);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+.learn-more-btn {
+    background-color: var(--primary-cyan);
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        .learn-more-btn:hover {
-            background-color: #00B8BA;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 206, 209, 0.3);
-        }
+.learn-more-btn:hover {
+    background-color: #00B8BA;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 206, 209, 0.3);
+}
 
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 50px;
-            height: 50px;
-            background-color: var(--primary-cyan);
-            border-radius: 50%;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.8;
-        }
+.carousel-control-prev,
+.carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-cyan);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+}
 
-        .carousel-control-prev {
-            left: 20px;
-        }
+.carousel-control-prev {
+    left: 20px;
+}
 
-        .carousel-control-next {
-            right: 20px;
-        }
+.carousel-control-next {
+    right: 20px;
+}
 
-        .carousel-control-prev:hover,
-        .carousel-control-next:hover {
-            opacity: 1;
-        }
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1;
+}
 
-        .carousel-indicators button {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--primary-cyan);
-        }
+.carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--primary-cyan);
+}
 
-        @media (max-width: 992px) {
-            .slide-content {
-                flex-direction: column;
-            }
+@media (max-width: 992px) {
+    .slide-content {
+        flex-direction: column;
+    }
 
-            .left-content {
-                padding-right: 0;
-                margin-bottom: 2rem;
-            }
+    .left-content {
+        padding-right: 0;
+        margin-bottom: 2rem;
+    }
 
-            .carousel-caption h1 {
-                font-size: 2.5rem;
-            }
+    .carousel-caption h1 {
+        font-size: 2.5rem;
+    }
 
-            .right-content h2 {
-                font-size: 1.5rem;
-            }
+    .right-content h2 {
+        font-size: 1.5rem;
+    }
 
-            .carousel-item {
-                height: auto;
-                min-height: 500px;
-            }
-        }
+    .carousel-item {
+        height: auto;
+        min-height: 500px;
+    }
+}
 
 /* Why Trinity Section */
 .why-section {
@@ -242,7 +244,7 @@ body {
     background: white;
     padding: 2rem 1.5rem;
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     text-align: center;
     height: 100%;
     transition: transform 0.3s ease;
@@ -250,7 +252,7 @@ body {
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .feature-icon {
@@ -328,7 +330,7 @@ body {
     background: white;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     height: 100%;
     transition: transform 0.3s ease;
 }
@@ -352,7 +354,7 @@ body {
 }
 
 .course-card.green-card .course-image {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .course-content {
@@ -468,7 +470,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .team-illustration i {
@@ -600,4 +602,2831 @@ footer i {
         width: 160px;
         height: 230px;
     }
+}
+
+
+/*Accreditation styling*/
+/* Accreditation Page Styling */
+.accreditation-section .content-box {
+    padding: 25px 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.8rem;
+}
+
+.accreditation-section p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.accreditation-section .about-subtitle {
+    font-size: 1.6rem;
+    color: #00B8BB;
+    font-weight: 700;
+    margin-top: 3rem;
+}
+
+.accreditation-section .inner-box {
+    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    height: 100%;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.accreditation-section .inner-box i {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+
+.accreditation-section .section-title {
+    padding-top: 4rem 0;
+}
+
+.accreditation-section .inner-box h3 {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+}
+
+.about-section.accreditation-section {
+    padding: 4rem 0;
+}
+
+.accreditation-section .about-text p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    /* reduce */
+    margin-bottom: 0.6rem;
+    /* reduce */
+}
+
+/*==============================*/
+/* Scholarship Page Styles */
+/*=============================*/
+
+/* Page Header - Same as Fees */
+.scholarship-section .section-title {
+    padding-top: 4rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+/* Main Section */
+.scholarship-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+/* Intro Section - Same styling as fees */
+.scholarship-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.scholarship-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.scholarship-section .intro-section .step-link {
+    color: #A78BFA;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.scholarship-section .intro-section .step-link:hover {
+    color: #8B5CF6;
+    text-decoration: underline;
+}
+
+/* Process Steps Section */
+.scholarship-section .process-steps {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: #f8f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #A78BFA;
+}
+
+.scholarship-section .about-subtitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00B8BB;
+    margin-bottom: 1.5rem;
+}
+
+.scholarship-section .process-steps>p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* Admission Steps List - Enhanced Styling */
+.scholarship-section .admission-steps-list {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-left: 0;
+    margin-top: 2rem;
+}
+
+.scholarship-section .admission-steps-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 1.2rem 1.5rem 1.2rem 4rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    border: 1px solid #e8e8e8;
+    text-align: left;
+}
+
+.scholarship-section .admission-steps-list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+    border-color: #A78BFA;
+}
+
+.scholarship-section .admission-steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Content Box - Important Note */
+.scholarship-section .content-box {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2rem 2rem;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff5eb 100%);
+    border-radius: 10px;
+    border: 1px solid #ffe4cc;
+    border-left: 4px solid #ff9f43;
+    text-align: left;
+}
+
+.scholarship-section .content-box p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+.scholarship-section .content-box strong {
+    color: #ff9f43;
+    font-weight: 700;
+}
+
+/* Call to Action Section */
+.scholarship-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.scholarship-section .cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.scholarship-section .cta-content>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: left;
+}
+
+.scholarship-section .btn-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: #ffffff;
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.scholarship-section .btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: #f8f9ff;
+}
+
+.scholarship-section .btn-cta i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .scholarship-section {
+        padding: 3rem 0;
+    }
+
+    .scholarship-section .section-title {
+        font-size: 1.75rem;
+    }
+
+    .scholarship-section .process-steps {
+        padding: 2rem 1.5rem;
+    }
+
+    .scholarship-section .about-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .scholarship-section .admission-steps-list li {
+        padding: 1rem 1rem 1rem 3.5rem;
+        font-size: 0.9rem;
+    }
+
+    .scholarship-section .admission-steps-list li::before {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+        left: 1rem;
+    }
+
+    .scholarship-section .content-box {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .scholarship-section .cta-content {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .scholarship-section .cta-title {
+        font-size: 1.6rem;
+    }
+
+    .scholarship-section .btn-cta {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .scholarship-section .section-title {
+        font-size: 1.5rem;
+    }
+
+    /* Add this to the main intro section styles */
+    .scholarship-section .intro-section p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .process-steps>p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1.5rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .content-box p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 0;
+        text-align: center;
+        /* Add this */
+    }
+
+    .scholarship-section .process-steps {
+        padding: 1.5rem 1rem;
+    }
+
+    .scholarship-section .admission-steps-list li {
+        padding: 0.9rem 0.8rem 0.9rem 3rem;
+        font-size: 0.85rem;
+    }
+
+    .scholarship-section .admission-steps-list li::before {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+        left: 0.8rem;
+    }
+
+    .scholarship-section .cta-content {
+        padding: 2rem 1.2rem;
+    }
+
+    .scholarship-section .cta-title {
+        font-size: 1.4rem;
+    }
+
+    .scholarship-section .cta-content>p {
+        font-size: 0.95rem;
+    }
+
+    .scholarship-section .btn-cta {
+        padding: 0.85rem 1.8rem;
+        font-size: 0.95rem;
+    }
+}
+
+
+/*==============================*/
+/* Fees Structure Page Styles */
+/*=============================*/
+
+.fees-section .section-title {
+    padding-top: 4rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+.payment-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    padding: 80px 0 60px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Main Content */
+.fees-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+.fees-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+/* Fees Table - Beautiful Enhanced Design */
+.fees-table-wrapper {
+    max-width: 900px;
+    margin: 3rem auto;
+    overflow-x: auto;
+}
+
+.fees-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0f0f0;
+}
+
+.fees-table thead {
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+}
+
+.fees-section .fees-table th {
+    padding: 22px 25px;
+    text-align: center;
+    font-weight: 700;
+    color: #ffffff;
+    border: none;
+    font-size: .8rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.fees-table th:last-child {
+    border-right: none;
+}
+
+.fees-table td {
+    padding: 20px 25px;
+    border: 1px solid #e8e8e8;
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+    border-left: none;
+    border-right: 1px solid #f5f5f5;
+}
+
+/* Remove border on last column */
+.fees-table td:last-child {
+    border-right: none;
+}
+
+.fees-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.fees-table tbody tr:hover {
+    background-color: #f8f9ff;
+    transform: scale(1.01);
+}
+
+.fees-table tbody tr:first-child td {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #00CED1;
+    padding-top: 28px;
+    padding-bottom: 18px;
+}
+
+.fees-table tbody tr:last-child td {
+    font-style: italic;
+    color: #333;
+    font-size: 0.9rem;
+    padding-bottom: 28px;
+    padding-top: 10px;
+    border-bottom: none;
+}
+
+/* Additional Information */
+.fees-info {
+    max-width: 1000px;
+    margin: 3rem auto 0;
+}
+
+/* Ensure all paragraphs have consistent weight */
+.fees-section p {
+    font-weight: 400;
+}
+
+.fees-section .intro-section p,
+.fees-section .fees-info p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    /* Explicitly set to normal */
+}
+
+.contact-note {
+    font-style: italic;
+    color: #555;
+    font-size: 0.95rem !important;
+    margin-top: 2rem;
+    margin-bottom: 0.6rem;
+    line-height: 1.75;
+}
+
+.contact-note em {
+    font-weight: 600;
+}
+
+.contact-cta {
+    margin-top: 3rem;
+    /* Increase spacing from above content */
+    padding: 2.5rem 2rem;
+    /* Add more vertical padding */
+    background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+    /* Subtle gradient */
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #e8ecff;
+    /* Subtle border */
+}
+.fees-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+.fees-section .cta-content>p {
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: center;
+}
+
+.contact-cta p {
+    font-size: 1.05rem;
+    /* Slightly larger for emphasis */
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+
+.contact-link {
+    display: inline-block;
+    color: cyan;
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+    color: #0a7c64;
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .fees-section {
+        padding: 3rem 0;
+    }
+
+    .fees-table-wrapper {
+        margin: 2rem auto;
+    }
+
+    .fees-table th {
+        padding: 18px 15px;
+        font-size: 0.9rem;
+    }
+
+    .fees-table td {
+        padding: 15px 12px;
+        font-size: 0.9rem;
+    }
+
+    .fees-table tbody tr:first-child td {
+        font-size: 1.2rem;
+        padding-top: 22px;
+    }
+
+    .fees-section .intro-section p,
+    .fees-info p {
+        text-align: left;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header {
+        padding: 50px 0 40px;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .fees-table th {
+        padding: 15px 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.3px;
+    }
+
+    .fees-table td {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+
+    .fees-table tbody tr:first-child td {
+        font-size: 1.1rem;
+        padding-top: 18px;
+    }
+
+    .fees-table tbody tr:last-child td {
+        font-size: 0.8rem;
+    }
+
+}
+
+/* ================================
+   MODERN PAYMENT FORM STYLES
+   ================================ */
+
+/* Reset and Override */
+.payment-section * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Error message styling */
+.error-message {
+    color: #dc3545;
+    /* Bootstrap red color */
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Main Section */
+.payment-section {
+    min-height: 100vh;
+    background: #2c5f7f;
+    padding: 3rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+/* Form Container */
+.payment-section .form-container {
+    background: #fff;
+    color: #333;
+    width: 100%;
+    max-width: 700px;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Header */
+.payment-section .section-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #2c5f7f;
+}
+
+/* Input Fields */
+.payment-section input,
+.payment-section select,
+.payment-section textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.payment-section input:focus,
+.payment-section select:focus,
+.payment-section textarea:focus {
+    outline: none;
+    border-color: #1d4360;
+    box-shadow: 0 0 5px rgba(44, 95, 127, 0.5);
+}
+
+/* Buttons */
+.payment-section button {
+    background: #2c5f7f;
+    color: #fff;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.payment-section button:hover {
+    background: #1d4360;
+}
+
+
+
+
+
+
+
+
+/*==============================*/
+/* Application Form Page Styles */
+/*=============================*/
+
+.application-section {
+    padding: 4rem 0;
+    background-color: #f8f9fa;
+}
+
+.application-section .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+/* Intro Section */
+.application-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    text-align: center;
+}
+
+.application-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    padding: 1rem 2rem;
+    background: #f0f9ff;
+    border-left: 4px solid #00CED1;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.application-section .intro-section .required {
+    margin: 0;
+}
+
+/* Form Wrapper */
+.application-form-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem;
+    background: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Layout */
+.application-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.application-form .certificates-row {
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 2.5rem;
+}
+
+.application-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.application-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Labels */
+.application-form label {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+}
+
+/* Required asterisk */
+.required {
+    color: #dc3545;
+    font-weight: 700;
+    margin-left: 3px;
+}
+
+/* Input Fields */
+.application-form input[type="text"],
+.application-form input[type="email"],
+.application-form input[type="tel"],
+.application-form input[type="date"],
+.application-form input[type="number"],
+.application-form input[type="file"],
+.application-form select,
+.application-form textarea {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s ease;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+/* Placeholder styling */
+.application-form input::placeholder {
+    color: #9ca3af;
+}
+
+/* Hover state */
+.application-form input:hover,
+.application-form select:hover,
+.application-form textarea:hover {
+    border-color: #9ca3af;
+}
+
+/* Focus state */
+.application-form input:focus,
+.application-form select:focus,
+.application-form textarea:focus {
+    outline: none;
+    border-color: #A78BFA;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+    background-color: #fafbfc;
+}
+
+/* Select Dropdown */
+.application-form select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A78BFA' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    color: #333;
+}
+
+.application-form select option:first-child {
+    color: #9ca3af;
+}
+
+/* Date Input */
+.application-form input[type="date"] {
+    color: #666;
+}
+
+.application-form input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+/* Phone Input with Country Code */
+.phone-input-wrapper {
+    display: flex;
+    gap: 0;
+}
+
+.country-code {
+    width: 100px;
+    flex-shrink: 0;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+}
+
+.phone-input-wrapper input {
+    flex: 1;
+    border-left: 1px solid #d1d5db;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Radio Groups */
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    padding: 0.75rem 0;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 400;
+    cursor: pointer;
+    color: #666;
+}
+
+.radio-group input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #A78BFA;
+}
+
+/* Textarea */
+.application-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Section Headers */
+.section-header {
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    padding: 1.2rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 3rem -3rem 2rem -3rem;
+    box-shadow: 0 2px 10px rgba(167, 139, 250, 0.3);
+}
+
+.section-header i {
+    margin-right: 0.8rem;
+    vertical-align: middle;
+}
+
+/* Instructions */
+.instructions {
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+}
+
+.instructions p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0.8rem;
+}
+
+.instructions strong {
+    color: #333;
+}
+
+/* File Upload */
+.file-input-group {
+    display: flex;
+    gap: 0;
+}
+
+.file-input-group input[type="text"] {
+    flex: 1;
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+    background: #f8f9fa;
+}
+
+.file-btn {
+    padding: 0.8rem 1.8rem;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.file-btn:hover {
+    background: #A78BFA;
+    color: white;
+    border-color: #A78BFA;
+}
+
+/* Submit Button */
+.form-submit {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: right;
+}
+
+.btn-apply-submit {
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    padding: 1.1rem 4.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4);
+}
+
+.btn-apply-submit:hover {
+    background: linear-gradient(135deg, #8A6EF6, #AA6FFC);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(167, 139, 250, 0.5);
+}
+
+.error-msg {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 3px;
+    display: block;
+}
+
+.input-error {
+    border: 1px solid red !important;
+    background: #ffecec;
+}
+
+.input-valid {
+    border: 2px solid #28a745 !important;
+    background: #f0fff4;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .application-form .certificates-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .application-form-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .application-form .form-row,
+    .application-form .certificates-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .section-header {
+        margin-left: -1.5rem;
+        margin-right: -1.5rem;
+        font-size: 1rem;
+    }
+
+    .form-submit {
+        text-align: center;
+    }
+
+    .btn-apply-submit {
+        width: 100%;
+        padding: 1rem 2rem;
+    }
+
+    .radio-group {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .application-section .section-title {
+        font-size: 1.75rem;
+    }
+
+    .application-form-wrapper {
+        padding: 1.5rem 1rem;
+    }
+
+    .application-form label {
+        font-size: 0.9rem;
+    }
+
+    .application-form input,
+    .application-form select,
+    .application-form textarea {
+        font-size: 0.9rem;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .section-header {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-apply-submit {
+        font-size: 1rem;
+    }
+}
+
+
+
+/* ================================================
+   D.MIN PROGRAM PAGE STYLES
+   ================================================ */
+
+:root {
+    --primary-cyan: #00CED1;
+    --light-cyan: #E0F7F7;
+    --dark-navy: #1B2845;
+    --purple-gradient-start: #A78BFA;
+    --purple-gradient-end: #C084FC;
+    --green-card: #90EE90;
+    --blue-button: #4169E1;
+    --text-gray: #666666;
+    --primary-cyan-dark: #00B8BB;
+    --white: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+body {
+    color: #333;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ================================================
+   PAGE HEADER
+   ================================================ */
+.page-header {
+    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    padding: 80px 0 60px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.breadcrumb {
+    position: relative;
+    z-index: 1;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.breadcrumb span {
+    margin: 0 8px;
+}
+
+/* ================================================
+   PROGRAM SECTION
+   ================================================ */
+.program-section {
+    padding: 4rem 0;
+    background-color: white;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+.section-title .highlight {
+    color: var(--primary-cyan);
+}
+
+/* ================================================
+   INTRO SECTION
+   ================================================ */
+.intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.intro-section p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 400;
+}
+
+/* ================================================
+   CONTENT BOX
+   ================================================ */
+.content-box {
+    padding: 25px 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2.5rem;
+}
+
+.sub-title {
+    font-size: 1.5rem;
+    color: var(--primary-cyan);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.content-box p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+}
+
+/* ================================================
+   REQUIREMENTS LIST
+   ================================================ */
+.requirements-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.requirements-list li {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.requirements-list li::before {
+    content: "•";
+    color: var(--primary-cyan);
+    font-weight: bold;
+    font-size: 1.2rem;
+    position: absolute;
+    left: 0;
+}
+
+/* ================================================
+   PROGRAM TABLE
+   ================================================ */
+.program-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.program-table thead {
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+}
+
+.program-table th {
+    padding: 18px 20px;
+    text-align: left;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.program-table th:last-child {
+    border-right: none;
+    text-align: center;
+}
+
+.program-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.program-table tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+.program-table td {
+    padding: 15px 20px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.program-table td:first-child {
+    font-weight: 600;
+    color: #555;
+    width: 120px;
+}
+
+.program-table td:last-child {
+    text-align: center;
+    font-weight: 600;
+    color: #555;
+    width: 100px;
+}
+
+/* Group Header Row */
+.program-table .group-header td {
+    background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+    font-weight: 700;
+    color: #555;
+    font-size: 1.1rem;
+    padding: 18px 20px;
+    border-top: 2px solid #e5e7eb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* ================================================
+   CTA CONTENT
+   ================================================ */
+.cta-content {
+    margin-top: 4rem;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e8ecff;
+}
+
+.cta-title {
+    font-size: 1.8rem;
+    color: #1B2845;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.cta-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-gray);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.cta-button {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    color: white;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+}
+
+.cta-button:hover {
+    background: linear-gradient(135deg, #8A6EF6, #AA6FFC);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    color: white;
+}
+
+.cta-button i {
+    margin-right: 8px;
+}
+
+/* ================================================
+   RESPONSIVE DESIGN
+   ================================================ */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
+    .sub-title {
+        font-size: 1.3rem;
+    }
+
+    .program-table {
+        font-size: 0.85rem;
+    }
+
+    .program-table th,
+    .program-table td {
+        padding: 12px 15px;
+    }
+
+    .program-table td:first-child {
+        width: 90px;
+    }
+
+    .cta-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .cta-title {
+        font-size: 1.4rem;
+    }
+
+    .cta-button {
+        width: 100%;
+        padding: 0.9rem 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header {
+        padding: 50px 0 40px;
+    }
+
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .program-section {
+        padding: 3rem 0;
+    }
+
+    .content-box {
+        padding: 20px;
+    }
+
+    .program-table {
+        font-size: 0.8rem;
+    }
+
+    .program-table th,
+    .program-table td {
+        padding: 10px 12px;
+    }
+
+    .program-table .group-header td {
+        font-size: 0.95rem;
+    }
+}
+
+
+
+
+
+
+/* ================================
+   BEAUTIFUL ADMISSION FORM STYLES
+   ================================ */
+
+/* Reset and Override */
+.application-section-modern * {
+    box-sizing: border-box;
+}
+
+/* Main Section with Professional Seminary Background */
+.application-section-modern {
+    min-height: 100vh;
+    background: #2c5f7f;
+    padding: 3rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle Pattern Overlay */
+.application-section-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Form Container */
+.form-container-modern {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+/* Modal Wrapper with Glass Effect */
+.form-modal {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    overflow: hidden;
+    animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Header - Deep Blue */
+.modal-header {
+    background: #2563EB;
+    padding: 1.75rem 2.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: shimmer 4s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-header i {
+    font-size: 1.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 2.5rem;
+    max-height: 75vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #2563EB #f0f0f0;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #2563EB;
+    border-radius: 10px;
+    border: 2px solid #f5f7fa;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #1d4ed8;
+}
+
+/* Form Section */
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #e8ecf1;
+    animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.form-section:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.form-section:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.form-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.form-section:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.form-section:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Section Header - Deep Blue Style */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    border-radius: 12px;
+    border-left: 4px solid #2563EB;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.section-header i {
+    font-size: 1.35rem;
+    color: #2563EB;
+}
+
+.section-header h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+    color: #2d3748;
+}
+
+.section-note {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-left: 4px solid #0ea5e9;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #164e63;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+}
+
+/* Reference Title */
+.ref-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 1.75rem 0 1.25rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+}
+
+/* Form Rows */
+.form-row-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Fields */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.625rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+}
+
+.form-field:focus-within label {
+    color: #2563EB;
+}
+
+.form-field .required {
+    color: #f56565;
+    font-weight: 700;
+}
+
+/* Input Styles with Beautiful Focus Effects */
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="tel"],
+.form-field input[type="date"],
+.form-field input[type="file"],
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #2d3748;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-field input[type="text"]::placeholder,
+.form-field input[type="email"]::placeholder,
+.form-field input[type="tel"]::placeholder,
+.form-field textarea::placeholder {
+    color: #a0aec0;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: #2563EB;
+    background: #ffffff;
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.1),
+        0 4px 12px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.form-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%232563EB' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 3rem;
+    cursor: pointer;
+}
+
+/* File Input Custom Styling */
+.form-field input[type="file"] {
+    padding: 0.625rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.form-field input[type="file"]::file-selector-button {
+    padding: 0.5rem 1.25rem;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.form-field input[type="file"]::file-selector-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+/* Radio Group with Beautiful Design */
+.radio-group-modern {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.75rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.radio-label:hover {
+    background: #f7fafc;
+    color: #2563EB;
+}
+
+.radio-label input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #2563EB;
+}
+
+/* Checkbox with Beautiful Design */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label:hover {
+    border-color: #2563EB;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #2563EB;
+}
+
+.checkbox-label input[type="checkbox"]:checked+span {
+    color: #2563EB;
+    font-weight: 600;
+}
+
+/* Error Messages */
+.error-msg {
+    font-size: 0.8rem;
+    color: #f56565;
+    margin-top: 0.375rem;
+    display: block;
+    font-weight: 500;
+}
+
+.input-error {
+    border-color: #fc8181 !important;
+    background: #fff5f5 !important;
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    50% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-8px);
+    }
+}
+
+.input-valid {
+    border-color: #48bb78 !important;
+    background: #f0fff4 !important;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.25rem;
+    padding-top: 2.5rem;
+    margin-top: 2.5rem;
+    border-top: 2px solid #e8ecf1;
+}
+
+.btn-cancel,
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(74, 85, 104, 0.3);
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 85, 104, 0.4);
+}
+
+.btn-save {
+    background: #2563EB;
+    color: white;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.btn-save::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-save:hover::before {
+    left: 100%;
+}
+
+.btn-save:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+
+.btn-cancel:active,
+.btn-save:active {
+    transform: translateY(0);
+}
+
+.btn-cancel i,
+.btn-save i {
+    font-size: 0.95rem;
+}
+
+/* Alert Messages with Beautiful Design */
+.alert {
+    padding: 1.25rem 1.5rem;
+    margin: 0 0 1.5rem 0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+.alert-error,
+.alert-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .application-section-modern {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .modal-body {
+        padding: 1.75rem;
+        max-height: 70vh;
+    }
+
+    .modal-header {
+        padding: 1.5rem 1.75rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.35rem;
+    }
+
+    .form-row-modern {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 1rem;
+    }
+
+    .btn-cancel,
+    .btn-save {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .section-header h3 {
+        font-size: 1rem;
+    }
+
+    .radio-group-modern {
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header {
+        padding: 1.25rem 1.25rem;
+    }
+
+    .modal-body {
+        padding: 1.25rem;
+    }
+
+    .form-field label {
+        font-size: 0.85rem;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        font-size: 0.85rem;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .section-header {
+        padding: 0.875rem 1rem;
+    }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled {
+    background: #edf2f7;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Focus visible for accessibility */
+.btn-cancel:focus-visible,
+.btn-save:focus-visible,
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.form-field textarea:focus-visible {
+    outline: 3px solid #2563EB;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .application-section-modern {
+        background: white;
+    }
+
+    .form-modal {
+        box-shadow: none;
+    }
+
+    .modal-header {
+        background: #2563EB;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .form-actions {
+        display: none;
+    }
+}
+
+
+/* ================================ */
+/*   Reference Form - Modern Styles */
+/* ================================ */
+
+/* Reset and box-sizing */
+.reference-form-wrapper * {
+    box-sizing: border-box;
+}
+
+/* Main Form Wrapper */
+.reference-form-wrapper {
+    max-width: 900px;
+    margin: 3rem auto;
+    background: #ffffff;
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Form Section Headers */
+.form-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1B2845;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid #2c5f7f;
+    display: inline-block;
+    padding-bottom: 0.25rem;
+}
+
+/* Form Rows (2-column layout) */
+.reference-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.reference-form .form-group {
+    flex: 1 1 calc(50% - 1.5rem);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels and Inputs */
+.reference-form label {
+    font-weight: 600;
+    color: #1B2845;
+    margin-bottom: 0.5rem;
+}
+
+.reference-form input,
+.reference-form select,
+.reference-form textarea {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.reference-form input:focus,
+.reference-form select:focus,
+.reference-form textarea:focus {
+    outline: none;
+    border-color: #2c5f7f;
+    box-shadow: 0 0 0 3px rgba(44, 95, 127, 0.15);
+}
+
+/* Input Validation States */
+.input-error {
+    border: 2px solid #dc3545 !important;
+    background: #ffecec !important;
+}
+
+.input-valid {
+    border: 2px solid #28a745 !important;
+    background: #f0fff4 !important;
+}
+
+/* Error messages */
+.error-message {
+    font-size: 0.85rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    border-radius: 12px;
+    border-left: 4px solid #2563EB;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.section-header i {
+    font-size: 1.35rem;
+    color: #2563EB;
+}
+
+.section-header h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+    color: #2d3748;
+}
+
+/* Textarea character count */
+.character-count {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Submit Button */
+.form-submit {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #2c5f7f, #1b3f5a);
+    color: #fff;
+    padding: 1rem 3rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(44, 95, 127, 0.3);
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #1b3f5a, #2c5f7f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 95, 127, 0.4);
+}
+
+/* reCAPTCHA Box */
+.recaptcha-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid #cfd8dc;
+    margin: 2rem 0;
+    background: #f8faff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+.recaptcha-left {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.recaptcha-left input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    accent-color: #2c5f7f;
+    cursor: pointer;
+}
+
+.recaptcha-left label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1B2845;
+}
+
+.recaptcha-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.recaptcha-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #495463;
+}
+
+.recaptcha-links {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.recaptcha-links:hover {
+    text-decoration: underline;
+}
+
+.recaptcha-note {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reference-form .form-row {
+        flex-direction: column;
+    }
+
+    .btn-submit {
+        width: 100%;
+    }
+
+    .recaptcha-box {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .recaptcha-right {
+        text-align: center;
+    }
+}
+
+
+/*  Academic Programmes :- Enable submenu open on hover/click */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: 0.1rem;
+    margin-right: 0.1rem;
+}
+
+
+/*==============================*/
+/* Admission Process Page Styles */
+/*=============================*/
+
+/* Page Header - Same as Scholarship */
+.admission-section .section-title {
+    padding-top: 4rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1B2845;
+}
+
+/* Main Section */
+.admission-section {
+    padding: 4rem 0;
+    background-color: var(--white);
+}
+
+/* Intro Section - Same styling as scholarship */
+.admission-section .intro-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.admission-section .intro-section p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.admission-section .intro-section .step-link {
+    color: #A78BFA;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.admission-section .intro-section .step-link:hover {
+    color: #8B5CF6;
+    text-decoration: underline;
+}
+
+/* Process Steps Section */
+.admission-section .process-steps {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: #f8f9ff;
+    border-radius: 10px;
+    border-left: 4px solid #A78BFA;
+}
+
+.admission-section .about-subtitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00B8BB;
+    margin-bottom: 1.5rem;
+}
+
+.admission-section .process-steps>p {
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* Admission Steps List - Enhanced Styling */
+.admission-section .admission-steps-list {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-left: 0;
+    margin-top: 2rem;
+}
+
+.admission-section .admission-steps-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding: 1.2rem 1.5rem 1.2rem 4rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    border: 1px solid #e8e8e8;
+    text-align: left;
+}
+
+.admission-section .admission-steps-list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+    border-color: #A78BFA;
+}
+
+.admission-section .admission-steps-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Content Box - Important Note */
+.admission-section .content-box {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 2rem 2rem;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff5eb 100%);
+    border-radius: 10px;
+    border: 1px solid #ffe4cc;
+    border-left: 4px solid #ff9f43;
+    text-align: left;
+}
+
+.admission-section .content-box p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+.admission-section .content-box strong {
+    color: #ff9f43;
+    font-weight: 700;
+}
+
+/* Call to Action Section */
+.admission-section .cta-content {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.admission-section .cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.admission-section .cta-content>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: left;
+}
+
+.admission-section .btn-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: #ffffff;
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admission-section .btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: #f8f9ff;
+}
+
+.admission-section .btn-cta i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admission-section {
+        padding: 3rem 0;
+    }
+
+    .admission-section .section-title {
+        font-size: 1.75rem;
+    }
+
+    .admission-section .process-steps {
+        padding: 2rem 1.5rem;
+    }
+
+    .admission-section .about-subtitle {
+        font-size: 1.3rem;
+    }
+
+    .admission-section .admission-steps-list li {
+        padding: 1rem 1rem 1rem 3.5rem;
+        font-size: 0.9rem;
+    }
+
+    .admission-section .admission-steps-list li::before {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+        left: 1rem;
+    }
+
+    .admission-section .content-box {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .admission-section .cta-content {
+        padding: 2.5rem 1.5rem;        
+    }
+    .admission-section .cta-content p {
+       text-align: center;     
+    }
+
+
+    .admission-section .cta-title {
+        font-size: 1.6rem;
+    }
+
+    .admission-section .btn-cta {
+        padding: 0.9rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .admission-section .section-title {
+        font-size: 1.5rem;
+    }
+
+    /* Add this to the main intro section styles */
+    .admission-section .intro-section p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .process-steps>p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 1.5rem;
+        font-weight: 400;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .content-box p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        margin-bottom: 0;
+        text-align: center;
+        /* Add this */
+    }
+
+    .admission-section .process-steps {
+        padding: 1.5rem 1rem;
+    }
+
+    .admission-section .admission-steps-list li {
+        padding: 0.9rem 0.8rem 0.9rem 3rem;
+        font-size: 0.85rem;
+    }
+
+    .admission-section .admission-steps-list li::before {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+        left: 0.8rem;
+    }
+
+    .admission-section .cta-content {
+        padding: 2rem 1.2rem;
+    }
+
+    .admission-section .cta-title {
+        font-size: 1.4rem;
+    }
+
+    .admission-section .cta-content>p {
+        font-size: 0.95rem;
+    }
+
+    .admission-section .btn-cta {
+        padding: 0.85rem 1.8rem;
+        font-size: 0.95rem;
+    }
+}
+
+/*Admission-process styling
+/* Call to Action Section */
+.scholarship-section .cta-contents {
+    max-width: 900px;
+    margin: 4rem auto 0;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, #A78BFA, #C084FC);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(167, 139, 250, 0.3);
+}
+
+.scholarship-section .cta-contents>p {
+    color: #ffffff;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+    text-align: center;
 }
