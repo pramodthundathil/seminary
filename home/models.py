@@ -63,13 +63,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=250, unique=True)
     image = models.CharField(max_length=250, blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
-    locked_exam = models.ForeignKey(
-        "Exams",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        db_column='locked_exam'
-    )
+    locked_exam = models.IntegerField(blank=True, null=True)
     banned_at = models.DateTimeField(blank=True, null=True)
     church_admin = models.ForeignKey('ChurchAdmins', on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     last_login = models.DateTimeField(blank=True, null=True)
