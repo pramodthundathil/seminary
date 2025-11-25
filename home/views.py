@@ -46,6 +46,27 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
+def student_home(request):
+    return render(request, "student/home.html")
+
+def student_subjects(request):
+    return render(request, "student/subjects.html")
+
+def student_view_post(request):
+    return render(request, "student/view_posts.html")
+
+def student_exam_hall(request):
+    return render(request, "student/exam_hall.html")
+
+def student_score_card(request):
+    return render(request, "student/score_card.html")
+
+def student_class_recordings(request):
+    return render(request, "student/class_recordings.html")
+
+def student_submitted_assignment(request):
+    return render(request, "student/submitted_assignment.html")
+
 
 def index(request): 
     pages = Pages.objects.all()
