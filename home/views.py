@@ -810,28 +810,50 @@ def doctoral_program(request):
     """
     Accademics Programs-Doctoral Program-D.Min Details
     """
-    return render(request,"site_pages/doctoral_program.html")
+    courses = Courses.objects.filter(course_name='D.Min', status=True)
+    print("courses",courses)
+    return render(request, "site_pages/doctoral_program.html", {
+        "courses": courses
+    })
 
 def masters_program(request):
     """
-    Accademics Programs-Master's Program-M.Div Details
+    Academics Programs - Master's Program - M.Div Details
     """
-    return render(request,"site_pages/masters_program.html")
+    # Get only Master-level courses (example)
+    
+    courses = Courses.objects.filter(course_name='M.Div', status=True)
+    print("courses",courses)
+    return render(request, "site_pages/masters_program.html", {
+        "courses": courses
+    })
 
 def bachelors_program(request):
     """
     Accademics Programs-Bachelor's Program-B.Th Details
     """
-    return render(request,"site_pages/bachelors_program.html")
+    courses = Courses.objects.filter(course_name='B.Th', status=True)
+    print("courses",courses)
+    return render(request, "site_pages/bachelors_program.html", {
+        "courses": courses
+    })
 
 def diploma_program(request):
     """
     Accademics Programs-Diploma Program-Dip.Th Details
     """
-    return render(request,"site_pages/diploma_program.html")
+    courses = Courses.objects.filter(course_name='M.Div', status=True)
+    print("courses",courses)
+    return render(request, "site_pages/masters_program.html", {
+        "courses": courses
+    })
 
 def certificate_program(request):
     """
     Accademics Programs-Certificate Program-C.Th Details
     """
-    return render(request,"site_pages/certificate_program.html")
+    courses = Courses.objects.filter(course_name='M.Div', status=True)
+    print("courses",courses)
+    return render(request, "site_pages/masters_program.html", {
+        "courses": courses
+    })

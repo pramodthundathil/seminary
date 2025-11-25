@@ -1438,7 +1438,7 @@ def course_create(request):
     try:
         course_name = request.POST.get('course_name')
         course_code = request.POST.get('course_code')
-        highest_qualification = int(request.POST.get('highest_qualification'))
+        highest_qualification_id = request.POST.get('highest_qualification')
         credit_hours = float(request.POST.get('credit_hours'))
         description = request.POST.get('description', '')
         browser_title = request.POST.get('browser_title', '')
@@ -1448,6 +1448,8 @@ def course_create(request):
         status = int(request.POST.get('status', 1))
         apply_button_top = int(request.POST.get('apply_button_top', 0))
         apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
+        print("*********",request.POST.get)
+
 
         # Check if course code already exists
         if Courses.objects.filter(course_code=course_code).exists():
@@ -1455,11 +1457,25 @@ def course_create(request):
                 'success': False,
                 'message': 'Course code already exists'
             })
+        if not highest_qualification_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please select a highest qualification'
+            })
+       
+        # Safely fetch qualification
+        try:
+            highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
+        except Qualifications.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Selected qualification does not exist'
+            })
 
         course = Courses.objects.create(
             course_name=course_name,
             course_code=course_code,
-            highest_qualification=highest_qualification,
+            highest_qualification=highest_qualification_obj,
             credit_hours=credit_hours,
             description=description,
             browser_title=browser_title,
@@ -1469,8 +1485,8 @@ def course_create(request):
             status=status,
             apply_button_top=apply_button_top,
             apply_button_bottom=apply_button_bottom,
-            created_by=request.user.id,
-            updated_by=request.user.id,
+            created_by=request.user,   
+            updated_by=request.user, 
             created_at=timezone.now()
         )
 
