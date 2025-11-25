@@ -86,14 +86,41 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
 
-    /* DataTable Styling */
-    table.dataTable {
-        width: 100% !important;
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 2px solid var(--border-gray);
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-gray);
+    }
+
+    .slider-table {
+        width: 100%;
         border-collapse: separate;
         border-spacing: 0 10px;
     }
 
-    table.dataTable thead th {
+    .slider-table thead th {
         background: linear-gradient(135deg, var(--dark-navy), #2A3F5F);
         color: white;
         padding: 18px 20px;
@@ -102,33 +129,39 @@
         font-size: 13px;
         letter-spacing: 1px;
         border: none;
-        position: relative;
     }
 
-    table.dataTable thead th:first-child {
+    .slider-table thead th:first-child {
         border-radius: 12px 0 0 12px;
     }
 
-    table.dataTable thead th:last-child {
+    .slider-table thead th:last-child {
         border-radius: 0 12px 12px 0;
     }
 
-    table.dataTable tbody tr {
+    .slider-table tbody tr {
         background: white;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         transition: all 0.3s ease;
-        border-radius: 10px;
     }
 
-    table.dataTable tbody tr:hover {
+    .slider-table tbody tr:hover {
         box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
         transform: translateY(-3px);
     }
 
-    table.dataTable tbody td {
+    .slider-table tbody td {
         padding: 20px;
         vertical-align: middle;
         border: none;
+    }
+
+    .slider-table tbody tr td:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .slider-table tbody tr td:last-child {
+        border-radius: 0 10px 10px 0;
     }
 
     .slider-info {
@@ -223,6 +256,76 @@
     .btn-delete:hover {
         background: #DC2626;
         transform: scale(1.1);
+    }
+
+    /* Pagination Styles */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid var(--purple-light);
+    }
+
+    .pagination-info {
+        color: var(--text-gray);
+        font-weight: 500;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 8px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pagination li a,
+    .pagination li span {
+        padding: 10px 16px;
+        border: 2px solid var(--border-gray);
+        border-radius: 8px;
+        color: var(--dark-navy);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .pagination li a:hover {
+        background: var(--purple-light);
+        border-color: var(--primary-purple);
+        color: var(--primary-purple);
+        transform: translateY(-2px);
+    }
+
+    .pagination li.active span {
+        background: linear-gradient(135deg, var(--primary-purple), #A78BFA);
+        border-color: var(--primary-purple);
+        color: white;
+    }
+
+    .pagination li.disabled span {
+        color: var(--border-gray);
+        cursor: not-allowed;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-gray);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        color: var(--purple-light);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--dark-navy);
+        margin-bottom: 10px;
     }
 
     /* Modal Styles */
@@ -367,22 +470,197 @@
         background: #4B5563;
     }
 
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        color: var(--dark-navy);
-        font-weight: 500;
+    @media (max-width: 1024px) {
+        .slider-container {
+            padding: 20px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .search-box {
+            width: 100%;
+        }
     }
 
     @media (max-width: 768px) {
+        .slider-container {
+            padding: 15px;
+        }
+
+        .page-header {
+            padding: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+        }
+
+        .content-card {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
         .form-row {
             grid-template-columns: 1fr;
         }
+
+        /* Hide table on mobile, show cards instead */
+        .slider-table {
+            display: none;
+        }
+
+        .mobile-cards {
+            display: block;
+        }
+
+        .mobile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-card:hover {
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .mobile-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--purple-light);
+        }
+
+        .mobile-card-title {
+            flex: 1;
+        }
+
+        .mobile-card-id {
+            background: var(--dark-navy);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .mobile-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mobile-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-card-label {
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .mobile-card-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--purple-light);
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .pagination {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+        .modal-footer .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 20px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .slider-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .action-buttons {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Mobile card styles - hidden by default */
+    .mobile-cards {
+        display: none;
+    }
+
+    @media (min-width: 769px) {
+        .mobile-cards {
+            display: none !important;
+        }
+        
+        .slider-table {
+            display: table !important;
+        }
     }
 </style>
-
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 <div class="slider-container">
     <div class="page-header">
@@ -399,21 +677,180 @@
     </div>
 
     <div class="content-card">
-        <table id="sliderTable" class="display" style="width:100%">
+        <div class="table-header">
+            <div class="pagination-info">
+                <strong>Total Sliders:</strong> {{ total_sliders }}
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search sliders..." onkeyup="searchTable()">
+            </div>
+        </div>
+
+        {% if sliders %}
+        <!-- Desktop Table View -->
+        <table class="slider-table" id="sliderTable">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width: 60px;">ID</th>
                     <th>Slider Info</th>
-                    <th>Dimensions</th>
-                    <th>Photos</th>
-                    <th>Created</th>
-                    <th>Actions</th>
+                    <th style="width: 150px;">Dimensions</th>
+                    <th style="width: 100px;">Photos</th>
+                    <th style="width: 120px;">Created</th>
+                    <th style="width: 150px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Data loaded via AJAX -->
+                {% for slider in sliders %}
+                <tr>
+                    <td><strong>{{ slider.id }}</strong></td>
+                    <td>
+                        <div class="slider-info">
+                            <div class="slider-name">{{ slider.slider_name }}</div>
+                            <div class="slider-meta">
+                                <span class="code-badge">{{ slider.code }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="dimension-badge">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            {{ slider.width }}×{{ slider.height }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="photo-count-badge">
+                            <i class="fas fa-images"></i>
+                            {{ slider.sliderphoto_set.count }}
+                        </span>
+                    </td>
+                    <td style="color: var(--text-gray); font-size: 13px;">
+                        {{ slider.created_at|date:"M d, Y" }}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-photos" 
+                                    onclick="managePhotos({{ slider.id }})" 
+                                    title="Manage Photos">
+                                <i class="fas fa-images"></i>
+                            </button>
+                            <button class="btn-action btn-edit" 
+                                    onclick="editSlider({{ slider.id }})" 
+                                    title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action btn-delete" 
+                                    onclick="deleteSlider({{ slider.id }}, '{{ slider.slider_name|escapejs }}')" 
+                                    title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-cards" id="mobileCards">
+            {% for slider in sliders %}
+            <div class="mobile-card">
+                <div class="mobile-card-header">
+                    <div class="mobile-card-title">
+                        <div class="slider-name">{{ slider.slider_name }}</div>
+                        <div class="slider-meta" style="margin-top: 10px;">
+                            <span class="code-badge">{{ slider.code }}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-card-id">#{{ slider.id }}</div>
+                </div>
+                
+                <div class="mobile-card-body">
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Dimensions:</span>
+                        <span class="dimension-badge">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            {{ slider.width }}×{{ slider.height }}
+                        </span>
+                    </div>
+                    
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Photos:</span>
+                        <span class="photo-count-badge">
+                            <i class="fas fa-images"></i>
+                            {{ slider.sliderphoto_set.count }}
+                        </span>
+                    </div>
+                    
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Created:</span>
+                        <span style="color: var(--text-gray); font-size: 13px; font-weight: 600;">
+                            {{ slider.created_at|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="mobile-card-footer">
+                    <div class="action-buttons">
+                        <button class="btn-action btn-photos" 
+                                onclick="managePhotos({{ slider.id }})" 
+                                title="Manage Photos">
+                            <i class="fas fa-images"></i>
+                        </button>
+                        <button class="btn-action btn-edit" 
+                                onclick="editSlider({{ slider.id }})" 
+                                title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" 
+                                onclick="deleteSlider({{ slider.id }}, '{{ slider.slider_name|escapejs }}')" 
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper">
+            <div class="pagination-info">
+                Showing {{ sliders.start_index }} to {{ sliders.end_index }} of {{ sliders.paginator.count }} entries
+            </div>
+            <ul class="pagination">
+                {% if sliders.has_previous %}
+                    <li><a href="?page=1"><i class="fas fa-angle-double-left"></i></a></li>
+                    <li><a href="?page={{ sliders.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>
+                {% else %}
+                    <li class="disabled"><span><i class="fas fa-angle-double-left"></i></span></li>
+                    <li class="disabled"><span><i class="fas fa-angle-left"></i></span></li>
+                {% endif %}
+
+                {% for num in sliders.paginator.page_range %}
+                    {% if sliders.number == num %}
+                        <li class="active"><span>{{ num }}</span></li>
+                    {% elif num > sliders.number|add:'-3' and num < sliders.number|add:'3' %}
+                        <li><a href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if sliders.has_next %}
+                    <li><a href="?page={{ sliders.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>
+                    <li><a href="?page={{ sliders.paginator.num_pages }}"><i class="fas fa-angle-double-right"></i></a></li>
+                {% else %}
+                    <li class="disabled"><span><i class="fas fa-angle-right"></i></span></li>
+                    <li class="disabled"><span><i class="fas fa-angle-double-right"></i></span></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-sliders-h"></i>
+            <h3>No Sliders Found</h3>
+            <p>Create your first slider to get started!</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -470,45 +907,8 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script>
-let sliderTable;
 let isEditMode = false;
-
-$(document).ready(function() {
-    sliderTable = $('#sliderTable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{% url "slider_datatable" %}',
-            type: 'GET'
-        },
-        columns: [
-            { data: 'id', width: '60px' },
-            { data: 'slider_info', orderable: false },
-            { data: 'dimensions', width: '120px' },
-            { data: 'photos', width: '80px' },
-            { data: 'created_at', width: '110px' },
-            { data: 'actions', orderable: false, searchable: false, width: '140px' }
-        ],
-        order: [[0, 'desc']],
-        pageLength: 12,
-        lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-        language: {
-            search: "Search:",
-            lengthMenu: "Show _MENU_ items",
-            info: "Showing _START_ to _END_ of _TOTAL_ sliders",
-            paginate: {
-                first: "First",
-                last: "Last",
-                next: "Next",
-                previous: "Previous"
-            }
-        }
-    });
-});
 
 function getCookie(name) {
     let cookieValue = null;
@@ -523,6 +923,47 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+function searchTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toUpperCase();
+    
+    // Search in desktop table
+    const table = document.getElementById('sliderTable');
+    if (table) {
+        const tr = table.getElementsByTagName('tr');
+        for (let i = 1; i < tr.length; i++) {
+            const td = tr[i].getElementsByTagName('td');
+            let found = false;
+            
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    const txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            tr[i].style.display = found ? '' : 'none';
+        }
+    }
+    
+    // Search in mobile cards
+    const mobileCards = document.getElementById('mobileCards');
+    if (mobileCards) {
+        const cards = mobileCards.getElementsByClassName('mobile-card');
+        for (let i = 0; i < cards.length; i++) {
+            const txtValue = cards[i].textContent || cards[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                cards[i].style.display = '';
+            } else {
+                cards[i].style.display = 'none';
+            }
+        }
+    }
 }
 
 function openCreateModal() {
@@ -586,7 +1027,7 @@ async function saveSlider() {
         if (result.success) {
             alert(isEditMode ? 'Slider updated successfully!' : 'Slider created successfully!');
             closeSliderModal();
-            sliderTable.ajax.reload();
+            location.reload();
         } else {
             alert('Error: ' + result.message);
         }
@@ -616,7 +1057,7 @@ async function deleteSlider(sliderId, sliderName) {
 
         if (result.success) {
             alert('Slider deleted successfully!');
-            sliderTable.ajax.reload();
+            location.reload();
         } else {
             alert('Error: ' + result.message);
         }
