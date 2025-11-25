@@ -30,12 +30,11 @@ urlpatterns = [
     path('toggle-status/<int:news_id>/', views.news_toggle_status, name='news_toggle_status'),
 
     # Media Library Management
-    path('admin/media/', views.media_list, name='admin/media/'),
-    path('media/datatable/', views.media_datatable, name='media_datatable'),
-    path('media/upload/', views.media_upload, name='media_upload'),
-    path('media/get/<int:media_id>/', views.media_get, name='media_get'),
-    path('media/update/<int:media_id>/', views.media_update, name='media_update'),
-    path('media/delete/<int:media_id>/', views.media_delete, name='media_delete'),
+    path('admin/media/', views.media_list, name='media_list'),
+    path('admin/media/upload/', views.media_upload, name='media_upload'),
+    path('admin/media/<int:media_id>/get/', views.media_get, name='media_get'),
+    path('admin/media/<int:media_id>/update/', views.media_update, name='media_update'),
+    path('admin/media/<int:media_id>/delete/', views.media_delete, name='media_delete'),
 
 
     #photo gallery

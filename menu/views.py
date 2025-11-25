@@ -22,8 +22,9 @@ from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
+from home.models import News, MediaLibrary
 from home.models import *
-from .forms import MediaLibraryForm
+from .forms import MediaLibraryForm, NewsForm
 from home.decorators import role_redirection
 from datetime import datetime, timedelta
 
@@ -120,7 +121,7 @@ def admin_index(request):
     return render(request, "admin/index.html", context)
 
 
-#######@login_required
+@login_required
 def menu_list(request):
     """Display all menus"""
     menus = Menus.objects.filter(deleted_at__isnull=True).order_by('-created_at')
@@ -130,7 +131,7 @@ def menu_list(request):
     }
     return render(request, 'admin/menus/menu_list.html', context)
 
-#######@login_required
+@login_required
 def menu_engineer(request, menu_id=None):
     """Menu engineering page with drag and drop"""
     if menu_id:
@@ -164,7 +165,7 @@ def menu_engineer(request, menu_id=None):
     }
     return render(request, 'admin/menus/menu_engineer.html', context)
 
-#######@login_required
+@login_required
 def pages_list(request):
     """Display all pages"""
     pages = Pages.objects.filter(deleted_at__isnull=True).order_by('-created_at')
@@ -174,7 +175,7 @@ def pages_list(request):
     }
     return render(request, 'admin/menus/pages_list.html', context)
 
-#######@login_required
+@login_required
 @require_POST
 def save_menu(request):
     """Save or update menu"""
@@ -216,7 +217,7 @@ def save_menu(request):
             'message': str(e)
         }, status=400)
 
-#######@login_required
+@login_required
 @require_POST
 def save_menu_items(request):
     """Save menu items with order"""
@@ -262,7 +263,7 @@ def save_menu_items(request):
             'message': str(e)
         }, status=400)
 
-#######@login_required
+@login_required
 @require_POST
 def delete_menu(request, menu_id):
     """Soft delete menu"""
@@ -284,7 +285,7 @@ def delete_menu(request, menu_id):
             'message': str(e)
         }, status=400)
 
-#######@login_required
+@login_required
 def get_menu_items(request, menu_id):
     """Get menu items as JSON"""
     try:
@@ -321,18 +322,8 @@ def get_menu_items(request, menu_id):
 
 # news setting 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from django.core.paginator import Paginator
-from django.db.models import Q
-from home.models import News, MediaLibrary
-from .forms import NewsForm
-import json
 
-######@login_required
+@login_required
 def news_list(request):
     """Display news list with DataTables"""
     context = {
@@ -340,7 +331,7 @@ def news_list(request):
     }
     return render(request, 'admin/news/news_list.html', context)
 
-######@login_required
+@login_required
 def news_datatable(request):
     """DataTables server-side processing for news"""
     draw = int(request.GET.get('draw', 1))
@@ -414,7 +405,7 @@ def news_datatable(request):
         'data': data
     })
 
-######@login_required
+@login_required
 def news_create(request):
     """Create new news"""
     if request.method == 'POST':
@@ -448,7 +439,7 @@ def news_create(request):
     }
     return render(request, 'admin/news/news_form.html', context)
 
-######@login_required
+@login_required
 def news_edit(request, news_id):
     """Edit existing news"""
     news = get_object_or_404(News, id=news_id, deleted_at__isnull=True)
@@ -483,7 +474,7 @@ def news_edit(request, news_id):
     }
     return render(request, 'admin/news/news_form.html', context)
 
-######@login_required
+@login_required
 def news_get(request, news_id):
     """Get news data as JSON"""
     try:
@@ -512,7 +503,7 @@ def news_get(request, news_id):
             'message': str(e)
         }, status=400)
 
-######@login_required
+@login_required
 @require_POST
 def news_delete(request, news_id):
     """Soft delete news"""
@@ -531,7 +522,7 @@ def news_delete(request, news_id):
             'message': str(e)
         }, status=400)
 
-######@login_required
+@login_required
 @require_POST
 def news_toggle_status(request, news_id):
     """Toggle news status"""
@@ -558,124 +549,84 @@ def news_toggle_status(request, news_id):
 
 
 
-
 @login_required
 def media_list(request):
-    """Display media library with DataTables"""
-    media_items = MediaLibrary.objects.filter(deleted_at__isnull=True).order_by('-created_at')
-    context = {
-        'page_title': 'Media Library',
-        'media_items': media_items
-    }
-    return render(request, 'admin/media/media_list.html', context)
-
-@login_required
-def media_datatable(request):
-    """DataTables server-side processing for media"""
-    draw = int(request.GET.get('draw', 1))
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 12))
-    search_value = request.GET.get('search[value]', '')
-    order_column_index = int(request.GET.get('order[0][column]', 0))
-    order_direction = request.GET.get('order[0][dir]', 'desc')
-    media_type_filter = request.GET.get('media_type', '')
+    """Display media library with pagination"""
+    # Get filter and search parameters
+    media_type_filter = request.GET.get('type', '')
+    search_query = request.GET.get('search', '')
+    page = request.GET.get('page', 1)
     
-    # Column mapping
-    columns = ['id', 'title', 'file_type', 'file_size', 'created_at']
-    order_column = columns[order_column_index] if order_column_index < len(columns) else 'created_at'
-    
-    if order_direction == 'desc':
-        order_column = f'-{order_column}'
-    
-    # Query
+    # Base query
     media_query = MediaLibrary.objects.filter(deleted_at__isnull=True)
     
-    # Media type filter
+    # Apply filters
     if media_type_filter:
         media_query = media_query.filter(media_type=media_type_filter)
     
-    # Search
-    if search_value:
+    # Apply search
+    if search_query:
         media_query = media_query.filter(
-            Q(title__icontains=search_value) |
-            Q(file_name__icontains=search_value) |
-            Q(description__icontains=search_value) |
-            Q(file_type__icontains=search_value)
+            Q(title__icontains=search_query) |
+            Q(file_name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(file_type__icontains=search_query)
         )
     
-    # Total records
-    total_records = MediaLibrary.objects.filter(deleted_at__isnull=True).count()
-    filtered_records = media_query.count()
+    # Order by newest first
+    media_query = media_query.order_by('-created_at')
     
-    # Order and paginate
-    media_query = media_query.order_by(order_column)[start:start + length]
+    # Paginate
+    paginator = Paginator(media_query, 12)  # 12 items per page
     
-    # Prepare data
-    data = []
-    for media in media_query:
-        # Get proper URLs
-        # file_url = media.file_path.url if media.file_path else ''
+    try:
+        media_items = paginator.page(page)
+    except PageNotAnInteger:
+        media_items = paginator.page(1)
+    except EmptyPage:
+        media_items = paginator.page(paginator.num_pages)
+    
+    # Process media items for safe display
+    processed_items = []
+    for media in media_items:
         try:
             file_url = media.file_path.url if media.file_path else ''
         except:
-            file_url = ""   # avoid S3 error locally
-
+            file_url = ''
+        
         thumb_url = media.thumb_file_path if media.thumb_file_path else file_url
         
-        # Determine file icon/preview
-        if media.media_type == 'image':
-            preview = f'<img src="{thumb_url}" alt="{media.file_name}" class="media-preview-img">'
-        elif media.media_type == 'video':
-            preview = '<div class="media-icon video"><i class="fas fa-video"></i></div>'
-        elif media.media_type == 'document':
-            preview = '<div class="media-icon document"><i class="fas fa-file-alt"></i></div>'
-        else:
-            preview = '<div class="media-icon other"><i class="fas fa-file"></i></div>'
-        
-        # File type badge
-        file_type_badge = f'<span class="file-type-badge {media.file_type.lower()}">{media.file_type.upper()}</span>'
-        
-        # Actions
-        actions = f'''
-            <div class="media-actions">
-                <button class="btn-media-action btn-view" onclick="viewMedia({media.id})" title="View">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn-media-action btn-edit" onclick="editMedia({media.id})" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-media-action btn-delete" onclick="deleteMediaConfirm({media.id}, '{media.file_name}')" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        '''
-        
-        data.append({
+        processed_items.append({
             'id': media.id,
-            'preview': preview,
-            'info': f'''
-                <div class="media-info">
-                    <div class="media-title">{media.title or media.file_name}</div>
-                    <div class="media-meta">{file_type_badge} {media.file_size}</div>
-                    {f'<div class="media-dimensions">{media.dimensions}</div>' if media.dimensions else ''}
-                </div>
-            ''',
-            'description': media.description[:60] + '...' if media.description and len(media.description) > 60 else (media.description or '-'),
-            'created_at': media.created_at.strftime('%b %d, %Y') if media.created_at else '',
-            'actions': actions
+            'file_name': media.file_name,
+            'file_url': file_url,
+            'thumb_url': thumb_url,
+            'file_type': media.file_type,
+            'file_size': media.file_size,
+            'dimensions': media.dimensions,
+            'media_type': media.media_type,
+            'title': media.title or media.file_name,
+            'description': media.description or '',
+            'alt_text': media.alt_text or '',
+            'created_at': media.created_at
         })
     
-    return JsonResponse({
-        'draw': draw,
-        'recordsTotal': total_records,
-        'recordsFiltered': filtered_records,
-        'data': data
-    })
+    context = {
+        'page_title': 'Media Library',
+        'media_items': processed_items,
+        'paginator': paginator,
+        'page_obj': media_items,
+        'current_type': media_type_filter,
+        'current_search': search_query,
+    }
+    
+    return render(request, 'admin/media/media_list.html', context)
+
 
 @login_required
 @require_POST
 def media_upload(request):
-    """Handle media file upload with S3 storage"""
+    """Handle media file upload"""
     try:
         uploaded_file = request.FILES.get('file')
         if not uploaded_file:
@@ -685,7 +636,7 @@ def media_upload(request):
             }, status=400)
         
         # Validate file size (10MB limit)
-        max_size = 10 * 1024 * 1024  # 10MB in bytes
+        max_size = 10 * 1024 * 1024
         if uploaded_file.size > max_size:
             return JsonResponse({
                 'success': False,
@@ -697,7 +648,7 @@ def media_upload(request):
         description = request.POST.get('description', '').strip()
         alt_text = request.POST.get('alt_text', '').strip()
         
-        # Determine media type and file type
+        # Determine media type
         file_ext = os.path.splitext(uploaded_file.name)[1].lower()
         file_type = file_ext.replace('.', '')
         
@@ -728,69 +679,35 @@ def media_upload(request):
         clean_filename = uploaded_file.name.replace(' ', '_')
         filename = f"{timestamp}_{clean_filename}"
         
-        # Prepare file path for S3
-        file_path = f"uploads/{media_type}s/{filename}"
-        
-        # Initialize variables
+        # Process dimensions for images
+        dimensions = None
         thumb_url = ''
         slider_url = ''
-        dimensions = None
         
-        # Process images
         if media_type == 'image':
             try:
-                # Open image
                 img = Image.open(uploaded_file)
                 dimensions = f"{img.width}x{img.height}"
                 
                 # Convert RGBA to RGB if necessary
                 if img.mode in ('RGBA', 'LA', 'P'):
                     background = Image.new('RGB', img.size, (255, 255, 255))
-                    background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    if img.mode == 'RGBA':
+                        background.paste(img, mask=img.split()[-1])
+                    else:
+                        background.paste(img)
                     img = background
                 
-                # Create thumbnail
-                thumb_img = img.copy()
-                thumb_img.thumbnail((300, 300), Image.Resampling.LANCZOS)
-                
-                thumb_io = BytesIO()
-                thumb_img.save(thumb_io, format='JPEG', quality=85)
-                thumb_io.seek(0)
-                
-                thumb_filename = f"thumb_{filename}"
-                thumb_path = f"uploads/thumbnails/{thumb_filename}"
-                
-                # For S3, we'll store the path and upload separately
-                thumb_url = thumb_path
-                
-                # Create slider image
-                slider_img = img.copy()
-                slider_img.thumbnail((1200, 800), Image.Resampling.LANCZOS)
-                
-                slider_io = BytesIO()
-                slider_img.save(slider_io, format='JPEG', quality=90)
-                slider_io.seek(0)
-                
-                slider_filename = f"slider_{filename}"
-                slider_path = f"uploads/sliders/{slider_filename}"
-                slider_url = slider_path
-                
-                # Note: You'll need to save thumb_io and slider_io to S3 manually
-                # For now, we'll use the main file URL
-                thumb_url = file_path
-                slider_url = file_path
+                # Reset file pointer for saving
+                uploaded_file.seek(0)
                 
             except Exception as e:
                 print(f"Error processing image: {e}")
-                thumb_url = file_path
-                slider_url = file_path
-        else:
-            thumb_url = file_path
         
         # Create media record
         media = MediaLibrary()
         media.file_name = uploaded_file.name
-        media.file_path = uploaded_file  # FileField will handle S3 upload
+        media.file_path = uploaded_file
         media.thumb_file_path = thumb_url
         media.slider_file_path = slider_url if media_type == 'image' else None
         media.file_type = file_type
@@ -800,16 +717,14 @@ def media_upload(request):
         media.title = title or uploaded_file.name
         media.description = description
         media.alt_text = alt_text
-        media.created_by = request.user.id
-        media.updated_by = request.user.id
-        
+        media.created_by = request.user
+        media.updated_by = request.user
         media.save()
         
         return JsonResponse({
             'success': True,
             'message': 'File uploaded successfully',
-            'media_id': media.id,
-            'media_url': media.file_path.url
+            'media_id': media.id
         })
         
     except Exception as e:
@@ -819,14 +734,25 @@ def media_upload(request):
             'message': f'Upload failed: {str(e)}'
         }, status=500)
 
-@login_required
+
+@require_http_methods(["GET"])
 def media_get(request, media_id):
     """Get media data as JSON"""
+    # Check authentication WITHOUT redirecting
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'message': 'Authentication required'
+        }, status=401)
+    
     try:
         media = get_object_or_404(MediaLibrary, id=media_id, deleted_at__isnull=True)
         
-        # Get proper URLs
-        file_url = media.file_path.url if media.file_path else ''
+        try:
+            file_url = media.file_path.url if media.file_path else ''
+        except:
+            file_url = ''
+        
         thumb_url = media.thumb_file_path if media.thumb_file_path else file_url
         slider_url = media.slider_file_path if media.slider_file_path else file_url
         
@@ -850,24 +776,33 @@ def media_get(request, media_id):
             'success': True,
             'data': data
         })
+    except MediaLibrary.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Media not found'
+        }, status=404)
     except Exception as e:
-        print(f"Get media error: {str(e)}")
         return JsonResponse({
             'success': False,
             'message': f'Failed to load media: {str(e)}'
-        }, status=400)
+        }, status=500)
 
-@login_required
-@require_POST
+@require_http_methods(["POST"])
 def media_update(request, media_id):
     """Update media metadata"""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'message': 'Authentication required'
+        }, status=401)
+    
     try:
         media = get_object_or_404(MediaLibrary, id=media_id, deleted_at__isnull=True)
         
         media.title = request.POST.get('title', '').strip() or media.title
         media.description = request.POST.get('description', '').strip()
         media.alt_text = request.POST.get('alt_text', '').strip()
-        media.updated_by = request.user.id
+        media.updated_by = request.user
         media.updated_at = timezone.now()
         media.save()
         
@@ -875,13 +810,48 @@ def media_update(request, media_id):
             'success': True,
             'message': 'Media updated successfully'
         })
+    except MediaLibrary.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Media not found'
+        }, status=404)
     except Exception as e:
-        print(f"Update error: {str(e)}")
         return JsonResponse({
             'success': False,
             'message': f'Update failed: {str(e)}'
-        }, status=400)
+        }, status=500)
 
+
+@require_http_methods(["POST"])
+def media_delete(request, media_id):
+    """Soft delete media"""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'message': 'Authentication required'
+        }, status=401)
+    
+    try:
+        media = get_object_or_404(MediaLibrary, id=media_id, deleted_at__isnull=True)
+        media.deleted_at = timezone.now()
+        media.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Media deleted successfully'
+        })
+    except MediaLibrary.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Media not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Delete failed: {str(e)}'
+        }, status=500)
+    
+    
 @login_required
 @require_POST
 def media_delete(request, media_id):
@@ -896,12 +866,10 @@ def media_delete(request, media_id):
             'message': 'Media deleted successfully'
         })
     except Exception as e:
-        print(f"Delete error: {str(e)}")
         return JsonResponse({
             'success': False,
             'message': f'Delete failed: {str(e)}'
         }, status=400)
-    
 
 
 def photo_gallery(request):
