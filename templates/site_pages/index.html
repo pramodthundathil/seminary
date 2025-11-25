@@ -8,16 +8,25 @@
     {% block title %}
     <title>Trinity Theological Seminary</title>
     {% endblock %}
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{%static 'css/styles.css' %}">
+
     <style>
+        /* ================================
+        1-Global Styles & Typography
+        ================================ */
         .section-title {
             font-weight: 700;
             text-align: center;
+            margin-top: 0;
+            /* remove space above */
             margin-bottom: 2rem;
             position: relative;
             padding-bottom: 15px;
+            font-size: 2rem;
+            color: #1d1d1d;
         }
 
         .section-title:after {
@@ -35,286 +44,530 @@
             color: var(--primary-cyan);
         }
 
-        /* Why Trinity Section */
-        .why-section {
-            padding: 80px 0;
-            background-color: var(--white);
+        /*2-why section*/
+        .why-cards-row {
+            display: flex;
+            flex-wrap: wrap;
+            /* ensures responsiveness on smaller screens */
+            gap: 30px;
+            /* space between cards */
+            justify-content: space-between;
+            /* spread evenly */
         }
 
-        .feature-card {
-            background: var(--white);
-            border-radius: 10px;
+        .why-card {
+            flex: 1 1 22%;
+            /* 4 cards in a row, responsive */
+            background: #fff;
+            border-radius: 15px;
             padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            min-width: 220px;
+            /* prevents shrinking too small */
+        }
+
+        /* Decorative frames */
+        .frame-blue {
+            position: absolute;
+            width: 200px;
+            height: 240px;
+            background: #4674a8;
+            border-radius: 0;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /*Card-4 student image8*/
+
+        .student-image-card {
+            flex: 1 1 22%;
+            /* same as other cards, allows 4 in a row */
+            position: relative;
+            /* required for absolutely positioned frames inside */
+            min-width: 220px;
+            height: 350px;
+            /* adjust as needed */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Wrapper to hold frames and image */
+        .student-image-wrapper {
+            position: relative;
+            width: 240px;
+            height: 280px;
+        }
+
+        /* Blue frame - back left */
+        .student-image-wrapper .frame-blue {
+            position: absolute;
+            width: 200px;
+            height: 240px;
+            background: #4674a8;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            border-radius: 8px;
+        }
+
+        /* Green frame - back right */
+        .student-image-wrapper .frame-green {
+            position: absolute;
+            width: 200px;
+            height: 240px;
+            background: #4CAF50;
+            bottom: 0;
+            right: 0;
+            z-index: 1;
+            border-radius: 8px;
+        }
+
+        /* Main image on top */
+        .student-image-wrapper .image-frame {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: 240px;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-image-wrapper .image-frame img {
+            width: 100%;
             height: 100%;
-            border-top: 4px solid var(--primary-cyan);
+            object-fit: cover;
+            display: block;
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
+        /* Optional icon styling */
+        .icon-circle {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            font-size: 1.5rem;
+            color: #fff;
         }
 
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--primary-cyan);
-            margin-bottom: 20px;
+        .icon-circle.blue {
+            background: #667eea;
         }
 
-        .feature-card h3 {
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--dark-navy);
+        .icon-circle.cyan {
+            background: #22d3ee;
         }
 
-        .feature-card p {
-            color: var(--text-gray);
-            line-height: 1.6;
+        .icon-circle.teal {
+            background: #14b8a6;
         }
 
-        .stats-row {
-            margin-top: 60px;
-            padding: 30px 0;
-            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
-            border-radius: 10px;
-            color: white;
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .student-image-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
         }
 
+        @media (max-width: 576px) {
+            .student-image-card {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .why-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .why-card {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* 3-Statistics Section */
+        .stats-section {
+            padding: 60px 0;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-container {
+            position: relative;
+            background: white;
+            border-radius: 29999px;
+            /* ensures full capsule shape */
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 40px;
+            max-width: 900px;
+            height: 120px;
+            margin: 0 auto;
+            overflow: visible;
+            /* allow circles to show outside if any */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Left decorative circle */
+        .stats-container .circle-left {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            border-radius: 50%;
+            top: -25px;
+            /* move half outside */
+            left: -25px;
+            z-index: 1;
+        }
+
+        /* Right decorative circle */
+        .stats-container .circle-right {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            bottom: -35px;
+            /* move half outside */
+            right: -35px;
+            z-index: 1;
+        }
+
+        /* Clip circles inside container */
+        .stats-container::before,
+        .stats-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: white;
+            border-radius: 50px;
+            z-index: 2;
+        }
+
+        /* Stat items */
         .stat-item {
             text-align: center;
-            padding: 15px;
+            flex: 1;
+            position: relative;
+            z-index: 3;
+            gap: 4px;
+            /* above clip layer */
         }
 
         .stat-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 2rem;
-            margin-bottom: 10px;
-            opacity: 0.9;
+            color: #667eea;
+            background: none;
+            /* remove background */
+            border: none;
+            margin-top: 3px;
         }
 
-        .stat-item h4 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .stat-icon i {
+            color: #1e3a8a;
+            background: none;
+            /* remove background */
+            border: none;
         }
 
-        .stat-item p {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #22c55e 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2px;
+            line-height: 0.75;
         }
 
-        /* Courses Section */
+        .stat-label {
+            font-size: 1rem !important;
+            font-weight: 900 !important;
+            color: #000000 !important;
+            margin-bottom: 8px !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .stats-container {
+                padding: 40px 30px;
+                gap: 30px;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                flex-direction: column;
+                padding: 40px 20px;
+                gap: 35px;
+                border-radius: 30px;
+            }
+
+            .stat-item {
+                width: 100%;
+            }
+
+            .stats-container::before {
+                width: 100px;
+                height: 100px;
+                top: -20px;
+                left: -20px;
+            }
+
+            .stats-container::after {
+                width: 120px;
+                height: 120px;
+                bottom: -30px;
+                right: -30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-section {
+                padding: 40px 15px;
+            }
+
+            .stat-number {
+                font-size: 2.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.95rem;
+            }
+        }
+
+        /*course section*/
+
         .courses-section {
-            padding: 80px 0;
-            background-color: var(--light-gray);
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #d7eaff;
+            /* light blue background */
+            padding: 60px 20px;
+            /* spacing so cards don’t touch edges */
+            border-radius: 20px;
+            /* optional: soft rounded corners */
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .section-title {
+            font-size: 35px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 0 !important;
+            margin-bottom: 20px !important;
+            text-align: center;
+            text-decoration: none !important;
+            border: none !important;
+            padding-top: 15px;
+        }
+
+        .section-title::after,
+        .section-title::before {
+            content: none !important;
+            /* removes decorative line under title */
+        }
+
+        .courses-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
         }
 
         .course-card {
-            background: var(--white);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            width: 360px;
+            padding: 40px 30px 30px;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            overflow: visible !important;
         }
 
         .course-card:hover {
             transform: translateY(-10px);
         }
 
-        .course-image {
-            height: 180px;
-            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        .course-blue {
+            background: linear-gradient(135deg, #a8e6e3 0%, #c8e6e3 100%);
+        }
+
+        .course-green {
+            background: linear-gradient(135deg, #a8d5a8 0%, #c1e1c1 100%);
+        }
+
+        .course-purple {
+            background: linear-gradient(135deg, #c8d5e8 0%, #d8e3f0 100%);
+        }
+
+        .badge-icon {
+            position: absolute;
+            top: -60px;
+            /* moves badge upward to the edge */
+            left: -45px;
+            /* moves badge to the left edge */
+            width: 70px;
+            height: 70px;
+
+            background:#d9d9d9;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 3.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+            z-index: 10;
+            overflow: visible !important;
+            position: relative;
         }
 
-        .course-content {
-            padding: 25px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+        .badge-icon i {
+            font-size: 32px;
+            color: #ffc107;
         }
+        /* INNER LIGHT BLUE CIRCLE */
+.badge-icon::after {
+    content: "";
+    position: absolute;
+    width: 55px;      /* Inner circle size */
+    height: 55px;
+    background:white; /* Light blue shade */
+    border-radius: 50%;
+    z-index: -1;      /* Keep it behind the image/icon */
+}
 
-        .course-content h3 {
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--dark-navy);
-        }
-
-        .course-content p {
-            color: var(--text-gray);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-
-        .btn-view-more {
-            background-color: var(--blue-button);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            align-self: flex-start;
-        }
-
-        .btn-view-more:hover {
-            background-color: var(--dark-navy);
-            transform: translateY(-2px);
-        }
-
-        .green-card .course-image {
-            background: linear-gradient(135deg, var(--green-card), #7CFC00);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-
-            .why-section,
-            .courses-section {
-                padding: 50px 0;
-            }
-
-            .feature-card,
-            .course-card {
-                margin-bottom: 20px;
-            }
-        }
-
-        .highlight {
-            color: var(--primary-cyan);
-        }
-
-        /* About Us Section */
-        .about-section {
-            padding: 80px 0;
-            background-color: var(--white);
-        }
-
-        .about-content {
-            display: flex;
-            align-items: center;
-            gap: 40px;
-        }
-
-        .about-text {
-            flex: 1;
-        }
-
-        .about-image {
-            flex: 1;
-            border-radius: 10px;
+        .course-img-container {
+            width: 80%;
+            height: 200px;
+            background: white;
+            border-radius: 40px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .about-image img {
+        .course-img {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 100%;
+            object-fit: cover;
+            align-items: center;
         }
 
-        .about-subtitle {
-            font-size: 1.5rem;
+        .course-title {
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--dark-navy);
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .about-description {
-            color: var(--text-gray);
-            line-height: 1.7;
-            margin-bottom: 25px;
-        }
-
-        .about-highlight {
-            background: var(--light-cyan);
-            padding: 25px;
-            border-radius: 10px;
-            margin: 30px 0;
-            border-left: 4px solid var(--primary-cyan);
-        }
-
-        .about-highlight p {
-            margin: 0;
-            font-style: italic;
-            color: var(--dark-navy);
+        .course-desc {
+            font-size: 15px;
             line-height: 1.6;
+            color: #34495e;
+            margin-bottom: 25px;
+            text-align: left;
         }
 
-        .btn-read-more {
-            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        .btn-join {
+            background: #4169e1;
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 5px;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
         }
 
-        .btn-read-more:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(167, 139, 250, 0.4);
-            color: white;
+        .btn-join:hover {
+            background: #3154c4;
         }
 
-        .about-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
+        /* Connector dots */
+        .dot-connector {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-top: 150px;
         }
 
-        .stat-box {
-            text-align: center;
-            flex: 1;
+        .dot-cyan {
+            background: #00bcd4;
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-cyan);
-            margin-bottom: 5px;
+        .dot-red {
+            background: #f44336;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-gray);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .about-content {
-                flex-direction: column;
-            }
-
-            .about-image {
-                order: -1;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .about-stats {
-                flex-wrap: wrap;
+        @media (max-width: 1200px) {
+            .courses-container {
                 gap: 20px;
             }
 
-            .stat-box {
-                flex: 0 0 calc(50% - 10px);
+            .dot-connector {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+
+            .course-card {
+                width: 100%;
+                max-width: 400px;
             }
         }
     </style>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -487,292 +740,171 @@
         </button>
     </div>
 
+
+
+
+    {% endblock%}
     <!-- Why Trinity Section -->
     <section class="why-section">
         <div class="container">
             <h2 class="section-title">Why <span class="highlight">Trinity</span> Theological Seminary?</h2>
 
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-laptop"></i></div>
-                        <h3>Online Mode of Courses</h3>
-                        <p>Exclusive online availability of courses makes it unique with cost and time saving solution
-                            for the aspirants.</p>
+            <div class="why-cards-row">
+                <!-- Card 1 -->
+                <div class="why-card">
+                    <div class="icon-circle blue">
+                        <i class="fas fa-laptop"></i>
                     </div>
+                    <h3>Online Mode of Courses</h3>
+                    <p>Exclusive online availability of courses makes it unique with cost and time saving solution for
+                        the aspirants.</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-users"></i></div>
-                        <h3>Experienced Faculty</h3>
-                        <p>Faculties in Trinity have a vision to prepare leaders for tomorrow and are subject experts to
-                            mould their leadership qualities for ministry fields.</p>
+
+                <!-- Card 2 -->
+                <div class="why-card">
+                    <div class="icon-circle cyan">
+                        <i class="fas fa-users"></i>
                     </div>
+                    <h3>Experienced Faculty</h3>
+                    <p>Faculties in Trinity have a vision to prepare leaders for tomorrow and are subject experts to
+                        mould their leadership qualities for ministry fields.</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
-                        <h3>Scholarships</h3>
-                        <p>Trinity acknowledges aspirants who have a strong profile but do not have enough sources to
-                            fund their education. There are scholarships and grants for needy applicants.</p>
+
+                <!-- Card 3 -->
+                <div class="why-card">
+                    <div class="icon-circle teal">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>Scholarships</h3>
+                    <p>Trinity acknowledges aspirants who have a strong profile but do not have enough sources to fund
+                        their education. There are scholarships and grants for needy applicants.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="why-card student-image-card">
+                    <div class="student-image-wrapper">
+                        <!-- Background colored frames -->
+                        <div class="frame-blue"></div>
+                        <div class="frame-green"></div>
+                        <!-- Main image with border -->
+                        <div class="image-frame">
+                            <img src="{% static 'img/man.jpg' %}" alt="person">
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="stats-row">
-                <div class="row g-3">
-                    <div class="col-6 col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
-                            <h4>1.5K</h4>
-                            <p>Students</p>
-                        </div>
+    <!--stats section---->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-container">
+                <!-- Decorative circles like student card -->
+                <div class="circle-left"></div>
+                <div class="circle-right"></div>
+
+                <!-- Students -->
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-icon"><i class="fas fa-book"></i></div>
-                            <h4>15</h4>
-                            <p>Courses</p>
-                        </div>
+                    <div class="stat-number">1.5k</div>
+                    <p class="stat-label">Students</p>
+                </div>
+
+                <!-- Courses -->
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-icon"><i class="fas fa-chalkboard"></i></div>
-                            <h4>483</h4>
-                            <p>Classes</p>
-                        </div>
+                    <div class="stat-number">15</div>
+                    <p class="stat-label">Courses</p>
+                </div>
+
+                <!-- Classes -->
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                            <h4>35</h4>
-                            <p>Trainers</p>
-                        </div>
+                    <div class="stat-number">483</div>
+                    <p class="stat-label">Classes</p>
+                </div>
+
+                <!-- Trainers -->
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
                     </div>
+                    <div class="stat-number">35</div>
+                    <p class="stat-label">Trainers</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Courses Section -->
-    <section class="courses-section" id="courses">
-        <div class="container text-center">
-            <h2 class="section-title">Our Courses</h2>
+    <section class="courses-section">
+        <h2 class="section-title">Our Courses</h2>
 
-            <div class="row justify-content-center g-4 mt-4">
-                <!-- M.Div -->
-                <div class="col-md-4">
-                    <div class="course-card course-blue">
-                        <div class="badge-icon">
-                            <i class="fas fa-medal"></i>
-                        </div>
-                        <img src="images/mdiv.jpg" alt="M.Div" class="course-img">
-                        <h3 class="course-title">M.Div</h3>
-                        <p class="course-desc">
-                            Master of Divinity (M. Div) is used to define the study of different faiths and belief
-                            systems. In Christian theology, this degree prepares students to work as...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
+        <div class="courses-container">
+            <!-- M.Div Card -->
+            <div class="course-card course-blue">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
                 </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/mdiv.jpg' %}" alt="M.Div" class="course-img">
+                </div>
+                <h3 class="course-title">M.Div</h3>
+                <p class="course-desc">
+                    Master of Divinity (M. Div) Master of Divinity is used to define the study of different faiths and
+                    belief systems. In Christian theology, this degree prepares students to work as...
+                </p>
+                <button class="btn-join">Join Now</button>
+            </div>
 
-                <!-- INTRODUCTION TO BIBLE -->
-                <div class="col-md-4">
-                    <div class="course-card course-green">
-                        <div class="badge-icon">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <img src="images/bible.jpg" alt="Introduction to Bible" class="course-img">
-                        <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
-                        <p class="course-desc">
-                            INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow
-                            format, presents all the important themes of the entire Bible and ties both Old...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
-                </div>
+            <!-- Cyan Dot -->
+            <div class="dot-connector dot-cyan"></div>
 
-                <!-- B.Th -->
-                <div class="col-md-4">
-                    <div class="course-card course-purple">
-                        <div class="badge-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <img src="images/bth.jpg" alt="B.Th" class="course-img">
-                        <h3 class="course-title">B.Th</h3>
-                        <p class="course-desc">
-                            The Graduate Certificate in Ministry is a one-year Bible training program. It equips
-                            candidates with a non-theology background to prepare themselves for postgraduate study as...
-                        </p>
-                        <button class="btn btn-join">Join Now</button>
-                    </div>
+            <!-- Introduction to Bible Card -->
+            <div class="course-card course-green">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
                 </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/bible.png' %}" alt="Introduction to Bible" class="course-img">
+                </div>
+                <h3 class="course-title">INTRODUCTION TO BIBLE</h3>
+                <p class="course-desc">
+                    INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow format,
+                    presents all the important themes of the entire Bible and ties both Old...
+                </p>
+                <button class="btn-join">Join Now</button>
+            </div>
+
+            <!-- Red Dot -->
+            <div class="dot-connector dot-red"></div>
+
+            <!-- B.Th Card -->
+            <div class="course-card course-purple">
+                <div class="badge-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="course-img-container">
+                    <img src="{% static 'img/bth.jpg' %}" alt="B.Th" class="course-img">
+                </div>
+                <h3 class="course-title">B.Th</h3>
+                <p class="course-desc">
+                    The Graduate Certificate in Ministry is a One-year Bible training program. The aim of the graduate
+                    certificate is to equip candidates with a non-theology background to prepare themselves for
+                    postgraduate study as...
+                </p>
+                <button class="btn-join">Join Now</button>
             </div>
         </div>
     </section>
 
-    <!-- CSS -->
-    <style>
-        .courses-section {
-            background-color: #f5faff;
-            padding: 60px 0;
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: #1d1d1d;
-            font-size: 2rem;
-        }
-
-        .course-card {
-            background: #fff;
-            border-radius: 25px;
-            padding: 30px 20px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .course-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .course-img {
-            width: 100%;
-            max-width: 100px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        .badge-icon {
-            position: absolute;
-            top: -15px;
-            left: 15px;
-            background: #fff;
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .badge-icon i {
-            color: #f9b233;
-            font-size: 18px;
-        }
-
-        .course-title {
-            font-weight: 700;
-            margin: 10px 0;
-            font-size: 1.2rem;
-        }
-
-        .course-desc {
-            font-size: 0.95rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .btn-join {
-            background: #2b5cff;
-            color: #fff;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 20px;
-            font-weight: 600;
-            transition: background 0.3s ease;
-        }
-
-        .btn-join:hover {
-            background: #1d3ecc;
-        }
-
-        .course-blue {
-            background: linear-gradient(145deg, #d6f2ff, #a3e4ff);
-        }
-
-        .course-green {
-            background: linear-gradient(145deg, #d8f6d5, #a4e6a1);
-        }
-
-        .course-purple {
-            background: linear-gradient(145deg, #e3ddff, #c8bfff);
-        }
-    </style>
-
-    <!-- Font Awesome -->
-    <script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
-
-
-    <!-- Scholarship Section -->
-    <section class="scholarship-section">
-        <div class="container">
-            <h2>Financial Scholarships are available to reduce<br>the tuition for your degree.</h2>
-            <p>Your life learning experiences and previous education are used to reduce the degree cost.</p>
-            <button class="btn btn-apply">Apply for Scholarship</button>
-        </div>
-    </section>
-
-    <!-- About Us Section -->
-    <section class="about-section" id="about">
-        <div class="container">
-            <h2 class="section-title">About <span class="highlight">Us</span></h2>
-
-            <div class="about-content">
-                <div class="about-text">
-                    <h3 class="about-subtitle">Who We Are?</h3>
-                    <p class="about-description">
-                        At Trinity Theological Seminary, you will not be a normal aspirant who takes admission,
-                        completes the course and leaves. Instead, we believe in building a relationship that lasts
-                        longer than most things do.
-                    </p>
-
-                    <div class="about-highlight">
-                        <p>
-                            Our aim is to build a leader out of the aspirant, preparing for the world that needs God's
-                            grace. That is the reason our faculties are trained in such a way to bring the best of
-                            leadership qualities from you, building a strong foundation of faith and faith based skills
-                            to be a change in this world. With that, we will be there to...
-                        </p>
-                    </div>
-
-                    <button class="btn-read-more">
-                        Read More <i class="fas fa-arrow-right"></i>
-                    </button>
-
-                    <div class="about-stats">
-                        <div class="stat-box">
-                            <div class="stat-number">25+</div>
-                            <div class="stat-label">Years of Excellence</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-number">50+</div>
-                            <div class="stat-label">Countries Reached</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-number">98%</div>
-                            <div class="stat-label">Graduate Satisfaction</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="about-image">
-                    <!-- This would be replaced with an actual image in production -->
-                    <div
-                        style="background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)); height: 100%; min-height: 400px; display: flex; align-items: center; justify-content: center; color: white;">
-                        <div style="text-align: center; padding: 20px;">
-                            <i class="fas fa-university" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                            <h3>Trinity Theological Seminary</h3>
-                            <p>Building Leaders for Tomorrow</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    {% endblock%}
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -812,85 +944,6 @@
         </div>
     </footer>
     <!-- Add this to your base template head section -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        :root {
-            --primary-cyan: #00CED1;
-            --light-cyan: #E0F7F7;
-            --dark-navy: #1B2845;
-            --purple-gradient-start: #A78BFA;
-            --purple-gradient-end: #C084FC;
-            --green-card: #90EE90;
-            --blue-button: #4169E1;
-            --text-gray: #666666;
-        }
-
-        /* Success Alert */
-        .swal2-popup.swal-success {
-            border-left: 5px solid var(--green-card);
-        }
-
-        /* Error Alert */
-        .swal2-popup.swal-error {
-            border-left: 5px solid #ff6b6b;
-        }
-
-        /* Warning Alert */
-        .swal2-popup.swal-warning {
-            border-left: 5px solid #ffa726;
-        }
-
-        /* Info Alert */
-        .swal2-popup.swal-info {
-            border-left: 5px solid var(--primary-cyan);
-        }
-
-        /* Custom styling for all alerts */
-        .swal2-popup {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            border-radius: 12px;
-            padding: 2rem;
-        }
-
-        .swal2-title {
-            color: var(--dark-navy);
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .swal2-html-container {
-            color: var(--text-gray);
-            font-size: 1rem;
-        }
-
-        .swal2-confirm {
-            background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end)) !important;
-            border: none !important;
-            border-radius: 8px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
-        }
-
-        .swal2-confirm:hover {
-            background: linear-gradient(135deg, var(--purple-gradient-end), var(--purple-gradient-start)) !important;
-        }
-
-        .swal2-cancel {
-            background-color: #e5e7eb !important;
-            color: var(--text-gray) !important;
-            border: none !important;
-            border-radius: 8px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-        }
-
-        .swal2-icon {
-            border-width: 3px;
-        }
-    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
