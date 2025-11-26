@@ -1,152 +1,20 @@
 {% extends "site_pages/index.html" %}
-{% load static %}
-
-{% block title %}
-<title>Doctoral Programs - Trinity Theological Seminary</title>
-{% endblock %}
-
 {% block content %}
 
-<!-- Main Content -->
-<section class="program-section">
-    <div class="container">
+<div class="container py-5">
+    <h1>Master’s Programs</h1>
+    <hr>
 
-        <h2 class="section-title">Doctoral <span class="highlight">Programs</span></h2>
-
-        <!-- Intro Section -->
-        <div class="intro-section">
-            <p>
-                The Doctor of Ministry (D.Min), Doctorate in Theology (Th.D), Doctor of Philosophy (Ph.D), 
-                and Doctor of Divinity (DD) are the highest professional degrees for those in parish or related ministries. 
-                These programs are designed for educated, experienced practitioners of the Christian faith who desire renewal 
-                in themselves and their ministries through advanced training, research, and reflection.
-            </p>
-            <p>
-                Busy ministry leaders need a tailor-made program grounded in high-impact online education with strong 
-                practical application. The International Association for Theological Accreditation (IATA) has authorized TTS 
-                to run its Doctoral programs. This program has been designed to fulfill the vision God has placed on your 
-                ministry and provide the advanced training and skills needed to reach it.
-            </p>
-            <p>
-                Our program specializes in deep personal and ministry transformation — equipping leaders to remain effective, 
-                spiritually alert, and aligned with God’s purpose for their lives and ministries.
-            </p>
-            <p>
-                The Doctorate degree is an advanced professional program created for ongoing development in vocational ministry.
-                It enhances professional competence by expanding theological foundations and ministry experience, enabling 
-                graduates to strengthen current skills, address weaknesses, and increase overall effectiveness.
-            </p>
-            <p>
-                This program is open to ministerial leaders worldwide who meet the qualifications for admission and are 
-                proficient in online learning.
-            </p>
+    {% for course in courses %}
+        <h2>{{ course.course_name }}</h2>
+        <div class="description ck-content">
+            {{ course.description|safe }}
         </div>
-
-        <!-- Admission Requirements -->
-        <div class="content-box">
-            <h3 class="sub-title">Admission Requirements</h3>
-
-            <ul class="requirements-list">
-                <li>Hold a bachelor’s degree from a regionally accredited college or university.</li>
-                <li>Hold an M.Div., M.Th., or any Master’s degree or equivalent from an accredited institution.</li>
-                <li>Have at least five years of active ministry experience.</li>
-                <li>Have earned a grade average of at least B+ (50%+) in their master’s program.</li>
-                <li>Submit two academic reference letters assessing intellectual and academic ability.</li>
-                <li>Submit two ministry reference letters (one from a church official and one from a layperson).</li>
-                <li>Submit two essays: 
-                    <ul>
-                        <li>A two-page statement of goals for pursuing doctoral study (including proposed focus).</li>
-                        <li>A sample of academic writing (maximum 15 pages).</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Academic Information -->
-        <div class="content-box">
-            <h3 class="sub-title">Academic Information</h3>
-
-            <p>
-                Most Doctoral programs are designed as three-year programs for Pastors and Christian Leaders. 
-                Doctoral students are required to take <strong>10 courses out of the 22 offered</strong>, totaling 
-                <strong>1,890 class hours</strong> plus a Dissertation.
-            </p>
-        </div>
-
-        <!-- Course Table -->
-        <div class="content-box">
-            <h3 class="sub-title">Courses Offered</h3>
-
-            <table class="fees-table">
-                <thead>
-                    <tr>
-                        <th>Sl.#</th>
-                        <th>Department</th>
-                        <th>Course Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td>Practical Ministry</td><td>Evangelism & Assimilation</td></tr>
-                    <tr><td>2</td><td>Practical Ministry</td><td>Evangelism that demands a response</td></tr>
-                    <tr><td>3</td><td>Missions</td><td>World Religions and the Christian Message</td></tr>
-                    <tr><td>4</td><td>Missions</td><td>Taking the whole Gospel to the whole world</td></tr>
-                    <tr><td>5</td><td>Church Planting</td><td>Strategies for Church planting</td></tr>
-                    <tr><td>6</td><td>Practical Ministry</td><td>Managing church conflict</td></tr>
-                    <tr><td>7</td><td>Practical Ministry</td><td>Prayer & Spiritual warfare</td></tr>
-                    <tr><td>8</td><td>Urban Ministry</td><td>Contextualizing Ministry for Urban Settings</td></tr>
-                    <tr><td>9</td><td>Practical Ministry & Theology</td><td>Expository Preaching Biblical Study & Interpretation</td></tr>
-                    <tr><td>10</td><td>Theology</td><td>Survey of Major Christian Doctrines</td></tr>
-                    <tr><td>11</td><td>Bible</td><td>Exposition on Nine miraculous signs of John's Gospel</td></tr>
-                    <tr><td>12</td><td>Practical Ministry</td><td>Designing a website for your ministry</td></tr>
-                    <tr><td>13</td><td>Practical Ministry</td><td>Discipleship</td></tr>
-                    <tr><td>14</td><td>Practical Ministry</td><td>Spiritual Disciplines</td></tr>
-                    <tr><td>15</td><td>Practical Ministry</td><td>Marriage & family</td></tr>
-                    <tr><td>16</td><td>Leadership Development</td><td>Leadership</td></tr>
-                    <tr><td>17</td><td>Leadership Development</td><td>Leading and Providing vision</td></tr>
-                    <tr><td>18</td><td>Bible</td><td>Old Testament Minor & Major Prophets</td></tr>
-                    <tr><td>19</td><td>Leadership Development</td><td>Strategic Planning for the Church today</td></tr>
-                    <tr><td>20</td><td>Practical Ministry</td><td>Exercise Spiritual Authority</td></tr>
-                    <tr><td>21</td><td>Research Studies</td><td>Master's Thesis</td></tr>
-                    <tr><td>22</td><td>Research Studies</td><td>Doctoral Dissertation</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Class Hour Calculation -->
-        <div class="content-box">
-            <h3 class="sub-title">Class Hour Calculations</h3>
-
-            <table class="fees-table">
-                <thead>
-                    <tr>
-                        <th>Activity</th>
-                        <th>Class Hours</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>30 Pages reading</td><td>1 Class Hour</td></tr>
-                    <tr><td>1 Page Writing</td><td>3 Class Hours</td></tr>
-                    <tr><td>1 Hour in Class Time</td><td>1 Class Hour</td></tr>
-                    <tr><td>1 Hour listening / viewing</td><td>1 Class Hour</td></tr>
-                    <tr><td>1 Hour meeting with Mentor</td><td>1 Class Hour</td></tr>
-                    <tr><td>1 Hour ministry time related to assignment</td><td>1 Class Hour</td></tr>
-                    <tr><td>Studying and working</td><td>35 Class Hours</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- CTA Section -->
-        <div class="journey-cta">
-            <h3 class="cta-title">Advance Your Calling Through Doctoral Study</h3>
-            <p class="cta-subtitle">
-                Take the next step toward becoming a stronger, more effective ministry leader with advanced theological training.
-            </p>
-            <a href="{% url 'new_admission_form' %}" class="cta-button">
-                <i class="fas fa-file-signature"></i> Begin Your Enrollment Today →
-            </a>
-        </div>
-
-    </div>
-</section>
+        <a href="#" class="btn btn-primary mt-2">View Details</a>
+        <hr>
+    {% empty %}
+        <p>No programs available right now.</p>
+    {% endfor %}
+</div>
 
 {% endblock %}
