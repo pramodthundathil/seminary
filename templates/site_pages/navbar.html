@@ -1,0 +1,499 @@
+{% load static %}
+
+<!-- navbar.html - Backend Processed Navigation -->
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">
+            <img src="{% static 'img/Trinity_final-nobg.png' %}" style="max-width: 100px;" alt="Trinity Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% for item in header_menu_items %}
+                    {% if item.has_children %}
+                        <!-- Parent item with children (dropdown) -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown{{ item.id }}" 
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ item.title }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdown{{ item.id }}">
+                                {% for child in item.children %}
+                                    {% if child.has_children %}
+                                        <!-- Child with sub-children (nested dropdown) -->
+                                        <li class="dropdown-submenu">
+                                            <a class="dropdown-item dropdown-toggle" href="#">
+                                                {{ child.title }}
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                {% for subchild in child.children %}
+                                                    {% if subchild.has_children %}
+                                                        <!-- Third level dropdown -->
+                                                        <li class="dropdown-submenu">
+                                                            <a class="dropdown-item dropdown-toggle" href="#">
+                                                                {{ subchild.title }}
+                                                            </a>
+                                                            <ul class="dropdown-menu">
+                                                                {% for subsubchild in subchild.children %}
+                                                                    <li>
+                                                                        <a class="dropdown-item" 
+                                                                           href="{{ subsubchild.computed_url }}"
+                                                                           {% if subsubchild.target_blank %}target="_blank"{% endif %}>
+                                                                            {{ subsubchild.title }}
+                                                                        </a>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </li>
+                                                    {% else %}
+                                                        <!-- Third level item (no children) -->
+                                                        <li>
+                                                            <a class="dropdown-item" 
+                                                               href="{{ subchild.computed_url }}"
+                                                               {% if subchild.target_blank %}target="_blank"{% endif %}>
+                                                                {{ subchild.title }}
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% else %}
+                                        <!-- Child item (no sub-children) -->
+                                        <li>
+                                            <a class="dropdown-item" 
+                                               href="{{ child.computed_url }}"
+                                               {% if child.target_blank %}target="_blank"{% endif %}>
+                                                {{ child.title }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Single item (no children) -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               href="{{ item.computed_url }}"
+                               {% if item.target_blank %}target="_blank"{% endif %}>
+                                {{ item.title }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Login Button -->
+                {% if user.is_authenticated %}
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-login" href="{% url 'admin_index' %}">Dashboard</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-login" href="{% url 'admin_index' %}">Log in</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Navbar Styles */
+.navbar {
+    background: #ffffff;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    padding: 1rem 0;
+}
+
+.navbar-brand img {
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+/* Nav Links */
+.nav-link {
+    color: #1f2937 !important;
+    font-weight: 500;
+    padding: 0.75rem 1.25rem !important;
+    transition: all 0.3s ease;
+    position: relative;
+    border-radius: 8px;
+    margin: 0 0.25rem;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+    color: #14b8a6 !important;
+    /* background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%); */
+    transform: translateY(-2px);
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 60%;
+    height: 2px;
+    background: #14b8a6;
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover::before {
+    transform: translateX(-50%) scaleX(1);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 0;
+    margin-top: 0.75rem;
+    min-width: 240px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dropdown Items */
+.dropdown-item {
+    padding: 0.75rem 1.5rem;
+    color: #2d3748;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    margin: 0.25rem 0.5rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    /* background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%); */
+    color: #14b8a6 !important;
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+}
+
+.dropdown-item::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    width: 4px;
+    height: 0;
+    background: #14b8a6;
+    transition: height 0.3s ease;
+    border-radius: 2px;
+}
+
+.dropdown-item:hover::before {
+    height: 60%;
+}
+
+/* Dropdown Submenu */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -0.75rem;
+    margin-left: 0.5rem;
+}
+
+.dropdown-submenu:hover > .dropdown-menu {
+    display: block;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.dropdown-submenu > .dropdown-toggle::after {
+    content: '\f054';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    border: none;
+    transform: rotate(0deg);
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    margin-top: -0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-submenu:hover > .dropdown-toggle::after {
+    transform: translateX(5px);
+}
+
+/* Login Button */
+.btn-login {
+    background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
+    color: #ffffff !important;
+    border: none;
+    padding: 0.65rem 1.75rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+}
+
+.btn-login:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+/* Navbar Toggler */
+.navbar-toggler {
+    border: 2px solid #14b8a6;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(20, 184, 166, 0.25);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2820, 184, 166, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 991px) {
+    .navbar {
+        padding: 0.75rem 0;
+    }
+    
+    .navbar-collapse {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 12px;
+        margin-top: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-link {
+        color: #2d3748 !important;
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+    }
+    
+    .nav-link:hover {
+        background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
+        color: #ffffff !important;
+    }
+    
+    .nav-link::before {
+        display: none;
+    }
+    
+    .dropdown-menu {
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        padding-left: 1rem;
+        margin-top: 0.5rem;
+        animation: none;
+    }
+    
+    .dropdown-submenu > .dropdown-menu {
+        position: static;
+        float: none;
+        width: auto;
+        margin-left: 1rem;
+        box-shadow: none;
+        border-left: 3px solid #14b8a6;
+        padding-left: 1rem;
+    }
+    
+    .dropdown-submenu > .dropdown-toggle::after {
+        content: '\f078';
+        transform: rotate(0deg);
+    }
+    
+    .dropdown-submenu.show > .dropdown-toggle::after {
+        content: '\f077';
+    }
+    
+    .dropdown-item {
+        padding: 0.65rem 1rem;
+        margin: 0.2rem 0;
+        color: #2d3748;
+        border-radius: 8px;
+    }
+    
+    .dropdown-item:hover {
+        transform: translateX(0);
+        padding-left: 1.25rem;
+    }
+    
+    .btn-login {
+        margin-top: 1rem;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) and (max-width: 991px) {
+    .nav-link {
+        padding: 0.6rem 1rem !important;
+    }
+}
+
+/* Large Desktop Styles */
+@media (min-width: 1400px) {
+    .dropdown-menu {
+        min-width: 280px;
+    }
+    
+    .nav-link {
+        padding: 0.85rem 1.5rem !important;
+    }
+}
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Accessibility improvements */
+.dropdown-item:focus,
+.nav-link:focus,
+.btn-login:focus {
+    outline: 2px solid #14b8a6;
+    outline-offset: 2px;
+}
+
+/* Loading animation for dropdowns */
+.dropdown-menu.show {
+    animation: slideDown 0.3s ease;
+}
+</style>
+
+<script>
+// Enhanced JavaScript for nested dropdowns
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle submenu clicks on mobile
+    if (window.innerWidth <= 991) {
+        document.querySelectorAll('.dropdown-submenu > a').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var parentLi = this.parentElement;
+                var submenu = this.nextElementSibling;
+                
+                // Toggle show class
+                parentLi.classList.toggle('show');
+                
+                if (submenu && submenu.classList.contains('dropdown-menu')) {
+                    if (submenu.style.display === 'block') {
+                        submenu.style.display = 'none';
+                    } else {
+                        // Close other open submenus at same level
+                        var siblings = parentLi.parentElement.querySelectorAll('.dropdown-submenu > .dropdown-menu');
+                        siblings.forEach(function(sibling) {
+                            if (sibling !== submenu) {
+                                sibling.style.display = 'none';
+                                sibling.parentElement.classList.remove('show');
+                            }
+                        });
+                        submenu.style.display = 'block';
+                    }
+                }
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-submenu')) {
+                document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(menu) {
+                    menu.style.display = 'none';
+                    menu.parentElement.classList.remove('show');
+                });
+            }
+        });
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#' && href !== '#!') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu after clicking
+                    const navbarCollapse = document.querySelector('.navbar-collapse');
+                    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                        navbarCollapse.classList.remove('show');
+                    }
+                }
+            }
+        });
+    });
+    
+    // Add active class to current page
+    const currentLocation = window.location.pathname;
+    document.querySelectorAll('.nav-link, .dropdown-item').forEach(link => {
+        if (link.getAttribute('href') === currentLocation) {
+            link.classList.add('active');
+            if (link.classList.contains('dropdown-item')) {
+                const dropdown = link.closest('.dropdown');
+                if (dropdown) {
+                    dropdown.querySelector('.nav-link').classList.add('active');
+                }
+            }
+        }
+    });
+});
+
+// Handle window resize
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+        if (window.innerWidth > 991) {
+            // Reset mobile menu styles on desktop
+            document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(menu) {
+                menu.style.display = '';
+            });
+        }
+    }, 250);
+});
+</script>

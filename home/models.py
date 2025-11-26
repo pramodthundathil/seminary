@@ -839,6 +839,9 @@ class Qualifications(models.Model):
         managed = True
         db_table = 'qualifications'
 
+    def __str__(self):
+        return str(self.qualification_name)
+
 class ReferenceForm(models.Model):
     id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=250)

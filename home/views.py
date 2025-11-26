@@ -9,7 +9,7 @@ import logging
 # -------------------------------
 # Django Core Imports
 # -------------------------------
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -68,10 +68,74 @@ def student_submitted_assignment(request):
     return render(request, "student/submitted_assignment.html")
 
 
-def index(request): 
-    pages = Pages.objects.all()
-    context = {"pages":pages}
-    return render(request,"site_pages/index.html",context)
+##################only test###################
+from django.shortcuts import render
+from django.http import JsonResponse
+from .context_processors import menu_context
+
+def test_menu_debug(request):
+    """
+    Debug view to see the processed menu structure
+    Access this at /test-menu-debug/
+    """
+    context_data = menu_context(request)
+    
+    # Pretty print the menu structure
+    import json
+    
+    result = {
+        'header_menu_items': context_data['header_menu_items'],
+        'footer_menu_items': context_data['footer_menu_items'],
+    }
+    
+    return JsonResponse(result, safe=False, json_dumps_params={'indent': 2})
+
+############################only test#######################################
+def index(request):
+    """
+    Home page view - menu context is automatically available
+    via context processor
+    """
+    pages = Pages.objects.filter(deleted_at__isnull=True, status=True)
+    context = {
+        "pages": pages
+    }
+    return render(request, "site_pages/index.html", context)
+
+def page_detail(request, slug):
+    """
+    Dynamic page view for handling page URLs
+    """
+    page = get_object_or_404(Pages, code=slug, deleted_at__isnull=True, status=True)
+    context = {
+        "page": page
+    }
+    return render(request, "site_pages/page_detail.html", context)
+
+def course_detail(request, slug):
+    """
+    Display individual course details
+    slug parameter uses course_code field
+    """
+    # Get course by course_code (used as slug)
+    course = get_object_or_404(
+        Courses,
+        course_code=slug,
+        status=1  # Only show active courses
+    )
+    
+    # You can add related courses or other data here
+    related_courses = Courses.objects.filter(
+        highest_qualification=course.highest_qualification,
+        status=1
+    ).exclude(id=course.id)[:3]
+    
+    context = {
+        'course': course,
+        'related_courses': related_courses,
+    }
+    
+    return render(request, 'site_pages/course_detail.html', context)
 
 def about_us(request):
     """

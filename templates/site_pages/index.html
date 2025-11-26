@@ -877,94 +877,7 @@
 
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg  sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <img src="{% static 'img/Trinity_final-nobg.png'%}" style="max-width: 100px;" alt="">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About us</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="admissionsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Admissions
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="admissionsDropdown">
-                            <li><a class="dropdown-item" href="{% url 'accreditation' %}">Accreditation</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admission_process' %}">Admission Process</a></li>
-                            <li><a class="dropdown-item" href="{% url 'fees_structure' %}">Fees Structure</a></li>
-                            <li><a class="dropdown-item" href="{% url 'scholarship' %}">Scholarships</a></li>
-                            <li><a class="dropdown-item" href="{% url 'new_admission_form' %}">New Admission Form</a>
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'reference_form' %}">Reference Form</a></li>
-                            <li><a class="dropdown-item" href="{% url 'payment_options' %}">Payment Options</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="academicsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Academic Programmes
-                        </a>
-
-                        <ul class="dropdown-menu" aria-labelledby="academicsDropdown">
-
-                            <!-- Doctoral -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Doctoral Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'doctoral_program' %}">D.Min</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Masters -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Masters Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'masters_program' %}">M.Div</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Bachelors -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Bachelors Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#bth">B.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Diploma -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Diploma Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#dipth">Dip.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Certificate -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Certificate Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#cth">C.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Associate -->
-                            <li><a class="dropdown-item" href="#associate">Associate Degree</a></li>
-
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
-                    <li class="nav-item ms-2"><a class="btn btn-login" href="{% url 'admin_index' %}">Log in</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include 'site_pages/navbar.html' %}
     {% block content %}
     <!-- Hero Section -->
 
@@ -1045,7 +958,6 @@
         </button>
     </div>
 
-    {% endblock%}
     <!-- Why Trinity Section -->
     <section class="why-section">
         <div class="container">
@@ -1274,6 +1186,7 @@
             </div>
         </div>
     </section>
+    {% endblock%}
 
     <!-- Footer -->
     <footer>
