@@ -137,37 +137,6 @@ def course_detail(request, slug):
     
     return render(request, 'site_pages/course_detail.html', context)
 
-def about_us(request):
-    """
-    Details about Trinity Theological Seminary. 
-    """
-    return render(request,"site_pages/about_us.html")
-
-def accreditation(request):
-    """
-    Seminary accreditation details. 
-    """
-    return render(request,"site_pages/accreditation.html")
-
-def admission_process(request):
-    """
-    Admission process details for students
-    """
-    return render(request,"site_pages/admission_process.html")
-
-def fees_structure(request):
-    """
-    Fee structure for students
-    """
-    return render(request,"site_pages/fees_structure.html")
-
-def scholarship(request):
-    """
-    Scholarship details for students
-    """
-    return render(request,"site_pages/scholarship.html")
-
-
 
 def new_admission_form(request):
     """
@@ -561,6 +530,7 @@ def reference_form(request):
         logger.error(f"Error rendering reference form page: {e}", exc_info=True)
         messages.error(request, "Could not load the reference form page.")
         return render(request, "site_pages/reference_form.html")
+
 def payment_options(request):
     return render(request,"site_pages/payment_options.html")
 
@@ -869,55 +839,3 @@ def student_index(request):
         student = None
     print(student,"--------------")
     return render(request, 'student/index.html')
-
-def doctoral_program(request):
-    """
-    Accademics Programs-Doctoral Program-D.Min Details
-    """
-    courses = Courses.objects.filter(course_name='D.Min', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/doctoral_program.html", {
-        "courses": courses
-    })
-
-def masters_program(request):
-    """
-    Academics Programs - Master's Program - M.Div Details
-    """
-    # Get only Master-level courses (example)
-    
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
-
-def bachelors_program(request):
-    """
-    Accademics Programs-Bachelor's Program-B.Th Details
-    """
-    courses = Courses.objects.filter(course_name='B.Th', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/bachelors_program.html", {
-        "courses": courses
-    })
-
-def diploma_program(request):
-    """
-    Accademics Programs-Diploma Program-Dip.Th Details
-    """
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
-
-def certificate_program(request):
-    """
-    Accademics Programs-Certificate Program-C.Th Details
-    """
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
