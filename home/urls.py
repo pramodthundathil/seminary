@@ -9,33 +9,30 @@ urlpatterns = [
     path("score-card/", views.student_score_card, name="student_score_card"),
     path("class-recordings/", views.student_class_recordings, name="student_class_recordings"),
     path("submitted-assignment/", views.student_submitted_assignment, name="student_submitted_assignment"),
-
+# Dynamic page URL (keep this last)
+    path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
+    path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     path('',views.index, name='index'),
-    path("about_us",views.about_us,name="about_us"),
+   
 
     path("student_index",views.student_index,name="student_index"),
     path("signin/",views.signin,name="signin"),
     path("signout",views.signout,name="signout"),
     path("register/",views.register,name="register"),
-    path("contact/",views.contact,name="contact"),
+    path("contact-us/",views.contact,name="contact-us"),
     # path("signup_student/",views.signup_student,name="signup_student"),
     path('student/register/', views.signup_student, name='signup_student'),
     path('student/application/success/', views.student_application_success, name='student_application_success'),
 
     # Admissions dropdown pages
-    path('admissions/accreditation/', views.accreditation, name='accreditation'),
-    path('admissions/admission-process/', views.admission_process, name='admission_process'),    
-    path('admissions/fees-structure/', views.fees_structure, name='fees_structure'),
-    path('admissions/scholarship/', views.scholarship, name='scholarship'),
     path('admissions/new-admission-form/', views.new_admission_form, name='new_admission_form'),
-    path('admissions/reference-form/', views.reference_form, name='reference_form'),
-    path('admissions/payment-options/', views.payment_options, name='payment_options'),
+    path('reference-form/', views.reference_form, name='reference_form'),
+    path('make-payment/', views.payment_options, name='payment_options'),
 
-    # Admissions dropdown pages
-    path('admissions/doctoral-program/', views.doctoral_program, name='doctoral_program'),
-    path('admissions/masters-program/', views.masters_program, name='masters_program'),       
-    path('admissions/bachelors-program/', views.bachelors_program, name='bachelors_program'),
-    path('admissions/diploma-program/', views.diploma_program, name='diploma_program'),
-    path('admissions/certificate-program/', views.certificate_program, name='certificate_program'),
+
+
+
+
+    path("check/",views.test_menu_debug,name="test_menu_debug")
     
 ]

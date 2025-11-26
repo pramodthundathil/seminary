@@ -744,227 +744,339 @@
         }
 
         /* Our Aim Section */
-       /* Our Aim Section */
-.our-aim-section {
-    display: flex;
-    gap: 30px; /* Reduced from 50px */
-    align-items: flex-start; /* Changed from center to flex-start */
-    margin-top: -70px;
-}
+        /* Our Aim Section */
+        .our-aim-section {
+            display: flex;
+            gap: 30px;
+            /* Reduced from 50px */
+            align-items: flex-start;
+            /* Changed from center to flex-start */
+            margin-top: -70px;
+        }
 
-.church-card {
-    position: relative;
-    flex-shrink: 0;
-    margin-top: -30px; /* Changed from -30px */
-}
+        .church-card {
+            position: relative;
+            flex-shrink: 0;
+            margin-top: -30px;
+            /* Changed from -30px */
+        }
 
-.church-card-inner {
-    background: white;
-    border-radius: 25px; /* Reduced from 30px */
-    padding: 20px; /* Reduced from 30px */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
-}
+        .church-card-inner {
+            background: white;
+            border-radius: 25px;
+            /* Reduced from 30px */
+            padding: 20px;
+            /* Reduced from 30px */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
 
-.church-card::before {
-    content: '';
-    position: absolute;
-    top: -15px; /* Reduced from -20px */
-    left: -15px; /* Reduced from -20px */
-    width: 40px; /* Reduced from 50px */
-    height: 40px; /* Reduced from 50px */
-    background: #5865f2;
-    border-radius: 50%;
-}
+        .church-card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            /* Reduced from -20px */
+            left: -15px;
+            /* Reduced from -20px */
+            width: 40px;
+            /* Reduced from 50px */
+            height: 40px;
+            /* Reduced from 50px */
+            background: #5865f2;
+            border-radius: 50%;
+        }
 
-.church-card::after {
-    content: '';
-    position: absolute;
-    bottom: -6px; /* Adjusted from -8px */
-    right: -2px; /* Adjusted from -3px */
-    width: 16px; /* Reduced from 20px */
-    height: 16px; /* Reduced from 20px */
-    background: #ff6b9d;
-    border-radius: 50%;
-    overflow: visible;
-}
+        .church-card::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            /* Adjusted from -8px */
+            right: -2px;
+            /* Adjusted from -3px */
+            width: 16px;
+            /* Reduced from 20px */
+            height: 16px;
+            /* Reduced from 20px */
+            background: #ff6b9d;
+            border-radius: 50%;
+            overflow: visible;
+        }
 
-.dot-green {
-    position: absolute;
-    top: -12px; /* Adjusted from -15px */
-    left: -20px; /* Adjusted from -25px */
-    width: 12px; /* Reduced from 15px */
-    height: 12px; /* Reduced from 15px */
-    background: #4dd0e1;
-    border-radius: 50%;
-}
+        .dot-green {
+            position: absolute;
+            top: -12px;
+            /* Adjusted from -15px */
+            left: -20px;
+            /* Adjusted from -25px */
+            width: 12px;
+            /* Reduced from 15px */
+            height: 12px;
+            /* Reduced from 15px */
+            background: #4dd0e1;
+            border-radius: 50%;
+        }
 
-.church-image {
-    width: 180px; /* Reduced from 250px */
-    height: 180px; /* Reduced from 250px */
-    border-radius: 20px; /* Reduced from 25px */
-    overflow: hidden;
-}
+        .church-image {
+            width: 180px;
+            /* Reduced from 250px */
+            height: 180px;
+            /* Reduced from 250px */
+            border-radius: 20px;
+            /* Reduced from 25px */
+            overflow: hidden;
+        }
 
-.church-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+        .church-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-.our-aim-content {
-    flex: 1;
-    padding-top: 10px; /* Added to align text better with image */
-}
+        .our-aim-content {
+            flex: 1;
+            padding-top: 10px;
+            /* Added to align text better with image */
+        }
 
-.our-aim-description {
-    font-size: 18px; /* Reduced from 20px */
-    font-weight: 700;
-    line-height: 1.8;
-    color: #2c3e50;
-    margin-bottom: 20px; /* Added spacing before button */
-}
+        .our-aim-description {
+            font-size: 18px;
+            /* Reduced from 20px */
+            font-weight: 700;
+            line-height: 1.8;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            /* Added spacing before button */
+        }
 
-.btn-read-more {
-    background: transparent;
-    color: #4dd0e1;
-    border: 2px solid #4dd0e1;
-    padding: 10px 30px; /* Slightly reduced from 12px 35px */
-    border-radius: 30px;
-    font-size: 15px; /* Reduced from 16px */
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
+        .btn-read-more {
+            background: transparent;
+            color: #4dd0e1;
+            border: 2px solid #4dd0e1;
+            padding: 10px 30px;
+            /* Slightly reduced from 12px 35px */
+            border-radius: 30px;
+            font-size: 15px;
+            /* Reduced from 16px */
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.btn-read-more:hover {
-    background: #4dd0e1;
-    color: white;
-}
+        .btn-read-more:hover {
+            background: #4dd0e1;
+            color: white;
+        }
 
-.btn-read-more i {
-    font-size: 14px;
-}
+        .btn-read-more i {
+            font-size: 14px;
+        }
 
-@media (max-width: 992px) {
-    .our-aim-section {
-        flex-direction: column;
-        align-items: center;
-    }
+        @media (max-width: 992px) {
+            .our-aim-section {
+                flex-direction: column;
+                align-items: center;
+            }
 
-    .church-card {
-        align-self: center;
-    }
-}
+            .church-card {
+                align-self: center;
+            }
+        }
 
-@media (max-width: 768px) {
-    .church-image {
-        width: 150px; /* Further reduced for mobile */
-        height: 150px;
-    }
+        @media (max-width: 768px) {
+            .church-image {
+                width: 150px;
+                /* Further reduced for mobile */
+                height: 150px;
+            }
 
-    .our-aim-description {
-        font-size: 16px;
-    }
-}
+            .our-aim-description {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <style>
+        /* * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        } */
+
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 50%, #c8e3f0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .logo {
+            max-width: 120px;
+            max-height: 120px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: #4a9d8f;
+            border-right-color: #6ba854;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-ring:nth-child(2) {
+            width: 90%;
+            height: 90%;
+            top: 5%;
+            left: 5%;
+            border-top-color: #d4a574;
+            border-right-color: transparent;
+            animation-duration: 2s;
+            animation-direction: reverse;
+        }
+
+        .loading-text {
+            color: #2d5f7f;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            width: 30px;
+            text-align: left;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        .progress-bar {
+            width: 250px;
+            height: 4px;
+            background: rgba(45, 95, 127, 0.2);
+            border-radius: 2px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9d8f 0%, #6ba854 50%, #d4a574 100%);
+            border-radius: 2px;
+            animation: progress 2.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        @keyframes progress {
+            0% {
+                width: 0%;
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                width: 100%;
+                opacity: 0.5;
+            }
+        }
     </style>
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/a2e0e9b8b8.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg  sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <img src="{% static 'img/Trinity_final-nobg.png'%}" style="max-width: 100px;" alt="">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About us</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="admissionsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Admissions
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="admissionsDropdown">
-                            <li><a class="dropdown-item" href="{% url 'accreditation' %}">Accreditation</a></li>
-                            <li><a class="dropdown-item" href="{% url 'admission_process' %}">Admission Process</a></li>
-                            <li><a class="dropdown-item" href="{% url 'fees_structure' %}">Fees Structure</a></li>
-                            <li><a class="dropdown-item" href="{% url 'scholarship' %}">Scholarships</a></li>
-                            <li><a class="dropdown-item" href="{% url 'new_admission_form' %}">New Admission Form</a>
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'reference_form' %}">Reference Form</a></li>
-                            <li><a class="dropdown-item" href="{% url 'payment_options' %}">Payment Options</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="academicsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Academic Programmes
-                        </a>
-
-                        <ul class="dropdown-menu" aria-labelledby="academicsDropdown">
-
-                            <!-- Doctoral -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Doctoral Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'doctoral_program' %}">D.Min</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Masters -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Masters Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'masters_program' %}">M.Div</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Bachelors -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Bachelors Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#bth">B.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Diploma -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Diploma Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#dipth">Dip.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Certificate -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Certificate Program</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#cth">C.Th</a></li>
-                                </ul>
-                            </li>
-
-                            <!-- Associate -->
-                            <li><a class="dropdown-item" href="#associate">Associate Degree</a></li>
-
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
-                    <li class="nav-item ms-2"><a class="btn btn-login" href="{% url 'admin_index' %}">Log in</a></li>
-                </ul>
+    <!-- Loader HTML -->
+    <div class="loader-container" id="loader">
+        <div class="logo-wrapper">
+            <div class="spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
             </div>
+            <img src="{% static 'img/Trinity_logo.png' %}" alt="Trinity Seminary Logo" class="logo" id="logoImage">
         </div>
-    </nav>
+        <!-- <div class="loading-text">
+            LOADING<span class="loading-dots"></span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div> -->
+    </div>
+    <!-- Navigation -->
+    {% include 'site_pages/navbar.html' %}
     {% block content %}
     <!-- Hero Section -->
 
@@ -1045,7 +1157,6 @@
         </button>
     </div>
 
-    {% endblock%}
     <!-- Why Trinity Section -->
     <section class="why-section">
         <div class="container">
@@ -1274,6 +1385,7 @@
             </div>
         </div>
     </section>
+    {% endblock%}
 
     <!-- Footer -->
     <footer>
@@ -1394,7 +1506,65 @@ messages.info(request, 'Please verify your email.')
             });
         });
     </script>
+    <!-- loader scripts  -->
+    <script>
+        // Trinity Seminary Loader Script
+        // Add this to your base.html or include it in each page
 
+        document.addEventListener('DOMContentLoaded', function () {
+            // Show loader immediately
+            showLoader();
+
+            // Hide loader after 2 seconds
+            setTimeout(function () {
+                hideLoader();
+            }, 2000);
+        });
+
+        // Function to show the loader
+        function showLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+                // Prevent scrolling while loading
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Function to hide the loader with fade effect
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.5s ease';
+
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                    // Re-enable scrolling
+                    document.body.style.overflow = 'auto';
+                }, 500);
+            }
+        }
+
+        // Optional: Show loader on page navigation (for SPAs or internal links)
+        function showLoaderOnNavigation() {
+            const links = document.querySelectorAll('a:not([target="_blank"]):not([href^="#"])');
+
+            links.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    // Only show loader for internal navigation
+                    if (this.hostname === window.location.hostname) {
+                        showLoader();
+                    }
+                });
+            });
+        }
+
+        // Initialize navigation loader (optional)
+        // Uncomment the line below if you want loader on link clicks
+        // showLoaderOnNavigation();
+    </script>
 </body>
 
 </html>

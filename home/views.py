@@ -9,7 +9,7 @@ import logging
 # -------------------------------
 # Django Core Imports
 # -------------------------------
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -68,41 +68,74 @@ def student_submitted_assignment(request):
     return render(request, "student/submitted_assignment.html")
 
 
-def index(request): 
-    pages = Pages.objects.all()
-    context = {"pages":pages}
-    return render(request,"site_pages/index.html",context)
+##################only test###################
+from django.shortcuts import render
+from django.http import JsonResponse
+from .context_processors import menu_context
 
-def about_us(request):
+def test_menu_debug(request):
     """
-    Details about Trinity Theological Seminary. 
+    Debug view to see the processed menu structure
+    Access this at /test-menu-debug/
     """
-    return render(request,"site_pages/about_us.html")
+    context_data = menu_context(request)
+    
+    # Pretty print the menu structure
+    import json
+    
+    result = {
+        'header_menu_items': context_data['header_menu_items'],
+        'footer_menu_items': context_data['footer_menu_items'],
+    }
+    
+    return JsonResponse(result, safe=False, json_dumps_params={'indent': 2})
 
-def accreditation(request):
+############################only test#######################################
+def index(request):
     """
-    Seminary accreditation details. 
+    Home page view - menu context is automatically available
+    via context processor
     """
-    return render(request,"site_pages/accreditation.html")
+    pages = Pages.objects.filter(deleted_at__isnull=True, status=True)
+    context = {
+        "pages": pages
+    }
+    return render(request, "site_pages/index.html", context)
 
-def admission_process(request):
+def page_detail(request, slug):
     """
-    Admission process details for students
+    Dynamic page view for handling page URLs
     """
-    return render(request,"site_pages/admission_process.html")
+    page = get_object_or_404(Pages, code=slug, deleted_at__isnull=True, status=True)
+    context = {
+        "page": page
+    }
+    return render(request, "site_pages/page_detail.html", context)
 
-def fees_structure(request):
+def course_detail(request, slug):
     """
-    Fee structure for students
+    Display individual course details
+    slug parameter uses course_code field
     """
-    return render(request,"site_pages/fees_structure.html")
-
-def scholarship(request):
-    """
-    Scholarship details for students
-    """
-    return render(request,"site_pages/scholarship.html")
-
+    # Get course by course_code (used as slug)
+    course = get_object_or_404(
+        Courses,
+        course_code=slug,
+        status=1  # Only show active courses
+    )
+    
+    # You can add related courses or other data here
+    related_courses = Courses.objects.filter(
+        highest_qualification=course.highest_qualification,
+        status=1
+    ).exclude(id=course.id)[:3]
+    
+    context = {
+        'course': course,
+        'related_courses': related_courses,
+    }
+    
+    return render(request, 'site_pages/course_detail.html', context)
 
 
 def new_admission_form(request):
@@ -497,6 +530,7 @@ def reference_form(request):
         logger.error(f"Error rendering reference form page: {e}", exc_info=True)
         messages.error(request, "Could not load the reference form page.")
         return render(request, "site_pages/reference_form.html")
+
 def payment_options(request):
     return render(request,"site_pages/payment_options.html")
 
@@ -805,55 +839,3 @@ def student_index(request):
         student = None
     print(student,"--------------")
     return render(request, 'student/index.html')
-
-def doctoral_program(request):
-    """
-    Accademics Programs-Doctoral Program-D.Min Details
-    """
-    courses = Courses.objects.filter(course_name='D.Min', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/doctoral_program.html", {
-        "courses": courses
-    })
-
-def masters_program(request):
-    """
-    Academics Programs - Master's Program - M.Div Details
-    """
-    # Get only Master-level courses (example)
-    
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
-
-def bachelors_program(request):
-    """
-    Accademics Programs-Bachelor's Program-B.Th Details
-    """
-    courses = Courses.objects.filter(course_name='B.Th', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/bachelors_program.html", {
-        "courses": courses
-    })
-
-def diploma_program(request):
-    """
-    Accademics Programs-Diploma Program-Dip.Th Details
-    """
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
-
-def certificate_program(request):
-    """
-    Accademics Programs-Certificate Program-C.Th Details
-    """
-    courses = Courses.objects.filter(course_name='M.Div', status=True)
-    print("courses",courses)
-    return render(request, "site_pages/masters_program.html", {
-        "courses": courses
-    })
