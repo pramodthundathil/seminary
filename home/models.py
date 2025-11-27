@@ -22,7 +22,8 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class CustomUserManager(BaseUserManager):
@@ -366,7 +367,7 @@ class Courses(models.Model):
     course_code = models.CharField(max_length=250)
     highest_qualification = models.ForeignKey('Qualifications', on_delete=models.DO_NOTHING)
     credit_hours = models.DecimalField(max_digits=10, decimal_places=2)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)
@@ -469,9 +470,9 @@ class MediaLibrary(models.Model):
     file_name = models.TextField()
      
     file_path = models.FileField(
-        storage=s3_storage,
+        
         upload_to='uploads/',     # base path (can be empty if Laravel already used 'uploads/')
-        max_length=250,
+        
         db_column='file_path',    # critical! keep mapping to same DB column
     )
 
@@ -673,7 +674,7 @@ class Pages(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
     title = models.CharField(max_length=250)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)
@@ -885,7 +886,7 @@ class SliderPhotos(models.Model):
     sliders = models.ForeignKey('Sliders', on_delete=models.CASCADE, related_name='photos')
     media = models.ForeignKey(MediaLibrary, on_delete=models.CASCADE, related_name='slider_photos')
     title = models.CharField(max_length=250, blank=True, null=True)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
     button_text = models.CharField(max_length=250, blank=True, null=True)
     button_link = models.CharField(max_length=250, blank=True, null=True)
