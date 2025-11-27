@@ -7,6 +7,7 @@ urlpatterns = [
 
     #admin index
     path("admin/dashboard",views.admin_index,name="admin_index"),
+
     # Menu Management
     path('admin/menus/', views.menu_list, name='menu_list'),
     path('menus/engineer/', views.menu_engineer, name='menu_engineer_new'),
@@ -38,8 +39,14 @@ urlpatterns = [
 
 
     #photo gallery
-
-    path("admin/photos",views.photo_gallery,name="photo_gallery"),
+    
+    path('admin/photos', views.photo_gallery, name='photo_gallery'),
+    path('photos/datatable/', views.photo_datatable, name='photo_datatable'),
+    path('photos/create/', views.photo_create, name='photo_create'),
+    path('photos/get/<int:photo_id>/', views.photo_get, name='photo_get'),
+    path('photos/update/<int:photo_id>/', views.photo_update, name='photo_update'),
+    path('photos/delete/<int:photo_id>/', views.photo_delete, name='photo_delete'),
+    path('photos/media-list/', views.media_library_list, name='media_library_list'),
 
 
 

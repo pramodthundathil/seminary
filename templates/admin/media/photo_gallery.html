@@ -3,295 +3,282 @@
 
 <style>
     :root {
-        --primary-cyan: #00CED1;
-        --light-cyan: #E0F7F7;
-        --dark-navy: #1B2845;
-        --purple-gradient-start: #A78BFA;
-        --purple-gradient-end: #C084FC;
-        --green-card: #90EE90;
-        --blue-button: #4169E1;
-        --text-gray: #666666;
+
+        --primary-dark: #1e40af;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+        --primary: #00CED1;
+        --border: #666666;
+        ;
     }
 
     * {
-        font-family: 'Roboto Condensed', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .media-container {
-        padding: 30px;
-        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+    .gallery-container {
+        padding: 24px;
+        background: var(--gray-50);
         min-height: 100vh;
     }
 
-    .media-header {
+    .gallery-header {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
-        padding: 25px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .media-header h1 {
-        color: var(--dark-navy);
-        font-size: 28px;
+    .gallery-header h1 {
+        font-size: 24px;
         font-weight: 700;
+        color: var(--gray-900);
+        margin: 0;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
     }
 
-    .header-actions {
-        display: flex;
-        gap: 15px;
+    .gallery-header h1 i {
+        color: var(--primary);
     }
 
     .btn {
-        padding: 12px 24px;
+        padding: 10px 20px;
         border: none;
         border-radius: 8px;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
         font-size: 14px;
-        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s;
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        text-decoration: none;
     }
 
-    .btn-upload {
-        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    .btn-primary {
+        background: var(--primary);
         color: white;
     }
 
-    .btn-upload:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
     }
 
-    .media-filters {
+    .btn-success {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+    }
+
+    .btn-secondary {
+        background: var(--gray-600);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-700);
+    }
+
+    .gallery-filters {
         background: white;
-        padding: 20px 25px;
+        border: 1px solid var(--border);
         border-radius: 12px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         display: flex;
-        gap: 15px;
+        gap: 16px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .filter-group {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .filter-group label {
         font-weight: 600;
-        color: var(--dark-navy);
         font-size: 14px;
+        color: var(--gray-700);
     }
 
     .filter-select {
-        padding: 8px 15px;
-        border: 2px solid #e0e0e0;
+        padding: 8px 12px;
+        border: 1px solid var(--gray-300);
         border-radius: 6px;
         font-size: 14px;
-        min-width: 150px;
+        min-width: 180px;
+        background: white;
     }
 
-    .datatable-container {
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .table-container {
         background: white;
         border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    /* DataTables Custom Styling */
     table.dataTable {
         width: 100% !important;
         border-collapse: separate;
-        border-spacing: 0 8px;
+        border-spacing: 0;
     }
 
     table.dataTable thead th {
-        background: linear-gradient(135deg, var(--dark-navy), #2a3f5f);
+        background: var(--gray-900);
         color: white;
-        padding: 15px;
+        padding: 14px 16px;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 13px;
+        font-size: 12px;
         letter-spacing: 0.5px;
         border: none;
     }
 
     table.dataTable thead th:first-child {
-        border-radius: 8px 0 0 8px;
+        border-radius: 8px 0 0 0;
     }
 
     table.dataTable thead th:last-child {
-        border-radius: 0 8px 8px 0;
+        border-radius: 0 8px 0 0;
     }
 
     table.dataTable tbody tr {
-        background: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+        border-bottom: 1px solid var(--gray-200);
+        transition: background 0.2s;
     }
 
     table.dataTable tbody tr:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
+        background: var(--gray-50);
     }
 
     table.dataTable tbody td {
-        padding: 15px;
+        padding: 16px;
         vertical-align: middle;
         border: none;
     }
 
-    .media-preview-img {
+    .photo-preview-img {
         width: 80px;
         height: 80px;
         object-fit: cover;
         border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .media-preview-img:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    .photo-preview-img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .media-icon {
+    .no-preview {
         width: 80px;
         height: 80px;
-        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 32px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--gray-200);
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--gray-600);
     }
 
-    .media-icon.video {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-        color: white;
-    }
-
-    .media-icon.document {
-        background: linear-gradient(135deg, var(--blue-button), #3557c7);
-        color: white;
-    }
-
-    .media-icon.other {
-        background: linear-gradient(135deg, var(--text-gray), #555);
-        color: white;
-    }
-
-    .media-info {
+    .photo-info {
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-    .media-title {
-        font-weight: 700;
-        color: var(--dark-navy);
-        font-size: 15px;
+    .photo-title {
+        font-weight: 600;
+        color: var(--gray-900);
+        font-size: 14px;
     }
 
-    .media-meta {
+    .photo-meta {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
     }
 
-    .file-type-badge {
+    .category-badge {
         padding: 4px 10px;
         border-radius: 12px;
         font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
+        font-weight: 600;
+        background: var(--gray-100);
+        color: var(--gray-700);
     }
 
-    .file-type-badge.jpg,
-    .file-type-badge.jpeg,
-    .file-type-badge.png,
-    .file-type-badge.gif,
-    .file-type-badge.webp {
-        background: var(--green-card);
-        color: #2d6a2d;
-    }
-
-    .file-type-badge.mp4,
-    .file-type-badge.avi,
-    .file-type-badge.mov {
-        background: #ffcccb;
-        color: #8b0000;
-    }
-
-    .file-type-badge.pdf,
-    .file-type-badge.doc,
-    .file-type-badge.docx {
-        background: var(--light-cyan);
-        color: var(--dark-navy);
-    }
-
-    .media-dimensions {
-        font-size: 12px;
-        color: var(--text-gray);
-    }
-
-    .media-actions {
+    .photo-actions {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
     }
 
-    .btn-media-action {
-        width: 36px;
-        height: 36px;
+    .btn-photo-action {
+        width: 32px;
+        height: 32px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
         color: white;
     }
 
     .btn-view {
-        background: var(--primary-cyan);
+        background: var(--primary);
     }
 
     .btn-view:hover {
-        background: #00b8ba;
-        transform: scale(1.1);
+        background: var(--primary-dark);
     }
 
     .btn-edit {
-        background: var(--blue-button);
+        background: var(--warning);
     }
 
     .btn-edit:hover {
-        background: #3557c7;
-        transform: scale(1.1);
+        background: #d97706;
     }
 
     .btn-delete {
-        background: #ff6b6b;
+        background: var(--danger);
     }
 
     .btn-delete:hover {
-        background: #ee5a52;
-        transform: scale(1.1);
+        background: #dc2626;
     }
 
     /* Modal Styles */
@@ -303,21 +290,24 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(27, 40, 69, 0.8);
-        backdrop-filter: blur(5px);
-        animation: fadeIn 0.3s ease;
+        background: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.2s ease;
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
 
     .modal-content {
         background: white;
-        margin: 3% auto;
-        padding: 0;
-        border-radius: 16px;
+        margin: 50px auto;
+        border-radius: 12px;
         width: 90%;
         max-width: 700px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -328,9 +318,10 @@
 
     @keyframes slideDown {
         from {
-            transform: translateY(-50px);
+            transform: translateY(-30px);
             opacity: 0;
         }
+
         to {
             transform: translateY(0);
             opacity: 1;
@@ -338,10 +329,8 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
-        color: white;
-        padding: 25px 30px;
-        border-radius: 16px 16px 0 0;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--gray-200);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -349,116 +338,44 @@
 
     .modal-header h2 {
         margin: 0;
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 700;
+        color: var(--gray-900);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
     .close-modal {
-        color: white;
-        font-size: 32px;
-        font-weight: 300;
-        cursor: pointer;
-        border: none;
         background: none;
-        width: 40px;
-        height: 40px;
+        border: none;
+        font-size: 28px;
+        color: var(--gray-600);
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        transition: all 0.3s ease;
+        border-radius: 6px;
+        transition: all 0.2s;
     }
 
     .close-modal:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: rotate(90deg);
+        background: var(--gray-100);
+        color: var(--gray-900);
     }
 
     .modal-body {
-        padding: 30px;
+        padding: 24px;
     }
 
-    .upload-zone {
-        border: 3px dashed var(--primary-cyan);
-        border-radius: 12px;
-        padding: 40px;
-        text-align: center;
-        background: var(--light-cyan);
-        transition: all 0.3s ease;
-        cursor: pointer;
-        margin-bottom: 25px;
-    }
-
-    .upload-zone:hover {
-        border-color: var(--dark-navy);
-        background: #d0f0f0;
-    }
-
-    .upload-zone.dragover {
-        border-color: var(--purple-gradient-start);
-        background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(192, 132, 252, 0.1));
-        transform: scale(1.02);
-    }
-
-    .upload-icon {
-        font-size: 64px;
-        color: var(--primary-cyan);
-        margin-bottom: 20px;
-    }
-
-    .upload-text {
-        font-size: 18px;
-        color: var(--dark-navy);
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-
-    .upload-hint {
-        font-size: 14px;
-        color: var(--text-gray);
-    }
-
-    #fileInput {
-        display: none;
-    }
-
-    .file-preview {
-        margin: 20px 0;
-        padding: 20px;
-        background: var(--light-cyan);
-        border-radius: 8px;
-        display: none;
-    }
-
-    .file-preview-content {
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--gray-200);
         display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .file-preview-img {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-
-    .file-preview-info {
-        flex: 1;
-    }
-
-    .file-preview-name {
-        font-weight: 700;
-        color: var(--dark-navy);
-        margin-bottom: 5px;
-    }
-
-    .file-preview-size {
-        font-size: 14px;
-        color: var(--text-gray);
+        justify-content: flex-end;
+        gap: 12px;
     }
 
     .form-group {
@@ -468,115 +385,177 @@
     .form-label {
         display: block;
         font-weight: 600;
-        color: var(--dark-navy);
-        margin-bottom: 8px;
         font-size: 14px;
+        color: var(--gray-700);
+        margin-bottom: 8px;
     }
 
     .form-control {
         width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
+        padding: 10px 14px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
         font-size: 14px;
-        transition: all 0.3s ease;
-        font-family: 'Roboto Condensed', sans-serif;
+        transition: all 0.2s;
     }
 
     .form-control:focus {
         outline: none;
-        border-color: var(--primary-cyan);
-        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     textarea.form-control {
         resize: vertical;
-        min-height: 80px;
+        min-height: 100px;
     }
 
-    .modal-footer {
-        padding: 20px 30px;
-        border-top: 2px solid var(--light-cyan);
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
+    /* Media Library Grid */
+    .media-library-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 12px;
+        background: var(--gray-50);
+        border-radius: 8px;
     }
 
-    .btn-cancel {
-        background: var(--text-gray);
-        color: white;
-    }
-
-    .btn-cancel:hover {
-        background: #555;
-    }
-
-    .progress-bar {
-        width: 100%;
-        height: 8px;
-        background: #e0e0e0;
-        border-radius: 10px;
+    .media-item {
+        position: relative;
+        cursor: pointer;
+        border-radius: 8px;
         overflow: hidden;
-        margin-top: 15px;
-        display: none;
+        border: 2px solid transparent;
+        transition: all 0.2s;
     }
 
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
-        width: 0%;
-        transition: width 0.3s ease;
+    .media-item:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
     }
 
-    /* View Modal */
-    .view-modal-content {
-        max-width: 900px;
+    .media-item.selected {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
     }
 
-    .media-detail {
-        padding: 30px;
+    .media-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
     }
 
-    .media-detail-preview {
+    .media-item-title {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        color: white;
+        padding: 8px 6px 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    /* Detail View */
+    .detail-preview {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
 
-    .media-detail-preview img {
+    .detail-preview img {
         max-width: 100%;
         max-height: 500px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .detail-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: 16px;
+        margin-top: 20px;
     }
 
     .detail-item {
-        padding: 15px;
-        background: var(--light-cyan);
+        padding: 14px;
+        background: var(--gray-50);
         border-radius: 8px;
     }
 
     .detail-label {
-        font-size: 12px;
-        color: var(--text-gray);
-        text-transform: uppercase;
+        font-size: 11px;
         font-weight: 600;
-        margin-bottom: 5px;
+        text-transform: uppercase;
+        color: var(--gray-600);
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
     }
 
     .detail-value {
-        font-size: 16px;
-        color: var(--dark-navy);
+        font-size: 14px;
         font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--gray-300);
+        border-radius: 8px;
+        padding: 32px;
+        text-align: center;
+        background: var(--gray-50);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--primary);
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .upload-zone.dragover {
+        border-color: var(--success);
+        background: rgba(16, 185, 129, 0.05);
+        transform: scale(1.02);
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-600);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text-dark);
     }
 
     @media (max-width: 768px) {
-        .media-filters {
+        .gallery-filters {
             flex-direction: column;
             align-items: stretch;
         }
@@ -592,41 +571,36 @@
         .detail-grid {
             grid-template-columns: 1fr;
         }
+
+        .media-library-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
     }
 </style>
 
-<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
-<div class="media-container">
-    <div class="media-header">
-        <h1>
-            <i class="fas fa-photo-video"></i>
-            Photo Library
-        </h1>
-        <div class="header-actions">
-            <button class="btn btn-upload" onclick="openUploadModal()">
-                <i class="fas fa-cloud-upload-alt"></i>
-                Upload Photo
-            </button>
-        </div>
+<div class="gallery-container">
+
+    <div class="page-header">
+        <h1>Photo Gallery</h1>
+        <button class="btn btn-primary" onclick="openCreateModal()">Add Photo</button>
     </div>
 
-    <div class="media-filters">
+    <div class="gallery-filters">
         <div class="filter-group">
-            <label for="mediaTypeFilter">Photo Type:</label>
-            <select id="mediaTypeFilter" class="filter-select" onchange="filterByMediaType()">
-                <option value="">All Types</option>
-                <option value="image">Images</option>
-                <option value="video">Videos</option>
-                <option value="document">Documents</option>
-                <option value="other">Other</option>
+            <label for="categoryFilter">Category:</label>
+            <select id="categoryFilter" class="filter-select" onchange="filterPhotos()">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
             </select>
         </div>
     </div>
 
-    <div class="datatable-container">
-        <table id="mediaTable" class="display" style="width:100%">
+    <div class="table-container">
+        <table id="photoTable" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -644,63 +618,113 @@
     </div>
 </div>
 
-<!-- Upload Modal -->
-<div id="uploadModal" class="modal">
+<!-- Create/Edit Modal -->
+<div id="photoModal" class="modal">
     <div class="modal-content">
+
         <div class="modal-header">
-            <h2><i class="fas fa-cloud-upload-alt"></i> Upload Media</h2>
-            <button class="close-modal" onclick="closeUploadModal()">&times;</button>
+            <h2 id="modalTitle">
+                <i class="fas fa-plus"></i>
+                Add Photo
+            </h2>
+            <button class="close-modal" onclick="closePhotoModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="uploadForm" enctype="multipart/form-data">
+            <form id="photoForm">
                 {% csrf_token %}
-                
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
+                <input type="hidden" id="photoId" name="photo_id">
+                <input type="hidden" id="mediaId" name="media_id">
+
+                <div class="form-group" id="mediaSelectionGroup">
+                    <label class="form-label">Select Media Source</label>
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <button type="button" class="btn btn-secondary" onclick="switchToUpload()" id="uploadBtn">
+                            <i class="fas fa-upload"></i> Upload New
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="switchToLibrary()" id="libraryBtn">
+                            <i class="fas fa-images"></i> From Library
+                        </button>
                     </div>
-                    <div class="upload-text">Click to upload or drag and drop</div>
-                    <div class="upload-hint">PNG, JPG, GIF, MP4, PDF, DOC (MAX. 10MB)</div>
-                </div>
-                
-                <input type="file" id="fileInput" name="file" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
-                
-                <div id="filePreview" class="file-preview">
-                    <div class="file-preview-content">
-                        <img id="previewImg" class="file-preview-img" style="display:none;">
-                        <div class="file-preview-info">
-                            <div class="file-preview-name" id="fileName"></div>
-                            <div class="file-preview-size" id="fileSize"></div>
+
+                    <!-- Upload New File Section -->
+                    <div id="uploadSection" style="display: none;">
+                        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                            <div style="text-align: center;">
+                                <i class="fas fa-cloud-upload-alt"
+                                    style="font-size: 48px; color: var(--primary); margin-bottom: 12px;"></i>
+                                <div style="font-weight: 600; color: var(--gray-900); margin-bottom: 8px;">Click to
+                                    upload or drag and drop</div>
+                                <div style="font-size: 14px; color: var(--gray-600);">PNG, JPG, GIF (MAX. 10MB)</div>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" name="file" accept="image/*" style="display: none;">
+
+                        <div id="filePreview"
+                            style="display: none; margin-top: 16px; padding: 16px; background: var(--gray-50); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <img id="previewImg"
+                                    style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; display: none;">
+                                <div style="flex: 1;">
+                                    <div id="fileName"
+                                        style="font-weight: 600; color: var(--gray-900); margin-bottom: 4px;"></div>
+                                    <div id="fileSize" style="font-size: 14px; color: var(--gray-600);"></div>
+                                </div>
+                                <button type="button" onclick="clearFileUpload()" class="btn btn-secondary"
+                                    style="padding: 8px 16px;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media Library Section -->
+                    <div id="librarySection" style="display: none;">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="mediaSearch" placeholder="Search media library..."
+                                onkeyup="searchMedia()">
+                        </div>
+                        <div class="media-library-grid" id="mediaLibraryGrid">
+                            <!-- Media items loaded here -->
                         </div>
                     </div>
                 </div>
 
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
+                <div class="form-group">
+                    <label class="form-label" for="photoTitle">Title</label>
+                    <input type="text" class="form-control" id="photoTitle" name="title"
+                        placeholder="Enter photo title">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="mediaTitle">Title</label>
-                    <input type="text" class="form-control" id="mediaTitle" name="title" placeholder="Enter media title">
+                    <label class="form-label" for="photoDescription">Description</label>
+                    <textarea class="form-control" id="photoDescription" name="description"
+                        placeholder="Enter description"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="mediaDescription">Description</label>
-                    <textarea class="form-control" id="mediaDescription" name="description" placeholder="Enter description"></textarea>
+                    <label class="form-label" for="photoAltText">Alt Text</label>
+                    <input type="text" class="form-control" id="photoAltText" name="alt_text"
+                        placeholder="Alt text for accessibility">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="mediaAltText">Alt Text</label>
-                    <input type="text" class="form-control" id="mediaAltText" name="alt_text" placeholder="Enter alt text for accessibility">
+                    <label class="form-label" for="photoCategory">Category</label>
+                    <select class="form-control" id="photoCategory" name="category_id">
+                        <option value="">None</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-cancel" onclick="closeUploadModal()">
+            <button class="btn btn-secondary" onclick="closePhotoModal()">
                 <i class="fas fa-times"></i> Cancel
             </button>
-            <button class="btn btn-upload" onclick="uploadMedia()">
-                <i class="fas fa-check"></i> Upload
+            <button class="btn btn-success" onclick="savePhoto()" id="saveBtn">
+                <i class="fas fa-check"></i> Save
             </button>
         </div>
     </div>
@@ -708,419 +732,455 @@
 
 <!-- View Modal -->
 <div id="viewModal" class="modal">
-    <div class="modal-content view-modal-content">
+    <div class="modal-content">
         <div class="modal-header">
-            <h2><i class="fas fa-eye"></i> Photo Details</h2>
+            <h2>
+                <i class="fas fa-eye"></i>
+                Photo Details
+            </h2>
             <button class="close-modal" onclick="closeViewModal()">&times;</button>
         </div>
-        <div class="media-detail" id="mediaDetailContent">
+        <div class="modal-body" id="viewModalContent">
             <!-- Content loaded dynamically -->
         </div>
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-edit"></i> Edit Photo</h2>
-            <button class="close-modal" onclick="closeEditModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="editForm">
-                {% csrf_token %}
-                <input type="hidden" id="editMediaId" name="media_id">
-
-                <div class="form-group">
-                    <label class="form-label" for="editTitle">Title</label>
-                    <input type="text" class="form-control" id="editTitle" name="title">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="editDescription">Description</label>
-                    <textarea class="form-control" id="editDescription" name="description"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="editAltText">Alt Text</label>
-                    <input type="text" class="form-control" id="editAltText" name="alt_text">
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-cancel" onclick="closeEditModal()">
-                <i class="fas fa-times"></i> Cancel
-            </button>
-            <button class="btn btn-upload" onclick="updateMedia()">
-                <i class="fas fa-save"></i> Save Changes
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- jQuery and DataTables JS -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
-let mediaTable;
-let selectedFile = null;
+    let photoTable;
+    let isEditMode = false;
+    let selectedMediaId = null;
+    let uploadedFile = null;
+    let mediaSource = 'library'; // 'library' or 'upload'
 
-$(document).ready(function() {
-    mediaTable = $('#mediaTable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{% url "media_datatable" %}',
-            type: 'GET',
-            data: function(d) {
-                d.media_type = $('#mediaTypeFilter').val();
-            }
-        },
-        columns: [
-            { data: 'id', width: '50px' },
-            { data: 'preview', orderable: false, searchable: false, width: '100px' },
-            { data: 'info', width: '250px' },
-            { data: 'description' },
-            { data: 'created_at', width: '120px' },
-            { data: 'actions', orderable: false, searchable: false, width: '140px' }
-        ],
-        order: [[0, 'desc']],
-        pageLength: 12,
-        lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-        language: {
-            search: "Search:",
-            lengthMenu: "Show _MENU_ items",
-            info: "Showing _START_ to _END_ of _TOTAL_ items",
-            paginate: {
-                first: "First",
-                last: "Last",
-                next: "Next",
-                previous: "Previous"
-            }
-        }
-    });
-});
-
-function filterByMediaType() {
-    mediaTable.ajax.reload();
-}
-
-// Upload Modal Functions
-function openUploadModal() {
-    document.getElementById('uploadModal').style.display = 'block';
-    document.getElementById('uploadForm').reset();
-    document.getElementById('filePreview').style.display = 'none';
-    selectedFile = null;
-}
-
-function closeUploadModal() {
-    document.getElementById('uploadModal').style.display = 'none';
-}
-
-// Drag and Drop
-const uploadZone = document.getElementById('uploadZone');
-
-uploadZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadZone.classList.add('dragover');
-});
-
-uploadZone.addEventListener('dragleave', () => {
-    uploadZone.classList.remove('dragover');
-});
-
-uploadZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadZone.classList.remove('dragover');
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        handleFileSelect(files[0]);
-    }
-});
-
-document.getElementById('fileInput').addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
-        handleFileSelect(e.target.files[0]);
-    }
-});
-
-function handleFileSelect(file) {
-    selectedFile = file;
-    
-    // Show preview
-    const preview = document.getElementById('filePreview');
-    const fileName = document.getElementById('fileName');
-    const fileSize = document.getElementById('fileSize');
-    const previewImg = document.getElementById('previewImg');
-    
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
-    
-    // Preview image
-    if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            previewImg.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    } else {
-        previewImg.style.display = 'none';
-    }
-    
-    preview.style.display = 'block';
-}
-
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-async function uploadMedia() {
-    if (!selectedFile) {
-        alert('Please select a file to upload');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('title', document.getElementById('mediaTitle').value);
-    formData.append('description', document.getElementById('mediaDescription').value);
-    formData.append('alt_text', document.getElementById('mediaAltText').value);
-
-    const csrftoken = getCookie('csrftoken');
-    const progressBar = document.getElementById('progressBar');
-    const progressFill = document.getElementById('progressFill');
-
-    progressBar.style.display = 'block';
-
-    try {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener('progress', (e) => {
-            if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100;
-                progressFill.style.width = percentComplete + '%';
-            }
-        });
-
-        xhr.addEventListener('load', () => {
-            if (xhr.status === 200) {
-                const result = JSON.parse(xhr.responseText);
-                if (result.success) {
-                    alert('Media uploaded successfully!');
-                    closeUploadModal();
-                    mediaTable.ajax.reload();
-                } else {
-                    alert('Error: ' + result.message);
+    $(document).ready(function () {
+        photoTable = $('#photoTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{% url "photo_datatable" %}',
+                type: 'GET',
+                data: function (d) {
+                    d.category = $('#categoryFilter').val();
                 }
-            } else {
-                alert('Upload failed');
+            },
+            columns: [
+                { data: 'id', width: '60px' },
+                { data: 'preview', orderable: false, searchable: false, width: '100px' },
+                { data: 'info', width: '200px' },
+                { data: 'description' },
+                { data: 'created_at', width: '120px' },
+                { data: 'actions', orderable: false, searchable: false, width: '120px' }
+            ],
+            order: [[0, 'desc']],
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ photos",
+                info: "Showing _START_ to _END_ of _TOTAL_ photos",
             }
-            progressBar.style.display = 'none';
-            progressFill.style.width = '0%';
         });
 
-        xhr.open('POST', '{% url "media_upload" %}');
-        xhr.setRequestHeader('X-CSRFToken', csrftoken);
-        xhr.send(formData);
+        // Setup drag and drop
+        setupDragAndDrop();
+    });
 
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred during upload');
-        progressBar.style.display = 'none';
-        progressFill.style.width = '0%';
+    function setupDragAndDrop() {
+        const uploadZone = document.getElementById('uploadZone');
+
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+        }
+
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', function (e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+        }
     }
-}
 
-// View Media
-async function viewMedia(mediaId) {
-    try {
-        const response = await fetch(`/admin/media/get/${mediaId}/`);
-        const result = await response.json();
+    function handleFileSelect(file) {
+        uploadedFile = file;
 
-        if (result.success) {
-            const data = result.data;
-            let previewHTML = '';
+        const preview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const previewImg = document.getElementById('previewImg');
 
-            if (data.media_type === 'image') {
-                previewHTML = `<div class="media-detail-preview">
-                    <img src="${data.file_path}" alt="${data.alt_text || data.title}">
-                </div>`;
-            } else if (data.media_type === 'video') {
-                previewHTML = `<div class="media-detail-preview">
-                    <video controls style="max-width: 100%; border-radius: 12px;">
-                        <source src="${data.file_path}" type="video/${data.file_type}">
-                    </video>
-                </div>`;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+
+        // Preview image
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewImg.style.display = 'none';
+        }
+
+        preview.style.display = 'block';
+        selectedMediaId = null;
+        document.getElementById('mediaId').value = '';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function clearFileUpload() {
+        uploadedFile = null;
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePreview').style.display = 'none';
+        document.getElementById('previewImg').src = '';
+    }
+
+    function switchToUpload() {
+        mediaSource = 'upload';
+        document.getElementById('uploadSection').style.display = 'block';
+        document.getElementById('librarySection').style.display = 'none';
+        document.getElementById('uploadBtn').classList.add('active');
+        document.getElementById('libraryBtn').classList.remove('active');
+        selectedMediaId = null;
+    }
+
+    function switchToLibrary() {
+        mediaSource = 'library';
+        document.getElementById('uploadSection').style.display = 'none';
+        document.getElementById('librarySection').style.display = 'block';
+        document.getElementById('libraryBtn').classList.add('active');
+        document.getElementById('uploadBtn').classList.remove('active');
+        uploadedFile = null;
+        clearFileUpload();
+        loadMediaLibrary();
+    }
+
+    function filterPhotos() {
+        photoTable.ajax.reload();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
+        }
+        return cookieValue;
+    }
 
-            const detailHTML = `
-                ${previewHTML}
+    async function openCreateModal() {
+        isEditMode = false;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Photo';
+        document.getElementById('photoForm').reset();
+        document.getElementById('photoId').value = '';
+        document.getElementById('mediaId').value = '';
+        selectedMediaId = null;
+        uploadedFile = null;
+        clearFileUpload();
+        document.getElementById('mediaSelectionGroup').style.display = 'block';
+        document.getElementById('photoModal').style.display = 'block';
+
+        // Default to library view
+        switchToLibrary();
+    }
+
+    async function editPhoto(photoId) {
+        isEditMode = true;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Photo';
+        document.getElementById('mediaSelectionGroup').style.display = 'none';
+
+        try {
+            const response = await fetch(`/admin/photos/get/${photoId}/`);
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('photoId').value = data.id;
+                document.getElementById('mediaId').value = data.media.id || '';
+                document.getElementById('photoTitle').value = data.title;
+                document.getElementById('photoDescription').value = data.description;
+                document.getElementById('photoAltText').value = data.alt_text;
+                document.getElementById('photoCategory').value = data.category_id || '';
+
+                document.getElementById('photoModal').style.display = 'block';
+            } else {
+                alert('Error loading photo: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to load photo data');
+        }
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').style.display = 'none';
+        clearFileUpload();
+        uploadedFile = null;
+        selectedMediaId = null;
+    }
+
+    async function loadMediaLibrary(search = '') {
+        try {
+            const response = await fetch(`/admin/photos/media-list/?search=${encodeURIComponent(search)}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const grid = document.getElementById('mediaLibraryGrid');
+                grid.innerHTML = '';
+
+                if (result.data.length === 0) {
+                    grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--gray-600);">No media found</div>';
+                    return;
+                }
+
+                result.data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'media-item';
+                    div.onclick = () => selectMedia(item.id, div);
+                    div.innerHTML = `
+                    <img src="${item.thumb_path}" alt="${item.title}">
+                    <div class="media-item-title">${item.title}</div>
+                `;
+                    grid.appendChild(div);
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function searchMedia() {
+        const search = document.getElementById('mediaSearch').value;
+        loadMediaLibrary(search);
+    }
+
+    function selectMedia(mediaId, element) {
+        selectedMediaId = mediaId;
+        document.getElementById('mediaId').value = mediaId;
+        uploadedFile = null;
+
+        // Remove selected class from all
+        document.querySelectorAll('.media-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+
+        // Add to clicked
+        element.classList.add('selected');
+    }
+
+    async function savePhoto() {
+        const photoId = document.getElementById('photoId').value;
+        const formData = new FormData();
+
+        // Add form fields
+        formData.append('title', document.getElementById('photoTitle').value);
+        formData.append('description', document.getElementById('photoDescription').value);
+        formData.append('alt_text', document.getElementById('photoAltText').value);
+        formData.append('category_id', document.getElementById('photoCategory').value);
+
+        if (!isEditMode) {
+            // For create: check if file uploaded or media selected
+            if (uploadedFile) {
+                formData.append('file', uploadedFile);
+            } else if (selectedMediaId) {
+                formData.append('media_id', selectedMediaId);
+            } else {
+                alert('Please upload a file or select from media library');
+                return;
+            }
+        }
+
+        const url = isEditMode ?
+            `/admin/photos/update/${photoId}/` :
+            '/admin/photos/create/';
+
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(isEditMode ? 'Photo updated successfully!' : 'Photo created successfully!');
+                closePhotoModal();
+                photoTable.ajax.reload();
+            } else {
+                alert('Error: ' + result.message);
+                if (result.traceback) {
+                    console.error(result.traceback);
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save photo');
+        }
+    }
+
+    async function viewPhoto(photoId) {
+        try {
+            const response = await fetch(`/admin/photos/get/${photoId}/`);
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+                const media = data.media;
+                let html = '';
+
+                if (media.file_path) {
+                    html += `
+                    <div class="detail-preview">
+                        <img src="${media.file_path}" alt="${data.alt_text || data.title}">
+                    </div>
+                `;
+                }
+
+                html += `
                 <div class="detail-grid">
                     <div class="detail-item">
                         <div class="detail-label">Title</div>
-                        <div class="detail-value">${data.title || '-'}</div>
+                        <div class="detail-value">${data.title || 'Untitled'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Category</div>
+                        <div class="detail-value">${data.category_name}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">File Name</div>
-                        <div class="detail-value">${data.file_name}</div>
+                        <div class="detail-value">${media.file_name}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">File Type</div>
-                        <div class="detail-value">${data.file_type.toUpperCase()}</div>
+                        <div class="detail-value">${media.file_type.toUpperCase()}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">File Size</div>
-                        <div class="detail-value">${data.file_size}</div>
+                        <div class="detail-value">${media.file_size}</div>
                     </div>
-                    ${data.dimensions ? `<div class="detail-item">
+                    ${media.dimensions ? `<div class="detail-item">
                         <div class="detail-label">Dimensions</div>
-                        <div class="detail-value">${data.dimensions}</div>
+                        <div class="detail-value">${media.dimensions}</div>
                     </div>` : ''}
                     <div class="detail-item">
-                        <div class="detail-label">Created At</div>
+                        <div class="detail-label">Media Type</div>
+                        <div class="detail-value">${media.media_type}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created</div>
                         <div class="detail-value">${data.created_at}</div>
                     </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Created By</div>
+                        <div class="detail-value">${data.created_by}</div>
+                    </div>
                 </div>
-                ${data.description ? `<div style="margin-top: 20px; padding: 15px; background: var(--light-cyan); border-radius: 8px;">
-                    <div class="detail-label">Description</div>
-                    <p style="margin: 10px 0 0 0; color: var(--dark-navy);">${data.description}</p>
-                </div>` : ''}
             `;
 
-            document.getElementById('mediaDetailContent').innerHTML = detailHTML;
-            document.getElementById('viewModal').style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to load media details');
-    }
-}
+                if (data.description) {
+                    html += `
+                    <div style="margin-top: 20px; padding: 16px; background: var(--gray-50); border-radius: 8px;">
+                        <div class="detail-label">Description</div>
+                        <p style="margin: 10px 0 0 0; color: var(--gray-900); line-height: 1.6;">${data.description}</p>
+                    </div>
+                `;
+                }
 
-function closeViewModal() {
-    document.getElementById('viewModal').style.display = 'none';
-}
-
-// Edit Media
-async function editMedia(mediaId) {
-    try {
-        const response = await fetch(`/admin/media/get/${mediaId}/`);
-        const result = await response.json();
-
-        if (result.success) {
-            const data = result.data;
-            document.getElementById('editMediaId').value = mediaId;
-            document.getElementById('editTitle').value = data.title || '';
-            document.getElementById('editDescription').value = data.description || '';
-            document.getElementById('editAltText').value = data.alt_text || '';
-            document.getElementById('editModal').style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to load media data');
-    }
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-
-async function updateMedia() {
-    const mediaId = document.getElementById('editMediaId').value;
-    const formData = new FormData(document.getElementById('editForm'));
-
-    const csrftoken = getCookie('csrftoken');
-
-    try {
-        const response = await fetch(`/admin/media/update/${mediaId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert('Media updated successfully!');
-            closeEditModal();
-            mediaTable.ajax.reload();
-        } else {
-            alert('Error: ' + result.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to update media');
-    }
-}
-
-// Delete Media
-async function deleteMedia(mediaId, fileName) {
-    if (!confirm(`Are you sure you want to delete "${fileName}"?\n\nThis action cannot be undone.`)) {
-        return;
-    }
-
-    const csrftoken = getCookie('csrftoken');
-
-    try {
-        const response = await fetch(`/admin/media/delete/${mediaId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
+                document.getElementById('viewModalContent').innerHTML = html;
+                document.getElementById('viewModal').style.display = 'block';
             }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert('Media deleted successfully!');
-            mediaTable.ajax.reload();
-        } else {
-            alert('Error: ' + result.message);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to load photo details');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to delete media');
     }
-}
 
-// Close modals on outside click
-window.onclick = function(event) {
-    const uploadModal = document.getElementById('uploadModal');
-    const viewModal = document.getElementById('viewModal');
-    const editModal = document.getElementById('editModal');
-    
-    if (event.target === uploadModal) {
-        closeUploadModal();
+    function closeViewModal() {
+        document.getElementById('viewModal').style.display = 'none';
     }
-    if (event.target === viewModal) {
-        closeViewModal();
+
+    async function deletePhoto(photoId, title) {
+        if (!confirm(`Are you sure you want to delete "${title}"?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(`/admin/photos/delete/${photoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Photo deleted successfully!');
+                photoTable.ajax.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to delete photo');
+        }
     }
-    if (event.target === editModal) {
-        closeEditModal();
+
+    // Close modal on outside click
+    window.onclick = function (event) {
+        const photoModal = document.getElementById('photoModal');
+        const viewModal = document.getElementById('viewModal');
+
+        if (event.target === photoModal) {
+            closePhotoModal();
+        }
+        if (event.target === viewModal) {
+            closeViewModal();
+        }
     }
-}
 </script>
 
 {% endblock %}

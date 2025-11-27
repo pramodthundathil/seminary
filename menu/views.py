@@ -852,28 +852,390 @@ def media_delete(request, media_id):
         }, status=500)
     
     
+# Photos Functionalities
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator
+from django.db.models import Q
+from datetime import datetime
+import json
+
 @login_required
-@require_POST
-def media_delete(request, media_id):
-    """Soft delete media"""
+def photo_gallery(request):
+    """Main photo gallery page"""
+    categories = Categories.objects.filter(
+        deleted_at__isnull=True,
+        type='photo'
+    ).order_by('name')
+    
+    context = {
+        'categories': categories
+    }
+    return render(request, "admin/media/photo_gallery.html", context)
+
+
+@login_required
+def photo_datatable(request):
+    """DataTable AJAX endpoint for photos"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 12))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    # Filters
+    category_filter = request.GET.get('category', '')
+    
+    # Base query
+    photos = Photos.objects.filter(deleted_at__isnull=True).select_related(
+        'media', 'categories', 'created_by'
+    )
+    
+    # Apply filters
+    if category_filter:
+        photos = photos.filter(categories_id=category_filter)
+    
+    # Apply search
+    if search_value:
+        photos = photos.filter(
+            Q(title__icontains=search_value) |
+            Q(description__icontains=search_value) |
+            Q(media__file_name__icontains=search_value) |
+            Q(alt_text__icontains=search_value)
+        )
+    
+    # Total records
+    total_records = Photos.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = photos.count()
+    
+    # Ordering
+    order_columns = ['id', 'title', 'categories__name', 'created_at']
+    if order_column_index < len(order_columns):
+        order_by = order_columns[order_column_index]
+        if order_direction == 'desc':
+            order_by = f'-{order_by}'
+        photos = photos.order_by(order_by)
+    else:
+        photos = photos.order_by('-created_at')
+    
+    # Pagination
+    photos = photos[start:start + length]
+    
+    # Prepare data
+    data = []
+    for photo in photos:
+        # Preview
+        if photo.media and photo.media.file_path:
+            preview = f'''
+                <img src="{photo.media.file_path.url}" 
+                     class="photo-preview-img" 
+                     alt="{photo.alt_text or photo.title or 'Photo'}"
+                     onclick="viewPhoto({photo.id})">
+            '''
+        else:
+            preview = '<div class="no-preview">No Image</div>'
+        
+        # Info
+        category_name = photo.categories.name if photo.categories else 'Uncategorized'
+        info = f'''
+            <div class="photo-info">
+                <div class="photo-title">{photo.title or 'Untitled'}</div>
+                <div class="photo-meta">
+                    <span class="category-badge">{category_name}</span>
+                </div>
+            </div>
+        '''
+        
+        # Description
+        description = photo.description[:100] + '...' if photo.description and len(photo.description) > 100 else (photo.description or '-')
+        
+        # Actions
+        actions = f'''
+            <div class="photo-actions">
+                <button class="btn-photo-action btn-view" onclick="viewPhoto({photo.id})" title="View">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-photo-action btn-edit" onclick="editPhoto({photo.id})" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-photo-action btn-delete" onclick="deletePhoto({photo.id}, '{photo.title or 'this photo'}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'id': photo.id,
+            'preview': preview,
+            'info': info,
+            'description': description,
+            'created_at': photo.created_at.strftime('%Y-%m-%d'),
+            'actions': actions
+        })
+    
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total_records,
+        'recordsFiltered': filtered_records,
+        'data': data
+    })
+
+
+
+@require_http_methods(["POST"])
+def photo_create(request):
+    """Create a new photo with media library upload"""
     try:
-        media = get_object_or_404(MediaLibrary, id=media_id, deleted_at__isnull=True)
-        media.deleted_at = timezone.now()
-        media.save()
+        title = request.POST.get('title', '')
+        description = request.POST.get('description', '')
+        alt_text = request.POST.get('alt_text', '')
+        category_id = request.POST.get('category_id')
+        
+        # Check if uploading new file or using existing media
+        uploaded_file = request.FILES.get('file')
+        media_id = request.POST.get('media_id')
+        
+        if not uploaded_file and not media_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please upload a file or select from media library'
+            }, status=400)
+        
+        # If new file uploaded, create media library entry
+        if uploaded_file:
+            from PIL import Image
+            import os
+            
+            # Get file info
+            file_name = uploaded_file.name
+            file_size = uploaded_file.size
+            file_type = file_name.split('.')[-1].lower()
+            
+            # Determine media type
+            image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']
+            video_extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv']
+            document_extensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']
+            
+            if file_type in image_extensions:
+                media_type = 'image'
+            elif file_type in video_extensions:
+                media_type = 'video'
+            elif file_type in document_extensions:
+                media_type = 'document'
+            else:
+                media_type = 'other'
+            
+            # Get dimensions for images
+            dimensions = None
+            if media_type == 'image':
+                try:
+                    img = Image.open(uploaded_file)
+                    dimensions = f"{img.width}x{img.height}"
+                    uploaded_file.seek(0)  # Reset file pointer
+                except:
+                    pass
+            
+            # Format file size
+            if file_size < 1024:
+                formatted_size = f"{file_size} B"
+            elif file_size < 1024 * 1024:
+                formatted_size = f"{file_size / 1024:.2f} KB"
+            else:
+                formatted_size = f"{file_size / (1024 * 1024):.2f} MB"
+            
+            # Create MediaLibrary entry
+            media = MediaLibrary.objects.create(
+                file_name=file_name,
+                file_path=uploaded_file,
+                thumb_file_path='',  # Can be generated separately
+                slider_file_path='',
+                file_type=file_type,
+                file_size=formatted_size,
+                dimensions=dimensions,
+                media_type=media_type,
+                title=title,
+                description=description,
+                alt_text=alt_text,
+                created_by=request.user,
+                updated_by=request.user
+            )
+        else:
+            # Use existing media
+            media = get_object_or_404(MediaLibrary, id=media_id, deleted_at__isnull=True)
+        
+        # Create Photo entry
+        photo = Photos.objects.create(
+            media=media,
+            title=title,
+            description=description,
+            alt_text=alt_text,
+            categories_id=category_id if category_id else None,
+            created_by=request.user,
+            updated_by=request.user
+        )
         
         return JsonResponse({
             'success': True,
-            'message': 'Media deleted successfully'
+            'message': 'Photo created successfully',
+            'photo_id': photo.id
         })
+        
+    except Exception as e:
+        import traceback
+        return JsonResponse({
+            'success': False,
+            'message': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+
+@login_required
+def photo_get(request, photo_id):
+    """Get photo details with full media library data"""
+    try:
+        photo = get_object_or_404(
+            Photos.objects.select_related('media', 'categories', 'created_by'),
+            id=photo_id,
+            deleted_at__isnull=True
+        )
+        
+        # Get media library data
+        media_data = {}
+        if photo.media:
+            media_data = {
+                'id': photo.media.id,
+                'file_path': photo.media.file_path.url if photo.media.file_path else '',
+                'file_name': photo.media.file_name,
+                'file_size': photo.media.file_size,
+                'file_type': photo.media.file_type,
+                'dimensions': photo.media.dimensions or '',
+                'media_type': photo.media.media_type,
+                'thumb_path': photo.media.thumb_file_path or (photo.media.file_path.url if photo.media.file_path else ''),
+                'slider_path': photo.media.slider_file_path or '',
+            }
+        
+        data = {
+            'id': photo.id,
+            'title': photo.title or '',
+            'description': photo.description or '',
+            'alt_text': photo.alt_text or '',
+            'category_id': photo.categories.id if photo.categories else None,
+            'category_name': photo.categories.name if photo.categories else 'Uncategorized',
+            'created_at': photo.created_at.strftime('%Y-%m-%d %H:%M'),
+            'updated_at': photo.updated_at.strftime('%Y-%m-%d %H:%M'),
+            'created_by': photo.created_by.username if photo.created_by else '',
+            'media': media_data
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'data': data
+        })
+        
+    except Exception as e:
+        import traceback
+        return JsonResponse({
+            'success': False,
+            'message': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def photo_update(request, photo_id):
+    """Update photo details"""
+    try:
+        photo = get_object_or_404(Photos, id=photo_id, deleted_at__isnull=True)
+        
+        photo.title = request.POST.get('title', photo.title)
+        photo.description = request.POST.get('description', photo.description)
+        photo.alt_text = request.POST.get('alt_text', photo.alt_text)
+        
+        category_id = request.POST.get('category_id')
+        if category_id:
+            photo.categories_id = category_id
+        
+        photo.updated_by = request.user
+        photo.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Photo updated successfully'
+        })
+        
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': f'Delete failed: {str(e)}'
-        }, status=400)
+            'message': str(e)
+        }, status=500)
 
 
-def photo_gallery(request):
-    return render(request,"admin/media/photo_gallery.html")
+@login_required
+@require_http_methods(["POST"])
+def photo_delete(request, photo_id):
+    """Soft delete a photo"""
+    try:
+        photo = get_object_or_404(Photos, id=photo_id, deleted_at__isnull=True)
+        
+        photo.deleted_at = datetime.now()
+        photo.updated_by = request.user
+        photo.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Photo deleted successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+
+
+@login_required
+def media_library_list(request):
+    """Get available media for photo selection"""
+    try:
+        search = request.GET.get('search', '')
+        
+        media_items = MediaLibrary.objects.filter(
+            deleted_at__isnull=True,
+            media_type='image'
+        )
+        
+        if search:
+            media_items = media_items.filter(
+                Q(file_name__icontains=search) |
+                Q(title__icontains=search)
+            )
+        
+        media_items = media_items.order_by('-created_at')[:20]
+        
+        data = [{
+            'id': item.id,
+            'file_name': item.file_name,
+            'file_path': item.file_path.url if item.file_path else '',
+            'thumb_path': item.thumb_file_path or (item.file_path.url if item.file_path else ''),
+            'title': item.title or item.file_name
+        } for item in media_items]
+        
+        return JsonResponse({
+            'success': True,
+            'data': data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
 
 
 
