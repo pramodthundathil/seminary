@@ -22,7 +22,8 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class CustomUserManager(BaseUserManager):
@@ -673,7 +674,7 @@ class Pages(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
     title = models.CharField(max_length=250)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)

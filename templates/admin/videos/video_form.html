@@ -1,0 +1,238 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{% if video %}Edit Video{% else %}Add Video{% endif %}</h1>
+        <a href="{% url 'video_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="form-container" style="max-width:900px;margin:0 auto;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Video Information -->
+            <div class="form-section">
+                <h3 style="margin-bottom:20px;color:var(--text-dark);font-size:18px;">
+                    <i class="fas fa-info-circle"></i> Video Information
+                </h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Title *</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <span class="error-message">{{ form.title.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span class="error-message">{{ form.description.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.categories.id_for_label }}">Category</label>
+                    {{ form.categories }}
+                    {% if form.categories.errors %}
+                        <span class="error-message">{{ form.categories.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upload Type Selection -->
+            <div class="form-section" style="margin-top:30px;">
+                <h3 style="margin-bottom:20px;color:var(--text-dark);font-size:18px;">
+                    <i class="fas fa-upload"></i> Video Source
+                </h3>
+                
+                <div class="upload-type-selector" style="display:flex;gap:15px;margin-bottom:25px;">
+                    <label class="upload-type-option" style="flex:1;">
+                        <input type="radio" name="upload_type" value="media" 
+                               {% if not video or video.media %}checked{% endif %} 
+                               onchange="toggleUploadType('media')">
+                        <div class="option-card" style="padding:20px;border:2px solid var(--gray-200);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;">
+                            <i class="fas fa-file-video" style="font-size:32px;color:var(--primary);margin-bottom:10px;"></i>
+                            <div style="font-weight:600;color:var(--text-dark);">Upload Video File</div>
+                            <div style="font-size:13px;color:var(--text-light);margin-top:5px;">MP4, AVI, MOV, etc.</div>
+                        </div>
+                    </label>
+                    
+                    <label class="upload-type-option" style="flex:1;">
+                        <input type="radio" name="upload_type" value="youtube" 
+                               {% if video and video.youtube %}checked{% endif %}
+                               onchange="toggleUploadType('youtube')">
+                        <div class="option-card" style="padding:20px;border:2px solid var(--gray-200);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;">
+                            <i class="fab fa-youtube" style="font-size:32px;color:#FF0000;margin-bottom:10px;"></i>
+                            <div style="font-weight:600;color:var(--text-dark);">YouTube Video</div>
+                            <div style="font-size:13px;color:var(--text-light);margin-top:5px;">Embed from YouTube</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Media Upload Section -->
+                <div id="mediaUploadSection" style="{% if video and video.youtube %}display:none;{% endif %}">
+                    <div class="form-group">
+                        <label for="{{ media_form.file.id_for_label }}">Select Video File</label>
+                        <input type="file" name="media-file" id="media-file" class="form-control" accept="video/*">
+                        <small style="display:block;margin-top:5px;color:var(--text-light);">
+                            Supported formats: MP4, AVI, MOV, WMV, FLV, MKV, WebM
+                        </small>
+                        {% if video and video.media %}
+                            <div style="margin-top:10px;padding:10px;background:var(--gray-50);border-radius:8px;">
+                                <strong>Current file:</strong> {{ video.media.file_name }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- YouTube Upload Section -->
+                <div id="youtubeUploadSection" style="{% if not video or video.media %}display:none;{% endif %}">
+                    <div class="form-group">
+                        <label for="{{ youtube_form.file_path.id_for_label }}">YouTube URL *</label>
+                        {{ youtube_form.file_path }}
+                        <small style="display:block;margin-top:5px;color:var(--text-light);">
+                            <strong>Supported formats:</strong><br>
+                            • https://www.youtube.com/watch?v=VIDEO_ID<br>
+                            • https://youtu.be/VIDEO_ID<br>
+                            • https://www.youtube.com/embed/VIDEO_ID<br>
+                            • Or just the 11-character video ID
+                        </small>
+                        {% if youtube_form.file_path.errors %}
+                            <span class="error-message">{{ youtube_form.file_path.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ youtube_form.thumb_file_path.id_for_label }}">Thumbnail URL</label>
+                        {{ youtube_form.thumb_file_path }}
+                        <small style="display:block;margin-top:5px;color:var(--text-light);">
+                            Optional: Enter custom thumbnail URL
+                        </small>
+                        {% if youtube_form.thumb_file_path.errors %}
+                            <span class="error-message">{{ youtube_form.thumb_file_path.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions" style="margin-top:30px;display:flex;gap:15px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> {% if video %}Update Video{% else %}Create Video{% endif %}
+                </button>
+                <a href="{% url 'video_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.upload-type-option input[type="radio"] {
+    display: none;
+}
+
+.upload-type-option input[type="radio"]:checked + .option-card {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.option-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.error-message {
+    display: block;
+    margin-top: 5px;
+    color: #dc3545;
+    font-size: 13px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--gray-200);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-300);
+}
+</style>
+
+<script>
+function toggleUploadType(type) {
+    const mediaSection = document.getElementById('mediaUploadSection');
+    const youtubeSection = document.getElementById('youtubeUploadSection');
+    
+    if (type === 'media') {
+        mediaSection.style.display = 'block';
+        youtubeSection.style.display = 'none';
+    } else {
+        mediaSection.style.display = 'none';
+        youtubeSection.style.display = 'block';
+    }
+}
+</script>
+
+{% endblock %}

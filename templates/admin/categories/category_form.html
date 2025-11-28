@@ -1,0 +1,142 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{% if form.instance.pk %}Edit Category{% else %}Add Category{% endif %}</h1>
+        <a href="{% url 'category_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="table-container" style="max-width:900px;margin:0 auto;">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Code *</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        <span style="color:red;font-size:12px;">{{ form.code.errors }}</span>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Name *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <span style="color:red;font-size:12px;">{{ form.name.errors }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <span style="color:red;font-size:12px;">{{ form.description.errors }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Type</label>
+                    {{ form.type }}
+                </div>
+                <div class="form-group">
+                    <label>Parent ID</label>
+                    {{ form.parent_id }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Table Color</label>
+                    {{ form.table_color }}
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Category Image</label>
+                
+                <!-- Tabs for Media Selection -->
+                <div class="media-source-tabs" style="margin-bottom:15px;">
+                    <button type="button" id="libraryBtn" class="tab-btn btn btn-info active" onclick="switchTab('library')">
+                        <i class="fas fa-images"></i> Select from Library
+                    </button>
+                    <button type="button" id="uploadBtn" class="tab-btn btn btn-info" onclick="switchTab('upload')">
+                        <i class="fas fa-upload"></i> Upload New
+                    </button>
+                </div>
+
+                <!-- Select from Library -->
+                <div id="librarySection">
+                    <label>Select Existing Media</label>
+                    {{ form.media }}
+                </div>
+
+                <!-- Upload New -->
+                <div id="uploadSection" style="display:none;">
+                    <div class="upload-zone" style="border:2px dashed var(--border);padding:40px;text-align:center;border-radius:8px;background:var(--gray-50);">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:48px;color:var(--primary-cyan);margin-bottom:15px;"></i>
+                        <p style="margin:10px 0;">Upload a new image for this category</p>
+                        {{ media_form.file }}
+                    </div>
+                    
+                    <div style="margin-top:15px;">
+                        <div class="form-group">
+                            <label>Media Title</label>
+                            {{ media_form.title }}
+                        </div>
+                        <div class="form-group">
+                            <label>Media Description</label>
+                            {{ media_form.description }}
+                        </div>
+                        <div class="form-group">
+                            <label>Alt Text</label>
+                            {{ media_form.alt_text }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px;">
+                <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function switchTab(tab) {
+    const librarySection = document.getElementById('librarySection');
+    const uploadSection = document.getElementById('uploadSection');
+    const libraryBtn = document.getElementById('libraryBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    if (tab === 'library') {
+        librarySection.style.display = 'block';
+        uploadSection.style.display = 'none';
+        libraryBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        // Clear upload field
+        document.querySelector('#uploadSection input[type="file"]').value = '';
+    } else {
+        librarySection.style.display = 'none';
+        uploadSection.style.display = 'block';
+        uploadBtn.classList.add('active');
+        libraryBtn.classList.remove('active');
+        // Clear library selection
+        document.querySelector('#librarySection select').value = '';
+    }
+}
+</script>
+
+{% endblock %}

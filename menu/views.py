@@ -20,11 +20,12 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib import messages
 
 
 from home.models import News, MediaLibrary
 from home.models import *
-from .forms import MediaLibraryForm, NewsForm
+from .forms import *
 from home.decorators import role_redirection
 from datetime import datetime, timedelta
 
@@ -165,6 +166,9 @@ def menu_engineer(request, menu_id=None):
     }
     return render(request, 'admin/menus/menu_engineer.html', context)
 
+# pages 
+
+
 @login_required
 def pages_list(request):
     """Display all pages"""
@@ -173,7 +177,78 @@ def pages_list(request):
         'pages': pages,
         'page_title': 'Pages Management'
     }
-    return render(request, 'admin/menus/pages_list.html', context)
+    return render(request, 'admin/pages/pages_list.html', context)
+
+@login_required
+def page_create(request):
+    """Create new page"""
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+        if form.is_valid():
+            page = form.save(commit=False)
+            page.created_by = request.user
+            page.updated_by = request.user
+            page.save()
+            messages.success(request, 'Page created successfully!')
+            return redirect('pages_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PageForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Create Page',
+        'action': 'Create'
+    }
+    return render(request, 'admin/pages/page_form.html', context)
+
+@login_required
+def page_edit(request, pk):
+    """Edit existing page"""
+    page = get_object_or_404(Pages, pk=pk, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = PageForm(request.POST, instance=page)
+        if form.is_valid():
+            page = form.save(commit=False)
+            page.updated_by = request.user
+            page.save()
+            messages.success(request, 'Page updated successfully!')
+            return redirect('pages_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PageForm(instance=page)
+    
+    context = {
+        'form': form,
+        'page': page,
+        'page_title': 'Edit Page',
+        'action': 'Update'
+    }
+    return render(request, 'admin/pages/page_form.html', context)
+
+@login_required
+def page_view(request, pk):
+    """View page details"""
+    page = get_object_or_404(Pages, pk=pk, deleted_at__isnull=True)
+    context = {
+        'page': page,
+        'page_title': 'View Page'
+    }
+    return render(request, 'admin/pages/page_view.html', context)
+
+@login_required
+def page_delete(request, pk):
+    """Soft delete page"""
+    page = get_object_or_404(Pages, pk=pk, deleted_at__isnull=True)
+    page.deleted_at = timezone.now()
+    page.save()
+    messages.success(request, 'Page deleted successfully!')
+    return redirect('pages_list')
+
+
 
 @login_required
 @require_POST
@@ -2419,3 +2494,507 @@ def student_toggle_approval(request, student_id):
             }, status=400)
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
+
+
+#categories update delete and edit 
+
+
+@login_required
+def category_list(request):
+    """List all categories with DataTables"""
+    categories = Categories.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('media', 'created_by').order_by('-id')
+    
+    return render(request, 'admin/categories/category-list.html', {
+        'categories': categories
+    })
+
+@login_required
+def category_create(request):
+    """Create new category"""
+    if request.method == 'POST':
+        category_form = CategoryForm(request.POST)
+        media_form = MediaLibraryForm(request.POST, request.FILES, prefix='media')
+        
+        if category_form.is_valid():
+            category = category_form.save(commit=False)
+            category.created_by = request.user
+            category.updated_by = request.user
+            category.created_at = timezone.now()
+            
+            # Handle new file upload
+            if request.FILES.get('media-file'):
+                if media_form.is_valid():
+                    media = media_form.save(commit=False)
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    
+                    # Process the uploaded file
+                    uploaded_file = request.FILES['media-file']
+                    media.file_name = uploaded_file.name
+                    media.file_path = uploaded_file
+                    media.file_type = uploaded_file.name.split('.')[-1].lower()
+                    media.file_size = f"{uploaded_file.size / 1024:.2f} KB"
+                    
+                    # Get dimensions for images
+                    if media.file_type in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
+                        try:
+                            img = Image.open(uploaded_file)
+                            media.dimensions = f"{img.width}x{img.height}"
+                            media.media_type = 'image'
+                        except:
+                            media.media_type = 'file'
+                    else:
+                        media.media_type = 'file'
+                    
+                    # Set thumbnail path (same as file for now)
+                    media.thumb_file_path = media.file_path.url
+                    media.slider_file_path = media.file_path.url
+                    
+                    media.save()
+                    category.media = media
+            
+            category.save()
+            messages.success(request, 'Category created successfully!')
+            return redirect('category_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        category_form = CategoryForm()
+        media_form = MediaLibraryForm(prefix='media')
+    
+    return render(request, 'admin/categories/category_form.html', {
+        'form': category_form,
+        'media_form': media_form
+    })
+
+@login_required
+def category_edit(request, category_id):
+    """Edit existing category"""
+    category = get_object_or_404(Categories, id=category_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        category_form = CategoryForm(request.POST, instance=category)
+        media_form = MediaLibraryForm(request.POST, request.FILES, prefix='media')
+        
+        if category_form.is_valid():
+            category = category_form.save(commit=False)
+            category.updated_by = request.user
+            
+            # Handle new file upload
+            if request.FILES.get('media-file'):
+                if media_form.is_valid():
+                    media = media_form.save(commit=False)
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    
+                    uploaded_file = request.FILES['media-file']
+                    media.file_name = uploaded_file.name
+                    media.file_path = uploaded_file
+                    media.file_type = uploaded_file.name.split('.')[-1].lower()
+                    media.file_size = f"{uploaded_file.size / 1024:.2f} KB"
+                    
+                    if media.file_type in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
+                        try:
+                            img = Image.open(uploaded_file)
+                            media.dimensions = f"{img.width}x{img.height}"
+                            media.media_type = 'image'
+                        except:
+                            media.media_type = 'file'
+                    else:
+                        media.media_type = 'file'
+                    
+                    media.thumb_file_path = media.file_path.url
+                    media.slider_file_path = media.file_path.url
+                    media.save()
+                    category.media = media
+            
+            category.save()
+            messages.success(request, 'Category updated successfully!')
+            return redirect('category_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        category_form = CategoryForm(instance=category)
+        media_form = MediaLibraryForm(prefix='media')
+    
+    return render(request, 'admin/categories/category_form.html', {
+        'form': category_form,
+        'media_form': media_form
+    })
+
+@login_required
+def category_view(request, category_id):
+    """View category details"""
+    category = get_object_or_404(
+        Categories.objects.select_related('media', 'created_by', 'updated_by'),
+        id=category_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/categories/category_view.html', {
+        'category': category
+    })
+
+@login_required
+def category_delete(request, category_id):
+    """Soft delete category"""
+    category = get_object_or_404(Categories, id=category_id, deleted_at__isnull=True)
+    category.deleted_at = timezone.now()
+    category.save()
+    messages.success(request, 'Category deleted successfully!')
+    return redirect('category_list')
+
+
+# videos
+
+
+@login_required
+def video_list(request):
+    """List all videos with DataTables"""
+    videos = Videos.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('media', 'youtube', 'categories', 'created_by').order_by('-id')
+    
+    return render(request, 'admin/videos/video-list.html', {
+        'videos': videos
+    })
+
+@login_required
+def video_create(request):
+    """Create new video"""
+    if request.method == 'POST':
+        video_form = VideoForm(request.POST)
+        media_form = MediaLibraryForm(request.POST, request.FILES, prefix='media')
+        youtube_form = YoutubeVideoForm(request.POST, prefix='youtube')
+        
+        if video_form.is_valid():
+            video = video_form.save(commit=False)
+            video.created_by = request.user
+            video.updated_by = request.user
+            video.created_at = timezone.now()
+            
+            # Determine upload type: media file or YouTube
+            upload_type = request.POST.get('upload_type', 'media')
+            
+            if upload_type == 'media' and request.FILES.get('media-file'):
+                # Handle media file upload
+                if media_form.is_valid():
+                    media = media_form.save(commit=False)
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    
+                    uploaded_file = request.FILES['media-file']
+                    media.file_name = uploaded_file.name
+                    media.file_path = uploaded_file
+                    media.file_type = uploaded_file.name.split('.')[-1].lower()
+                    media.file_size = f"{uploaded_file.size / 1024:.2f} KB"
+                    
+                    # Check if it's a video file
+                    video_extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']
+                    if media.file_type in video_extensions:
+                        media.media_type = 'video'
+                    elif media.file_type in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
+                        try:
+                            img = Image.open(uploaded_file)
+                            media.dimensions = f"{img.width}x{img.height}"
+                            media.media_type = 'image'
+                        except:
+                            media.media_type = 'file'
+                    else:
+                        media.media_type = 'file'
+                    
+                    media.thumb_file_path = media.file_path.url
+                    media.slider_file_path = media.file_path.url
+                    
+                    media.save()
+                    video.media = media
+                    video.youtube = None
+            
+            elif upload_type == 'youtube':
+                # Handle YouTube video
+                if youtube_form.is_valid():
+                    youtube = youtube_form.save(commit=False)
+                    youtube.created_by = request.user
+                    youtube.updated_by = request.user
+                    youtube.save()
+                    video.youtube = youtube
+                    video.media = None
+            
+            video.save()
+            messages.success(request, 'Video created successfully!')
+            return redirect('video_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        video_form = VideoForm()
+        media_form = MediaLibraryForm(prefix='media')
+        youtube_form = YoutubeVideoForm(prefix='youtube')
+    
+    # Get all categories for dropdown
+    categories = Categories.objects.filter(deleted_at__isnull=True, status=True)
+    
+    return render(request, 'admin/videos/video_form.html', {
+        'form': video_form,
+        'media_form': media_form,
+        'youtube_form': youtube_form,
+        'categories': categories
+    })
+
+@login_required
+def video_edit(request, video_id):
+    """Edit existing video"""
+    video = get_object_or_404(Videos, id=video_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        video_form = VideoForm(request.POST, instance=video)
+        media_form = MediaLibraryForm(request.POST, request.FILES, prefix='media')
+        youtube_form = YoutubeVideoForm(request.POST, prefix='youtube')
+        
+        if video_form.is_valid():
+            video = video_form.save(commit=False)
+            video.updated_by = request.user
+            
+            upload_type = request.POST.get('upload_type', 'media')
+            
+            if upload_type == 'media' and request.FILES.get('media-file'):
+                if media_form.is_valid():
+                    media = media_form.save(commit=False)
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    
+                    uploaded_file = request.FILES['media-file']
+                    media.file_name = uploaded_file.name
+                    media.file_path = uploaded_file
+                    media.file_type = uploaded_file.name.split('.')[-1].lower()
+                    media.file_size = f"{uploaded_file.size / 1024:.2f} KB"
+                    
+                    video_extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']
+                    if media.file_type in video_extensions:
+                        media.media_type = 'video'
+                    elif media.file_type in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
+                        try:
+                            img = Image.open(uploaded_file)
+                            media.dimensions = f"{img.width}x{img.height}"
+                            media.media_type = 'image'
+                        except:
+                            media.media_type = 'file'
+                    else:
+                        media.media_type = 'file'
+                    
+                    media.thumb_file_path = media.file_path.url
+                    media.slider_file_path = media.file_path.url
+                    media.save()
+                    video.media = media
+                    video.youtube = None
+            
+            elif upload_type == 'youtube':
+                if youtube_form.is_valid():
+                    youtube = youtube_form.save(commit=False)
+                    youtube.created_by = request.user
+                    youtube.updated_by = request.user
+                    youtube.save()
+                    video.youtube = youtube
+                    video.media = None
+            
+            video.save()
+            messages.success(request, 'Video updated successfully!')
+            return redirect('video_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        video_form = VideoForm(instance=video)
+        media_form = MediaLibraryForm(prefix='media')
+        youtube_form = YoutubeVideoForm(prefix='youtube')
+    
+    categories = Categories.objects.filter(deleted_at__isnull=True, status=True)
+    
+    return render(request, 'admin/videos/video_form.html', {
+        'form': video_form,
+        'media_form': media_form,
+        'youtube_form': youtube_form,
+        'categories': categories,
+        'video': video
+    })
+
+@login_required
+def video_view(request, video_id):
+    """View video details"""
+    video = get_object_or_404(
+        Videos.objects.select_related('media', 'youtube', 'categories', 'created_by', 'updated_by'),
+        id=video_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/videos/video_view.html', {
+        'video': video
+    })
+
+@login_required
+def video_delete(request, video_id):
+    """Soft delete video"""
+    video = get_object_or_404(Videos, id=video_id, deleted_at__isnull=True)
+    video.deleted_at = timezone.now()
+    video.save()
+    messages.success(request, 'Video deleted successfully!')
+    return redirect('video_list')
+
+
+
+# roles and permissions 
+@login_required
+def roles(request):
+    return render(request,"admin/roles/roles.html")
+
+
+# languages
+@login_required
+def languages(request):
+    languages = Languages.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    return render(request,"admin/languages/languages_list.html",{"languages":languages})
+
+@login_required
+def language_create(request):
+    form = LanguageForm()
+    if request.method == "POST":
+        form = LanguageForm(request.POST)
+        if form.is_valid():
+            language  = form.save(commit=False)
+            language.created_by = request.user
+            language.updated_by = request.user
+            language.save()
+        messages.success(request, "Language saved success...")
+        return redirect("languages_list")
+    context = {
+        "form":form,
+        'action': 'Create'
+    }
+    return render(request,"admin/languages/languages_form.html",context)
+
+@login_required
+def language_view(request, language_id):
+    """View language details"""
+    language = get_object_or_404(Languages, id=language_id, deleted_at__isnull=True)
+    return render(request, 'admin/languages/language_view.html', {
+        'language': language
+    })
+
+@login_required
+def language_edit(request, language_id):
+    """Edit existing language"""
+    language = get_object_or_404(Languages, id=language_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = LanguageForm(request.POST, instance=language)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Language updated successfully!')
+            return redirect('languages_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = LanguageForm(instance=language)
+    
+    return render(request, 'admin/languages/languages_form.html', {
+        'form': form,
+        'action': 'Update'
+    })
+
+@login_required
+def language_delete(request, language_id):
+    """Soft delete language"""
+    language = get_object_or_404(Languages, id=language_id, deleted_at__isnull=True)
+    language.deleted_at = timezone.now()
+    language.save()
+    messages.success(request, 'Language deleted successfully!')
+    return redirect('languages_list')
+
+
+
+#subjects 
+
+# subjects
+
+@login_required
+def subjects(request):
+    """List all subjects with DataTables"""
+    subjects_list = Subjects.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    
+    return render(request, 'admin/subjects/subjects_list.html', {
+        'subjects': subjects_list
+    })
+
+@login_required
+def subjects_create(request):
+    """Create new subject"""
+    if request.method == 'POST':
+        form = SubjectsForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.created_by = request.user
+            subject.updated_by = request.user
+            subject.created_at = timezone.now()
+            subject.save()
+            messages.success(request, 'Subject created successfully!')
+            return redirect('subjects_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SubjectsForm()
+    
+    return render(request, 'admin/subjects/subjects_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+@login_required
+def subjects_view(request, subjects_id):
+    """View subject details"""
+    subject = get_object_or_404(
+        Subjects.objects.select_related('created_by', 'updated_by'),
+        id=subjects_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/subjects/subjects_view.html', {
+        'subject': subject
+    })
+
+@login_required
+def subjects_edit(request, subjects_id):
+    """Edit existing subject"""
+    subject = get_object_or_404(Subjects, id=subjects_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = SubjectsForm(request.POST, instance=subject)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.updated_by = request.user
+            subject.save()
+            messages.success(request, 'Subject updated successfully!')
+            return redirect('subjects_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = SubjectsForm(instance=subject)
+    
+    return render(request, 'admin/subjects/subjects_form.html', {
+        'form': form,
+        'action': 'Update',
+        'subject': subject
+    })
+
+@login_required
+def subjects_delete(request, subjects_id):
+    """Soft delete subject"""
+    subject = get_object_or_404(Subjects, id=subjects_id, deleted_at__isnull=True)
+    subject.deleted_at = timezone.now()
+    subject.save()
+    messages.success(request, 'Subject deleted successfully!')
+    return redirect('subjects_list')
