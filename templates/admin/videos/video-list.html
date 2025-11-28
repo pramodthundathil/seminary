@@ -1,0 +1,150 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Video List</h1>
+        <a href="{% url 'video_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Video
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table id="videoTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Preview</th>
+                    <th>Info</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for video in videos %}
+                <tr>
+                    <td>{{ video.id }}</td>
+                    <td>
+                        {% if video.youtube %}
+                            {% load custom_filters %}
+                            {% with video_id=video.youtube.file_path|youtube_id %}
+                                {% if video.youtube.thumb_file_path %}
+                                    <img src="{{ video.youtube.thumb_file_path }}" 
+                                         style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
+                                         alt="{{ video.title }}">
+                                {% elif video_id %}
+                                    <img src="https://img.youtube.com/vi/{{ video_id }}/mqdefault.jpg" 
+                                         style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
+                                         alt="{{ video.title }}"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div style="width:120px;height:80px;background:linear-gradient(135deg, #FF0000 0%, #CC0000 100%);display:none;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                        <i class="fab fa-youtube" style="font-size:32px;color:white;"></i>
+                                    </div>
+                                {% else %}
+                                    <div style="width:120px;height:80px;background:linear-gradient(135deg, #FF0000 0%, #CC0000 100%);display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                        <i class="fab fa-youtube" style="font-size:32px;color:white;"></i>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        {% elif video.media and video.media.thumb_file_path %}
+                            <img src="{{ video.media.thumb_file_path }}" 
+                                 style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
+                                 alt="{{ video.title }}">
+                        {% else %}
+                            <div style="width:120px;height:80px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                <i class="fas fa-video" style="font-size:32px;color:var(--gray-400);"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="line-height:1.5;">
+                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
+                                {{ video.title|truncatewords:8 }}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                {{ video.description|truncatewords:10|default:"-" }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if video.categories %}
+                            <span style="display:inline-block;padding:4px 12px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:12px;font-weight:500;">
+                                {{ video.categories.name }}
+                            </span>
+                        {% else %}
+                            <span style="color:var(--gray-400);">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if video.youtube %}
+                            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:#FFE5E5;color:#CC0000;border-radius:12px;font-size:12px;font-weight:500;">
+                                <i class="fab fa-youtube"></i> YouTube
+                            </span>
+                        {% elif video.media %}
+                            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:#E3F2FD;color:#1976D2;border-radius:12px;font-size:12px;font-weight:500;">
+                                <i class="fas fa-file-video"></i> Upload
+                            </span>
+                        {% else %}
+                            <span style="color:var(--gray-400);">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'video_view' video.id %}" class="action-btn view" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'video_edit' video.id %}" class="action-btn edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'video_delete' video.id %}" class="action-btn delete" title="Delete" 
+                           onclick="return confirm('Are you sure you want to delete this video?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:40px;color:var(--gray-600);">
+                        No videos found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#videoTable').DataTable({
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            order: [[0, 'desc']],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ videos",
+                info: "Showing _START_ to _END_ of _TOTAL_ videos",
+                infoEmpty: "Showing 0 to 0 of 0 videos",
+                infoFiltered: "(filtered from _MAX_ total videos)",
+                zeroRecords: "No matching videos found",
+                emptyTable: "No videos available"
+            },
+            columnDefs: [
+                { orderable: false, targets: [1, 5] },
+                { width: '60px', targets: 0 },
+                { width: '140px', targets: 1 },
+                { width: '250px', targets: 2 },
+                { width: '120px', targets: 3 },
+                { width: '100px', targets: 4 },
+                { width: '150px', targets: 5 }
+            ]
+        });
+    });
+</script>
+
+{% endblock %}

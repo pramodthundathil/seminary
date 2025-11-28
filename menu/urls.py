@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 
@@ -19,6 +19,11 @@ urlpatterns = [
     
     # Pages Management
     path('admin/pages/', views.pages_list, name='pages_list'),
+    path('pages/create/', views.page_create, name='page_create'),
+    path('pages/<int:pk>/edit/', views.page_edit, name='page_edit'),
+    path('pages/<int:pk>/view/', views.page_view, name='page_view'),
+    path('pages/<int:pk>/delete/', views.page_delete, name='page_delete'),
+    
 
 
     # News Management
@@ -67,6 +72,13 @@ urlpatterns = [
     path('sliders/photos/delete/<int:photo_id>/', views.slider_photo_delete, name='slider_photo_delete'),
 
 
+    path("admin/categories", views.category_list, name= "category_list"),
+    path('categories/create/', views.category_create, name='category_create'),
+    path('categories/edit/<int:category_id>/', views.category_edit, name='category_edit'),
+    path('categories/view/<int:category_id>/', views.category_view, name='category_view'),
+    path('categories/delete/<int:category_id>/', views.category_delete, name='category_delete'),
+
+
     # Course management
     path('admin/courses/', views.course_list, name='course_list'),
     path('courses/datatable/', views.course_datatable, name='course_datatable'),
@@ -87,5 +99,37 @@ urlpatterns = [
     path('students/toggle-approval/<int:student_id>/', views.student_toggle_approval, name='student_toggle_approval'),
 
 
+    #videos
+
+    path("admin/videos", views.video_list, name = "video_list"),
+    path('videos/create/', views.video_create, name='video_create'),
+    path('videos/<int:video_id>/edit/', views.video_edit, name='video_edit'),
+    path('videos/<int:video_id>/view/', views.video_view, name='video_view'),
+    path('videos/<int:video_id>/delete/', views.video_delete, name='video_delete'),
+
+
+    #roles and permissions
+
+    path("admin/roles",views.roles,name="roles"),
+
+
+    # languages
+
+    path("admin/languages",views.languages, name="languages_list"),
+    path("admin/language/create",views.language_create, name="language_create"),
+    path("admin/language/<int:language_id>/view", views.language_view, name="language_view"),
+    path("admin/language/<int:language_id>/edit", views.language_edit, name="language_edit"),
+    path("admin/language/<int:language_id>/delete", views.language_delete, name="language_delete"),
+
+    #subjects
+
+    path("admin/subjects",views.subjects, name="subjects_list"),
+    path("admin/subjects/create",views.subjects_create, name="subjects_create"),
+    path("admin/subjects/<int:subjects_id>/view", views.subjects_view, name="subjects_view"),
+    path("admin/subjects/<int:subjects_id>/edit", views.subjects_edit, name="subjects_edit"),
+    path("admin/subjects/<int:subjects_id>/delete", views.subjects_delete, name="subjects_delete"),
+
+
+    
 
 ]
