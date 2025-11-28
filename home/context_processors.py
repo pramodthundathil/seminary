@@ -8,7 +8,6 @@ def get_menu_item_url(menu_item):
     Priority: pages (if exists) > url > #
     """
     # First check if pages foreign key exists
-    print(menu_item.pages)
     if menu_item.pages:
         try:
             # Use page id for the URL (or use code if that's your URL pattern)

@@ -1,0 +1,138 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Category List</h1>
+        <a href="{% url 'category_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Category
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table id="categoryTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Preview</th>
+                    <th>Info</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>{{ category.id }}</td>
+                    <td>
+                        {% if category.media and category.media.thumb_file_path %}
+                            <img src="{{ category.media.thumb_file_path }}" 
+                                 style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
+                                 alt="{{ category.name }}">
+                        {% else %}
+                            <div style="width:80px;height:80px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                <i class="fas fa-image" style="font-size:32px;color:var(--gray-400);"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="line-height:1.5;">
+                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
+                                {{ category.name }}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                Code: {{ category.code }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {{ category.description|truncatewords:15|default:"-" }}
+                    </td>
+                    <td>
+                        {% if category.status %}
+                            <span class="status-badge status-active">Active</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'category_view' category.id %}" class="action-btn view" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'category_edit' category.id %}" class="action-btn edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'category_delete' category.id %}" class="action-btn delete" title="Delete" 
+                           onclick="return confirm('Are you sure you want to delete this category?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:40px;color:var(--gray-600);">
+                        No categories found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#categoryTable').DataTable({
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            order: [[0, 'desc']],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ categories",
+                info: "Showing _START_ to _END_ of _TOTAL_ categories",
+                infoEmpty: "Showing 0 to 0 of 0 categories",
+                infoFiltered: "(filtered from _MAX_ total categories)",
+                zeroRecords: "No matching categories found",
+                emptyTable: "No categories available"
+            },
+            columnDefs: [
+                { orderable: false, targets: [1, 5] }, // Preview and Actions columns not sortable
+                { width: '60px', targets: 0 },
+                { width: '100px', targets: 1 },
+                { width: '200px', targets: 2 },
+                { width: '100px', targets: 4 },
+                { width: '150px', targets: 5 }
+            ]
+        });
+    });
+</script>
+
+{% endblock %}

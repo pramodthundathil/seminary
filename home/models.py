@@ -22,7 +22,8 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class CustomUserManager(BaseUserManager):
@@ -276,6 +277,9 @@ class Branches(models.Model):
         managed = True
         db_table = 'branches'
 
+    def __str__(self):
+        return f"{str(self.branch_name)} - {str(self.branch_code)}"
+
 class Categories(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
@@ -285,7 +289,7 @@ class Categories(models.Model):
     type = models.CharField(max_length=50)
     media = models.ForeignKey('MediaLibrary', on_delete=models.SET_NULL, null=True, blank=True, related_name='categories')
     table_color = models.CharField(max_length=50, blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
+    status = models.BooleanField(default=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="categories_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="categories_updated")
 
@@ -366,7 +370,7 @@ class Courses(models.Model):
     course_code = models.CharField(max_length=250)
     highest_qualification = models.ForeignKey('Qualifications', on_delete=models.DO_NOTHING)
     credit_hours = models.DecimalField(max_digits=10, decimal_places=2)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)
@@ -451,9 +455,10 @@ class Languages(models.Model):
     language_name = models.CharField(max_length=250)
     status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="language_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="language_updated")
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
 
     class Meta:
@@ -469,9 +474,9 @@ class MediaLibrary(models.Model):
     file_name = models.TextField()
      
     file_path = models.FileField(
-        storage=s3_storage,
+        
         upload_to='uploads/',     # base path (can be empty if Laravel already used 'uploads/')
-        max_length=250,
+        
         db_column='file_path',    # critical! keep mapping to same DB column
     )
 
@@ -494,6 +499,9 @@ class MediaLibrary(models.Model):
     class Meta:
         managed = True
         db_table = 'media_library'
+
+    def __str__(self):
+        return f"{str(self.file_name)} - file {self.file_type}"
 
 class Menus(models.Model):
     id = models.AutoField(primary_key=True)
@@ -673,7 +681,7 @@ class Pages(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=250)
     title = models.CharField(max_length=250)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
     meta_keywords = models.TextField(blank=True, null=True)
@@ -885,7 +893,7 @@ class SliderPhotos(models.Model):
     sliders = models.ForeignKey('Sliders', on_delete=models.CASCADE, related_name='photos')
     media = models.ForeignKey(MediaLibrary, on_delete=models.CASCADE, related_name='slider_photos')
     title = models.CharField(max_length=250, blank=True, null=True)
-    description = RichTextField(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
     alt_text = models.CharField(max_length=250, blank=True, null=True)
     button_text = models.CharField(max_length=250, blank=True, null=True)
     button_link = models.CharField(max_length=250, blank=True, null=True)
@@ -1140,6 +1148,7 @@ class Subjects(models.Model):
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="subject_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="subject_updated")
 
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True

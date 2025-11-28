@@ -39,9 +39,102 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
-    'ckeditor',
+    "django_ckeditor_5", 
     'menu',
+   
+  
 ]
+
+CKEDITOR_UPLOAD_PATH = 'content/ckeditor/'
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': {
+            'items': [
+                # Styles
+                'heading',
+                'fontFamily',
+                'fontSize',
+                'fontColor',
+                'fontBackgroundColor',
+
+                # Text Formatting
+                'bold',
+                'italic',
+                'underline',
+                'strikethrough',
+
+                # Lists
+                'bulletedList',
+                'numberedList',
+
+                # Alignment
+                'alignment',
+
+                # Links
+                'link',
+
+                # Tables
+                'insertTable',
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells',
+
+                # Media
+                'imageUpload',
+
+                # Undo / Redo
+                'undo',
+                'redo',
+            ]
+        },
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+            ]
+        },
+        'fontFamily': {
+            'options': [
+                'default',
+                'Arial, Helvetica, sans-serif',
+                'Courier New, Courier, monospace',
+                'Georgia, serif',
+                'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                'Tahoma, Geneva, sans-serif',
+                'Times New Roman, Times, serif',
+                'Trebuchet MS, Helvetica, sans-serif',
+                'Verdana, Geneva, sans-serif'
+            ],
+            'supportAllValues': True
+        },
+        'fontSize': {
+            'options': [
+                8,
+                10,
+                12,
+                14,
+                16,
+                18,
+                24,
+                30,
+                36
+            ],
+            'supportAllValues': True
+        },
+        'table': {
+            'contentToolbar': [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells'
+            ]
+        }
+    }
+}
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

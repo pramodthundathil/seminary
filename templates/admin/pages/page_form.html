@@ -1,0 +1,148 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{{ action }} Page</h1>
+        <a href="{% url 'pages_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="form-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Please correct the following errors:</strong>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="id_code" class="form-label">Code <span style="color:red;">*</span></label>
+                        {{ form.code }}
+                        {% if form.code.help_text %}
+                            <small class="form-text text-muted">{{ form.code.help_text }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="id_status" class="form-label">Status <span style="color:red;">*</span></label>
+                        {{ form.status }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="id_title" class="form-label">Title <span style="color:red;">*</span></label>
+                {{ form.title }}
+            </div>
+            <div class="form-group mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                {{ form.media }}
+                {{ form.description }}
+            </div>
+
+            
+          
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="id_media" class="form-label">Media (Image)</label>
+                        {{ form.media_lib }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="id_video" class="form-label">Video</label>
+                        {{ form.video }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="id_youtube" class="form-label">YouTube Video</label>
+                        {{ form.youtube }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="id_parent_id" class="form-label">Parent Page</label>
+                {{ form.parent_id }}
+                <small class="form-text text-muted">Select a parent page to create a sub-page</small>
+            </div>
+
+            <hr style="margin:25px 0;">
+
+            <h5 style="margin-bottom:20px;color:var(--text-dark);">SEO Settings</h5>
+
+            <div class="form-group mb-3">
+                <label for="id_browser_title" class="form-label">Browser Title</label>
+                {{ form.browser_title }}
+                <small class="form-text text-muted">Title shown in browser tab and search results</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="id_meta_description" class="form-label">Meta Description</label>
+                {{ form.meta_description }}
+                <small class="form-text text-muted">Brief description for search engines (150-160 characters)</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="id_meta_keywords" class="form-label">Meta Keywords</label>
+                {{ form.meta_keywords }}
+                <small class="form-text text-muted">Keywords separated by commas</small>
+            </div>
+
+            <hr style="margin:25px 0;">
+
+            <h5 style="margin-bottom:20px;color:var(--text-dark);">Button Settings</h5>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check mb-3">
+                        {{ form.apply_button_top }}
+                        <label class="form-check-label" for="id_apply_button_top">
+                            Show Apply Button at Top
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check mb-3">
+                        {{ form.apply_button_bottom }}
+                        <label class="form-check-label" for="id_apply_button_bottom">
+                            Show Apply Button at Bottom
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top:30px;padding-top:20px;border-top:1px solid var(--gray-200);">
+                <button type="submit" class="btn btn-primary" style="min-width:120px;">
+                    <i class="fas fa-save"></i> {{ action }}
+                </button>
+                <a href="{% url 'pages_list' %}" class="btn btn-secondary" style="min-width:120px;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
