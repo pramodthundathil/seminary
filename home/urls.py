@@ -2,6 +2,8 @@ from django.urls import path
 from  .import views
 
 urlpatterns = [
+    path('',views.index, name='index'),
+   
     path("home/", views.student_home, name="student_home"),
     path("subjects/", views.student_subjects, name="student_subjects"),
     path("view-posts/", views.student_view_post, name="student_view_post"),
@@ -12,7 +14,6 @@ urlpatterns = [
 # Dynamic page URL (keep this last)
     path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
-    path('',views.index, name='index'),
    
 
     path("student_index",views.student_index,name="student_index"),
@@ -33,6 +34,7 @@ urlpatterns = [
 
 
 
-    path("check/",views.test_menu_debug,name="test_menu_debug")
+    path("check/",views.test_menu_debug,name="test_menu_debug"),
+    path("course-list/",views.courses,name="course-list")
     
 ]

@@ -44,7 +44,202 @@
             color: var(--primary-cyan);
         }
 
+        /*footer*/
+
+        .col-md-3 ul {
+            list-style: none;
+            /* removes bullet */
+            padding-left: 0;
+            /* removes left indent */
+        }
+
+        .col-md-3 ul li {
+            margin-bottom: 5px;
+            /* spacing between lines (optional) */
+        }
+
+        .col-md-3 ul li a {
+            text-decoration: none;
+        }
+
+        .col-md-3 ul li a:hover {
+            color: var(--primary-cyan);
+        }
+
+        /*trinityCarousel style */
+        #trinityCarousel {
+            position: relative;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        .carousel-item {
+            position: relative;
+            height: 600px;
+            /* Fixed height for desktop */
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Fix carousel caption positioning to prevent shifts */
+        .carousel-caption {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+            z-index: 10;
+        }
+
+        /* Left Content - Align Left */
+        .left-content {
+            flex: 1;
+            text-align: left;
+            /* nudge slightly toward the outer container on desktop */
+            margin-left: -30px;
+            padding-left: 10px;
+        }
+
+        .left-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0 10px 0 0;
+            text-align: left;
+            max-width: 720px;
+        }
+
+        .left-content h1 br {
+            display: block;
+            /* Ensures line breaks work */
+        }
+
+        /* Right Content - Align Right */
+        .right-content {
+            flex: 1;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            /* nudge right content outward toward the edge on desktop */
+            margin-right: -30px;
+            padding-right: 10px;
+        }
+
+        .right-content h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            line-height: 1.3;
+            margin: 0 -45px 15px 0;
+            padding: 0 10px 0 0;
+            text-align: right;
+            max-width: 520px;
+        }
+
+        .right-content p {
+            font-size: 1.1rem;
+            color: primary-cyan;
+            line-height: 1.6;
+            margin: 12px -45px 10px 0;
+            padding: 0 10px 0 0;
+            text-align: right;
+            max-width: 420px;
+        }
+
+        .learn-more-btn {
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #4169e1;
+            color: white;
+            border: none;
+            margin: 18px -45px 0 0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-end;
+            /* Keeps button on right side */
+        }
+
+        .learn-more-btn:hover {
+            background: #3154c4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+        }
+
+        /*responsive*/
+        @media (max-width: 1200px) {
+            .carousel-item {
+                height: 550px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .carousel-item {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item {
+                height: 450px;
+            }
+
+            .carousel-caption {
+                width: 95%;
+                padding: 15px 10px;
+            }
+
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item {
+                height: 400px !important;
+                /* Fixed height to prevent shifting */
+                min-height: 400px !important;
+                max-height: 400px !important;
+            }
+
+            .carousel-item img {
+                height: 400px !important;
+                min-height: 400px !important;
+                max-height: 400px !important;
+            }
+
+            .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                transform: translateY(-50%) translateX(-50%) !important;
+                left: 50% !important;
+            }
+        }
+
+
         /*2-why section*/
+
+        .why-section {
+            padding-top: 80px;
+            padding-bottom: 60px;
+            background: #f8f9fa;
+            position: relative;
+            z-index: 1;
+            margin-top: 0 !important;
+            clear: both;
+        }
+
         .why-cards-row {
             display: flex;
             flex-wrap: wrap;
@@ -176,16 +371,12 @@
                 flex: 1 1 45%;
                 margin-bottom: 20px;
             }
-        }
 
-        @media (max-width: 576px) {
-            .student-image-card {
-                flex: 1 1 100%;
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
             }
-        }
 
-        /* Responsive */
-        @media (max-width: 992px) {
             .why-card {
                 flex: 1 1 45%;
                 margin-bottom: 20px;
@@ -193,17 +384,36 @@
         }
 
         @media (max-width: 576px) {
+            .student-image-card {
+                flex: 1 1 100%;
+            }
+
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
+
             .why-card {
                 flex: 1 1 100%;
             }
         }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        }
+
 
         /* 3-Statistics Section */
         .stats-section {
             padding: 60px 0;
             background: #f8f9fa;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            /* allow decorative circles to show outside the section */
         }
 
         .stats-container {
@@ -224,29 +434,34 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
+        .wrapper {
+            position: relative;
+            overflow: visible;
+        }
+
         /* Left decorative circle */
-        .stats-container .circle-left {
+        .wrapper .circle-left {
             position: absolute;
             width: 100px;
             height: 100px;
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
-            top: -25px;
+            top: -20px;
             /* move half outside */
-            left: -25px;
+            left: 125px;
             z-index: 1;
         }
 
         /* Right decorative circle */
-        .stats-container .circle-right {
+        .wrapper .circle-right {
             position: absolute;
             width: 120px;
             height: 120px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
             border-radius: 50%;
-            bottom: -35px;
+            bottom: -30px;
             /* move half outside */
-            right: -35px;
+            right: 130px;
             z-index: 1;
         }
 
@@ -316,6 +531,13 @@
             .stats-container {
                 padding: 40px 30px;
                 gap: 30px;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: -20px !important;
             }
 
             .stat-number {
@@ -337,26 +559,32 @@
             .stats-container {
                 flex-direction: column;
                 padding: 40px 20px;
-                gap: 35px;
+                gap: 15px;
                 border-radius: 30px;
+                position: relative;
+                overflow: visible !important;
+                max-width: 180px !important;
+                margin-top: 15px !important;
             }
 
             .stat-item {
                 width: 100%;
             }
 
-            .stats-container::before {
-                width: 100px;
-                height: 100px;
-                top: -20px;
-                left: -20px;
+            .wrapper .circle-left {
+                width: 80px !important;
+                height: 80px !important;
+                top: -20px !important;
+                left: 55px !important;
+                z-index: 1 !important;
             }
 
-            .stats-container::after {
-                width: 120px;
-                height: 120px;
-                bottom: -30px;
-                right: -30px;
+            .wrapper .circle-right {
+                width: 100px !important;
+                height: 100px !important;
+                bottom: -20px !important;
+                right: 55px !important;
+                z-index: 1 !important;
             }
         }
 
@@ -532,6 +760,23 @@
         .btn-join:hover {
             background: #3154c4;
         }
+
+        .btn-show-more {
+            background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start));
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-show-more:hover {
+            background: #e6574c
+        }
+
 
         /* Connector dots */
         .dot-connector {
@@ -874,27 +1119,193 @@
             font-size: 14px;
         }
 
+        /* ================================
+        TABLET VIEW (MAX 992px)
+        ================================ */
         @media (max-width: 992px) {
+
+            .about-section {
+                padding: 70px 30px;
+            }
+
+            .dot-cyan {
+                position: absolute !important;
+                top: 20px !important;
+                right: 20px !important;
+                width: 14px !important;
+                height: 14px !important;
+                background: #4dd0e1 !important;
+                border-radius: 50% !important;
+                z-index: 5 !important;
+            }
+
+            .who-we-are {
+                flex-direction: column;
+                text-align: center;
+                display: flex;
+                flex-wrap: wrap;
+                order: 1;
+            }
+
+            .who-we-are-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .who-we-are-title {
+                text-align: center;
+            }
+
+            .who-we-are-image {
+                order: 2 !important;
+                width: 100% !important;
+                margin: -60px auto 0 auto !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+
+            .who-we-are-image img {
+                width: 85% !important;
+                max-width: 400px !important;
+                display: block !important;
+            }
+
             .our-aim-section {
                 flex-direction: column;
-                align-items: center;
+                text-align: center;
+            }
+
+            .our-aim-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
             }
 
             .church-card {
-                align-self: center;
+                order: 2 !important;
+                margin: 0 auto !important;
+                display: flex;
+                justify-content: center;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            }
+
+            .btn-read-more {
+                order: 3 !important;
+                margin: 15px auto 0 auto !important;
+                display: inline-flex !important;
             }
         }
 
+        /* ================================
+        MOBILE VIEW (MAX 768px)
+        ================================ */
         @media (max-width: 768px) {
-            .church-image {
-                width: 150px;
-                /* Further reduced for mobile */
-                height: 150px;
+
+            .dot-cyan {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                width: 12px !important;
+                height: 12px !important;
+                background: #4dd0e1 !important;
+                border-radius: 50% !important;
+                z-index: 5 !important;
             }
 
+            .who-we-are-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .who-we-are-image {
+                order: 2 !important;
+                width: 100% !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin: -60px auto 0 auto !important;
+                justify-content: center;
+            }
+
+            .who-we-are-image img {
+                width: 85% !important;
+                max-width: 350px !important;
+                display: block !important;
+            }
+
+            .our-aim-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .church-card {
+                order: 2 !important;
+                margin: 0 auto !important;
+                display: flex;
+                justify-content: center;
+            }
+
+            .btn-read-more {
+                order: 3 !important;
+                margin: 15px auto 0 auto !important;
+                display: inline-flex !important;
+                text-align: center;
+            }
+
+            .who-we-are-description,
             .our-aim-description {
                 font-size: 16px;
             }
+
+            .church-image img {
+                width: 180px;
+                height: 180px;
+            }
+        }
+
+        /* ================================
+        SMALL MOBILE (MAX 576px)
+        ================================ */
+        @media (max-width: 576px) {
+
+            .about-section {
+                padding: 40px 12px;
+            }
+
+            .who-we-are-title {
+                font-size: 22px;
+            }
+
+            .church-card {
+                margin: 0 auto 8px auto;
+            }
+
+            .who-we-are-image img {
+                width: 90%;
+                max-width: 300px;
+            }
+
+            .btn-read-more {
+                font-size: 15px;
+                padding: 9px 14px;
+            }
+        }
+
+
+        /*company list in footer */
+
+        .no-bullets {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
         }
     </style>
     <style>
@@ -1002,13 +1413,25 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         @keyframes fadeInScale {
@@ -1016,6 +1439,7 @@
                 opacity: 0;
                 transform: scale(0.8);
             }
+
             100% {
                 opacity: 1;
                 transform: scale(1);
@@ -1027,6 +1451,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -1034,10 +1459,24 @@
         }
 
         @keyframes dots {
-            0%, 20% { content: ''; }
-            40% { content: '.'; }
-            60% { content: '..'; }
-            80%, 100% { content: '...'; }
+
+            0%,
+            20% {
+                content: '';
+            }
+
+            40% {
+                content: '.';
+            }
+
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
         }
 
         @keyframes progress {
@@ -1045,12 +1484,601 @@
                 width: 0%;
                 opacity: 0.5;
             }
+
             50% {
                 opacity: 1;
             }
+
             100% {
                 width: 100%;
                 opacity: 0.5;
+            }
+        }
+
+        /*Hero/Carousel Section Responsiveness=*/
+        @media (max-width: 1200px) {
+            .carousel-caption .slide-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.8rem;
+            }
+
+            .left-content,
+            .right-content {
+                text-align: center;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .carousel-caption {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+            }
+
+            .carousel-caption h1 {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.5rem;
+                line-height: 1.3;
+            }
+
+            .carousel-caption p {
+                font-size: 0.95rem;
+                margin: 10px 0;
+            }
+
+            .learn-more-btn {
+                padding: 10px 25px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-caption {
+                padding: 15px 10px;
+                width: 95%;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 12px;
+            }
+
+            .carousel-caption h1 {
+                font-size: 1.5rem;
+                line-height: 1.2;
+                margin-bottom: 10px;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
+
+            .carousel-caption h1 br {
+                display: none;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.2rem;
+                line-height: 1.3;
+                margin-bottom: 8px;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
+
+            .carousel-caption p {
+                font-size: 0.85rem;
+                margin: 8px 0;
+                color: #ffffff !important;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            }
+
+            .learn-more-btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item {
+                min-height: 400px;
+                max-height: 500px;
+            }
+
+            .carousel-item img {
+                min-height: 400px;
+                max-height: 500px;
+                object-fit: cover;
+            }
+
+            .carousel-caption {
+                padding: 10px 8px;
+                width: 98%;
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+            }
+
+            .carousel-caption h1 {
+                font-size: 1.1rem;
+                line-height: 1.2;
+                margin-bottom: 8px;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                font-weight: 700;
+            }
+
+            .carousel-caption h2 {
+                font-size: 0.95rem;
+                line-height: 1.3;
+                margin-bottom: 6px;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                font-weight: 600;
+            }
+
+            .carousel-caption p {
+                font-size: 0.75rem;
+                margin: 6px 0;
+                line-height: 1.4;
+                color: #ffffff !important;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            }
+
+            .learn-more-btn {
+                padding: 8px 18px;
+                font-size: 0.85rem;
+                margin-top: 10px;
+                background: #4169e1;
+                color: white !important;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .highlight {
+                color: #22d3ee !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+
+            .highlight-green {
+                color: #4ade80 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+        }
+
+        /* ================================
+   Why Trinity Section Responsiveness
+================================ */
+        @media (max-width: 1200px) {
+            .why-cards-row {
+                gap: 20px;
+            }
+
+            .why-card {
+                flex: 1 1 calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .why-section {
+                padding: 40px 15px;
+            }
+
+            .why-card {
+                flex: 1 1 100%;
+                margin-bottom: 20px;
+            }
+
+            .why-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .why-card p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .student-image-wrapper {
+                width: 200px;
+                height: 240px;
+            }
+
+            .student-image-wrapper .frame-blue,
+            .student-image-wrapper .frame-green {
+                width: 160px;
+                height: 200px;
+            }
+
+            .student-image-wrapper .image-frame {
+                width: 160px;
+                height: 200px;
+            }
+        }
+
+        /* ================================
+        Statistics Section Enhanced Responsiveness
+        ================================ */
+        @media (max-width: 1200px) {
+            .stats-container {
+                max-width: 800px;
+                padding: 25px 30px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .stats-container {
+                height: auto;
+                padding: 30px 25px;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.95rem !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .wrapper .circle-left {
+                width: 80px;
+                height: 80px;
+                top: -25px;
+                left: -25px;
+            }
+
+            .wrapper .circle-right {
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+                border-radius: 50%;
+                bottom: -35px;
+                /* move half outside */
+                right: -35px;
+                z-index: 1;
+            }
+        }
+
+        @media (max-width: 576px) {
+
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -15px;
+            }
+        }
+
+
+        @media (max-width: 576px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* ================================
+        Courses Section Responsiveness
+        ================================ */
+        @media (max-width: 1200px) {
+            .courses-container {
+                gap: 20px;
+            }
+
+            .course-card {
+                width: 320px;
+            }
+
+            .dot-connector {
+                display: none;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .courses-section {
+                padding: 50px 20px;
+            }
+
+            .course-card {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 28px;
+            }
+
+            .course-card {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .badge-icon {
+                width: 60px;
+                height: 60px;
+                top: -50px;
+                left: -35px;
+            }
+
+            .badge-icon i {
+                font-size: 28px;
+            }
+
+            .badge-icon::after {
+                width: 48px;
+                height: 48px;
+            }
+
+            .course-img-container {
+                height: 180px;
+            }
+
+            .course-title {
+                font-size: 18px;
+            }
+
+            .course-desc {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .courses-section {
+                padding: 40px 15px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                padding-top: 10px;
+            }
+
+            .course-card {
+                padding: 35px 20px 25px;
+                border-radius: 30px;
+            }
+
+            .btn-join {
+                padding: 10px 30px;
+                font-size: 14px;
+            }
+        }
+
+        /* ================================
+        Scholarship Section Responsiveness
+        ================================ */
+        @media (max-width: 992px) {
+            .scholarship-section {
+                padding: 50px 20px;
+            }
+
+            .scholarship-title {
+                font-size: 20px;
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .scholarship-section {
+                padding: 40px 20px;
+            }
+
+            .scholarship-title {
+                font-size: 18px;
+                line-height: 1.5;
+            }
+
+            .btn-new-admission {
+                width: 220px;
+                height: 32px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .scholarship-title {
+                font-size: 16px;
+                max-width: 100%;
+            }
+
+            .btn-new-admission {
+                width: 200px;
+                height: 30px;
+                font-size: 13px;
+            }
+
+            .oval-wrapper {
+                padding: 3px;
+            }
+        }
+
+
+
+        /* ================================
+        Footer Responsiveness
+        ================================ */
+        @media (max-width: 992px) {
+            footer .col-md-3 {
+                margin-bottom: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            footer {
+                padding: 40px 20px;
+            }
+
+            footer h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            footer p,
+            footer a {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            footer {
+                padding: 30px 15px;
+            }
+
+            footer h3 {
+                font-size: 1.1rem;
+            }
+
+            footer p,
+            footer a {
+                font-size: 0.85rem;
+            }
+
+            .newsletter-form input,
+            .newsletter-form button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .social-icons {
+                justify-content: center;
+                margin-top: 15px;
+            }
+        }
+
+        /* ================================
+        Loader Responsiveness
+        ================================ */
+        @media (max-width: 768px) {
+            .logo {
+                max-width: 100px;
+                max-height: 100px;
+            }
+
+            .spinner {
+                width: 150px;
+                height: 150px;
+            }
+
+            .loading-text {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+
+            .progress-bar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .logo {
+                max-width: 80px;
+                max-height: 80px;
+            }
+
+            .spinner {
+                width: 120px;
+                height: 120px;
+            }
+
+            .loading-text {
+                font-size: 18px;
+            }
+
+            .progress-bar {
+                width: 180px;
+            }
+        }
+
+        /* ================================
+        General Section Padding Adjustments
+        ================================ */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 1.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 12px;
+            }
+
+            .section-title:after {
+                width: 60px;
+                height: 2px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.25rem;
+            }
+        }
+
+        /* ================================
+        Container Padding for Mobile
+        ================================ */
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+
+        /* ================================
+        Ensure Images Don't Overflow
+        ================================ */
+        @media (max-width: 768px) {
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* ================================
+        Fix Horizontal Scrolling Issues
+        ================================ */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            [class*="col-"] {
+                padding-left: 10px;
+                padding-right: 10px;
             }
         }
     </style>
@@ -1099,10 +2127,10 @@
                             <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
                         </div>
                         <div class="right-content">
-                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
-                            <p>Online mode of course completion saving time and money for aspirants.</p>
-                            <!-- <button class="learn-more-btn">Learn More</button> -->
+                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green"><br>ONE OF ITS KIND.</span></h2>
+                            <p>Online mode of course completion <br>saving time and money for aspirants.</p>
                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+
                         </div>
                     </div>
                 </div>
@@ -1117,16 +2145,15 @@
                             <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
                         </div>
                         <div class="right-content">
-                            <h2>YOUR ONE STOP PLATFORM <span class="highlight-green">FOR COURSES RELATED TO
+                            <h2>YOUR ONE STOP PLATFORM <span class="highlight-green"><br>FOR COURSES <br>RELATED TO
                                     THEOLOGY.</span></h2>
-                            <p>From certificate and diploma to master's courses available.</p>
-                            <!-- <button class="learn-more-btn">Learn More</button> -->
+                            <p>From certificate and diploma<br>to master's courses available.</p>
                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
                         </div>
+
                     </div>
                 </div>
             </div>
-
             <!-- Slide 3 -->
             <div class="carousel-item">
                 <img src="{% static 'img/slide3.jpg' %}" alt="Holy Bible Reading">
@@ -1136,25 +2163,30 @@
                             <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
                         </div>
                         <div class="right-content">
-                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green">ONE OF ITS KIND.</span></h2>
-                            <p>Online mode of course completion saving time and money for aspirants.</p>
+                            <h2>EXCLUSIVE ONLINE<br> COURSES <span class="highlight-green"><br>ONE OF ITS KIND</span>
+                            </h2>
+                            <p>Online mode of course completion <br>saving time and money for aspirants.</p>
                             <!-- <button class="learn-more-btn">Learn More</button> -->
                             <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#trinityCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#trinityCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
+
+    </div>
+
+    <!-- Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#trinityCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#trinityCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
     </div>
 
     <!-- Why Trinity Section -->
@@ -1211,12 +2243,12 @@
 
     <!--stats section---->
     <section class="stats-section">
-        <div class="container">
-            <div class="stats-container">
-                <!-- Decorative circles like student card -->
-                <div class="circle-left"></div>
-                <div class="circle-right"></div>
+        <div class="container wrapper">
 
+            <!-- Decorative circles like student card -->
+            <div class="circle-left"></div>
+            <div class="circle-right"></div>
+            <div class="stats-container">
                 <!-- Students -->
                 <div class="stat-item">
                     <div class="stat-icon">
@@ -1274,7 +2306,9 @@
                     Master of Divinity (M. Div) Master of Divinity is used to define the study of different faiths and
                     belief systems. In Christian theology, this degree prepares students to work as...
                 </p>
-                <button class="btn-join">Join Now</button>
+                <button class="btn-join" onclick="window.location.href='{% url 'register' %}'">
+                    Join Now
+                </button>
             </div>
 
             <!-- Cyan Dot -->
@@ -1293,7 +2327,9 @@
                     INTRODUCTION TO BIBLE is an introductory course on the Bible that, in an easy-to-follow format,
                     presents all the important themes of the entire Bible and ties both Old...
                 </p>
-                <button class="btn-join">Join Now</button>
+                <button class="btn-join" onclick="window.location.href='{% url 'register' %}'">
+                    Join Now
+                </button>
             </div>
 
             <!-- Red Dot -->
@@ -1313,7 +2349,14 @@
                     certificate is to equip candidates with a non-theology background to prepare themselves for
                     postgraduate study as...
                 </p>
-                <button class="btn-join">Join Now</button>
+                <button class="btn-join" onclick="window.location.href='{% url 'register' %}'">
+                    Join Now
+                </button>
+            </div>
+            <div>
+                <button class="btn-show-more" onclick="window.location.href='{% url 'course-list' %}'">
+                    Show More..
+                </button>
             </div>
         </div>
     </section>
@@ -1325,9 +2368,8 @@
                 experiences and previous education are used to reduce the degree requirements...
             </h2>
             <div class="oval-wrapper">
-                <button class="btn-new-admission">
-                    <i class="fas fa-id-card"></i>
-                    New Admission
+                <button class="btn-new-admission" onclick="window.location.href='{% url 'register' %}'">
+                    <i class="fas fa-id-card"></i> New Admission
                 </button>
             </div>
         </div>
@@ -1374,13 +2416,15 @@
                         leadership qualities from you, building a strong foundation of faith and faith based skills to
                         be a change in this world. With that, we will be there to...
                     </p>
-                    <button class="btn-read-more">
-                        Read More
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
+                    {% for page in pages_data %}
+                    {% if page.code and page.code == "about-us" %}
+                    <button class="learn-more-btn" data-url="{% url 'page_detail' slug=page.code %}"
+                        onclick="location.href=this.dataset.url">
+                        Learn More
                     </button>
+                    {% endif %}
+                    {% endfor %}
+
                 </div>
             </div>
         </div>
@@ -1399,10 +2443,22 @@
                 </div>
                 <div class="col-md-3">
                     <h3>Company</h3>
-                    <a href="#about">About</a>
-                    <a href="#courses">Courses</a>
-                    <a href="#admissions">Admissions</a>
-                    <a href="#contact">Contact</a>
+                    <ul>
+                        {% for page in pages_data %}
+                        {% if page.code and page.code == "about-us" %}
+                        <li>
+                            <a href="{% url 'page_detail' slug=page.code %}">About</a>
+                        </li>
+                        {% endif %}
+                        {% if page.code and page.code == "Admission-Process" %}
+                        <li>
+                            <a href="{% url 'page_detail' slug=page.code %}">Admissions</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        <li><a href="{% url 'course-list' %}">Courses</a></li>
+                        <li><a href="{% url 'contact-us' %}">Contact</a></li>
+                    </ul>
                 </div>
                 <div class="col-md-3">
                     <h3>Contact Us</h3>

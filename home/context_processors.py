@@ -1,6 +1,6 @@
 # context_processors.py
 from django.urls import reverse
-from .models import Menus, MenuItems
+from .models import Menus, MenuItems, Pages  
 
 def get_menu_item_url(menu_item):
     """
@@ -21,6 +21,10 @@ def get_menu_item_url(menu_item):
     # Second, check if url field has a value
     elif menu_item.url:
         return f"/{menu_item.url}"
+    
+    # Third, check if url field has a '' it will redirect to Home
+    elif menu_item.url == '':
+        return reverse('index')
     
     # Last resort - return placeholder
     return '#'
@@ -95,12 +99,18 @@ def menu_context(request):
             ).select_related('pages').prefetch_related('sub_menu').order_by('menu_order')
             
             footer_items = process_menu_items(parent_items)
+        # Add pages_data for footer
+        pages_data = Pages.objects.filter(
+            status=1,  # Assuming 1 means active
+            deleted_at__isnull=True
+        ).order_by('id')
         
         return {
             'header_menu': header_menu,
             'header_menu_items': header_items,
             'footer_menu': footer_menu,
             'footer_menu_items': footer_items,
+            'pages_data': pages_data,
         }
     except Exception as e:
         print(f"Error loading menus: {e}")
@@ -111,4 +121,5 @@ def menu_context(request):
             'header_menu_items': [],
             'footer_menu': None,
             'footer_menu_items': [],
+            'pages_data': [],
         }
