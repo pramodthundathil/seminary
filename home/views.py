@@ -96,12 +96,20 @@ def index(request):
     Home page view - menu context is automatically available
     via context processor
     """
-    pages = Pages.objects.filter(deleted_at__isnull=True, status=True)
+    codes_needed = ["about-us","Admission-Process"]
+    pages_data = Pages.objects.filter(
+        code__in=codes_needed,
+        status=True,
+        deleted_at__isnull=True
+    ).exclude(
+        Q(code__isnull=True) |
+        Q(code__exact="") |
+        Q(code__regex=r'^\s*$')
+    )  
     context = {
-        "pages": pages
+        "pages_data": pages_data,
     }
     return render(request, "site_pages/index.html", context)
-
 def page_detail(request, slug):
     """
     Dynamic page view for handling page URLs
@@ -839,3 +847,7 @@ def student_index(request):
         student = None
     print(student,"--------------")
     return render(request, 'student/index.html')
+
+def courses(request):
+    courses = Courses.objects.filter(status=1).order_by('id')
+    return render(request, 'site_pages/course_list.html', {'courses': courses})

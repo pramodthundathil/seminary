@@ -1,14 +1,31 @@
 :root {
-    --primary-cyan: #00CED1;
-    --light-cyan: #E0F7F7;
-    --dark-navy: #1B2845;
-    --purple-gradient-start: #A78BFA;
-    --purple-gradient-end: #C084FC;
-    --green-card: #90EE90;
-    --blue-button: #4169E1;
-    --text-gray: #666666;
-    --primary-cyan-dark: #00B8BB;
-}
+            --primary: #00CED1;
+            --primary-dark: #1B2845;
+            --secondary: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --border: #666666;
+
+            --bg-gray: #F8FAFC;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --primary-cyan: #00CED1;
+            --light-cyan: #E0F7F7;
+            --dark-navy: #1B2845;
+            --purple-gradient-start: #A78BFA;
+            --purple-gradient-end: #C084FC;
+            --green-card: #90EE90;
+            --blue-button: #4169E1;
+            --text-gray: #666666;
+            --sidebar-width: 250px;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
 
 * {
     font-family: 'Roboto Condensed', sans-serif;
@@ -144,7 +161,7 @@ body {
 
 .right-content p {
     font-size: 1.1rem;
-    color: var(--text-gray);
+    color: var(--dark-navy);
     margin-bottom: 2rem;
     line-height: 1.6;
 }
@@ -224,10 +241,14 @@ body {
 
 /* Why Trinity Section */
 .why-section {
-    padding: 4rem 0;
-    background: white;
+    padding-top: 80px; /* Add space at the top */
+    padding-bottom: 60px;
+    background: #f8f9fa;
+    position: relative;
+    z-index: 1; /* Ensure it stays below carousel but above other content */
+    margin-top: 0 !important; /* Prevent margin collapse */
+    clear: both; /* Clear any floats */
 }
-
 .section-title {
     font-size: 2rem;
     font-weight: 700;
