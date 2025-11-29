@@ -45,31 +45,176 @@ from .decorators import role_redirection
 logger = logging.getLogger(__name__)
 
 
+
+
+from home.models import Students,Notifications,Subjects,StudentsInstructor,Exams
+
 def student_home(request):
-    return render(request, "student/home.html")
+    try:
+       student=Students.objects.get(id=166)
+    except:   
+        student=None
+    if not student:
+        return render(request, "student/home.html", {"error": "Student not found"})    
+    notifications=Notifications.objects.filter(notification_type="Exam", student_id=student.id)
+
+    if student:
+        lang = Languages.objects.filter(id=student.language_id_id).first()
+        if lang:
+            language= lang.language_name
+        else:
+            language=None
+    else:
+        language=None
+
+    try:
+        instructor_relation = StudentsInstructor.objects.get(student_id=student.id)
+    except StudentsInstructor.DoesNotExist:
+        instructor_relation = None
+
+    instructor_name = None
+    if instructor_relation:
+        try:
+            instructor_user = Users.objects.get(id=instructor_relation.instructor_id)
+            instructor_name = instructor_user.name
+        except Users.DoesNotExist:
+            instructor_name = None
+
+    try:
+        course = student.course_applied
+    except :
+        course = None
+
+    context={
+        # "student":student,
+        "notifications":notifications,
+        "course":course, 
+        "instructor_name":instructor_name,
+        "language":language,
+    }
+
+    return render(request, "student/home.html",{"context": context})
+
 
 def student_subjects(request):
-    return render(request, "student/subjects.html")
+
+    subjects = Subjects.objects.filter(
+        students_subject_id__student_id=166
+    )
+    
+    context={
+        "subjects":subjects,
+    }
+
+
+    return render(request, "student/subjects.html",context)
 
 def student_view_post(request):
     return render(request, "student/view_posts.html")
 
 def student_exam_hall(request):
-    return render(request, "student/exam_hall.html")
+    try:
+        student = Students.objects.get(id=166)
+    except Students.DoesNotExist:
+        return render(request, "student/exam_hall.html", {"error": "Student not found"})
+
+    exams = StudentsExams.objects.filter(student_id=student.id)
+    exam_list = []
+
+    for e in exams:
+        # SAFE exam fetch
+        exam_obj = Exams.objects.filter(id=e.exam_id_id).first()
+        if not exam_obj:
+            continue  # skip broken exam rows
+
+        # SAFE subject fetch
+        subject_obj = Subjects.objects.filter(id=exam_obj.subject_id_id).first()
+
+        exam_list.append({
+            "exam_name": exam_obj.exam_name if exam_obj else "N/A",
+            "subject_name": subject_obj.subject_name if subject_obj else "N/A",
+            "requested_time": e.created_at,
+            "status": (
+                "Completed" if e.is_exam_ended else
+                "Ongoing" if e.is_exam_started else
+                "Pending"
+            )
+        })
+    context={
+        "exam_list": exam_list,
+        "request_exam_url": "/student/request-exam/"  # or use reverse('student_request_exam')
+    }
+    return render(request, "student/exam_hall.html", context)
 
 def student_score_card(request):
-    return render(request, "student/score_card.html")
+    # assignment_mark = StudentsAssignment.objects.filter(student_id=166)
+    assignment_mark = StudentsAssignment.objects.filter(student_id=166).select_related("assignment_id")
+
+    # for item in assignment_mark:
+    #     print(item.assignment_id.code, item.assignment_id.assignment_name, item.assignment_id.total_score)
+
+    student_exams = StudentsExams.objects.filter(student_id=166).select_related("exam_id")
+
+    # for item in student_exams:
+    #     print(item.exam_id.code, item.exam_id.exam_name)
+
+    context={
+        "assignment_mark":assignment_mark,
+        "student_exams":student_exams,
+        }
+    return render(request, "student/score_card.html",context)
 
 def student_class_recordings(request):
     return render(request, "student/class_recordings.html")
+def student_doubts_answers(request):
+    return render(request, "student/doubts_answers.html")
+
+def student_request_exam(request):
+    return render(request, "student/request_exam.html")
+
+def student_profile_view(request):
+    return render(request, "student/student_profile.html")
+
+def student_pending_assignment(request):
+    try:
+        student = Students.objects.get(id=166)
+    except Students.DoesNotExist:
+        student = None
+
+    if not student:
+        return render(request, "student/pending_assignment.html", {"error": "Student not found"})
+
+    pending_assignments = StudentsAssignment.objects.filter(
+        student_id=student.id,
+        submitted_on__isnull=True
+    )
+
+    return render(request, "student/pending_assignment.html", {
+        "pending_assignments": pending_assignments
+    })
+
 
 def student_submitted_assignment(request):
-    return render(request, "student/submitted_assignment.html")
+    try:
+       student=Students.objects.get(id=166)
+    except:   
+        student=None
+
+    if not student:
+        return render(request, "student/submitted_assignment.html", {"error": "Student not found"})    
+
+    submitted_assignments = StudentsAssignment.objects.filter(
+        student_id=student.id,
+        submitted_on__isnull=False   # means submitted
+    )
+    context={"submitted_assignments":submitted_assignments}
+    return render(request, "student/submitted_assignment.html",context)
 
 
 def index(request): 
     pages = Pages.objects.all()
-    context = {"pages":pages}
+    student=Students.objects.get(id=10600)
+    context = {"pages":pages,"student":student}
     return render(request,"site_pages/index.html",context)
 
 def about_us(request):
@@ -893,10 +1038,14 @@ def admin_index(request):
 @login_required
 def student_index(request):
     try:
-        student  = request.user.student
+        # student  = request.user.student
+        student= Students.objects.get(id=166)
     except:
         student = None
-    print(student,"--------------")
+    print("--------------",student)
+    context = {
+        'student': student,
+    }
     return render(request, 'student/index.html')
 
 def doctoral_program(request):

@@ -9,6 +9,10 @@ urlpatterns = [
     path("score-card/", views.student_score_card, name="student_score_card"),
     path("class-recordings/", views.student_class_recordings, name="student_class_recordings"),
     path("submitted-assignment/", views.student_submitted_assignment, name="student_submitted_assignment"),
+    path("pending-assignment/", views.student_pending_assignment, name="student_pending_assignment"),
+    path("doubts-answers/", views.student_doubts_answers, name="student_doubts_answers"),
+    path("request-exam/", views.student_request_exam, name="student_request_exam"),
+    path("student-profile/", views.student_profile_view, name="student_profile_view"),
 
     path('',views.index, name='index'),
     path("about_us",views.about_us,name="about_us"),

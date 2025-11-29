@@ -1,307 +1,347 @@
 {% extends "student/index.html" %}
 
-{% block title %}Video Lessons{% endblock %}
+{% block title %}Class Recordings{% endblock %}
+{% block body_class %}no-right{% endblock %}
 
 {% block middle %}
 
-<div class="details-card" style="padding:0; background:transparent; box-shadow:none; border:none;">
+<style>
+/* Desktop Styles - Keep original design */
+.recordings-container {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
 
-    <!-- PAGE HEADER -->
-    <div class="page-header" style="
-        background:white;
-        padding:25px 30px;
-        border-radius:15px;
-        box-shadow:0 4px 15px rgba(0,0,0,0.08);
-        margin-bottom:30px;
-    ">
-        <h1 style="color:#2c3e50;font-size:28px;font-weight:600;">🎬 Video Lessons</h1>
+.recordings-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.recordings-header h1 {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.recordings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.recording-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recording-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.recording-thumbnail {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recording-thumbnail svg {
+    width: 60px;
+    height: 60px;
+    opacity: 0.9;
+}
+
+.recording-duration {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.recording-info {
+    padding: 15px;
+}
+
+.recording-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.recording-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.recording-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.recording-subject {
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 968px) {
+    /* Move recordings below stats on tablets */
+    .recordings-container {
+        padding: 20px;
+        border-radius: 12px;
+    }
+    
+    .recordings-header h1 {
+        font-size: 24px;
+    }
+    
+    .recordings-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .recording-thumbnail {
+        height: 140px;
+    }
+    
+    .recording-thumbnail svg {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .recording-info {
+        padding: 12px;
+    }
+    
+    .recording-title {
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    /* Stack recordings in single column on mobile */
+    .recordings-container {
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 15px;
+    }
+    
+    .recordings-header {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+    }
+    
+    .recordings-header h1 {
+        font-size: 20px;
+    }
+    
+    .recordings-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .recording-card {
+        border-radius: 10px;
+    }
+    
+    .recording-thumbnail {
+        height: 160px;
+    }
+    
+    .recording-thumbnail svg {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .recording-info {
+        padding: 12px;
+    }
+    
+    .recording-title {
+        font-size: 15px;
+        margin-bottom: 6px;
+    }
+    
+    .recording-meta {
+        font-size: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .recording-subject {
+        font-size: 11px;
+    }
+}
+
+/* Ensure recordings appear below stats on mobile */
+@media screen and (max-width: 968px) {
+    body.no-right .container {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Profile card will stack first, then recordings */
+    .container > div:first-child {
+        order: 1;
+    }
+    
+    .middle-column {
+        order: 2;
+    }
+}
+</style>
+
+<div class="recordings-container">
+    <!-- Header -->
+    <div class="recordings-header">
+        <h1>📼 Class Recordings</h1>
     </div>
 
-    <!-- VIDEO GRID (3 per row) -->
-    <div class="video-grid" style="
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:25px;
-        margin-bottom:30px;
-    ">
-        <!-- Video Card 1 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+    <!-- Recordings Grid -->
+    <div class="recordings-grid">
+        <!-- Recording Card 1 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#667eea"/>
                 </svg>
+                <div class="recording-duration">1:45:30</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Building Theology</h3>
+            <div class="recording-info">
+                <div class="recording-title">Building Theology - Lecture 1</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 20, 2024</div>
+                    <div class="recording-subject">Theology</div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Card 2 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+        <!-- Recording Card 2 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#f5576c"/>
                 </svg>
+                <div class="recording-duration">2:15:45</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Introduction to Biblical Theology 1</h3>
+            <div class="recording-info">
+                <div class="recording-title">Biblical Theology Introduction</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 19, 2024</div>
+                    <div class="recording-subject">Bible Study</div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Card 3 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+        <!-- Recording Card 3 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#00f2fe"/>
                 </svg>
+                <div class="recording-duration">1:30:20</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Understanding New Testament</h3>
+            <div class="recording-info">
+                <div class="recording-title">New Testament Overview</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 18, 2024</div>
+                    <div class="recording-subject">NT Studies</div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Card 4 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#fccb90 0%,#d57eeb 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+        <!-- Recording Card 4 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#d57eeb"/>
                 </svg>
+                <div class="recording-duration">2:00:15</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Old Testament Foundations</h3>
+            <div class="recording-info">
+                <div class="recording-title">Old Testament Foundations</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 17, 2024</div>
+                    <div class="recording-subject">OT Studies</div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Card 5 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#fa709a 0%,#fee140 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+        <!-- Recording Card 5 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#fa709a"/>
                 </svg>
+                <div class="recording-duration">1:55:40</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Advanced Biblical Studies</h3>
+            <div class="recording-info">
+                <div class="recording-title">Advanced Biblical Studies</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 16, 2024</div>
+                    <div class="recording-subject">Advanced</div>
+                </div>
             </div>
         </div>
 
-        <!-- Video Card 6 -->
-        <div class="video-card" style="
-            background:white;
-            border-radius:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.08);
-            overflow:hidden;
-            transition:transform 0.3s ease, box-shadow 0.3s ease;
-            cursor:pointer;
-        " onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" 
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)';">
-            
-            <!-- Thumbnail -->
-            <div class="video-thumbnail" style="
-                position:relative;
-                background:linear-gradient(135deg,#30cfd0 0%,#330867 100%);
-                height:200px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-            ">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" style="opacity:0.9;">
+        <!-- Recording Card 6 -->
+        <div class="recording-card">
+            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <svg viewBox="0 0 24 24" fill="none">
                     <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <rect x="5" y="1" width="2" height="2" fill="white"/>
-                    <rect x="9" y="1" width="2" height="2" fill="white"/>
-                    <rect x="13" y="1" width="2" height="2" fill="white"/>
-                    <rect x="17" y="1" width="2" height="2" fill="white"/>
-                    <path d="M10 8L16 12L10 16V8Z" fill="white"/>
+                    <circle cx="12" cy="12" r="4" fill="white"/>
+                    <circle cx="12" cy="12" r="2" fill="#330867"/>
                 </svg>
+                <div class="recording-duration">1:40:25</div>
             </div>
-
-            <!-- Card Content -->
-            <div style="padding:20px;text-align:center;">
-                <h3 style="
-                    color:#2c3e50; font-size:18px; font-weight:600;
-                    margin:0;
-                ">Theological Perspectives</h3>
+            <div class="recording-info">
+                <div class="recording-title">Theological Perspectives</div>
+                <div class="recording-meta">
+                    <div class="recording-date">📅 Nov 15, 2024</div>
+                    <div class="recording-subject">Theology</div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- PAGINATION -->
-    <div class="pagination" style="
-        background:white; padding:20px 30px; border-radius:15px;
-        box-shadow:0 4px 15px rgba(0,0,0,0.08);
-        display:flex; justify-content:space-between; align-items:center;
-    ">
-        <div style="color:#666;">Showing 1 to 6 of 18 videos</div>
-        <div class="pagination-controls" style="display:flex; gap:10px;">
-            <button class="pagination-btn" style="
-                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
-                background:white;color:#666;cursor:pointer;font-weight:500;
-            ">Previous</button>
-            <button class="pagination-btn active" style="
-                padding:8px 16px;border-radius:8px;border:none;color:white;
-                background:linear-gradient(135deg,#4facfe,#00f2fe);cursor:pointer;
-                font-weight:600;
-            ">1</button>
-            <button class="pagination-btn" style="
-                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
-                background:white;color:#666;cursor:pointer;font-weight:500;
-            ">2</button>
-            <button class="pagination-btn" style="
-                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
-                background:white;color:#666;cursor:pointer;font-weight:500;
-            ">3</button>
-            <button class="pagination-btn" style="
-                padding:8px 16px;border:2px solid #e1e8ed;border-radius:8px;
-                background:white;color:#666;cursor:pointer;font-weight:500;
-            ">Next</button>
-        </div>
-    </div>
-
 </div>
 
-{% endblock %}
-
-{% block right %}
-<div class="alerts-card">
-    <div class="card-header"><h3 class="card-title">🔔 Notifications & Alerts</h3></div>
-
-    <div class="alert-item"><p class="alert-text">⭐ <strong>Exam:</strong> OT UNIT 1 assigned</p></div>
-    <div class="alert-item"><p class="alert-text">⭐ <strong>Exam:</strong> Biblical Theology 1 approved</p></div>
-    <div class="alert-item"><p class="alert-text">📚 <strong>Subject:</strong> Old Testament assigned</p></div>
-    <div class="alert-item"><p class="alert-text">📊 <strong>Exam Score:</strong> NT UNIT 2 assigned</p></div>
-</div>
 {% endblock %}

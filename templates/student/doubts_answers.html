@@ -1,0 +1,260 @@
+{% extends "student/index.html" %}
+
+{% block title %}Query Management{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+{% block middle %}
+<style>
+    :root{
+        --primary: #2563eb;
+        --primary-light: #3b82f6;
+        --bg-page: #f8fafc;
+        --bg-card: #ffffff;
+        --border: #e6edf6;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --shadow-sm: 0 6px 18px rgba(16,24,40,0.06);
+    }
+
+    .details-card { background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; }
+    .card-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .card-title { font-size: 18px; font-weight:700; color:var(--text-primary); margin:0; }
+
+    .table-controls { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 20px; }
+    .entries-control, .search-control { display:flex; align-items:center; gap:8px; }
+    .entries-select, .search-input, select { padding:8px 12px; border:1px solid var(--border); border-radius:8px; }
+
+    .table-wrapper { padding: 0 20px 20px 20px; overflow-x:auto; }
+    .data-table { width:100%; border-collapse:collapse; background:var(--bg-card); table-layout: fixed; }
+    .data-table thead { background: linear-gradient(180deg, #fbfdff, #f6fbff); }
+    .data-table th, .data-table td { padding:14px 12px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
+    .data-table th { font-size:13px; font-weight:700; color:var(--text-primary); }
+
+    .status-badge { display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700; font-size:13px; }
+    .status-open { background: linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1e3a8a; }
+    .status-closed { background: linear-gradient(135deg,#e6fffa,#ccfbf1); color:#065f46; }
+
+    .action-btn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid var(--primary); color:var(--primary); cursor:pointer; }
+
+    .pagination-wrapper { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 20px 20px; }
+    .pagination-info { color:var(--text-secondary); }
+    .pagination-controls { display:flex; gap:8px; }
+    .pagination-btn { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); cursor:pointer; }
+
+    /* Column widths */
+    .data-table th:nth-child(1), .data-table td:nth-child(1) { width:40%; }
+    .data-table th:nth-child(2), .data-table td:nth-child(2) { width:20%; }
+    .data-table th:nth-child(3), .data-table td:nth-child(3) { width:20%; }
+    .data-table th:nth-child(4), .data-table td:nth-child(4) { width:12%; }
+    .data-table th:nth-child(5), .data-table td:nth-child(5) { width:8%; }
+
+    /* Mobile responsive */
+    @media screen and (max-width: 968px) {
+        .table-controls { flex-direction: column; align-items:flex-start; gap:10px; }
+        .data-table { display:block; min-width:640px; }
+        .table-wrapper { overflow-x:auto; }
+        .card-header { flex-direction:column; align-items:flex-start; gap:10px; }
+        .pagination-wrapper { flex-direction:column; gap:8px; align-items:flex-start; }
+    }
+
+    @media screen and (max-width: 576px) {
+        .data-table { min-width:520px; }
+        .card-title { font-size:16px; }
+        .entries-select, .search-input { width:100%; }
+    }
+    /* Responsive Design */
+@media screen and (max-width: 1200px) {
+    .container { grid-template-columns: 260px 1fr 300px; gap: 1.25rem; }
+}
+
+@media screen and (max-width: 968px) {
+    .top-bar-content, .nav-content { padding: 0 1rem; }
+    .contact-info { display: none; }
+    .mobile-menu-btn { display: block; }
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        flex-direction: column;
+        gap: 0;
+        box-shadow: var(--shadow-md);
+        padding: 1rem;
+        border-top: 1px solid var(--border);
+    }
+    .nav-links.active { display: flex; }
+    .nav-item { border-bottom: 1px solid var(--border); padding: 0.75rem 0; }
+    .nav-link { padding: 0.5rem 0; }
+    .dropdown { 
+        position: static; 
+        box-shadow: none; 
+        margin-top: 0.75rem; 
+        background: var(--bg-page);
+        border: none;
+    }
+    .nav-item.active .dropdown { display: block; }
+    
+    .right-submenu {
+        position: static;
+        margin-left: 1rem;
+        margin-top: 0.5rem;
+        box-shadow: none;
+        background: var(--bg-page);
+        border: none;
+    }
+    
+    /* UPDATED: Change grid to single column layout */
+    .container { 
+        grid-template-columns: 1fr; 
+        padding: 1rem; 
+        gap: 1rem; 
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Ensure left column (profile) appears first */
+    .container > div:first-child {
+        order: 1;
+    }
+    
+    /* Middle column appears second */
+    .middle-column {
+        order: 2;
+    }
+    
+    /* Right column appears last */
+    .right-column {
+        order: 3;
+    }
+    
+    .detail-item { grid-template-columns: 140px 1fr; gap: 0.75rem; }
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .quick-actions { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+
+<div class="details-card">
+    <div class="">
+        <h2 class="card-title">❓ Doubts & Answers</h2>
+        <div class="header-actions">
+        </div>
+    </div>
+
+    <div class="table-controls">
+        <div class="entries-control">
+            <span>Show</span>
+            <select class="entries-select" id="entries">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>entries</span>
+        </div>
+
+        <div class="search-control">
+            <label for="searchInput">🔍</label>
+            <input id="searchInput" class="search-input" placeholder="Search...">
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table" id="queryTable">
+            <thead>
+                <tr>
+                    <th>Query</th>
+                    <th>Category</th>
+                    <th>Last Updated</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td>Sample question about course requirements</td>
+                    <td>General</td>
+                    <td>27 Nov, 2025 06:49 AM</td>
+                    <td><span class="status-badge status-open">Open</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-wrapper">
+        <div class="pagination-info">Showing <span id="showingStart">1</span> to <span id="showingEnd">1</span> of <span id="totalEntries">1</span> entries</div>
+        <div class="pagination-controls">
+            <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)">◄ Previous</button>
+            <button class="pagination-btn active" onclick="goToPage(1)">1</button>
+            <button class="pagination-btn" id="nextBtn" onclick="changePage(1)">Next ►</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const queries = [];
+    let currentPage = 1;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('queryForm');
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e){
+                const term = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('.data-table tbody tr');
+                rows.forEach(row => row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none');
+            });
+        }
+
+        // submit handler (if you later add a form)
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // implement submit behaviour (AJAX or server-side)
+            });
+        }
+
+        updatePagination();
+    });
+
+    function updateTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        queries.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.query}</td>
+                <td>${item.category}</td>
+                <td>${item.lastUpdated}</td>
+                <td><span class="status-badge ${item.status === 'Open' ? 'status-open' : 'status-closed'}">${item.status}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
+        document.getElementById('totalEntries').textContent = queries.length;
+        document.getElementById('showingStart').textContent = queries.length > 0 ? 1 : 0;
+        document.getElementById('showingEnd').textContent = queries.length;
+    }
+
+
+
+    function changePage(direction) {
+        currentPage += direction;
+        updatePagination();
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const prev = document.getElementById('prevBtn');
+        const next = document.getElementById('nextBtn');
+        if (prev) prev.disabled = currentPage === 1;
+        if (next) next.disabled = true;
+    }
+</script>
+{% endblock %}

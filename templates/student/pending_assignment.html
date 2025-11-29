@@ -1,11 +1,11 @@
 {% extends "student/index.html" %}
 
-{% block title %}Query Management{% endblock %}
+{% block title %}Pending Assignments{% endblock %}
 {% block body_class %}no-right{% endblock %}
 {% block middle %}
 <div class="details-card">
     <div class="card-header">
-        <h2 class="card-title">📋 Submitted Assignments</h2>
+        <h2 class="card-title">⏳ Pending Assignments</h2>
     </div>
 
     <!-- Table Controls -->
@@ -45,34 +45,48 @@
                     </th>
                     <th class="sortable" onclick="sortTable(2)">
                         <div class="th-content">
-                            Submitted On
+                            Due Date
+                            <span class="sort-icon">⇅</span>
                         </div>
                     </th>
-                    <th class="sortable" onclick="sortTable(3)"></th>
-                    <th class="sortable" onclick="sortTable(4)"></th>
+                    <th class="sortable" onclick="sortTable(3)">
+                        <div class="th-content">
+                            Status
+                            <span class="sort-icon">⇅</span>
+                        </div>
+                    </th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                    {% if submitted_assignments %}
-                        {% for s in submitted_assignments %}
-                        <tr>
-                            <td>{{ s.assignment_id.assignment_name }}</td>
+                    {% if pending_assignments %}
+                        {% for assignment in pending_assignments %}
+                            <tr>
+                                <td>{{ assignment.assignment_id.assignment_name }}</td>
 
-                            <td>{{ s.assignment_id.subject_id.subject_name }}</td>
+                                <td>{{ assignment.assignment_id.subject_id.subject_name }}</td>
 
-                            <td>{{ s.submitted_on|date:"d M Y, h:i A" }}</td>
+                                <td>{{ assignment.submission_date}}</td>  
 
-                            <td></td>
-                            <td></td>
-                        </tr>
+                                <td>
+                                    <span class="status-badge pending">⏳ Pending</span>
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'submit_assignment' assignment.id %}" class="action-btn submit-btn">
+                                        📤 Submit
+                                    </a>
+                                </td>
+                            </tr>
+
                         {% endfor %}
                     {% else %}
                         <tr>
                             <td colspan="5" class="no-data">
                                 <div class="no-data-content">
-                                    <!-- <div class="no-data-icon">📭</div> -->
-                                    <p class="">📭 No submitted assignments</p>
-                                    <!-- <span class="no-data-subtitle">You have not submitted any assignments yet.</span> -->
+                                    <!-- <div class="no-data-icon">🎉</div> -->
+                                    <p class="">🎉 No pending assignments</p>
+                                    <!-- <span class="no-data-subtitle">Great job! You're all caught up with your assignments.</span> -->
                                 </div>
                             </td>
                         </tr>
@@ -99,7 +113,7 @@
 <style>
 
 /* ——————————————
-   YOUR ORIGINAL STYLES (unchanged)
+   BASE STYLES
    —————————————— */
 .filter-section { background: var(--bg-gray); padding: 20px; border-radius: 12px; margin-bottom: 24px; }
 .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
@@ -121,7 +135,63 @@
 .data-table td { padding: 16px; border-bottom: 1px solid var(--border); }
 
 /* ——————————————————————
-   ✨ IMPROVED NO DATA STATE
+   ✨ STATUS BADGES
+   —————————————————————— */
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.status-badge.overdue {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    border: 1px solid #f87171;
+    animation: pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+}
+
+/* ——————————————————————
+   ✨ ACTION BUTTONS
+   —————————————————————— */
+.action-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: 1px solid #2563eb;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* ——————————————————————
+   ✨ NO DATA STATE
    —————————————————————— */
 .no-data {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
@@ -164,7 +234,7 @@
 }
 
 /* ——————————————————————
-   ✨ IMPROVED PAGINATION
+   ✨ PAGINATION
    —————————————————————— */
 .pagination-wrapper {
     display: flex;
@@ -256,7 +326,40 @@
 }
 
 /* ——————————————————————
-   ✓ MOBILE STACKING + TABLE WIDTH
+   TABLE COLUMN WIDTHS
+   —————————————————————— */
+.data-table {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+    width: 30%;   /* Assignment */
+}
+
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+    width: 20%;   /* Subject */
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+    width: 20%;   /* Due Date */
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+    width: 15%;   /* Status */
+}
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) {
+    width: 15%;   /* Action */
+}
+
+/* ——————————————————————
+   MOBILE RESPONSIVE
    —————————————————————— */
 @media screen and (max-width: 968px) {
     .container {
@@ -305,9 +408,6 @@
     }
 }
 
-/* ——————————————————————
-   ✓ MOBILE TABLE WIDTH FIX
-   —————————————————————— */
 @media screen and (max-width: 576px) {
     .table-controls {
         gap: 12px;
@@ -323,7 +423,7 @@
     }
 
     .data-table {
-        min-width: 500px !important;
+        min-width: 600px !important;
         table-layout: auto;
     }
 
@@ -331,6 +431,16 @@
     .data-table td {
         padding: 12px 10px;
         font-size: 0.8125rem;
+    }
+
+    .status-badge {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+
+    .action-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
     }
 
     .no-data-content {
@@ -392,6 +502,10 @@
         height: 2rem;
         font-size: 0.75rem;
     }
+
+    .data-table {
+        min-width: 550px !important;
+    }
 }
 </style>
 
@@ -411,6 +525,14 @@ function sortTable(columnIndex) {
     rows.sort((a, b) => {
         const aText = a.cells[columnIndex].textContent.trim();
         const bText = b.cells[columnIndex].textContent.trim();
+        
+        // Special handling for date column (index 2)
+        if (columnIndex === 2) {
+            const aDate = new Date(aText);
+            const bDate = new Date(bText);
+            return direction === 'asc' ? aDate - bDate : bDate - aDate;
+        }
+        
         return direction === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
     });
 
@@ -438,58 +560,5 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
 .stat-row { display: flex; justify-content: space-between; padding: 14px; background: var(--bg-gray); border-radius: 10px; }
 .stat-label { font-size: 14px; font-weight: 600; }
 .stat-number { font-size: 20px; font-weight: 700; color: var(--primary-blue); }
-
-/* TABLE ALWAYS FULL WIDTH */
-.data-table {
-    width: 100% !important;
-    table-layout: fixed;
-}
-
-/* COLUMN WIDTH RATIO (ALL SCREENS) */
-.data-table th:nth-child(1),
-.data-table td:nth-child(1) {
-    width: 40%;   /* Assignment */
-}
-
-.data-table th:nth-child(2),
-.data-table td:nth-child(2) {
-    width: 30%;   /* Subject */
-}
-
-.data-table th:nth-child(3),
-.data-table td:nth-child(3) {
-    width: 20%;   /* Submitted On */
-}
-
-.data-table th:nth-child(4),
-.data-table td:nth-child(4),
-.data-table th:nth-child(5),
-.data-table td:nth-child(5) {
-    width: 5%;    /* empty icons/buttons */
-}
-
-/* MOBILE — TABLE STILL 100% WIDTH */
-@media screen and (max-width: 576px) {
-    .data-table {
-        width: 100% !important;
-        min-width: 100% !important;
-    }
-}
-
-
-@media screen and (max-width: 576px) {
-
-    .table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .data-table {
-        width: 100% !important;      /* full width */
-        min-width: 100% !important;  /* no extra scroll */
-        table-layout: fixed;
-    }
-}
-
 </style>
 {% endblock %}
