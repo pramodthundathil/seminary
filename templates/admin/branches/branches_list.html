@@ -1,0 +1,133 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Branches List</h1>
+        <a href="{% url 'branches_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Branch
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table id="branchesTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Branch Name</th>
+                    <th>Branch Code</th>
+                    <th>Associate Degree</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                <tr>
+                    <td>{{ branch.id }}</td>
+
+                    <td>
+                        <div style="line-height:1.5;">
+                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
+                                {{ branch.branch_name }}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                Created by: {{ branch.created_by }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ branch.branch_code }}</td>
+
+                    <td>
+                        {% if branch.is_associate_degree %}
+                            <span class="status-badge status-active">Yes</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">No</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ branch.created_at|default:"-" }}</td>
+
+                    <td>
+                        {% if branch.status %}
+                            <span class="status-badge status-active">Active</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'branches_view' branch.id %}" class="action-btn view" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'branches_edit' branch.id %}" class="action-btn edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'branches_delete' branch.id %}" class="action-btn delete"
+                           onclick="return confirm('Are you sure you want to delete this branch?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal (optional, unchanged) -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#branchesTable').DataTable({
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            order: [[0, 'desc']],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ branches",
+                info: "Showing _START_ to _END_ of _TOTAL_ branches",
+                infoEmpty: "Showing 0 to 0 of 0 branches",
+                infoFiltered: "(filtered from _MAX_ total branches)",
+                zeroRecords: "No matching branches found",
+                emptyTable: "No branches available"
+            },
+            columnDefs: [
+                { orderable: false, targets: [1, 6] }, // Branch Name + Actions not sortable
+                { width: '60px',  targets: 0 },  // ID
+                { width: '220px', targets: 1 },  // Branch Name
+                { width: '140px', targets: 2 },  // Branch Code
+                { width: '140px', targets: 3 },  // Associate Degree
+                { width: '160px', targets: 4 },  // Created At
+                { width: '90px',  targets: 5 },  // Status
+                { width: '150px', targets: 6 }   // Actions
+            ]
+        });
+    });
+</script>
+
+{% endblock %}

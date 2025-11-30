@@ -344,3 +344,26 @@ class SubjectsForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field.widget.__class__.__name__ != "CheckboxInput":  # Avoid checkbox styling
                 field.widget.attrs.update({'class': 'form-control'})
+
+
+
+from home.models import Branches
+
+class BranchesForm(forms.ModelForm):
+    class Meta:
+        model = Branches
+        fields = [
+            'branch_name',
+            'branch_code',
+            'is_associate_degree',
+            'status',
+           
+        ]
+
+        widgets = {
+            'branch_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'branch_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_associate_degree': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'status': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            
+        }

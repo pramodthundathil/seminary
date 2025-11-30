@@ -2998,3 +2998,125 @@ def subjects_delete(request, subjects_id):
     subject.save()
     messages.success(request, 'Subject deleted successfully!')
     return redirect('subjects_list')
+
+# branches 
+
+@login_required
+def branches_list(request):
+    branches = Branches.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    return render(request, "admin/branches/branches_list.html",{"branches":branches})
+
+@login_required
+def branches_view(request, branch_id):
+    """View branch details"""
+    branch = get_object_or_404(
+        Branches.objects.select_related('created_by', 'updated_by'),
+        id=branch_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/branches/branches_view.html', {
+        'branch': branch
+    })
+
+
+@login_required
+def branches_create(request):
+    """Create new branch"""
+    if request.method == 'POST':
+        form = BranchesForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.created_by = request.user
+            branch.updated_by = request.user
+            branch.created_at = timezone.now()
+            branch.save()
+            messages.success(request, 'Branch created successfully!')
+            return redirect('branches_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BranchesForm()
+    
+    return render(request, 'admin/branches/branches_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+@login_required
+def branches_edit(request, branch_id):
+    """Edit existing branch"""
+    branch = get_object_or_404(Branches, id=branch_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = BranchesForm(request.POST, instance=branch)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.updated_by = request.user
+            branch.save()
+            messages.success(request, 'Branch updated successfully!')
+            return redirect('branches_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BranchesForm(instance=branch)
+    
+    return render(request, 'admin/branches/branches_form.html', {
+        'form': form,
+        'action': 'Update',
+        'branch': branch
+    })
+
+@login_required
+def branches_delete(request, branch_id):
+    """Soft delete branch"""
+    branch = get_object_or_404(Branches, id=branch_id, deleted_at__isnull=True)
+    branch.deleted_at = timezone.now()
+    branch.save()
+    messages.success(request, 'Branch deleted successfully!')
+    return redirect('branches_list')
+
+
+#contact requests 
+
+
+def contact_list(request):
+    """
+    Display all contact requests
+    """
+    contacts = Contacts.objects.all().order_by('-created_at')
+    
+    context = {
+        'contacts': contacts,
+    }
+    
+    return render(request, 'admin/contacts/contact_requests.html', context)
+
+
+def contact_delete(request, id):
+    """
+    Soft delete a contact request by setting deleted_at timestamp
+    """
+    contact = get_object_or_404(Contacts, id=id)
+    
+    # Soft delete - set deleted_at timestamp
+    contact.deleted_at = timezone.now()
+    contact.save()
+    
+    messages.success(request, 'Contact request deleted successfully!')
+    return redirect('contact_list')
+
+
+def contact_permanent_delete(request, id):
+    """
+    Permanently delete a contact request from database
+    """
+    contact = get_object_or_404(Contacts, id=id)
+    
+    # Hard delete - remove from database
+    contact.delete()
+    
+    messages.success(request, 'Contact request permanently deleted!')
+    return redirect('contact_list')

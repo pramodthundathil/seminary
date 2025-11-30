@@ -130,6 +130,19 @@ urlpatterns = [
     path("admin/subjects/<int:subjects_id>/delete", views.subjects_delete, name="subjects_delete"),
 
 
+    #branches
+
+    path("admin/branches", views.branches_list, name="branches_list"),
+    path("admin/branches/create", views.branches_create, name="branches_create"),
+    path("admin/branches/<int:branch_id>/view", views.branches_view, name="branches_view"),
+    path("admin/branches/<int:branch_id>/edit", views.branches_edit, name="branches_edit"),
+    path("admin/branches/<int:branch_id>/delete", views.branches_delete, name="branches_delete"),
+
+    #contact request
+
+    path("admin/contact",views.contact_list, name='contact_list'),
+    path('contacts/delete/<int:id>/', views.contact_delete, name='contact_delete'),
+    path('contacts/permanent-delete/<int:id>/', views.contact_permanent_delete, name='contact_permanent_delete'),
     
 
 ]
