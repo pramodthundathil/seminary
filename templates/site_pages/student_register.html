@@ -472,6 +472,13 @@ nav.navbar {
 .section-title:hover .section-icon {
     color: #0056b3;
 }
+.g-recaptcha iframe {
+        width: 100% !important;
+        min-height: 78px;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
 
 /* Responsive for small screens */
 @media (max-width: 576px) {
@@ -975,6 +982,9 @@ nav.navbar {
                 </div>
             </div>
         </div>
+        <div class="recaptcha-wrapper">
+    <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+</div>
 
         <!-- Submit Buttons -->
         <div class="btn-group">
@@ -983,6 +993,7 @@ nav.navbar {
         </div>
     </form>
 </div>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <script>
     // File upload label update

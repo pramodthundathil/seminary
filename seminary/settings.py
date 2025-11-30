@@ -28,6 +28,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+RECAPTCHA_SITE_KEY = "6LegFxwsAAAAAPuKJ6Fhea_53wqGHMW1gYtXWAJG"
+RECAPTCHA_SECRET_KEY = "6LegFxwsAAAAAAJiRfIuSh95YkkVSMmPmL0wX_BB"
+
+
 
 # Application definition
 

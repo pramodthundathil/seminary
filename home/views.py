@@ -5,6 +5,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 import logging
+import requests
 
 # -------------------------------
 # Django Core Imports
@@ -831,8 +832,35 @@ def contact(request):
     return render(request,"site_pages/contact.html")
 
 def register(request):
-    return render(request,"site_pages/register.html" )
+    if request.method == "POST":
 
+        # Get reCAPTCHA response from form
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+
+        # Verify with Google
+        data = {
+            'secret': settings.RECAPTCHA_SECRET_KEY,
+            'response': recaptcha_response
+        }
+        google_verify = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify', data=data
+        )
+        result = google_verify.json()
+        print("*8888",settings.RECAPTCHA_SITE_KEY)
+        if result.get('success'):
+            print("✓ Human verified — continue saving form")
+            return render(request,"site_pages/register.html" )
+        else:
+            print("✗ Invalid reCAPTCHA")
+            return render(request, "site_pages/register.html", {
+                "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY,
+                "error": "Invalid CAPTCHA. Please try again."
+            })
+
+    return render(request, "site_pages/register.html", {
+        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
+    })
+    
 def admin_functions():
     print(AdminPages.objects.all())
 
