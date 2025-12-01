@@ -367,3 +367,73 @@ class BranchesForm(forms.ModelForm):
             'status': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             
         }
+
+
+
+from home.models import Exams
+
+class ExamsForm(forms.ModelForm):
+    class Meta:
+        model = Exams
+        fields = [
+            'code',
+            'subject',
+            'exam_name',
+            'exam_type',
+            'status',
+        ]
+
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter exam code'
+            }),
+            'subject': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'exam_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter exam name'
+            }),
+            'exam_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'status': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+from home.models import Assignments
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignments
+        fields = [
+            "code",
+            "subject",
+            "assignment_name",
+            "assignment_type",
+            "total_score",
+        ]
+
+        widgets = {
+            "code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment code"
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "assignment_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment name"
+            }),
+            "assignment_type": forms.Select(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment type"
+            }),
+            "total_score": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter total score"
+            }),
+        }

@@ -143,6 +143,24 @@ urlpatterns = [
     path("admin/contact",views.contact_list, name='contact_list'),
     path('contacts/delete/<int:id>/', views.contact_delete, name='contact_delete'),
     path('contacts/permanent-delete/<int:id>/', views.contact_permanent_delete, name='contact_permanent_delete'),
+
+
+    #exams 
+
+    path("admin/exams", views.exams_list, name="exams_list"),
+    path('exams/create/', views.exam_create, name='exams_create'),
+    path('exams/<int:exam_id>/view/', views.exam_view, name='exams_view'),
+    path('exams/<int:exam_id>/edit/', views.exam_edit, name='exams_edit'),
+    path('exams/<int:exam_id>/delete/', views.exam_delete, name='exams_delete'),
+
+
+    #assignments 
+
+    path("admin/assignments", views.assignments_list, name="assignments_list"),
+    path('assignments/create/', views.assignment_create, name='assignments_create'),
+    path('assignments/<int:assignment_id>/view/', views.assignment_view, name='assignments_view'),
+    path('assignments/<int:assignment_id>/edit/', views.assignment_edit, name='assignments_edit'),
+    path('assignments/<int:assignment_id>/delete/', views.assignment_delete, name='assignments_delete'),
     
 
 ]

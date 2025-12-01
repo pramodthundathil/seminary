@@ -173,16 +173,25 @@ class Assignments(models.Model):
     code = models.CharField(max_length=250)
     subject = models.ForeignKey("Subjects", on_delete=models.CASCADE)
     assignment_name = models.CharField(max_length=250)
-    assignment_type = models.CharField(max_length=250)
+    assignment_type = models.CharField(
+        max_length=250,
+        choices=(
+            ('paper_upload', 'Paper Upload type'),
+            ('paper_submit', 'Paper Submit type'),
+        )
+    )
     total_score = models.SmallIntegerField()
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="assignment_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="assignment_updated")
-
+    deleted_at = models.DateTimeField(blank=True, null=True)
     class Meta:
         managed = True
         db_table = 'assignments'
+
+    def __str__(self):
+        return str(self.assignment_name)
 
 class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
@@ -363,6 +372,9 @@ class Countries(models.Model):
     class Meta:
         managed = True
         db_table = 'countries'
+    
+    def __str__(self):
+        return str(self.name)
 
 class Courses(models.Model):
     id = models.AutoField(primary_key=True)
@@ -422,12 +434,19 @@ class Exams(models.Model):
     code = models.CharField(max_length=250)
     subject = models.ForeignKey('Subjects', on_delete=models.DO_NOTHING, related_name='exams')
     exam_name = models.CharField(max_length=250)
-    exam_type = models.CharField(max_length=20)
+    exam_type = models.CharField(
+        max_length=20,
+        choices=(
+            ('descriptive', 'Descriptive'),
+            ('objective', 'Objective'),
+        )
+    )
     status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="exams_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="exams_updated")
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
 
     class Meta:
@@ -1153,6 +1172,9 @@ class Subjects(models.Model):
     class Meta:
         managed = True
         db_table = 'subjects'
+
+    def __str__(self):
+        return str(self.subject_name)
 
 class Support(models.Model):
     id = models.AutoField(primary_key=True)

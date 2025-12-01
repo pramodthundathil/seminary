@@ -3082,6 +3082,7 @@ def branches_delete(request, branch_id):
 #contact requests 
 
 
+@login_required
 def contact_list(request):
     """
     Display all contact requests
@@ -3095,6 +3096,7 @@ def contact_list(request):
     return render(request, 'admin/contacts/contact_requests.html', context)
 
 
+@login_required
 def contact_delete(request, id):
     """
     Soft delete a contact request by setting deleted_at timestamp
@@ -3109,6 +3111,7 @@ def contact_delete(request, id):
     return redirect('contact_list')
 
 
+@login_required
 def contact_permanent_delete(request, id):
     """
     Permanently delete a contact request from database
@@ -3120,3 +3123,176 @@ def contact_permanent_delete(request, id):
     
     messages.success(request, 'Contact request permanently deleted!')
     return redirect('contact_list')
+
+
+#exams 
+@login_required
+def exams_list(request):
+    """Display all exams"""
+    exams = Exams.objects.filter(deleted_at__isnull=True).order_by('-created_at')
+    context = {
+        'exams': exams,
+        'page_title': 'Exams Management'
+    }
+    return render(request, "admin/exams/exam_list.html", context)
+
+
+@login_required
+def exam_create(request):
+    """Create new exam"""
+    if request.method == 'POST':
+        form = ExamsForm(request.POST)
+        if form.is_valid():
+            exam = form.save(commit=False)
+            exam.created_by = request.user
+            exam.updated_by = request.user
+            exam.created_at = timezone.now()
+            exam.save()
+            messages.success(request, 'Exam created successfully!')
+            return redirect('exams_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ExamsForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Create Exam',
+        'action': 'Create'
+    }
+    return render(request, 'admin/exams/exam_form.html', context)
+
+
+@login_required
+def exam_view(request, exam_id):
+    """View exam details"""
+    exam = get_object_or_404(
+        Exams.objects.select_related('created_by', 'updated_by'),
+        id=exam_id,
+        deleted_at__isnull=True
+    )
+    context = {
+        'exam': exam,
+        'page_title': 'View Exam'
+    }
+    return render(request, 'admin/exams/exam_view.html', context)
+
+
+@login_required
+def exam_edit(request, exam_id):
+    """Edit existing exam"""
+    exam = get_object_or_404(Exams, id=exam_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = ExamsForm(request.POST, instance=exam)
+        if form.is_valid():
+            exam = form.save(commit=False)
+            exam.updated_by = request.user
+            exam.save()
+            messages.success(request, 'Exam updated successfully!')
+            return redirect('exams_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ExamsForm(instance=exam)
+    
+    context = {
+        'form': form,
+        'exam': exam,
+        'page_title': 'Edit Exam',
+        'action': 'Update'
+    }
+    return render(request, 'admin/exams/exam_form.html', context)
+
+
+@login_required
+def exam_delete(request, exam_id):
+    """Soft delete exam"""
+    exam = get_object_or_404(Exams, id=exam_id, deleted_at__isnull=True)
+    exam.deleted_at = timezone.now()
+    exam.save()
+    messages.success(request, 'Exam deleted successfully!')
+    return redirect('exams_list')
+
+
+# assignments 
+
+@login_required
+def assignments_list(request):
+    """List all assignments with DataTables"""
+    assignments = Assignments.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    
+    return render(request, 'admin/assignments/assignments_list.html', {
+        'assignments': assignments
+    })
+
+@login_required
+def assignment_create(request):
+    """Create new assignment"""
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.created_by = request.user
+            assignment.updated_by = request.user
+            assignment.created_at = timezone.now()
+            assignment.save()
+            messages.success(request, 'Assignment created successfully!')
+            return redirect('assignments_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AssignmentForm()
+    
+    return render(request, 'admin/assignments/assignment_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+@login_required
+def assignment_view(request, assignment_id):
+    """View assignment details"""
+    assignment = get_object_or_404(
+        Assignments.objects.select_related('created_by', 'updated_by'),
+        id=assignment_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/assignments/assignment_view.html', {
+        'assignment': assignment
+    })
+
+@login_required
+def assignment_edit(request, assignment_id):
+    """Edit existing assignment"""
+    assignment = get_object_or_404(Assignments, id=assignment_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, instance=assignment)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.updated_by = request.user
+            assignment.save()
+            messages.success(request, 'Assignment updated successfully!')
+            return redirect('assignments_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AssignmentForm(instance=assignment)
+    
+    return render(request, 'admin/assignments/assignment_form.html', {
+        'form': form,
+        'action': 'Update',
+        'assignment': assignment
+    })
+
+@login_required
+def assignment_delete(request, assignment_id):
+    """Soft delete assignment"""
+    assignment = get_object_or_404(Assignments, id=assignment_id, deleted_at__isnull=True)
+    assignment.deleted_at = timezone.now()
+    assignment.save()
+    messages.success(request, 'Assignment deleted successfully!')
+    return redirect('assignments_list')
