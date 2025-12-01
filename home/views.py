@@ -9,7 +9,7 @@ import logging
 # -------------------------------
 # Django Core Imports
 # -------------------------------
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -36,9 +36,10 @@ from .models import (
     StudentsAssignment,
     Pages,
     Languages,
-    Users
+    Users,
+    AdminPages
 )
-from .decorators import role_redirection
+
 
 
 # Set up logger
@@ -211,42 +212,90 @@ def student_submitted_assignment(request):
     return render(request, "student/submitted_assignment.html",context)
 
 
+
 def index(request): 
     pages = Pages.objects.all()
     student=Students.objects.get(id=10600)
     context = {"pages":pages,"student":student}
     return render(request,"site_pages/index.html",context)
 
-def about_us(request):
-    """
-    Details about Trinity Theological Seminary. 
-    """
-    return render(request,"site_pages/about_us.html")
+##################only test###################
+from django.shortcuts import render
+from django.http import JsonResponse
+from .context_processors import menu_context
 
-def accreditation(request):
-    """
-    Seminary accreditation details. 
-    """
-    return render(request,"site_pages/accreditation.html")
 
-def admission_process(request):
+def test_menu_debug(request):
     """
-    Admission process details for students
+    Debug view to see the processed menu structure
+    Access this at /test-menu-debug/
     """
-    return render(request,"site_pages/admission_process.html")
+    context_data = menu_context(request)
+    
+    # Pretty print the menu structure
+    import json
+    
+    result = {
+        'header_menu_items': context_data['header_menu_items'],
+        'footer_menu_items': context_data['footer_menu_items'],
+    }
+    
+    return JsonResponse(result, safe=False, json_dumps_params={'indent': 2})
 
-def fees_structure(request):
+############################only test#######################################
+def index(request):
     """
-    Fee structure for students
+    Home page view - menu context is automatically available
+    via context processor
     """
-    return render(request,"site_pages/fees_structure.html")
+    codes_needed = ["about-us","Admission-Process"]
+    pages_data = Pages.objects.filter(
+        code__in=codes_needed,
+        status=True,
+        deleted_at__isnull=True
+    ).exclude(
+        Q(code__isnull=True) |
+        Q(code__exact="") |
+        Q(code__regex=r'^\s*$')
+    )  
+    context = {
+        "pages_data": pages_data,
+    }
+    return render(request, "site_pages/index.html", context)
+def page_detail(request, slug):
+    """
+    Dynamic page view for handling page URLs
+    """
+    page = get_object_or_404(Pages, code=slug, deleted_at__isnull=True, status=True)
+    context = {
+        "page": page
+    }
+    return render(request, "site_pages/page_detail.html", context)
 
-def scholarship(request):
+def course_detail(request, slug):
     """
-    Scholarship details for students
+    Display individual course details
+    slug parameter uses course_code field
     """
-    return render(request,"site_pages/scholarship.html")
-
+    # Get course by course_code (used as slug)
+    course = get_object_or_404(
+        Courses,
+        course_code=slug,
+        status=1  # Only show active courses
+    )
+    
+    # You can add related courses or other data here
+    related_courses = Courses.objects.filter(
+        highest_qualification=course.highest_qualification,
+        status=1
+    ).exclude(id=course.id)[:3]
+    
+    context = {
+        'course': course,
+        'related_courses': related_courses,
+    }
+    
+    return render(request, 'site_pages/course_detail.html', context)
 
 
 def new_admission_form(request):
@@ -641,6 +690,7 @@ def reference_form(request):
         logger.error(f"Error rendering reference form page: {e}", exc_info=True)
         messages.error(request, "Could not load the reference form page.")
         return render(request, "site_pages/reference_form.html")
+
 def payment_options(request):
     return render(request,"site_pages/payment_options.html")
 
@@ -939,101 +989,7 @@ def admin_functions():
     print(AdminPages.objects.all())
 
 
-@role_redirection
-@login_required
-def admin_index(request):
-    # admin_functions()
-    # Get total students
-    total_students = Students.objects.filter(active=1).count()
-    admin_pages = AdminPages.objects.all().order_by('menu_order')
-    
-    # Get new students (last 30 days)
-    thirty_days_ago = datetime.now() - timedelta(days=30)
-    new_students = Students.objects.filter(
-        created_at__gte=thirty_days_ago,
-        active=1
-    ).order_by('-created_at')[:10]
-    
-    # Gender statistics
-    male_count = Students.objects.filter(gender='Male', active=1).count()
-    female_count = Students.objects.filter(gender='Female', active=1).count()
-    
-    if total_students > 0:
-        male_percentage = round((male_count / total_students) * 100)
-        female_percentage = round((female_count / total_students) * 100)
-        # Calculate SVG circle offsets (314 is circumference for r=50)
-        male_offset = 314 - (314 * male_percentage / 100)
-        female_offset = 314 - (314 * female_percentage / 100)
-    else:
-        male_percentage = female_percentage = 0
-        male_offset = female_offset = 314
-    
-    # Get courses with student count using course_applied field
-    courses_list = []
-    for course in Courses.objects.filter(status=1)[:6]:
-        # Count students who applied for this course
-        student_count = Students.objects.filter(
-            course_applied=course.id,
-            active=1
-        ).count()
-        
-        # Add student_count as an attribute to the course object
-        course.student_count = student_count
-        courses_list.append(course)
-    
-    # Get pending exam requests
-   
-    # Get recent references
-    references = ReferenceForm.objects.order_by('-created_at')[:10]
-    
-    # Get pending subject requests
-    
-    # Calculate assignments in progress
-    total_assignments = Assignments.objects.count()
-    completed_assignments = StudentsAssignment.objects.filter(
-        submitted_on__isnull=False
-    ).count()
-    
-    if total_assignments > 0:
-        tasks_in_progress = round(((total_assignments - completed_assignments) / total_assignments) * 100)
-    else:
-        tasks_in_progress = 0
-    
-    # Calculate total exams completed
-    total_exams_completed = StudentsExams.objects.filter(
-        is_exam_ended=1
-    ).count()
-    
-    # Attendance calculation (example - customize based on your logic)
-    # You can calculate this based on actual attendance records if you have them
-    total_classes = 100  # Example
-    attended_classes = 80  # Example
-    attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
-    
-    context = {
-        'total_students': total_students,
-        'new_students': new_students,
-        'male_count': male_count,
-        'female_count': female_count,
-        'male_percentage': male_percentage,
-        'female_percentage': female_percentage,
-        'male_offset': male_offset,
-        'female_offset': female_offset,
-        'courses': courses_list,
-        # 'exam_requests': exam_requests,
-        'references': references,
-        # 'subject_requests': subject_requests,
-        'attendance_percentage': attendance_percentage,
-        'tasks_in_progress': tasks_in_progress,
-        'total_exams_completed': total_exams_completed,
-        'students_start': 1,
-        'students_end': min(10, len(new_students)),
-        'subjects_start': 1,
-        # 'subjects_end': min(10, len(subject_requests)),
-        'admin_pages':admin_pages
-    }
-    
-    return render(request,"admin/index.html",context)
+
 
 @login_required
 def student_index(request):
@@ -1048,32 +1004,6 @@ def student_index(request):
     }
     return render(request, 'student/index.html')
 
-def doctoral_program(request):
-    """
-    Accademics Programs-Doctoral Program-D.Min Details
-    """
-    return render(request,"site_pages/doctoral_program.html")
-
-def masters_program(request):
-    """
-    Accademics Programs-Master's Program-M.Div Details
-    """
-    return render(request,"site_pages/masters_program.html")
-
-def bachelors_program(request):
-    """
-    Accademics Programs-Bachelor's Program-B.Th Details
-    """
-    return render(request,"site_pages/bachelors_program.html")
-
-def diploma_program(request):
-    """
-    Accademics Programs-Diploma Program-Dip.Th Details
-    """
-    return render(request,"site_pages/diploma_program.html")
-
-def certificate_program(request):
-    """
-    Accademics Programs-Certificate Program-C.Th Details
-    """
-    return render(request,"site_pages/certificate_program.html")
+def courses(request):
+    courses = Courses.objects.filter(status=1).order_by('id')
+    return render(request, 'site_pages/course_list.html', {'courses': courses})

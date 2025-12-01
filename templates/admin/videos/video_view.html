@@ -1,0 +1,256 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Video Details</h1>
+        <div style="display:flex;gap:10px;">
+            <a href="{% url 'video_edit' video.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'video_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="view-container" style="max-width:1000px;margin:0 auto;">
+        <div class="video-preview-section" style="background:white;padding:30px;border-radius:12px;border:1px solid var(--gray-200);margin-bottom:30px;">
+            <h3 style="margin-bottom:20px;color:var(--text-dark);">
+                <i class="fas fa-video"></i> Video Preview
+            </h3>
+            
+            <div class="video-player" style="background:#000;border-radius:12px;overflow:hidden;max-width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+                {% if video.youtube %}
+                    {% load custom_filters %}
+                    {% with video_id=video.youtube.file_path|youtube_id %}
+                        {% if video_id %}
+                            <iframe width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/{{ video_id }}" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen>
+                            </iframe>
+                        {% else %}
+                            <div style="color:white;text-align:center;padding:40px;">
+                                <i class="fab fa-youtube" style="font-size:64px;margin-bottom:15px;color:#FF0000;"></i>
+                                <p style="margin-bottom:15px;">Invalid YouTube URL format</p>
+                                <p style="font-size:14px;color:#999;">URL: {{ video.youtube.file_path }}</p>
+                                <a href="{{ video.youtube.file_path }}" target="_blank" class="btn btn-primary" style="margin-top:15px;">
+                                    <i class="fab fa-youtube"></i> Watch on YouTube
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% elif video.media %}
+                    <video controls style="width:100%;height:100%;object-fit:contain;">
+                        <source src="{{ video.media.file_path.url }}" type="video/{{ video.media.file_type }}">
+                        Your browser does not support the video tag.
+                    </video>
+                {% else %}
+                    <div style="color:white;text-align:center;">
+                        <i class="fas fa-video-slash" style="font-size:64px;margin-bottom:15px;"></i>
+                        <p>No video available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="details-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+            <!-- Video Information -->
+            <div class="detail-card" style="background:white;padding:25px;border-radius:12px;border:1px solid var(--gray-200);">
+                <h3 style="margin-bottom:20px;color:var(--text-dark);font-size:18px;">
+                    <i class="fas fa-info-circle"></i> Video Information
+                </h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">ID:</span>
+                    <span class="detail-value">{{ video.id }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Title:</span>
+                    <span class="detail-value">{{ video.title|default:"-" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Description:</span>
+                    <span class="detail-value">{{ video.description|default:"-" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Category:</span>
+                    <span class="detail-value">
+                        {% if video.categories %}
+                            <span style="display:inline-block;padding:4px 12px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:13px;">
+                                {{ video.categories.name }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Video Type:</span>
+                    <span class="detail-value">
+                        {% if video.youtube %}
+                            <span style="display:inline-flex;align-items:center;gap:6px;color:#CC0000;">
+                                <i class="fab fa-youtube"></i> YouTube Video
+                            </span>
+                        {% elif video.media %}
+                            <span style="display:inline-flex;align-items:center;gap:6px;color:#1976D2;">
+                                <i class="fas fa-file-video"></i> Uploaded Video
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Media/YouTube Details -->
+            <div class="detail-card" style="background:white;padding:25px;border-radius:12px;border:1px solid var(--gray-200);">
+                <h3 style="margin-bottom:20px;color:var(--text-dark);font-size:18px;">
+                    {% if video.youtube %}
+                        <i class="fab fa-youtube"></i> YouTube Details
+                    {% else %}
+                        <i class="fas fa-file"></i> File Details
+                    {% endif %}
+                </h3>
+                
+                {% if video.youtube %}
+                    <div class="detail-row">
+                        <span class="detail-label">YouTube URL:</span>
+                        <span class="detail-value" style="word-break:break-all;">
+                            <a href="{{ video.youtube.file_path }}" target="_blank" style="color:var(--primary);">
+                                {{ video.youtube.file_path|truncatechars:50 }}
+                            </a>
+                        </span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Thumbnail:</span>
+                        <span class="detail-value">
+                            {% if video.youtube.thumb_file_path %}
+                                <img src="{{ video.youtube.thumb_file_path }}" 
+                                     style="max-width:200px;border-radius:8px;margin-top:10px;" 
+                                     alt="Thumbnail">
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+                {% elif video.media %}
+                    <div class="detail-row">
+                        <span class="detail-label">File Name:</span>
+                        <span class="detail-value">{{ video.media.file_name|default:"-" }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">File Type:</span>
+                        <span class="detail-value">{{ video.media.file_type|upper|default:"-" }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">File Size:</span>
+                        <span class="detail-value">{{ video.media.file_size|default:"-" }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Dimensions:</span>
+                        <span class="detail-value">{{ video.media.dimensions|default:"-" }}</span>
+                    </div>
+                {% else %}
+                    <p style="color:var(--gray-500);">No media details available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="detail-card" style="background:white;padding:25px;border-radius:12px;border:1px solid var(--gray-200);margin-top:30px;">
+            <h3 style="margin-bottom:20px;color:var(--text-dark);font-size:18px;">
+                <i class="fas fa-clock"></i> Metadata
+            </h3>
+            
+            <div class="metadata-grid" style="display:grid;grid-template-columns:repeat(2, 1fr);gap:20px;">
+                <div class="detail-row">
+                    <span class="detail-label">Created By:</span>
+                    <span class="detail-value">{{ video.created_by.username|default:"-" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Created At:</span>
+                    <span class="detail-value">{{ video.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Updated By:</span>
+                    <span class="detail-value">{{ video.updated_by.username|default:"-" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Updated At:</span>
+                    <span class="detail-value">{{ video.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    min-width: 140px;
+    flex-shrink: 0;
+}
+
+.detail-value {
+    color: var(--text-light);
+    flex: 1;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--gray-200);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-300);
+}
+</style>
+
+{% endblock %}

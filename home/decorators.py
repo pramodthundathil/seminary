@@ -6,7 +6,7 @@ def role_redirection(view_func):
     def wrapper_func(request, *args, **kwargs):
         if request.user.is_authenticated:
             try:
-                role = request.user.user_roles.all()[0].role_id.name
+                role = request.user.user_roles.all()[0].role.name
             except:
                 role = None
             print(role,"-------------------------------")

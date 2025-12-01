@@ -1,0 +1,103 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Category Details</h1>
+        <div>
+            <a href="{% url 'category_edit' category.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'category_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container" style="max-width:900px;margin:0 auto;">
+        {% if category.media and category.media.file_path %}
+        <div class="detail-preview">
+            <img src="{{ category.media.file_path.url }}" alt="{{ category.name }}" style="max-width:100%;border-radius:12px;">
+        </div>
+        {% endif %}
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">ID</div>
+                <div class="detail-value">{{ category.id }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Code</div>
+                <div class="detail-value">{{ category.code }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Name</div>
+                <div class="detail-value">{{ category.name }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Type</div>
+                <div class="detail-value">{{ category.type|default:"N/A" }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Parent ID</div>
+                <div class="detail-value">{{ category.parent_id }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    {% if category.status %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if category.table_color %}
+            <div class="detail-item">
+                <div class="detail-label">Table Color</div>
+                <div class="detail-value">
+                    <span style="display:inline-block;width:30px;height:20px;background:{{ category.table_color }};border:1px solid #ccc;border-radius:4px;vertical-align:middle;"></span>
+                    {{ category.table_color }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="detail-item">
+                <div class="detail-label">Created At</div>
+                <div class="detail-value">{{ category.created_at|date:"Y-m-d H:i" }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">{{ category.created_by.username }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Updated At</div>
+                <div class="detail-value">{{ category.updated_at|date:"Y-m-d H:i" }}</div>
+            </div>
+        </div>
+
+        {% if category.description %}
+        <div style="margin-top: 20px; padding: 16px; background: var(--gray-50); border-radius: 8px;">
+            <div class="detail-label">Description</div>
+            <p style="margin: 10px 0 0 0; color: var(--gray-900); line-height: 1.6;">{{ category.description }}</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="{% url 'category_delete' category.id %}" class="btn btn-danger" 
+               onclick="return confirm('Are you sure you want to delete this category?')">
+                <i class="fas fa-trash"></i> Delete Category
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

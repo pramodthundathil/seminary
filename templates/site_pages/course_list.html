@@ -1,0 +1,395 @@
+{% extends "site_pages/index.html" %}
+{% load static %}
+{% block content %}
+<style>
+    /*course section*/
+
+    .courses-section {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #d7eaff;
+        /* light blue background */
+        padding: 60px 20px;
+        /* spacing so cards don't touch edges */
+        border-radius: 0;
+        /* optional: soft rounded corners */
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+       
+    margin-top: -120px !important;   /* ★ lift upward behind navbar */
+    padding-top: 150px !important;   /* ★ push content down again */
+    }
+
+
+
+nav.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+    .section-title {
+        font-size: 35px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-top: 50px !important;
+        margin-bottom: 20px !important;
+        text-align: center;
+        text-decoration: none !important;
+        border: none !important;
+        padding-top: 15px;
+    }
+
+    .section-title::after,
+    .section-title::before {
+        content: none !important;
+        /* removes decorative line under title */
+    }
+
+    .courses-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .course-card {
+        position: relative;
+        width: 360px;
+        min-height: 550px;
+        /* Ensures all cards have same height */
+        padding: 40px 30px 30px;
+        border-radius: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        overflow: visible !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .course-blue {
+        background: linear-gradient(135deg, #6aadaa 0%, #c8e6e3 100%);
+    }
+
+    .course-green {
+        background: linear-gradient(135deg, #7cca7c 0%, #c1e1c1 100%);
+    }
+
+    .course-purple {
+        background: linear-gradient(135deg, #9eaec6 0%, #d8e3f0 100%);
+    }
+
+    .badge-icon {
+        position: absolute;
+        top: -60px;
+        /* moves badge upward to the edge */
+        left: -45px;
+        /* moves badge to the left edge */
+        width: 70px;
+        height: 70px;
+
+        background: #d9d9d9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+        z-index: 10;
+        overflow: visible !important;
+        position: relative;
+    }
+
+    .badge-icon i {
+        font-size: 32px;
+        color: #ffc107;
+    }
+
+    /* INNER LIGHT BLUE CIRCLE */
+    .badge-icon::after {
+        content: "";
+        position: absolute;
+        width: 55px;
+        /* Inner circle size */
+        height: 55px;
+        background: white;
+        /* Light blue shade */
+        border-radius: 50%;
+        z-index: -1;
+        /* Keep it behind the image/icon */
+    }
+
+    .course-img-container {
+        width: 80%;
+        height: 200px;
+        background: white;
+        border-radius: 40px;
+        overflow: hidden;
+        margin: -50px auto 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .course-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        align-items: center;
+    }
+
+    .course-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .course-desc {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #34495e;
+        margin-bottom: 25px;
+        text-align: left;
+        flex-grow: 1;
+        /* Pushes button to bottom */
+    }
+
+    .btn-join {
+        background: #4169e1;
+        color: white;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        align-self: center;
+        margin-top: auto;
+        /* Keeps button at bottom */
+    }
+
+    .btn-join:hover {
+        background: #3154c4;
+    }
+
+    .btn-show-more {
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start));
+        color: white;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .btn-show-more:hover {
+        background: #e6574c
+    }
+
+
+    /* Connector dots */
+    .dot-connector {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-top: 150px;
+    }
+
+    .dot-cyan {
+        background: #00bcd4;
+    }
+
+    .dot-red {
+        background: #f44336;
+    }
+
+    /* Add different gradient colors for each card */
+    .course-card:nth-child(4n+1) {
+        background: linear-gradient(135deg, #6aadaa 0%, #c8e6e3 100%);
+    }
+
+    .course-card:nth-child(4n+2) {
+        background: linear-gradient(135deg, #7cca7c 0%, #c1e1c1 100%);
+    }
+
+    .course-card:nth-child(4n+3) {
+        background: linear-gradient(135deg, #9eaec6 0%, #d8e3f0 100%);
+    }
+
+    .course-card:nth-child(4n+4) {
+        background: linear-gradient(135deg, #f9a8a8 0%, #fdd8d8 100%);
+    }
+
+    @media (max-width: 1200px) {
+        .courses-container {
+            gap: 20px;
+        }
+
+        .dot-connector {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 36px;
+        }
+
+        .course-card {
+            width: 100%;
+            max-width: 400px;
+            min-height: auto;
+        }
+    }
+
+    /* ================================
+        Courses Section Responsiveness
+        ================================ */
+    @media (max-width: 1200px) {
+        .courses-container {
+            gap: 20px;
+        }
+
+        .course-card {
+            width: 320px;
+        }
+
+        .dot-connector {
+            display: none;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .courses-section {
+            padding: 50px 20px;
+        }
+
+        .course-card {
+            width: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 28px;
+        }
+
+        .course-card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .badge-icon {
+            width: 60px;
+            height: 60px;
+            top: -50px;
+            left: -35px;
+        }
+
+        .badge-icon i {
+            font-size: 28px;
+        }
+
+        .badge-icon::after {
+            width: 48px;
+            height: 48px;
+        }
+
+        .course-img-container {
+            height: 180px;
+        }
+
+        .course-title {
+            font-size: 18px;
+        }
+
+        .course-desc {
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .courses-section {
+            padding: 40px 15px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            padding-top: 10px;
+        }
+
+        .course-card {
+            padding: 35px 20px 25px;
+            border-radius: 30px;
+        }
+
+        .btn-join {
+            padding: 10px 30px;
+            font-size: 14px;
+        }
+    }
+</style>
+<section class="courses-section">
+    <h2 class="section-title">Our Courses</h2>
+
+    <div class="courses-container">
+
+        {% for course in courses %}
+        <div class="course-card">
+
+            <!-- Award Icon -->
+            <div class="badge-icon">
+                <i class="fas fa-award"></i>
+            </div>
+
+            <!-- Image -->
+            <div class="course-img-container">
+                {% if course.media %}
+                <img src="{{ course.media.file.url }}" alt="{{ course.course_name }}" class="course-img">
+                {% else %}
+                <img src="{% static 'img/bth.jpg' %}" alt="{{ course.course_name }}" class="course-img">
+                {% endif %}
+            </div>
+
+            <!-- Course Name -->
+            <h3 class="course-title">{{ course.course_name }}</h3>
+
+            <!-- Short Description -->
+            <p class="course-desc">
+                {{ course.description|striptags|truncatewords:30 }}
+            </p>
+
+            <!-- View Details Button -->
+            <button class="btn-join" onclick="window.location.href='{% url 'course_detail' course.course_code %}'">
+                View Details
+            </button>
+
+        </div>
+
+        <!-- Dots Between Cards (Skip for every 3rd card to create proper spacing) -->
+        {% if not forloop.last %}
+            {% cycle 'cyan' 'red' 'cyan' as dot_color silent %}
+            <div class="dot-connector dot-{{ dot_color }}"></div>
+        {% endif %}
+
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

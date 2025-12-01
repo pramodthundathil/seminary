@@ -1,292 +1,1043 @@
-{% extends "site_pages/index.html" %}
-
-{% block title %}
-<title>Payment - Trinity Theological Seminary</title>
-{% endblock %}
-
+{% extends 'site_pages/index.html' %}
 {% block content %}
-<!-- Payment Form Section -->
-<section class="about-section payment-section">
-    <div class="container">
-        <h2 class="section-title">Make a <span class="highlight">Payment</span></h2>
 
-        <div class="intro-section">
-            <p>
-                Complete the form below to process your payment. All fields marked with <span class="required">*</span> are required. 
-                For questions regarding payments, please contact our admissions office.
-            </p>
+<style>
+    .application-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    body {
+    background: #d7eaff !important;
+    margin: 0;
+    padding: 0;
+}
+ 
+/* Application Container - Full width blue background */
+.application-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    background: transparent; /* Remove container background */
+    min-height: 100vh;
+    margin-top: -120px !important;
+    padding-top: 180px !important;
+    
+}
+/* Make navbar transparent */
+nav.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+.application-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-top: 20px;
+}
+
+.application-header h1 {
+    color: var(--dark-navy);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.application-header p {
+    color: var(--text-gray);
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .application-container {
+        margin-top: -80px !important;
+        padding-top: 140px !important;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .application-header h1 {
+        font-size: 2rem;
+    }
+
+    .application-header p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .application-container {
+        padding-top: 130px !important;
+    }
+
+    .application-header h1 {
+        font-size: 1.75rem;
+    }
+}
+
+    .application-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .application-header h1 {
+        color: var(--dark-navy);
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .application-header p {
+        color: var(--text-gray);
+        font-size: 1.1rem;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+    }
+
+
+    .progress-tracker {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        padding: 0 20px;
+        position: relative;
+    }
+
+    .progress-tracker::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+        background: white;
+        padding: 0 10px;
+    }
+
+    .progress-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #9ca3af;
+        margin-bottom: 8px;
+        transition: all 0.3s;
+    }
+    /* Progress tracker */
+.progress-tracker {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding: 0 20px;
+    position: relative;
+    background: transparent;
+}
+
+.progress-tracker::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e5e7eb;
+    z-index: 0;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    background: transparent; /* Remove white background */
+    padding: 0; /* Remove padding */
+}
+
+.progress-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+}
+
+.progress-step.active .progress-circle {
+    background: var(--primary-cyan);
+    color: white;
+}
+
+.progress-step.completed .progress-circle {
+    background: #10b981;
+    color: white;
+}
+
+.progress-label {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    text-align: center;
+    background: transparent; /* Ensure label background is transparent */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .progress-tracker {
+        padding: 0 10px;
+    }
+
+    .progress-label {
+        font-size: 0.75rem;
+    }
+}
+
+    .progress-step.active .progress-circle {
+        background: var(--primary-cyan);
+        color: white;
+    }
+
+    .progress-step.completed .progress-circle {
+        background: #10b981;
+        color: white;
+    }
+
+    .progress-label {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        text-align: center;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+    }
+
+    .section-title {
+        color: var(--dark-navy);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 50px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--primary-cyan);
+        gap: 12px;  
+         display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 12px;
+    text-align: center;
+    }
+    
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-row.two-cols {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row.three-cols {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 15px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s;
+        color: #374151;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+    }
+
+    .form-control.error {
+        border-color: #ef4444;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 16px;
+        background: #f9fafb;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .file-upload-label:hover {
+        border-color: var(--primary-cyan);
+        background: var(--light-cyan);
+    }
+
+    .file-upload-label i {
+        margin-right: 8px;
+        color: var(--primary-cyan);
+    }
+
+    .phone-group {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 10px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+         margin-bottom: 60px; /* Add space at bottom */
+    padding-bottom: 40px; /* Extra padding for better spacing */
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: #64748B!important;
+        color: white
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .info-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    /* Icon style */
+.section-icon {
+    font-size: 28px;
+    color: #007bff;          /* Main theme color */
+    min-width: 28px;         /* Prevent shifting if icons vary */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Optional: Hover Color Effect */
+.section-title:hover .section-icon {
+    color: #0056b3;
+}
+
+/* Responsive for small screens */
+@media (max-width: 576px) {
+    .section-title {
+        font-size: 24px;
+    }
+    .section-icon {
+        font-size: 24px;
+    }
+}
+
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .form-row.two-cols,
+        .form-row.three-cols {
+            grid-template-columns: 1fr;
+        }
+
+        .phone-group {
+            grid-template-columns: 100px 1fr;
+        }
+
+        .progress-tracker {
+            padding: 0 10px;
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+        }
+
+        .application-header h1 {
+            font-size: 2rem;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="application-container">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="application-header">
+        <h1>Student Application Form</h1>
+        <p>Complete all sections to submit your application</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Progress Tracker -->
+    <div class="progress-tracker">
+        <div class="progress-step active">
+            <div class="progress-circle">1</div>
+            <span class="progress-label">Personal Info</span>
         </div>
-
-        <!-- Payment Form -->
-        <div class="payment-form-wrapper">
-            
-            <form method="POST" action="" class="payment-form" novalidate>
-                {% csrf_token %}
-
-                <!-- Personal Information Section -->
-                <div class="form-section">
-                    <h3 class="form-section-title">Personal Information</h3>
-                    
-                    <!-- Row 1: Full Name -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="full_name">Full Name <span class="required">*</span></label>
-                            <input 
-                                type="text" 
-                                id="full_name" 
-                                name="full_name" 
-                                placeholder="Enter your full name"
-                                autocomplete="name"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email Address <span class="required">*</span></label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="example@email.com"
-                                autocomplete="email"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                    </div>
-
-                    <!-- Row 2: Contact Number and Student ID -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contact">Contact Number <span class="required">*</span></label>
-                            <input 
-                                type="tel" 
-                                id="contact" 
-                                name="contact" 
-                                placeholder="(555) 123-4567"
-                                autocomplete="tel"
-                                required
-                                aria-required="true">
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="student_id">Student ID <span class="optional-text">(if applicable)</span></label>
-                            <input 
-                                type="text" 
-                                id="student_id" 
-                                name="student_id"
-                                placeholder="Enter your student ID">
-                            <small class="field-help">Leave blank if you're not currently enrolled</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Details Section -->
-                <div class="form-section">
-                    <h3 class="form-section-title">Payment Details</h3>
-                    
-                    <!-- Row 3: Payment Type and Course -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="payment_type">Payment Type <span class="required">*</span></label>
-                            <select 
-                                id="payment_type" 
-                                name="payment_type" 
-                                required
-                                aria-required="true">
-                                <option value="">--- Select Payment Type ---</option>
-                                <option value="tuition">Tuition Fee</option>
-                                <option value="enrollment">Enrollment Fee</option>
-                                <option value="application">Application Fee</option>
-                                <option value="course">Course Fee</option>
-                                <option value="library">Library Fee</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="course">Course/Program</label>
-                            <select id="course" name="course">
-                                <option value="">--- Select Program Level ---</option>
-                                <option value="undergraduate">Undergraduate Level</option>
-                                <option value="masters">Master's Level</option>
-                                <option value="doctoral">Doctoral Level</option>
-                                <option value="certificate">Certificate Program</option>
-                                <option value="continuing">Continuing Education</option>
-                            </select>
-                            <small class="field-help">Select if payment is for a specific program</small>
-                        </div>
-                    </div>
-
-                    <!-- Row 4: Amount -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="amount">Payment Amount <span class="required">*</span></label>
-                            <div class="amount-input-wrapper">
-                                <span class="currency-symbol">$</span>
-                                <input 
-                                    type="number" 
-                                    id="amount" 
-                                    name="amount" 
-                                    step="0.01" 
-                                    min="1"
-                                    placeholder="0.00"
-                                    required
-                                    aria-required="true">
-                            </div>
-                            <span class="error-message" role="alert"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Additional Information Section -->
-                <div class="form-section">
-                    <h3 class="form-section-title">Additional Information</h3>
-                    
-                    <!-- Message/Notes -->
-                    <div class="form-group full-width">
-                        <label for="message">Message/Notes <span class="optional-text">(Optional)</span></label>
-                        <textarea 
-                            id="message" 
-                            name="message" 
-                            rows="5"
-                            placeholder="Add any additional information or special instructions here..."
-                            maxlength="500"></textarea>
-                        <small class="character-count">0 / 500 characters</small>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="form-submit">
-                    <button type="submit" class="btn-submit">
-                        <span class="btn-text">PROCEED TO PAYMENT</span>
-                        <span class="btn-icon">→</span>
-                    </button>
-                </div>
-            </form>
+        <div class="progress-step">
+            <div class="progress-circle">2</div>
+            <span class="progress-label">Contact</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-circle">3</div>
+            <span class="progress-label">Education</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-circle">4</div>
+            <span class="progress-label">References</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-circle">5</div>
+            <span class="progress-label">Documents</span>
         </div>
     </div>
-</section>
+
+    <form method="POST" enctype="multipart/form-data" id="studentApplicationForm">
+        {% csrf_token %}
+
+        <!-- Section 1: Personal Information -->
+        <div class="form-section">
+            <h2 class="section-title"><i class="section-icon fa fa-user"></i>Personal Information</h2>
+            
+            <div class="form-row three-cols">
+                <div class="form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" name="first_name" class="form-control" value="{{ request.POST.first_name|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Middle Name</label>
+                    <input type="text" name="middle_name" class="form-control" value="{{ request.POST.middle_name|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ request.POST.last_name|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="email" class="form-control" value="{{ request.POST.email|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth <span class="required">*</span></label>
+                    <input type="date" name="date_of_birth" class="form-control" value="{{ request.POST.date_of_birth|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Gender <span class="required">*</span></label>
+                    <select name="gender" class="form-select" required>
+                        <option value="">Select Gender</option>
+                        <option value="male" {% if request.POST.gender == 'male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if request.POST.gender == 'female' %}selected{% endif %}>Female</option>
+                        <option value="other" {% if request.POST.gender == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Citizenship <span class="required">*</span></label>
+                    <select name="citizenship" class="form-select" required>
+                        <option value="">Select Country</option>
+                        <option value="1" {% if request.POST.citizenship == '1' %}selected{% endif %}>United States</option>
+                        <option value="2" {% if request.POST.citizenship == '2' %}selected{% endif %}>India</option>
+                        <option value="3" {% if request.POST.citizenship == '3' %}selected{% endif %}>United Kingdom</option>
+                        <!-- Add more country options -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Marital Status</label>
+                    <select name="mrital_status" class="form-select">
+                        <option value="">Select Status</option>
+                        <option value="single" {% if request.POST.mrital_status == 'single' %}selected{% endif %}>Single</option>
+                        <option value="married" {% if request.POST.mrital_status == 'married' %}selected{% endif %}>Married</option>
+                        <option value="divorced" {% if request.POST.mrital_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                        <option value="widowed" {% if request.POST.mrital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Spouse Name</label>
+                    <input type="text" name="spouse_name" class="form-control" value="{{ request.POST.spouse_name|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Number of Children</label>
+                    <input type="number" name="children" class="form-control" value="{{ request.POST.children|default:'' }}" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Profile Photo</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="photo" class="file-upload-input" accept="image/*">
+                        <div class="file-upload-label">
+                            <i class="bi bi-upload"></i>
+                            <span>Upload Photo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact Information -->
+        <div class="form-section">
+            <h2 class="section-title"> <i class="fa fa-address-book section-icon"></i>Contact Information</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <div class="phone-group">
+                        <select name="phone_code" class="form-select" required>
+                            <option value="">Code</option>
+                            <option value="1" {% if request.POST.phone_code == '1' %}selected{% endif %}>+1</option>
+                            <option value="44" {% if request.POST.phone_code == '44' %}selected{% endif %}>+44</option>
+                            <option value="91" {% if request.POST.phone_code == '91' %}selected{% endif %}>+91</option>
+                        </select>
+                        <input type="tel" name="phone_number" class="form-control" value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mailing Address <span class="required">*</span></label>
+                    <input type="text" name="mailing_address" class="form-control" value="{{ request.POST.mailing_address|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>City <span class="required">*</span></label>
+                    <input type="text" name="city" class="form-control" value="{{ request.POST.city|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>State/Province <span class="required">*</span></label>
+                    <input type="text" name="state" class="form-control" value="{{ request.POST.state|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Country <span class="required">*</span></label>
+                    <select name="country" class="form-select" required>
+                        <option value="">Select Country</option>
+                        <option value="1" {% if request.POST.country == '1' %}selected{% endif %}>United States</option>
+                        <option value="2" {% if request.POST.country == '2' %}selected{% endif %}>India</option>
+                        <option value="3" {% if request.POST.country == '3' %}selected{% endif %}>United Kingdom</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Zip/Postal Code <span class="required">*</span></label>
+                    <input type="text" name="zip_code" class="form-control" value="{{ request.POST.zip_code|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Timezone <span class="required">*</span></label>
+                    <select name="timezone" class="form-select" required>
+                        <option value="">Select Timezone</option>
+                        <option value="America/New_York" {% if request.POST.timezone == 'America/New_York' %}selected{% endif %}>Eastern Time (ET)</option>
+                        <option value="America/Chicago" {% if request.POST.timezone == 'America/Chicago' %}selected{% endif %}>Central Time (CT)</option>
+                        <option value="America/Denver" {% if request.POST.timezone == 'America/Denver' %}selected{% endif %}>Mountain Time (MT)</option>
+                        <option value="America/Los_Angeles" {% if request.POST.timezone == 'America/Los_Angeles' %}selected{% endif %}>Pacific Time (PT)</option>
+                        <option value="Asia/Kolkata" {% if request.POST.timezone == 'Asia/Kolkata' %}selected{% endif %}>India Standard Time (IST)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Educational & Ministry Background -->
+        <div class="form-section">
+            <h2 class="section-title"> <i class="fa fa-graduation-cap section-icon"></i>Educational & Ministry Background</h2>
+            
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Highest Education <span class="required">*</span></label>
+                    <select name="highest_education" class="form-select" required>
+                        <option value="">Select Level</option>
+                        <option value="high_school" {% if request.POST.highest_education == 'high_school' %}selected{% endif %}>High School</option>
+                        <option value="associate" {% if request.POST.highest_education == 'associate' %}selected{% endif %}>Associate Degree</option>
+                        <option value="bachelor" {% if request.POST.highest_education == 'bachelor' %}selected{% endif %}>Bachelor's Degree</option>
+                        <option value="master" {% if request.POST.highest_education == 'master' %}selected{% endif %}>Master's Degree</option>
+                        <option value="doctorate" {% if request.POST.highest_education == 'doctorate' %}selected{% endif %}>Doctorate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Course Applied For <span class="required">*</span></label>
+                    <select name="course_applied" class="form-select" required>
+                        <option value="">Select Course</option>
+                        <option value="1" {% if request.POST.course_applied == '1' %}selected{% endif %}>Course 1</option>
+                        <option value="2" {% if request.POST.course_applied == '2' %}selected{% endif %}>Course 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Associate Degree</label>
+                    <select name="associate_degree" class="form-select">
+                        <option value="">Select Degree</option>
+                        <option value="1" {% if request.POST.associate_degree == '1' %}selected{% endif %}>Degree 1</option>
+                        <option value="2" {% if request.POST.associate_degree == '2' %}selected{% endif %}>Degree 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Starting Year <span class="required">*</span></label>
+                    <input type="number" name="starting_year" class="form-control" value="{{ request.POST.starting_year|default:'' }}" min="2020" max="2030" required>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Preferred Language <span class="required">*</span></label>
+                    <select name="language" class="form-select" required>
+                        <option value="">Select Language</option>
+                        <option value="1" {% if request.POST.language == '1' %}selected{% endif %}>English</option>
+                        <option value="2" {% if request.POST.language == '2' %}selected{% endif %}>Spanish</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ministerial Status</label>
+                    <select name="ministerial_status" class="form-select">
+                        <option value="">Select Status</option>
+                        <option value="ordained" {% if request.POST.ministerial_status == 'ordained' %}selected{% endif %}>Ordained Minister</option>
+                        <option value="licensed" {% if request.POST.ministerial_status == 'licensed' %}selected{% endif %}>Licensed Minister</option>
+                        <option value="lay" {% if request.POST.ministerial_status == 'lay' %}selected{% endif %}>Lay Minister</option>
+                        <option value="none" {% if request.POST.ministerial_status == 'none' %}selected{% endif %}>None</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Church Affiliation</label>
+                    <input type="text" name="church_affiliation" class="form-control" value="{{ request.POST.church_affiliation|default:'' }}" placeholder="Enter your church name">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Financial Information -->
+        <div class="form-section">
+            <h2 class="section-title"> <i class="fa fa-wallet section-icon"></i>Financial Information</h2>
+            
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Scholarship Needed? <span class="required">*</span></label>
+                    <select name="scholarship_needed" class="form-select" required>
+                        <option value="">Select Option</option>
+                        <option value="yes" {% if request.POST.scholarship_needed == 'yes' %}selected{% endif %}>Yes</option>
+                        <option value="no" {% if request.POST.scholarship_needed == 'no' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Currently Employed? <span class="required">*</span></label>
+                    <select name="currently_employed" class="form-select" required>
+                        <option value="">Select Option</option>
+                        <option value="yes" {% if request.POST.currently_employed == 'yes' %}selected{% endif %}>Yes</option>
+                        <option value="no" {% if request.POST.currently_employed == 'no' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Annual Income Range</label>
+                    <select name="income" class="form-select">
+                        <option value="">Select Range</option>
+                        <option value="0-25000" {% if request.POST.income == '0-25000' %}selected{% endif %}>$0 - $25,000</option>
+                        <option value="25000-50000" {% if request.POST.income == '25000-50000' %}selected{% endif %}>$25,000 - $50,000</option>
+                        <option value="50000-75000" {% if request.POST.income == '50000-75000' %}selected{% endif %}>$50,000 - $75,000</option>
+                        <option value="75000+" {% if request.POST.income == '75000+' %}selected{% endif %}>$75,000+</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Affordable Amount per Semester</label>
+                    <input type="text" name="affordable_amount" class="form-control" value="{{ request.POST.affordable_amount|default:'' }}" placeholder="Enter amount">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: References -->
+        <div class="form-section">
+            <h2 class="section-title"> <i class="fa fa-users section-icon"></i>References</h2>
+            <p class="info-text mb-4">Please provide at least two references who can speak to your character and qualifications.</p>
+            
+            <!-- Reference 1 -->
+            <h5 style="color: var(--dark-navy); margin-bottom: 15px;">Reference 1 <span class="required">*</span></h5>
+            <div class="form-row three-cols">
+                <div class="form-group">
+                    <label>Name <span class="required">*</span></label>
+                    <input type="text" name="reference_name1" class="form-control" value="{{ request.POST.reference_name1|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="reference_email1" class="form-control" value="{{ request.POST.reference_email1|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone <span class="required">*</span></label>
+                    <input type="tel" name="reference_phone1" class="form-control" value="{{ request.POST.reference_phone1|default:'' }}" required>
+                </div>
+            </div>
+
+            <!-- Reference 2 -->
+            <h5 style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 2 <span class="required">*</span></h5>
+            <div class="form-row three-cols">
+                <div class="form-group">
+                    <label>Name <span class="required">*</span></label>
+                    <input type="text" name="reference_name2" class="form-control" value="{{ request.POST.reference_name2|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="reference_email2" class="form-control" value="{{ request.POST.reference_email2|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone <span class="required">*</span></label>
+                    <input type="tel" name="reference_phone2" class="form-control" value="{{ request.POST.reference_phone2|default:'' }}" required>
+                </div>
+            </div>
+
+            <!-- Reference 3 -->
+            <h5 style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 3 (Optional)</h5>
+            <div class="form-row three-cols">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="reference_name3" class="form-control" value="{{ request.POST.reference_name3|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="reference_email3" class="form-control" value="{{ request.POST.reference_email3|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="reference_phone3" class="form-control" value="{{ request.POST.reference_phone3|default:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Documents & Certificates -->
+        <div class="form-section">
+            <h2 class="section-title"><i class="fa fa-file-alt section-icon"></i>Documents & Certificates</h2>
+            <p class="info-text mb-4">Upload relevant certificates, transcripts, or other supporting documents.</p>
+            
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Certificate 1</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="certificate1" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-upload-label">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Upload Document</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Certificate 2</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="certificate2" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-upload-label">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Upload Document</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Certificate 3</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="certificate3" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-upload-label">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Upload Document</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Certificate 4</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="certificate4" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-upload-label">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Upload Document</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Certificate 5</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" name="certificate5" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="file-upload-label">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <span>Upload Documents</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Additional Information -->
+        <div class="form-section">
+            <h2 class="section-title"> <i class="fa fa-info-circle section-icon"></i>Additional Information</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Personal Statement / Message</label>
+                    <textarea name="message" class="form-control" rows="6" placeholder="Tell us about yourself, your goals, and why you want to join this program...">{{ request.POST.message|default:'' }}</textarea>
+                    <small class="info-text">Share your motivations, career goals, and what you hope to achieve through this program.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="btn-group">
+            <button type="button" class="btn-secondary" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn-primary" id="submitBtn">Submit Application</button>
+        </div>
+    </form>
+</div>
 
 <script>
-// Form validation and UX enhancements
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.payment-form');
-    const messageTextarea = document.getElementById('message');
-    const charCount = document.querySelector('.character-count');
-    
-    // Character counter for textarea
-    if (messageTextarea && charCount) {
-        messageTextarea.addEventListener('input', function() {
-            const count = this.value.length;
-            charCount.textContent = `${count} / 500 characters`;
-            if (count > 450) {
-                charCount.style.color = '#dc3545';
+    // File upload label update
+    document.querySelectorAll('.file-upload-input').forEach(input => {
+        input.addEventListener('change', function(e) {
+            const label = this.parentElement.querySelector('.file-upload-label span');
+            if (this.files.length > 0) {
+                label.textContent = this.files[0].name;
+            }
+        });
+    });
+
+    // Form submission with loading
+    document.getElementById('studentApplicationForm').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
             } else {
-                charCount.style.color = '#666';
+                field.classList.remove('error');
             }
         });
-    }
-    
-    // Real-time validation
-    const inputs = form.querySelectorAll('input[required], select[required]');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            validateField(this);
-        });
-        
-        input.addEventListener('input', function() {
-            if (this.classList.contains('error')) {
-                validateField(this);
-            }
-        });
-    });
-    
-    // Form submission validation
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        let isValid = true;
-        
-        inputs.forEach(input => {
-            if (!validateField(input)) {
-                isValid = false;
-            }
-        });
-        
-        if (isValid) {
-            // Submit the form
-            this.submit();
-        } else {
-            // Scroll to first error
-            const firstError = form.querySelector('.error');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
-    
-    function validateField(field) {
-        const errorSpan = field.parentElement.querySelector('.error-message');
-        let isValid = true;
-        let errorMessage = '';
-        
-        if (field.hasAttribute('required') && !field.value.trim()) {
-            isValid = false;
-            errorMessage = 'This field is required';
-        } else if (field.type === 'email' && field.value) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(field.value)) {
-                isValid = false;
-                errorMessage = 'Please enter a valid email address';
-            }
-        } else if (field.type === 'number' && field.value) {
-            if (parseFloat(field.value) < 1) {
-                isValid = false;
-                errorMessage = 'Amount must be at least $1.00';
-            }
-        } else if (field.id === 'full_name' && field.value.trim()) {
-            // Basic full name validation - should have at least 2 words
-            const nameParts = field.value.trim().split(/\s+/);
-            if (nameParts.length < 2) {
-                isValid = false;
-                errorMessage = 'Please enter your full name (first and last name)';
-            }
-        }
-        
+
         if (!isValid) {
-            field.classList.add('error');
-            if (errorSpan) {
-                errorSpan.textContent = errorMessage;
-                errorSpan.style.display = 'block';
-            }
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
-            field.classList.remove('error');
-            if (errorSpan) {
-                errorSpan.textContent = '';
-                errorSpan.style.display = 'none';
-            }
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
         }
+    });
+
+    // Progress tracking on scroll
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.form-section');
+        const progressSteps = document.querySelectorAll('.progress-step');
         
-        return isValid;
-    }
-    
-    // Phone number formatting (basic)
-    const phoneInput = document.getElementById('contact');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) value = value.slice(0, 10);
-            
-            if (value.length >= 6) {
-                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6)}`;
-            } else if (value.length >= 3) {
-                e.target.value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
-            } else {
-                e.target.value = value;
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                progressSteps.forEach((step, stepIndex) => {
+                    if (stepIndex <= index) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
             }
         });
-    }
-});
+    });
 </script>
 
 {% endblock %}

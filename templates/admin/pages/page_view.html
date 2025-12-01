@@ -1,0 +1,142 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>View Page</h1>
+        <div>
+            <a href="{% url 'page_edit' page.id %}" class="btn btn-primary" style="margin-right:10px;">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'pages_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="view-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 style="color:var(--text-dark);margin-bottom:5px;">{{ page.title }}</h2>
+                <p style="color:var(--text-light);font-size:14px;">Code: <strong>{{ page.code }}</strong></p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if page.status %}
+                    <span class="status-badge status-active" style="font-size:16px;padding:8px 16px;">Active</span>
+                {% else %}
+                    <span class="status-badge status-inactive" style="font-size:16px;padding:8px 16px;">Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-4">
+            {% if page.media %}
+            <div class="col-md-4">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">Featured Image</h5>
+                <img src="{{ page.media.file_path.url }}" 
+                     style="width:100%;border-radius:8px;border:2px solid var(--gray-200);" 
+                     alt="{{ page.title }}">
+            </div>
+            {% endif %}
+
+            <div class="col-md-8">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">Description</h5>
+                <div style="padding:15px;background:var(--gray-50);border-radius:8px;line-height:1.8;">
+                    {{ page.description|safe|default:"No description provided" }}
+                </div>
+            </div>
+        </div>
+
+        {% if page.video or page.youtube %}
+        <hr>
+        <div class="row mb-4">
+            {% if page.video %}
+            <div class="col-md-6">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">Video</h5>
+                <video controls style="width:100%;border-radius:8px;border:2px solid var(--gray-200);">
+                    <source src="{{ page.video.file_path.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            {% endif %}
+
+            {% if page.youtube %}
+            <div class="col-md-6">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">YouTube Video</h5>
+                <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;">
+                    <iframe src="{{ page.youtube.file_path }}" 
+                            style="position:absolute;top:0;left:0;width:100%;height:100%;border:2px solid var(--gray-200);border-radius:8px;" 
+                            frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if page.parent_id %}
+        <hr>
+        <div class="mb-4">
+            <h5 style="color:var(--text-dark);margin-bottom:10px;">Parent Page</h5>
+            <p style="padding:10px;background:var(--gray-50);border-radius:8px;">
+                <strong>{{ page.parent_id.title }}</strong> ({{ page.parent_id.code }})
+            </p>
+        </div>
+        {% endif %}
+
+        <hr>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">Button Settings</h5>
+                <ul style="list-style:none;padding:0;">
+                    <li style="padding:8px 0;border-bottom:1px solid var(--gray-200);">
+                        <i class="fas fa-arrow-up" style="color:var(--primary);margin-right:10px;"></i>
+                        Apply Button at Top: 
+                        <strong>{{ page.apply_button_top|yesno:"Yes,No" }}</strong>
+                    </li>
+                    <li style="padding:8px 0;">
+                        <i class="fas fa-arrow-down" style="color:var(--primary);margin-right:10px;"></i>
+                        Apply Button at Bottom: 
+                        <strong>{{ page.apply_button_bottom|yesno:"Yes,No" }}</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-6">
+                <h5 style="color:var(--text-dark);margin-bottom:15px;">SEO Information</h5>
+                <div style="padding:15px;background:var(--gray-50);border-radius:8px;">
+                    <p style="margin-bottom:10px;">
+                        <strong>Browser Title:</strong><br>
+                        {{ page.browser_title|default:"-" }}
+                    </p>
+                    <p style="margin-bottom:10px;">
+                        <strong>Meta Description:</strong><br>
+                        {{ page.meta_description|default:"-" }}
+                    </p>
+                    <p style="margin-bottom:0;">
+                        <strong>Meta Keywords:</strong><br>
+                        {{ page.meta_keywords|default:"-" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row" style="font-size:13px;color:var(--text-light);">
+            <div class="col-md-6">
+                <p><strong>Created:</strong> {{ page.created_at|date:"F d, Y H:i" }} by {{ page.created_by.username }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Updated:</strong> {{ page.updated_at|date:"F d, Y H:i" }} by {{ page.updated_by.username }}</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

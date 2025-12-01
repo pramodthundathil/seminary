@@ -1,0 +1,600 @@
+{% extends "site_pages/index.html" %}
+{% load static %}
+
+{% block title %}
+    <title>{{ page.browser_title|default:page.title }} - Trinity Theological Seminary</title>
+{% endblock %}
+
+{% block meta %}
+    {% if page.meta_description %}
+    <meta name="description" content="{{ page.meta_description }}">
+    {% endif %}
+    
+    {% if page.meta_keywords %}
+    <meta name="keywords" content="{{ page.meta_keywords }}">
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+   :root {
+            --primary: #00CED1;
+            --primary-dark: #1B2845;
+            --secondary: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --border: #666666;
+
+            --bg-gray: #F8FAFC;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --primary-cyan: #00CED1;
+            --light-cyan: #E0F7F7;
+            --dark-navy: #1B2845;
+            --purple-gradient-start: #A78BFA;
+            --purple-gradient-end: #C084FC;
+            --green-card: #90EE90;
+            --blue-button: #4169E1;
+            --text-gray: #666666;
+            --sidebar-width: 250px;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+
+    /* Page Wrapper */
+    .page-wrapper {
+        min-height: 100vh;
+        background: var(--bg-page);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', sans-serif;
+    }
+
+    /* Hero Banner */
+    .page-hero {
+        background: linear-gradient(135deg, var(--dark-navy) 0%, #2A4365 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.4;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-breadcrumb {
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .hero-breadcrumb a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .hero-breadcrumb a:hover {
+        color: var(--primary-cyan);
+    }
+
+    .hero-breadcrumb span {
+        margin: 0 0.5rem;
+        opacity: 0.6;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+        font-size: 1.25rem;
+        margin-top: 0.75rem;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    /* Container */
+    .content-container {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 2rem 4rem;
+    }
+
+    /* Featured Image/Video */
+    .featured-media {
+        margin: -5rem auto 3rem;
+        max-width: 1000px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .media-box {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .media-box img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        background: #000;
+    }
+
+    .video-container iframe,
+    .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Main Content */
+    .main-content {
+        background: white;
+        border-radius: 12px;
+        padding: 3.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    /* Typography */
+    .content-body {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: var(--text-dark);
+    }
+
+    .content-body h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin: 3rem 0 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid var(--primary-cyan);
+        position: relative;
+    }
+
+    .content-body h2:first-child {
+        margin-top: 0;
+    }
+
+    .content-body h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin: 2.5rem 0 1rem;
+    }
+
+    .content-body h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 2rem 0 0.875rem;
+    }
+
+    .content-body p {
+        margin-bottom: 1.5rem;
+        line-height: 1.8;
+    }
+
+    .content-body strong {
+        color: var(--dark-navy);
+        font-weight: 600;
+    }
+
+    .highlight {
+        color: var(--primary-cyan);
+        font-weight: inherit;
+    }
+
+    .content-body ul,
+    .content-body ol {
+        margin: 1.5rem 0;
+        padding-left: 2rem;
+    }
+
+    .content-body li {
+        margin-bottom: 0.75rem;
+        line-height: 1.7;
+    }
+
+    .content-body a {
+        color: var(--primary-cyan);
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .content-body a:hover {
+        border-bottom-color: var(--primary-cyan);
+    }
+
+    .content-body img {
+        max-width: 100%;
+        height: auto;
+        margin: 2.5rem 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .content-body blockquote {
+        border-left: 4px solid var(--primary-cyan);
+        padding: 1.5rem 2rem;
+        margin: 2rem 0;
+        background: #F0FDFD;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+        color: var(--text-light);
+    }
+
+    .content-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+
+    .content-body th,
+    .content-body td {
+        padding: 1rem;
+        border: 1px solid var(--border);
+        text-align: left;
+    }
+
+    .content-body th {
+        background: var(--bg-page);
+        font-weight: 600;
+        color: var(--dark-navy);
+    }
+
+    /* Apply Button */
+    .apply-cta {
+        background: linear-gradient(135deg, #E0F7F7 0%, #B8ECEC 100%);
+        border: 2px solid var(--primary-cyan);
+        border-radius: 12px;
+        padding: 2.5rem;
+        text-align: center;
+        margin: 2.5rem 0;
+    }
+
+    .apply-cta-text {
+        font-size: 1.125rem;
+        color: var(--text-dark);
+        margin-bottom: 1.25rem;
+        font-weight: 500;
+    }
+
+    .btn-apply {
+        display: inline-block;
+        padding: 1rem 3rem;
+        background: var(--primary-cyan);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.125rem;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.3);
+    }
+
+    .btn-apply:hover {
+        background: var(--dark-navy);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 206, 209, 0.4);
+        color: white;
+    }
+
+    /* Related Pages */
+    .related-section {
+        margin-top: 3rem;
+    }
+
+    .related-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .related-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin: 0 0 0.5rem;
+    }
+
+    .related-subtitle {
+        color: var(--text-light);
+        font-size: 1.125rem;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .related-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        border: 1px solid var(--border);
+    }
+
+    .related-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-cyan);
+    }
+
+    .card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-img-placeholder {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, var(--bg-page) 0%, #E2E8F0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--primary-cyan);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin: 0 0 0.875rem;
+        line-height: 1.4;
+    }
+
+    .card-text {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-cyan);
+        text-decoration: none;
+        font-weight: 600;
+        transition: gap 0.2s;
+    }
+
+    .card-link:hover {
+        gap: 0.75rem;
+    }
+
+    .card-link svg {
+        transition: transform 0.2s;
+    }
+
+    .card-link:hover svg {
+        transform: translateX(3px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-hero {
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+        }
+
+        .featured-media {
+            margin: -3rem 1rem 2rem;
+        }
+
+        .content-container {
+            padding: 0 1rem 2rem;
+        }
+
+        .main-content {
+            padding: 2rem 1.5rem;
+            border-radius: 8px;
+        }
+
+        .content-body {
+            font-size: 1rem;
+        }
+
+        .content-body h2 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        .content-body h3 {
+            font-size: 1.25rem;
+        }
+
+        .apply-cta {
+            padding: 2rem 1.5rem;
+        }
+
+        .btn-apply {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+        }
+
+        .cards-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .related-title {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+    <!-- Hero Section -->
+    <section class="page-hero">
+        <div class="content-container">
+            <div class="hero-content">
+                <nav class="hero-breadcrumb">
+                    <a href="/">Home</a>
+                    {% if page.parent_id %}
+                    <span>/</span>
+                    <a href="{% url 'page_detail' slug=page.parent_id.slug %}">{{ page.parent_id.title }}</a>
+                    {% endif %}
+                    <span>/</span>
+                    <span>{{ page.title }}</span>
+                </nav>
+                <h1 class="page-title">{{ page.title }}</h1>
+                {% if page.meta_description %}
+                <p class="page-subtitle">{{ page.meta_description|truncatewords:20 }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Media -->
+    {% if page.media or page.video or page.youtube %}
+    <div class="featured-media">
+        <div class="media-box">
+            {% if page.youtube %}
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/{{ page.youtube.video_id }}" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen></iframe>
+            </div>
+            {% elif page.video %}
+            <div class="video-container">
+                <video controls>
+                    <source src="{{ page.video.file.url }}" type="video/mp4">
+                </video>
+            </div>
+            {% elif page.media %}
+            <img src="{{ page.media.file.url }}" alt="{{ page.title }}">
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <article class="main-content">
+            {% if page.apply_button_top %}
+            <div class="apply-cta">
+                <p class="apply-cta-text">Ready to start your journey with us?</p>
+                <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
+            </div>
+            {% endif %}
+
+            {% if page.description %}
+            <div class="content-body">
+                {{ page.description|safe }}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <p>Content coming soon...</p>
+            </div>
+            {% endif %}
+
+            {% if page.apply_button_bottom %}
+            <div class="apply-cta">
+                <p class="apply-cta-text">Ready to start your journey with us?</p>
+                <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
+            </div>
+            {% endif %}
+        </article>
+
+        <!-- Related Pages -->
+        {% if child_pages %}
+        <section class="related-section">
+            <div class="related-header">
+                <h2 class="related-title">Explore Related Topics</h2>
+                <p class="related-subtitle">Continue your learning journey</p>
+            </div>
+            <div class="cards-grid">
+                {% for child in child_pages %}
+                <article class="related-card">
+                    {% if child.media %}
+                    <img src="{{ child.media.file.url }}" class="card-img" alt="{{ child.title }}">
+                    {% else %}
+                    <div class="card-img-placeholder">📚</div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h3 class="card-title">{{ child.title }}</h3>
+                        <p class="card-text">
+                            {{ child.meta_description|default:"Discover more about this topic and enhance your understanding."|truncatewords:15 }}
+                        </p>
+                        <a href="{% url 'page_detail' slug=child.slug %}" class="card-link">
+                            Learn More
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
