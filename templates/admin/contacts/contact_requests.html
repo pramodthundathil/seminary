@@ -1,0 +1,269 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<style>
+    /* Ensure modal appears on top */
+    .modal {
+        z-index: 9999 !important;
+    }
+    
+    .modal-backdrop {
+        z-index: 9998 !important;
+    }
+    
+    /* Fix modal body overflow */
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    /* Better spacing for modal content */
+    .modal-body .row {
+        margin-bottom: 1rem;
+    }
+    
+    .modal-body strong {
+        color: #333;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .modal-body p {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Contact Requests</h1>
+    </div>
+
+    <div class="table-container">
+        <table id="contactsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.id }}</td>
+
+                    <td>
+                        <div style="line-height:1.5;">
+                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
+                                {{ contact.name|default:"-" }}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                {{ contact.email|default:"-" }}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ contact.email|default:"-" }}</td>
+
+                    <td>
+                        <div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            {{ contact.subject|default:"-" }}
+                        </div>
+                    </td>
+
+                    <td>{{ contact.created_at|date:"Y-m-d H:i"|default:"-" }}</td>
+
+                    <td>
+                        {% if contact.deleted_at %}
+                            <span class="status-badge status-inactive">Deleted</span>
+                        {% else %}
+                            <span class="status-badge status-active">Active</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="javascript:void(0);" 
+                           class="action-btn view" 
+                           title="View" 
+                           onclick="openContactModal({{ contact.id }})">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'contact_delete' contact.id %}" 
+                           class="action-btn delete" 
+                           title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this contact request?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Single Modal for all contacts -->
+{% for contact in contacts %}
+<div class="modal fade" id="contactModal{{ contact.id }}" tabindex="-1" 
+     aria-labelledby="contactModalLabel{{ contact.id }}" aria-hidden="true"
+     data-bs-backdrop="true" data-bs-keyboard="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel{{ contact.id }}">
+                    <i class="fas fa-envelope"></i> Contact Request Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>ID:</strong>
+                            <p>{{ contact.id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p>
+                                {% if contact.deleted_at %}
+                                    <span class="status-badge status-inactive">Deleted</span>
+                                {% else %}
+                                    <span class="status-badge status-active">Active</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Name:</strong>
+                            <p>{{ contact.name|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong>
+                            <p>{{ contact.email|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Subject:</strong>
+                            <p>{{ contact.subject|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Message:</strong>
+                            <p style="white-space: pre-wrap; min-height: 100px;">{{ contact.message|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created At:</strong>
+                            <p>{{ contact.created_at|date:"F d, Y H:i"|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Updated At:</strong>
+                            <p>{{ contact.updated_at|date:"F d, Y H:i"|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    {% if contact.deleted_at %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Deleted At:</strong>
+                            <p>{{ contact.deleted_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <a href="{% url 'contact_delete' contact.id %}" 
+                   class="btn btn-danger"
+                   onclick="return confirm('Are you sure you want to delete this contact request?')">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // Function to open modal
+    function openContactModal(contactId) {
+        const modalId = '#contactModal' + contactId;
+        const modalElement = document.querySelector(modalId);
+        
+        if (modalElement) {
+            // Using Bootstrap 5 modal API
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            modal.show();
+        }
+    }
+
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#contactsTable').DataTable({
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            order: [[0, 'desc']],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ contacts",
+                info: "Showing _START_ to _END_ of _TOTAL_ contacts",
+                infoEmpty: "Showing 0 to 0 of 0 contacts",
+                infoFiltered: "(filtered from _MAX_ total contacts)",
+                zeroRecords: "No matching contacts found",
+                emptyTable: "No contact requests available"
+            },
+            columnDefs: [
+                { orderable: false, targets: [6] }, // Actions not sortable
+                { width: '60px',  targets: 0 },  // ID
+                { width: '200px', targets: 1 },  // Name
+                { width: '180px', targets: 2 },  // Email
+                { width: '200px', targets: 3 },  // Subject
+                { width: '150px', targets: 4 },  // Created At
+                { width: '100px', targets: 5 },  // Status
+                { width: '120px', targets: 6 }   // Actions
+            ]
+        });
+
+        // Ensure modals work properly with DataTables
+        $('#contactsTable').on('draw.dt', function() {
+            // Re-attach modal functionality after table redraw
+            $('.action-btn.view').off('click').on('click', function(e) {
+                e.preventDefault();
+                const contactId = $(this).attr('onclick').match(/\d+/)[0];
+                openContactModal(contactId);
+            });
+        });
+    });
+</script>
+
+{% endblock %}

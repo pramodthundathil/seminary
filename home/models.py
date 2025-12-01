@@ -265,14 +265,14 @@ class Branches(models.Model):
     id = models.AutoField(primary_key=True)
     branch_name = models.CharField(max_length=250)
     branch_code = models.CharField(max_length=250)
-    is_associate_degree = models.IntegerField()
+    is_associate_degree = models.BooleanField(default=False)
     status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="branches_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="branches_updated")
 
-
+    deleted_at = models.DateTimeField(blank=True, null=True)
     class Meta:
         managed = True
         db_table = 'branches'
