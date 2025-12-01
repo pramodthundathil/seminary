@@ -1,6 +1,124 @@
 {% extends "student/index.html" %}
 
+
+
+
 {% block middle %}
+
+
+<style>
+
+/* QUERY FORM CARD */
+.query-form-card {
+    margin-top: 24px;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.query-textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    transition: 0.2s;
+}
+
+.query-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.category-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    background: white;
+    outline: none;
+    transition: 0.2s;
+}
+
+.category-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.submit-btn {
+    padding: 12px 26px;
+    background: var(--primary);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.submit-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+.small-box {
+    border: 1px solid #3224ef;        /* green border */
+    border-radius: 8px;               /* rounded */
+    padding: 16px;
+    background: #ffffff;
+    margin-top: 20px;
+}
+
+.small-box-header {
+    background: #00CED1;              /* green header */
+    color: white;
+    padding: 10px 14px;
+    font-weight: 700;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin: -16px -16px 12px -16px;   /* attach header to top border */
+}
+
+.small-box-item {
+    font-size: 15px;
+    color: #334155;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+
+@media screen and (max-width: 576px) {
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
+}
+
+    
+</style>
+
 <div class="details-card">
     <div class="card-header">
         <h3 class="card-title">👤 Student Information</h3>
@@ -10,65 +128,107 @@
 
         <div class="detail-item">
             <span class="detail-label">🆔 Student ID</span>
-            <span class="detail-value">TTSMDIV053</span>
+            <span class="detail-value">{{student.student_id}}</span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">👤 Full Name</span>
-            <span class="detail-value">Sobha Sudheesh</span>
+            <span class="detail-value">{{student.first_name}} {{student.middle_name}} {{student.last_name}}</span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">📧 Email Address</span>
-            <span class="detail-value">elittee.developer@gmail.com</span>
+            <span class="detail-value">{{student.email}}</span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">📅 Date of Joining</span>
-            <span class="detail-value">20 Oct, 2018</span>
+            <span class="detail-value">20 Oct, 2018 </span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">🎂 Date of Birth</span>
-            <span class="detail-value">11 Aug, 1987</span>
+            <span class="detail-value">{{student.date_of_birth}}</span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">🎓 Course</span>
-            <span class="detail-value">M.Div</span>
+            <span class="detail-value">{{context.course}}</span>
         </div>
 
         <div class="detail-item">
             <span class="detail-label">🌐 Medium</span>
-            <span class="detail-value">English</span>
+            <span class="detail-value">{{context.language}}</span>
         </div>
 
     </div>
+
+    
 </div>
+<div class="query-form-card">
+    <div class="form-group">
+        <textarea id="queryInput" class="query-textarea" placeholder="Ask a query"></textarea>
+    </div>
+
+    <div class="form-row">
+        <div style="flex:1;">
+            <select class="category-select">
+                <option value="general">General</option>
+                <option value="fees">Fees</option>
+                <option value="subject">Subject</option>
+                <option value="assignment">Assignment</option>
+            </select>
+        </div>
+        <div>
+            <button id="querySubmit" class="submit-btn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const submitBtn = document.getElementById('querySubmit');
+        const input = document.getElementById('queryInput');
+        if (!submitBtn || !input) return;
+
+        submitBtn.addEventListener('click', function(e){
+            const val = input.value || '';
+            if (val.trim().length === 0) {
+                // nothing entered — prevent redirect
+                e.preventDefault();
+                input.focus();
+                return;
+            }
+
+            // redirect to doubts answers page
+            window.location.href = "{% url 'student_doubts_answers' %}";
+        });
+    })();
+</script>
+
 {% endblock %}
 
 
 {% block right %}
 <div class="alerts-card">
-    <div class="card-header">
-        <h3 class="card-title">🔔 Notifications & Alerts</h3>
-    </div>
 
-    <div class="alert-item">
-        <p class="alert-text">⭐ <strong>Exam:</strong> OT UNIT 1 assigned on 06 Jul, 2022</p>
-    </div>
 
-    <div class="alert-item">
-        <p class="alert-text">⭐ <strong>Exam:</strong> Biblical Theology 1 approved</p>
-    </div>
+    {% for n in context.notifications|slice:":5" %}
+        <div class="alert-item">
+            <p class="alert-text">⭐ <strong>{{ n.notification_type }}:</strong> {{ n.message }}</p>
+        </div>
+    {% endfor %}
 
-    <div class="alert-item">
-        <p class="alert-text">📚 <strong>Subject:</strong> Old Testament assigned</p>
-    </div>
-
-    <div class="alert-item">
-        <p class="alert-text">📊 <strong>Exam Score:</strong> NT UNIT 2 assigned</p>
-    </div>
 
 </div>
+
+<div class="small-box">
+    <div class="small-box-header">INSTRUCTORS</div>
+
+    <div class="small-box-item">
+        ⭐ {{context.instructor_name}}
+    </div>
+</div>
+
 {% endblock %}
+

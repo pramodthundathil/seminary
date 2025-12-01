@@ -1,3 +1,20 @@
+
+from .models import Students
+
+def student_processor(request):
+    # if not request.user.is_authenticated:
+    #     return {}
+
+    try:
+        # student = Students.objects.get(user_id=request.user.id)
+        student = Students.objects.get(id=166)
+    except Students.DoesNotExist:
+        student = None
+
+    return {
+        "student": student
+    }
+
 # context_processors.py
 from django.urls import reverse
 from .models import Menus, MenuItems, Pages  
@@ -122,3 +139,4 @@ def menu_context(request):
             'footer_menu_items': [],
             'pages_data': [],
         }
+
