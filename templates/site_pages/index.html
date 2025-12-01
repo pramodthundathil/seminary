@@ -17,6 +17,113 @@
         /* ================================
         1-Global Styles & Typography
         ================================ */
+        /* Make navbar completely transparent */
+
+
+
+        nav.navbar {
+            position: fixed !important;
+            
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Remove any background from navbar containers */
+        nav.navbar .container,
+        nav.navbar .container-fluid {
+            background: transparent !important;
+        }
+
+        /* Make navbar links visible on carousel background */
+        .navbar-brand {
+            color: #2c3e50 !important;
+            font-weight: 700;
+        }
+
+        .navbar-nav .nav-link {
+            color: #2c3e50 !important;
+            font-weight: 600;
+            padding: 8px 15px !important;
+            transition: all 0.3s ease;
+            background: transparent !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #22d3ee !important;
+            background: transparent !important;
+        }
+
+        /* Dropdown menu styling */
+        .navbar .dropdown-menu {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .navbar .dropdown-item {
+            color: #2c3e50 !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .dropdown-item:hover {
+            background: rgba(34, 211, 238, 0.1) !important;
+            color: #22d3ee !important;
+        }
+
+        /* Log in button styling (cyan color from your design) */
+        .navbar .btn,
+        .navbar button[type="button"] {
+            background: #22d3ee !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 30px !important;
+            border-radius: 25px !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .btn:hover,
+        .navbar button[type="button"]:hover {
+            background: #14b8a6 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+        }
+
+        /* Ensure carousel starts from top */
+        #trinityCarousel {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Mobile responsive - add slight background for readability */
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(10px);
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .navbar-toggler {
+                border: 2px solid #2c3e50;
+                background: rgba(255, 255, 255, 0.9);
+            }
+        }
+
+
         .section-title {
             font-weight: 700;
             text-align: center;
@@ -67,6 +174,175 @@
         }
 
         /*trinityCarousel style */
+
+        /* Slide 1 - push all content tightly to the left */
+
+
+
+        /* Remove ALL padding & margin from slide wrapper */
+        .carousel-item:first-child,
+        .carousel-item:first-child .container,
+        .carousel-item:first-child .carousel-caption {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        /* Force all inner items to 0px left */
+        .carousel-item:first-child * {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        /* Ensure content stacks left */
+        .carousel-item:first-child .slide-content {
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+
+
+        .carousel-item:first-child .slide-content,
+        .carousel-item.active:first-child .slide-content {
+            justify-content: flex-start !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            max-width: 700px !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        /* Remove space around left content */
+        .carousel-item:first-child .left-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            text-align: left !important;
+        }
+
+        /* Bring H1 extremely close to left */
+        .carousel-item:first-child .left-content h1 {
+            margin: 0 0 10px 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+        }
+
+        /* Right content also pushed left */
+        .carousel-item:first-child .right-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            text-align: left !important;
+            align-items: flex-start !important;
+        }
+
+        /* Move H2 closer to left */
+        .carousel-item:first-child .right-content h2 {
+            margin: 0 0 8px 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Move paragraphs closer to left */
+        .carousel-item:first-child .right-content p {
+            margin: 0 0 2px 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Apply only inside Slide 1 (or your specific slide) */
+        .carousel-item:first-child h2 {
+            white-space: nowrap;
+            /* keep main text on one line */
+        }
+
+        .carousel-item:first-child h2 span {
+            white-space: normal;
+            /* allow span text to wrap */
+        }
+
+
+
+        /* Ensure paragraph stays left-aligned */
+        .carousel-item:first-child .right-content p {
+            text-align: left !important;
+        }
+
+        /* Button itself stays left */
+        .carousel-item:first-child .learn-more-btn {
+            align-self: flex-start !important;
+            /* stay left */
+            margin-left: 0 !important;
+            padding: 10px 25px !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            /* center text inside */
+            align-items: center !important;
+            text-align: center !important;
+            /* center text */
+        }
+
+        /* Make H2 and paragraph fully left aligned */
+        .carousel-item:first-child .right-content h2,
+        .carousel-item:first-child .right-content p {
+            text-align: left !important;
+            margin-left: 0 !important;
+        }
+
+        /* ---------- Learn More Button Style ---------- */
+        .carousel-item:first-child .learn-more-btn {
+            background-color: #5cc3c5 !important;
+            /* New Color */
+            border: none !important;
+            text-align: center !important;
+            /* Center text inside button */
+            justify-content: center !important;
+            align-items: center !important;
+            display: inline-flex !important;
+            padding: 12px 30px !important;
+            color: #1B2845 !important;
+            font-weight: 600;
+            border-radius: 40px;
+            margin-left: 0 !important;
+        }
+
+        /* Remove accidental text offset from global '*' rule */
+        .carousel-item:first-child .learn-more-btn * {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            text-align: center !important;
+        }
+
+        .carousel-item:first-child .hero-title {
+            white-space: nowrap;
+            /* Keep line 1 together */
+        }
+
+        .carousel-item:first-child .hero-title span {
+            white-space: nowrap;
+            /* Prevent unwanted wrapping */
+        }
+
+
+        /* Mobile responsive for Slide 1 */
+        @media (max-width: 768px) {
+            .carousel-item:first-child .slide-content {
+                max-width: 95% !important;
+                padding: 20px !important;
+            }
+
+            .carousel-item:first-child .left-content h1 {
+                font-size: 1.5rem !important;
+            }
+
+            .carousel-item:first-child .right-content h2 {
+                font-size: 1.2rem !important;
+            }
+
+            .carousel-item:first-child .right-content p {
+                font-size: 0.95rem !important;
+            }
+        }
+
+
         #trinityCarousel {
             position: relative;
             margin-bottom: 0;
@@ -159,7 +435,7 @@
             padding: 12px 35px;
             font-size: 16px;
             font-weight: 600;
-            background: #4169e1;
+            background-color: #5cc3c5 !important;
             color: white;
             border: none;
             margin: 18px -45px 0 0;
@@ -171,7 +447,7 @@
         }
 
         .learn-more-btn:hover {
-            background: #3154c4;
+            background-color: #5cc3c5 !important;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
         }
@@ -226,6 +502,551 @@
                 left: 50% !important;
             }
         }
+
+
+
+
+        /* ================================
+   SLIDE 2 SPECIFIC STYLING
+================================ */
+
+        /* Slide 2 - Two column layout with proper spacing */
+        .carousel-item:nth-child(2) .slide-content {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 50px !important;
+            flex-direction: row !important;
+        }
+
+        /* Left content - WELCOME TO TRINITY */
+        .carousel-item:nth-child(2) .left-content {
+            flex: 1 !important;
+            text-align: left !important;
+            margin-left: -40px !important;
+            padding-left: 10px !important;
+        }
+
+        .carousel-item:nth-child(2) .left-content h1 {
+            font-size: 2.8rem !important;
+            font-weight: 700 !important;
+            color: #1B2845 !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+        }
+
+        .carousel-item:nth-child(2) .left-content h1 .highlight {
+            color: #00CED1 !important;
+        }
+
+
+
+        /* Main H2 */
+        .carousel-item:nth-child(2) .right-content h2.title-line {
+            font-size: 1.8rem !important;
+            color: #1B2845 !important;
+            line-height: 1.3 !important;
+            text-align: left !important;
+            font-weight: 700 !important;
+            margin: 0 0 15px 180px !important;
+            padding: 0 !important;
+            max-width: 520px !important;
+        }
+
+        /* Make FOR stay green and remain in the SAME line */
+        .carousel-item:nth-child(2) .right-content h2 .for-green {
+            color: #4ade80 !important;
+            /* green */
+            display: inline !important;
+            /* stays on same line */
+        }
+
+        /* Second line - entire line is green */
+        .carousel-item:nth-child(2) .right-content h2 .other-green {
+            color: #4ade80 !important;
+            /* green */
+            display: inline !important;
+            /* natural flow after <br> */
+        }
+
+
+        .carousel-item:nth-child(2) .right-content {
+            flex: 1 !important;
+            text-align: right !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            margin-right: -70px !important;
+            padding-right: 10px !important;
+        }
+
+
+        .carousel-item:nth-child(2) .right-content h2 .highlight-green {
+            color: #4ade80 !important;
+        }
+
+        /* Main H2 */
+        .carousel-item:nth-child(2) .right-content h2.title-line {
+            color: #1B2845 !important;
+            line-height: 1.3 !important;
+            text-align: left !important;
+            font-weight: 700 !important;
+        }
+
+        /* Make FOR stay green and remain in the SAME line */
+        .carousel-item:nth-child(2) .right-content h2 .for-green {
+            color: #4ade80 !important;
+            /* green */
+            display: inline !important;
+            /* stays on same line */
+        }
+
+
+
+
+        .carousel-item:nth-child(2) .right-content p {
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            color: #1B2845 !important;
+            line-height: 1.5 !important;
+            margin: 0 0 20px 0 !important;
+            padding: 0 !important;
+            text-align: right !important;
+            /* CHANGED FROM left TO right */
+            max-width: 400px !important;
+        }
+
+        /* Learn More button - Blue for Slide 2 */
+        .carousel-item:nth-child(2) .learn-more-btn {
+            background-color: #5cc3c5 !important;
+            color: #1B2845 !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            border-radius: 25px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            align-self: flex-end !important;
+            margin: 0 !important;
+        }
+
+        .carousel-item:nth-child(2) .learn-more-btn:hover {
+            background-color: #5cc3c5 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+        }
+
+        .carousel-item:nth-child(2) .right-content h2 .highlight-green {
+            color: #4ade80 !important;
+        }
+
+        .carousel-item:nth-child(2) .right-content p {
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            color: #1B2845 !important;
+            line-height: 1.5 !important;
+            margin: 0 15px 20px 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+            max-width: 400px !important;
+        }
+
+        /* Learn More button - Blue for Slide 2 */
+        .carousel-item:nth-child(2) .learn-more-btn {
+            background-color: #5cc3c5 !important;
+            color: #1B2845 !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            border-radius: 25px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            align-self: flex-end !important;
+            margin: 0 !important;
+        }
+
+        .carousel-item:nth-child(2) .learn-more-btn:hover {
+            background-color: #5cc3c5 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+        }
+
+        /* ================================
+   RESPONSIVE FOR SLIDE 2
+================================ */
+
+        @media (max-width: 1200px) {
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 2.3rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.5rem !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .carousel-item:nth-child(2) .slide-content {
+                flex-direction: column !important;
+                gap: 30px !important;
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content,
+            .carousel-item:nth-child(2) .right-content {
+                text-align: center !important;
+                align-items: center !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1,
+            .carousel-item:nth-child(2) .right-content h2,
+            .carousel-item:nth-child(2) .right-content p {
+                text-align: center !important;
+                max-width: 100% !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item:nth-child(2) .carousel-caption {
+                background: rgba(0, 0, 0, 0.35);
+                padding: 20px;
+                border-radius: 12px;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.8rem !important;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 .highlight {
+                color: #00CED1 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.3rem !important;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 .highlight-green {
+                color: #4ade80 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.95rem !important;
+                color: #ffffff !important;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 10px 30px !important;
+                font-size: 15px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.4rem !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 br {
+                display: inline !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.85rem !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 9px 25px !important;
+                font-size: 14px !important;
+            }
+        }
+
+
+        /* Increase image scale for Slide 2 */
+        .carousel-item:nth-child(2) img {
+            transform: scale(1.5) !important;
+            /* Increase to 130% size */
+            transform-origin: center center;
+        }
+
+        /* If you need even MORE size */
+        .carousel-item:nth-child(2) img {
+            transform: scale(1) !important;
+            /* 150% - much larger */
+        }
+
+        /* Or increase with better positioning */
+        .carousel-item:nth-child(2) img {
+            transform: scale(1) !important;
+            object-fit: cover !important;
+            object-position: center 30% !important;
+        }
+
+        css
+        /* ================================
+   SLIDE 2 - SPECIFIC TEXT ARRANGEMENT
+================================ */
+
+        /* Slide 2 - Two column layout */
+        .carousel-item:nth-child(2) .slide-content {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 100px !important;
+        }
+
+        /* LEFT SIDE - H1 pushed far left like Slide 1 */
+        .carousel-item:nth-child(2) .left-content {
+            flex: 1 !important;
+            text-align: left !important;
+            margin-left: -120px !important;
+
+            padding-left: 0 !important;
+        }
+
+        .carousel-item:nth-child(2) .left-content h1 {
+            font-size: 2.8rem !important;
+            font-weight: 700 !important;
+            color: #1B2845 !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+        }
+
+        .carousel-item:nth-child(2) .left-content h1 .highlight {
+            color: #00CED1 !important;
+        }
+
+        /* RIGHT SIDE - H2 and content pushed to right edge */
+        .carousel-item:nth-child(2) .right-content {
+            flex: 1 !important;
+            text-align: right !important;
+            display: flex !important;
+            flex-direction: column !important;
+
+
+            padding-right: 0 !important;
+        }
+
+        /* H2 - Two lines as specified */
+        .carousel-item:nth-child(2) .right-content h2 {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #1B2845 !important;
+            line-height: 1.3 !important;
+            margin: 0 0 15px 180px !important;
+            padding: 0 !important;
+            text-align: left !important;
+            max-width: 520px !important;
+        }
+
+        .carousel-item:nth-child(2) .right-content h2 .for-green {
+            color: #4ade80 !important;
+            display: inline !important;
+        }
+
+        .carousel-item:nth-child(2) .right-content h2 .other-green {
+            color: #4ade80 !important;
+            display: inline !important;
+        }
+
+
+
+        /* Paragraph - Two lines as specified */
+        .carousel-item:nth-child(2) .right-content p {
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            color: #1B2845 !important;
+            line-height: 1.6 !important;
+            margin-left: 180px !important;
+            /* optional offset */
+            margin-bottom: 20px !important;
+            align-self: flex-start !important;
+            text-align: left !important;
+            max-width: 420px !important;
+
+        }
+
+        /* Button on next line, aligned right */
+        .carousel-item:nth-child(2) .learn-more-btn {
+            background-color: #5cc3c5 !important;
+            color: bwhite !important;
+            border: none !important;
+            padding: 12px 35px !important;
+            border-radius: 25px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            align-self: flex-start !important;
+            margin-left: 180px !important;
+        }
+
+        .carousel-item:nth-child(2) .learn-more-btn:hover {
+            background: cyan;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+        }
+
+
+
+        /* ================================
+   SLIDE 3 SPECIFIC STYLING
+================================ */
+
+        /* Slide 3 - Move left content more to left */
+        .carousel-item:nth-child(3) .left-content {
+            margin-left: -120px !important;
+            padding-left: 0 !important;
+        }
+
+        .carousel-item:nth-child(3) .left-content h1 {
+            font-size: 2.8rem !important;
+            font-weight: 700 !important;
+            color: #1B2845 !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: left !important;
+
+        }
+
+        /* Slide 3 - Move right content to the left */
+        .carousel-item:nth-child(3) .right-content {
+            margin-right: 0 !important;
+            padding-right: 0 !important;
+
+        }
+
+        .carousel-item:nth-child(3) .right-content h2 {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #1B2845 !important;
+            line-height: 1.3 !important;
+            margin-left: 180px !important;
+            padding: 0 !important;
+            text-align: left !important;
+            max-width: 520px !important;
+            align-self: flex-start !important;
+        }
+
+        .carousel-item:nth-child(3) .right-content p {
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            color: #1B2845 !important;
+            line-height: 1.6 !important;
+            margin-left: 180px !important;
+            padding: 0 !important;
+            text-align: left !important;
+            max-width: 420px !important;
+            align-self: flex-start !important;
+        }
+
+        .carousel-item:nth-child(3) .learn-more-btn {
+            background-color: #5cc3c5 !important;
+            color: #1B2845 !important;
+            margin: 0 !important;
+            margin-left: 180px !important;
+            align-self: flex-start !important;
+        }
+
+        /* ================================
+   RESPONSIVE
+================================ */
+
+        @media (max-width: 1200px) {
+            .carousel-item:nth-child(2) .slide-content {
+                gap: 60px !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content {
+                margin-left: -30px !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content {
+                margin-right: -30px !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .carousel-item:nth-child(2) .slide-content {
+                flex-direction: column !important;
+                gap: 30px !important;
+                align-items: center !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content,
+            .carousel-item:nth-child(2) .right-content {
+                text-align: center !important;
+                align-items: center !important;
+                margin: 0 !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1,
+            .carousel-item:nth-child(2) .right-content h2,
+            .carousel-item:nth-child(2) .right-content p {
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.8rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.3rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.4rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.85rem !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 10px 28px !important;
+                font-size: 14px !important;
+            }
+        }
+
+
 
 
         /*2-why section*/
@@ -1638,7 +2459,7 @@
                 padding: 8px 18px;
                 font-size: 0.85rem;
                 margin-top: 10px;
-                background: #4169e1;
+                background: #00CED1;
                 color: white !important;
                 font-weight: 600;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -1650,10 +2471,636 @@
             }
 
             .highlight-green {
-                color: #4ade80 !important;
+                color: #08b547 !important;
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
             }
         }
+
+        /* ================================
+   ENHANCED MOBILE RESPONSIVENESS - SMALLER FONTS
+================================ */
+
+        /* ================================
+   ENHANCED MOBILE RESPONSIVENESS - MAINTAIN DESKTOP COLORS
+================================ */
+        /* Tablet View (992px and below) */
+
+
+        @media (max-width: 992px) {
+
+            /* All Slides - Common responsive styles */
+            .carousel-caption {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                padding: 20px;
+                background: transparent !important;
+            }
+
+            .carousel-indicators {
+                bottom: -35px !important;
+                /* Move DOWN */
+            }
+
+            .carousel-caption .slide-content {
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: center !important;
+            }
+
+            .carousel-caption h1 {
+                font-size: 1.5rem !important;
+                line-height: 1.2;
+                text-align: center !important;
+                color: #1B2845 !important;
+                margin-bottom: 8px !important;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.2rem !important;
+                line-height: 1.3;
+                text-align: center !important;
+                color: #1B2845 !important;
+                margin-bottom: 8px !important;
+            }
+
+            .carousel-caption p {
+                font-size: 0.85rem !important;
+                margin: 5px 0 8px 0 !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+            }
+
+            /* Reset all slide margins for mobile */
+            .left-content,
+            .right-content {
+                margin: 0 !important;
+                padding: 0 15px !important;
+                width: 100% !important;
+                text-align: center !important;
+                align-items: center !important;
+            }
+
+            .learn-more-btn {
+                padding: 8px 20px !important;
+                font-size: 0.85rem !important;
+                align-self: center !important;
+                margin: 5px auto 0 auto !important;
+                background-color: #5cc3c5 !important;
+                color: #1B2845 !important;
+                display: inline-block !important;
+            }
+
+            /* Maintain color scheme from desktop */
+            .carousel-caption .highlight {
+                color: #00CED1 !important;
+            }
+
+            .carousel-caption .highlight-green,
+            .carousel-caption .for-green,
+            .carousel-caption .other-green {
+                color: #4ade80 !important;
+            }
+
+            /* Slide 1 Responsive */
+            .carousel-item:first-child .left-content,
+            .carousel-item:first-child .right-content {
+                margin: 0 auto !important;
+            }
+
+            /* Slide 2 Responsive */
+            .carousel-item:nth-child(2) .slide-content {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content,
+            .carousel-item:nth-child(2) .right-content {
+                margin: 0 !important;
+                text-align: center !important;
+                align-items: center !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2,
+            .carousel-item:nth-child(2) .right-content p {
+                margin-left: 0 !important;
+                margin-bottom: 8px !important;
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                margin: 5px auto 0 auto !important;
+                display: inline-block !important;
+            }
+
+            /* Slide 3 Responsive */
+            .carousel-item:nth-child(3) .left-content {
+                margin-left: 0 !important;
+            }
+
+            .carousel-item:nth-child(3) .right-content h2,
+            .carousel-item:nth-child(3) .right-content p {
+                margin-left: 0 !important;
+                margin-bottom: 8px !important;
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                margin: 5px auto 0 auto !important;
+                display: inline-block !important;
+            }
+        }
+
+        /* Mobile View (768px and below) */
+        @media (max-width: 768px) {
+
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: auto !important;
+                justify-content: center !important;
+                z-index: 9999 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+
+            }
+
+            /* Ensure slide 2 & 3 content stays high */
+            .carousel-item:nth-child(2) .carousel-caption,
+            .carousel-item:nth-child(3) .carousel-caption {
+                top: 38% !important;
+                /* Even higher for slides 2 & 3 */
+            }
+
+            /* Button always visible */
+            .learn-more-btn {
+                margin-top: 10px !important;
+                display: inline-block !important;
+                z-index: 9999 !important;
+            }
+
+            .carousel-item {
+                height: 500px !important;
+            }
+
+            .carousel-caption {
+                padding: 15px 12px;
+                width: 95%;
+                background: transparent !important;
+                border-radius: 0;
+                top: 45% !important;
+            }
+
+            /* ALL SLIDES - Maintain desktop colors (dark text) */
+            .carousel-caption h1 {
+                font-size: 1rem !important;
+                line-height: 1.2;
+                margin-bottom: 6px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+            }
+
+            .carousel-caption h1 br {
+                display: none !important;
+            }
+
+            .carousel-caption h2 {
+                font-size: 0.95rem !important;
+                line-height: 1.3;
+                margin-bottom: 10px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+            }
+
+            .carousel-caption h2 br {
+                display: inline !important;
+            }
+
+            .carousel-caption p {
+                font-size: 0.75rem !important;
+                margin: 5px 0 !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                line-height: 1.3;
+            }
+
+            .carousel-caption p br {
+                display: inline !important;
+            }
+
+            /* Highlight colors - same as desktop */
+            .carousel-caption .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-caption .highlight-green,
+            .carousel-caption .for-green,
+            .carousel-caption .other-green {
+                color: #4ade80 !important;
+                text-shadow: none !important;
+            }
+
+            /* Button styling - same as desktop */
+            .learn-more-btn {
+                padding: 8px 22px !important;
+                font-size: 0.8rem !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                font-weight: 600;
+                box-shadow: none;
+                margin: 8px auto 0 auto !important;
+                display: inline-block !important;
+                border-radius: 25px !important;
+                border: none !important;
+            }
+
+            /* Remove all left/right margins */
+            .left-content,
+            .right-content {
+                margin: 0 auto !important;
+                padding: 0 10px !important;
+            }
+
+            /* Slide-specific resets */
+            .carousel-item:nth-child(2) .right-content h2.title-line,
+            .carousel-item:nth-child(3) .right-content h2 {
+                margin-left: 0 !important;
+                margin-bottom: 6px !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p,
+            .carousel-item:nth-child(3) .right-content p {
+                margin-left: 0 !important;
+                margin-bottom: 6px !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                margin-left: 0 !important;
+                margin-top: 8px !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                display: inline-block !important;
+            }
+        }
+
+        /* Small Mobile View (576px and below) */
+        @media (max-width: 576px) {
+
+            #trinityCarousel>.carousel-indicators {
+                bottom: 55% !important;
+                /* Move indicators UP to caption level */
+                top: auto !important;
+                /* Reset Bootstrap top positioning */
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                width: auto !important;
+                justify-content: center !important;
+                z-index: 9999 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+                overflow: visible !important;
+            }
+
+            .carousel-item {
+                height: 450px !important;
+                min-height: 450px !important;
+                max-height: 450px !important;
+            }
+
+            .carousel-item img {
+                height: 450px !important;
+                min-height: 450px !important;
+                max-height: 450px !important;
+                object-fit: cover;
+            }
+
+            /* SLIDE-1 CAPTION → align left like slide-2 */
+            #trinityCarousel .carousel-item:nth-child(1) .carousel-caption {
+                left: 0 !important;
+                transform: translateX(0) !important;
+                width: 100% !important;
+                padding-left: 20px !important;
+                /* same as slide 2 */
+                padding-right: 20px !important;
+                top: 40% !important;
+                text-align: center !important;
+                /* same center alignment */
+            }
+
+            /* SLIDE-1 TITLE (H1) → same styling as slide-2 text */
+            #trinityCarousel .carousel-item:nth-child(1) .left-content h1 {
+                font-size: 0.95rem !important;
+                line-height: 1.1 !important;
+                margin: 0 0 6px 0 !important;
+                width: 100% !important;
+                text-align: center !important;
+                /* same center */
+                color: #1B2845 !important;
+                text-shadow: none !important;
+            }
+
+            /* SLIDE-1 H2 → center like slide-2 */
+            #trinityCarousel .carousel-item:nth-child(1) .right-content h2 {
+                font-size: 0.85rem !important;
+                line-height: 1.1 !important;
+                margin: 4px 0 !important;
+                width: 100% !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+            }
+
+            /* SLIDE-1 PARAGRAPH → center like slide-2 */
+            #trinityCarousel .carousel-item:nth-child(1) .right-content p {
+                font-size: 0.65rem !important;
+                line-height: 1.1 !important;
+                margin: 4px 0 !important;
+                text-align: center !important;
+                width: 100% !important;
+                color: #1B2845 !important;
+            }
+
+            /* SLIDE-1 BUTTON → centered same as slide-2 */
+            #trinityCarousel .carousel-item:nth-child(1) .learn-more-btn {
+                display: block !important;
+                margin: 8px auto 0 auto !important;
+                padding: 7px 18px !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                border-radius: 20px !important;
+                font-size: 0.7rem !important;
+            }
+
+            /* SLIDE-2 CAPTION aligned left */
+            #trinityCarousel .carousel-item:nth-child(2) .carousel-caption {
+                left: 0 !important;
+                transform: translateX(0) !important;
+                width: 100% !important;
+                padding-left: 20px !important;
+                top: 40% !important;
+                /* adjust down */
+                text-align: center !important;
+            }
+
+
+
+            /* SLIDE-2: RIGHT CONTENT = H2 + p right aligned */
+            #trinityCarousel .carousel-item:nth-child(2) .right-content {
+                text-align: center !important;
+                padding-right: 20px !important;
+                width: 100% !important;
+                margin-top: 10px !important;
+            }
+
+            /* SLIDE 2 — H2 behaves like caption H2 */
+            #trinityCarousel .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 0.85rem !important;
+                /* same as caption */
+                line-height: 1 !important;
+                margin-bottom: 5px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                /* same alignment */
+                width: 100% !important;
+            }
+
+            /* SLIDE 2 — P behaves like caption P */
+            #trinityCarousel .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 0.75rem !important;
+                /* same as caption */
+                line-height: 1 !important;
+                margin: 4px 0 !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                /* same alignment */
+                width: 100% !important;
+            }
+
+            #trinityCarousel .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.65rem !important;
+                /* same as caption */
+                line-height: 1 !important;
+                margin: 4px 0 !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                /* same alignment */
+                width: 100% !important;
+            }
+
+
+            #trinityCarousel .carousel-item:nth-child(2) .right-content h2,
+            #trinityCarousel .carousel-item:nth-child(2) .right-content p {
+                text-align: center !important;
+            }
+
+            /* SLIDE-2 BUTTON → CENTER */
+            #trinityCarousel .carousel-item:nth-child(2) .learn-more-btn {
+                margin: 10px auto 0 auto !important;
+                display: block !important;
+                /* center button */
+                text-align: center !important;
+            }
+
+            /* SLIDE 3 — move caption slightly down and align left */
+            #trinityCarousel .carousel-item:nth-child(3) .carousel-caption {
+                left: 0 !important;
+                transform: translateX(0) !important;
+                width: 100% !important;
+                padding-left: 20px !important;
+                top: 40% !important;
+                /* adjust down */
+                text-align: center !important;
+            }
+
+            /* H1 → LEFT */
+            #trinityCarousel .carousel-item:nth-child(3) .left-content h1 {
+                text-align: left !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding-left: 20px !important;
+                text-align: center !important;
+            }
+
+            /* RIGHT CONTENT — H2 + P right aligned */
+            #trinityCarousel .carousel-item:nth-child(3) .right-content {
+                text-align: center !important;
+                width: 100% !important;
+                padding-right: 20px !important;
+                margin-top: 8px !important;
+            }
+
+            /* SLIDE 3 — H2 behaves like caption H2 */
+            #trinityCarousel .carousel-item:nth-child(3) .right-content h2 {
+                font-size: 0.85rem !important;
+                /* same as caption */
+                line-height: 1 !important;
+                margin-bottom: 5px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                /* same alignment */
+                width: 100% !important;
+            }
+
+
+            /* SLIDE 3 — P behaves like caption P */
+            #trinityCarousel .carousel-item:nth-child(3) .right-content p {
+                font-size: 0.65rem !important;
+                /* same as caption */
+                line-height: 1 !important;
+                margin: 4px 0 !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+                text-align: center !important;
+                /* same alignment */
+                width: 100% !important;
+            }
+
+            /* BUTTON → CENTER */
+            #trinityCarousel .carousel-item:nth-child(3) .learn-more-btn {
+                display: block !important;
+                margin: 6px auto 0 auto !important;
+                padding: 7px 18px !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                border-radius: 20px !important;
+            }
+
+            .carousel-caption {
+                padding: 10px 8px;
+                width: 98%;
+                background: transparent !important;
+                border-radius: 0;
+                top: 42% !important;
+            }
+
+            #trinityCarousel .carousel-caption h1 {
+                font-size: 0.95rem !important;
+                line-height: 1;
+                margin-bottom: 5px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+            }
+
+            #trinityCarousel .carousel-caption h2 {
+                font-size: 0.85rem !important;
+                line-height: 1;
+                margin-bottom: 5px !important;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+            }
+
+            #trinityCarousel .carousel-caption p {
+                font-size: 0.65rem !important;
+                margin: 4px 0 !important;
+                line-height: 1;
+                color: #1B2845 !important;
+                text-shadow: none !important;
+            }
+
+            .learn-more-btn {
+                padding: 7px 18px !important;
+                font-size: 0.7rem !important;
+                margin-top: 6px !important;
+                border-radius: 20px !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                display: inline-block !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .highlight-green,
+            .for-green,
+            .other-green {
+                color: #4ade80 !important;
+                text-shadow: none !important;
+            }
+
+            /* Ensure buttons visible on slides 2 and 3 */
+            .carousel-item:nth-child(2) .learn-more-btn,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                margin-top: 6px !important;
+                display: inline-block !important;
+            }
+        }
+
+        /* Extra Small Mobile (400px and below) */
+        @media (max-width: 400px) {
+            .carousel-item {
+                height: 400px !important;
+                min-height: 400px !important;
+            }
+
+            .carousel-item img {
+                height: 400px !important;
+                min-height: 400px !important;
+            }
+
+            .carousel-caption {
+                padding: 8px 5px;
+                top: 40% !important;
+            }
+
+            .carousel-caption h1 {
+                font-size: 0.8rem !important;
+                margin-bottom: 4px !important;
+                color: #1B2845 !important;
+            }
+
+            .carousel-caption h2 {
+                font-size: 0.7rem !important;
+                margin-bottom: 4px !important;
+                color: #1B2845 !important;
+            }
+
+            .carousel-caption p {
+                font-size: 0.6rem !important;
+                margin: 3px 0 !important;
+                color: #1B2845 !important;
+            }
+
+            .learn-more-btn {
+                padding: 6px 15px !important;
+                font-size: 0.65rem !important;
+                margin-top: 5px !important;
+                background: #5cc3c5 !important;
+                color: #1B2845 !important;
+                display: inline-block !important;
+            }
+        }
+
+
+
+
+
+
 
         /* ================================
    Why Trinity Section Responsiveness
@@ -2127,15 +3574,29 @@
                             <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
                         </div>
                         <div class="right-content">
-                            <h2>EXCLUSIVE ONLINE COURSES <span class="highlight-green"><br>ONE OF ITS KIND.</span></h2>
+                            <h2 class="hero-title">
+                                EXCLUSIVE ONLINE COURSES
+                                <span class="highlight-green">ONE OF</span>
+                                <br>
+                                <span class="highlight-green">ITS KIND.</span>
+                            </h2>
+
+
                             <p>Online mode of course completion <br>saving time and money for aspirants.</p>
-                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
+                            {% for page in pages_data %}
+                            {% if page.code and page.code == "about-us" %}
+                            <button class="learn-more-btn" data-url="{% url 'page_detail' slug=page.code %}"
+                                onclick="location.href=this.dataset.url">
+                                Learn More
+                            </button>
+                            {% endif %}
+                            {% endfor %}
+
 
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Slide 2 -->
             <div class="carousel-item">
                 <img src="{% static 'img/slide2.jpg' %}" alt="Bible with Cross">
@@ -2145,15 +3606,26 @@
                             <h1>WELCOME TO <span class="highlight">TRINITY</span><br>THEOLOGICAL<br>SEMINARY</h1>
                         </div>
                         <div class="right-content">
-                            <h2>YOUR ONE STOP PLATFORM <span class="highlight-green"><br>FOR COURSES <br>RELATED TO
-                                    THEOLOGY.</span></h2>
-                            <p>From certificate and diploma<br>to master's courses available.</p>
-                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
-                        </div>
+                            <h2 class="title-line">
+                                YOUR ONE STOP PLATFORM <span class="for-green">FOR</span><br>
+                                <span class="other-green">COURSES RELATED TO THEOLOGY.</span>
+                            </h2>
 
+                            <p>From certificate and diploma to<br>master's courses available.</p>
+                            {% for page in pages_data %}
+                            {% if page.code and page.code == "about-us" %}
+                            <button class="learn-more-btn" data-url="{% url 'page_detail' slug=page.code %}"
+                                onclick="location.href=this.dataset.url">
+                                Learn More
+                            </button>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
+
+
             <!-- Slide 3 -->
             <div class="carousel-item">
                 <img src="{% static 'img/slide3.jpg' %}" alt="Holy Bible Reading">
@@ -2166,9 +3638,14 @@
                             <h2>EXCLUSIVE ONLINE<br> COURSES <span class="highlight-green"><br>ONE OF ITS KIND</span>
                             </h2>
                             <p>Online mode of course completion <br>saving time and money for aspirants.</p>
-                            <!-- <button class="learn-more-btn">Learn More</button> -->
-                            <button class="learn-more-btn" onclick="location.href='/about_us'">Learn More</button>
-
+                            {% for page in pages_data %}
+                            {% if page.code and page.code == "about-us" %}
+                            <button class="learn-more-btn" data-url="{% url 'page_detail' slug=page.code %}"
+                                onclick="location.href=this.dataset.url">
+                                Learn More
+                            </button>
+                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
