@@ -1,7 +1,7 @@
 {% load static %}
 
 <!-- navbar.html - Backend Processed Navigation -->
-<nav class="navbar navbar-expand-lg sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'img/Trinity_final-nobg.png' %}" style="max-width: 100px;" alt="Trinity Logo">
@@ -104,7 +104,7 @@
 <style>
 /* Navbar Styles */
 .navbar {
-    background: #ffffff;
+    background: #ffffff !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
     padding: 1rem 0;
 }
