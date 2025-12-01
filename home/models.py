@@ -256,15 +256,23 @@ class BookReferences(models.Model):
     title = models.CharField(max_length=250)
     auther_name = models.CharField(max_length=250, blank=True, null=True)
     subject = models.ForeignKey('Subjects', on_delete=models.DO_NOTHING, related_name='references')
-    format = models.CharField(max_length=5)
-    reference_file = models.CharField(max_length=250, blank=True, null=True)
-    reference_note = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    status = models.IntegerField()
+    format = models.CharField(
+        max_length=5,
+        choices=(
+            ('PDF', 'PDF'),
+            ('note', 'Note'),
+        )
+    )
+    reference_file = models.ForeignKey("MediaLibrary", on_delete=models.DO_NOTHING, blank=True, null=True)
+    reference_note = CKEditor5Field(blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
+    status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="book_reference_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="book_reference_updated")
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
 
     class Meta:
         managed = True
@@ -944,6 +952,10 @@ class Sliders(models.Model):
         managed = True
         db_table = 'sliders'
 
+
+import random
+import string
+
 class Staffs(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('Users', on_delete=models.DO_NOTHING, related_name='staffs')
@@ -955,9 +967,9 @@ class Staffs(models.Model):
     phone_code = models.IntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=15)
     date_of_joining = models.DateField()
-    image = models.CharField(max_length=250, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=2)
+    image = models.FileField(upload_to="Uploads/staffs/", blank=True, null=True)
+    description = CKEditor5Field(blank=True, null=True)
+    status = models.BooleanField(default=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="staff_created")
@@ -969,6 +981,28 @@ class Staffs(models.Model):
     class Meta:
         managed = True
         db_table = 'staffs'
+
+    def save(self, *args, **kwargs):
+        """Auto-generate staff_id if not exists"""
+        if not self.staff_id:
+            self.staff_id = self.generate_staff_id()
+        super().save(*args, **kwargs)
+
+    def generate_staff_id(self):
+        """Generate unique staff ID: TTSTECH{YY}{5 random alphanumeric}"""
+        year = timezone.now().strftime('%y')  # Get last 2 digits of year
+        
+        while True:
+            # Generate 5 random alphanumeric characters (uppercase)
+            random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+            staff_id = f"TTSTECH{year}{random_part}"
+            
+            # Check if this ID already exists
+            if not Staffs.objects.filter(staff_id=staff_id).exists():
+                return staff_id
+
+    def __str__(self):
+        return str(self.staff_name)
 
 class StaffsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1030,11 +1064,11 @@ class Students(models.Model):
     reference_name3 = models.CharField(max_length=250, blank=True, null=True)
     reference_email3 = models.CharField(max_length=250, blank=True, null=True)
     reference_phone3 = models.CharField(max_length=50, blank=True, null=True)
-    certificate1 = models.CharField(max_length=250, blank=True, null=True)
-    certificate2 = models.CharField(max_length=250, blank=True, null=True)
-    certificate3 = models.CharField(max_length=250, blank=True, null=True)
-    certificate4 = models.CharField(max_length=250, blank=True, null=True)
-    certificate5 = models.CharField(max_length=250, blank=True, null=True)
+    certificate1 = models.FileField(upload_to="uploads/certificates/1/", blank=True, null=True)
+    certificate2 = models.FileField(upload_to="uploads/certificates/2/", blank=True, null=True)
+    certificate3 = models.FileField(upload_to="uploads/certificates/3/", blank=True, null=True)
+    certificate4 = models.FileField(upload_to="uploads/certificates/4/", blank=True, null=True)
+    certificate5 = models.FileField(upload_to="uploads/certificates/5/", blank=True, null=True)
     approve_date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1045,6 +1079,18 @@ class Students(models.Model):
         managed = True
         db_table = 'students'
         unique_together = (('course_applied', 'user'),)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def get_full_name(self):
+        """Returns the student's full name"""
+        parts = [self.first_name]
+        if self.middle_name:
+            parts.append(self.middle_name)
+        if self.last_name:
+            parts.append(self.last_name)
+        return ' '.join(parts)
 
 class StudentsAssignment(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1189,6 +1235,7 @@ class Support(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True

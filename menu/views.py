@@ -21,7 +21,9 @@ import sys
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
-
+from django.core.mail import send_mail
+from django.conf import settings
+from django.db import transaction
 
 from home.models import News, MediaLibrary
 from home.models import *
@@ -3215,6 +3217,206 @@ def exam_delete(request, exam_id):
     return redirect('exams_list')
 
 
+
+#staffs 
+
+# staffs
+
+@login_required
+def staffs_list(request):
+    """List all staffs with DataTables"""
+    staffs = Staffs.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    
+    return render(request, 'admin/staffs/staffs_list.html', {
+        'staffs': staffs
+    })
+
+
+@login_required
+def staff_create(request):
+    """Create new staff with user account and send credentials via email"""
+    if request.method == 'POST':
+        form = StaffForm(request.POST)
+        if form.is_valid():
+            # Check if email already exists
+            email = form.cleaned_data.get('email')
+            if Users.objects.filter(email=email).exists():
+                messages.error(request, f'A user with email {email} already exists!')
+                return render(request, 'admin/staffs/staffs_form.html', {
+                    'form': form,
+                    'action': 'Create'
+                })
+            
+            try:
+                with transaction.atomic():
+                    # Create User account
+                    default_password = 'teacher123'
+                    staff_name = form.cleaned_data.get('staff_name')
+                    
+                    # Generate username from email (before @ symbol)
+                    username = email.split('@')[0]
+                    
+                    # Check if username exists, if so, append a number
+                    base_username = username
+                    counter = 1
+                    while Users.objects.filter(username=username).exists():
+                        username = f"{base_username}{counter}"
+                        counter += 1
+                    
+                    # Create the user
+                    user = Users.objects.create_user(
+                        email=email,
+                        username=username,
+                        name=staff_name,
+                        password=default_password,
+                        is_active=True,
+                        created_at=timezone.now(),
+                        updated_at=timezone.now()
+                    )
+                    
+                    # Assign Teacher role
+                    try:
+                        teacher_role = Roles.objects.get(name='Teacher')
+                        RoleUsers.objects.create(
+                            user=user,
+                            role=teacher_role
+                        )
+                    except Roles.DoesNotExist:
+                        messages.warning(request, 'Teacher role not found. Please create it first.')
+                        raise Exception('Teacher role does not exist')
+                    
+                    # Create Staff record
+                    staff = form.save(commit=False)
+                    staff.user = user
+                    staff.created_by = request.user
+                    staff.updated_by = request.user
+                    staff.created_at = timezone.now()
+                    staff.updated_at = timezone.now()
+                    # staff_id will be auto-generated in the model's save method
+                    staff.save()
+                    
+                    # Send email with credentials
+                    send_staff_credentials_email(
+                        staff_email=email,
+                        staff_name=staff_name,
+                        staff_id=staff.staff_id,
+                        username=username,
+                        password=default_password
+                    )
+                    
+                    messages.success(
+                        request, 
+                        f'Staff created successfully! Staff ID: {staff.staff_id}. Credentials sent to {email}.'
+                    )
+                    return redirect('staffs_list')
+                    
+            except Exception as e:
+                messages.error(request, f'Error creating staff: {str(e)}')
+                return render(request, 'admin/staffs/staffs_form.html', {
+                    'form': form,
+                    'action': 'Create'
+                })
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = StaffForm()
+    
+    return render(request, 'admin/staffs/staffs_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+
+def send_staff_credentials_email(staff_email, staff_name, staff_id, username, password):
+    """Send email with staff credentials"""
+    subject = 'Welcome to TTSTECH - Your Staff Account Credentials'
+    
+    message = f"""
+            Dear {staff_name},
+
+            Welcome to TTSTECH! Your staff account has been successfully created.
+
+            Here are your login credentials:
+
+            Staff ID: {staff_id}
+            Username: {username}
+            Email: {staff_email}
+            Password: {password}
+
+            Please login to the system using your email and password. We recommend changing your password after your first login for security purposes.
+
+            Login URL: {settings.SITE_URL if hasattr(settings, 'SITE_URL') else 'Your website URL'}
+
+            If you have any questions or need assistance, please contact the administration.
+
+            Best regards,
+            TTSTECH Administration Team
+                """
+    
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[staff_email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        # Log the error but don't fail the staff creation
+        print(f"Error sending email: {str(e)}")
+        # You might want to use proper logging here
+        # import logging
+        # logger = logging.getLogger(__name__)
+        # logger.error(f"Failed to send credentials email to {staff_email}: {str(e)}")
+
+@login_required
+def staff_view(request, staff_id):
+    """View staff details"""
+    staff = get_object_or_404(
+        Staffs.objects.select_related('created_by', 'updated_by'),
+        id=staff_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/staffs/staffs_view.html', {
+        'staff': staff
+    })
+
+@login_required
+def staff_edit(request, staff_id):
+    """Edit existing staff"""
+    staff = get_object_or_404(Staffs, id=staff_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = StaffForm(request.POST, instance=staff)
+        if form.is_valid():
+            staff = form.save(commit=False)
+            staff.updated_by = request.user
+            staff.save()
+            messages.success(request, 'Staff updated successfully!')
+            return redirect('staffs_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = StaffForm(instance=staff)
+    
+    return render(request, 'admin/staffs/staffs_form.html', {
+        'form': form,
+        'action': 'Update',
+        'staff': staff
+    })
+
+@login_required
+def staff_delete(request, staff_id):
+    """Soft delete staff"""
+    staff = get_object_or_404(Staffs, id=staff_id, deleted_at__isnull=True)
+    staff.deleted_at = timezone.now()
+    staff.save()
+    messages.success(request, 'Staff deleted successfully!')
+    return redirect('staffs_list')
+
 # assignments 
 
 @login_required
@@ -3296,3 +3498,260 @@ def assignment_delete(request, assignment_id):
     assignment.save()
     messages.success(request, 'Assignment deleted successfully!')
     return redirect('assignments_list')
+
+
+
+# book references
+
+@login_required
+def reference_list(request):
+    """List all book references with DataTables"""
+    references = BookReferences.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    
+    return render(request, 'admin/references/references_list.html', {
+        'book_references': references
+    })
+
+from django.utils.text import slugify
+from django.http import JsonResponse
+
+
+@login_required
+def reference_create(request):
+    """Create new book reference"""
+    if request.method == 'POST':
+        form = BookReferenceForm(request.POST, request.FILES)
+        if form.is_valid():
+            reference = form.save(commit=False)
+            
+            # Auto-generate code from title
+            reference.code = slugify(form.cleaned_data['title'])
+            
+            # Set user and timestamps
+            reference.created_by = request.user
+            reference.updated_by = request.user
+            reference.created_at = timezone.now()
+            reference.updated_at = timezone.now()
+            
+            # Handle PDF upload based on format
+            if reference.format == 'PDF':
+                new_file = request.FILES.get('new_pdf_file')
+                selected_media_id = request.POST.get('selected_media_id')
+                
+                if new_file:
+                    # Upload new PDF to MediaLibrary
+                    media = MediaLibrary()
+                    media.file_name = new_file.name
+                    media.file_path = new_file
+                    media.file_type = new_file.content_type
+                    media.file_size = str(new_file.size)
+                    media.media_type = 'document'
+                    media.title = form.cleaned_data['title']
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    media.thumb_file_path = 'uploads/thumbs/pdf-thumb.png'
+                    media.slider_file_path = ''
+                    media.save()
+                    
+                    reference.reference_file = media
+                    
+                elif selected_media_id:
+                    # Link existing media
+                    reference.reference_file_id = int(selected_media_id)
+                
+                # Clear reference_note for PDF format
+                reference.reference_note = None
+                
+            elif reference.format == 'note':
+                # Clear reference_file for note format
+                reference.reference_file = None
+            
+            reference.save()
+            messages.success(request, 'Reference created successfully!')
+            return redirect('reference_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BookReferenceForm()
+    
+    return render(request, 'admin/references/reference_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+
+@login_required
+def reference_edit(request, reference_id):
+    """Edit existing reference"""
+    reference = get_object_or_404(
+        BookReferences, 
+        id=reference_id, 
+        deleted_at__isnull=True
+    )
+    
+    if request.method == 'POST':
+        form = BookReferenceForm(request.POST, request.FILES, instance=reference)
+        if form.is_valid():
+            reference = form.save(commit=False)
+            
+            # Auto-generate code from title
+            reference.code = slugify(form.cleaned_data['title'])
+            
+            # Update user and timestamp
+            reference.updated_by = request.user
+            reference.updated_at = timezone.now()
+            
+            # Handle PDF upload based on format
+            if reference.format == 'PDF':
+                new_file = request.FILES.get('new_pdf_file')
+                selected_media_id = request.POST.get('selected_media_id')
+                
+                if new_file:
+                    # Upload new PDF to MediaLibrary
+                    media = MediaLibrary()
+                    media.file_name = new_file.name
+                    media.file_path = new_file
+                    media.file_type = new_file.content_type
+                    media.file_size = str(new_file.size)
+                    media.media_type = 'document'
+                    media.title = form.cleaned_data['title']
+                    media.created_by = request.user
+                    media.updated_by = request.user
+                    media.thumb_file_path = 'uploads/thumbs/pdf-thumb.png'
+                    media.slider_file_path = ''
+                    media.save()
+                    
+                    reference.reference_file = media
+                    
+                elif selected_media_id:
+                    # Link existing media
+                    reference.reference_file_id = int(selected_media_id)
+                
+                # Clear reference_note for PDF format
+                reference.reference_note = None
+                
+            elif reference.format == 'note':
+                # Clear reference_file for note format
+                reference.reference_file = None
+            
+            reference.save()
+            messages.success(request, 'Reference updated successfully!')
+            return redirect('reference_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BookReferenceForm(instance=reference)
+    
+    return render(request, 'admin/references/reference_form.html', {
+        'form': form,
+        'action': 'Update',
+        'reference': reference
+    })
+
+
+@login_required
+def reference_view(request, reference_id):
+    """View reference details"""
+    reference = get_object_or_404(
+        BookReferences.objects.select_related(
+            'created_by', 
+            'updated_by', 
+            'reference_file',
+            'subject'
+        ),
+        id=reference_id,
+        deleted_at__isnull=True
+    )
+    
+    return render(request, 'admin/references/reference_view.html', {
+        'reference': reference
+    })
+
+
+def get_media_library_pdfs(request):
+    """AJAX endpoint to get all PDFs from media library"""
+    pdfs = MediaLibrary.objects.filter(
+        file_type='application/pdf',
+        deleted_at__isnull=True
+    ).values('id', 'file_name', 'title', 'file_size', 'created_at')
+    
+    return JsonResponse({
+        'pdfs': list(pdfs)
+    })
+
+@login_required
+def reference_delete(request, reference_id):
+    """Soft delete reference"""
+    reference = get_object_or_404(BookReferences, id=reference_id, deleted_at__isnull=True)
+    reference.deleted_at = timezone.now()
+    reference.save()
+    messages.success(request, 'Reference deleted successfully!')
+    return redirect('reference_list')
+
+
+# supports 
+
+@login_required
+def support_list(request):
+    """List all support tickets"""
+    support = Support.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('created_by').order_by('-id')
+    
+    return render(request, 'admin/supports/support_list.html', {
+        'support': support
+    })
+
+@login_required
+def support_view(request, support_id):
+    """View support ticket details"""
+    support = get_object_or_404(Support, id=support_id)
+    replies = support.replies.filter(deleted_at__isnull=True).order_by('created_at')
+    
+    if request.method == 'POST':
+        doubt_answer = request.POST.get('doubt_answer')
+        if doubt_answer:
+            SupportReplies.objects.create(
+                support=support,
+                doubt_answer=doubt_answer,
+                created_by=request.user,
+                updated_by=request.user
+            )
+            messages.success(request, 'Reply added successfully!')
+            return redirect('support_view', support_id=support_id)
+    
+    context = {
+        'support': support,
+        'replies': replies,
+    }
+    return render(request, 'admin/supports/support_view.html', context)
+
+@login_required
+def support_reply_delete(request, pk):
+    reply = get_object_or_404(SupportReplies, id=pk)
+    support_id = reply.support.id
+    
+    if request.method == 'POST':
+        from django.utils import timezone
+        reply.deleted_at = timezone.now()
+        reply.save()
+        messages.success(request, 'Reply deleted successfully!')
+    
+    return redirect('support_view', support_id=support_id)
+
+
+@login_required
+def support_delete(request, support_id):
+    """Soft delete support ticket"""
+    try:
+        support = get_object_or_404(Support, id=support_id, deleted_at__isnull=True)
+        support.deleted_at = timezone.now()
+        support.save()
+        
+        messages.success(request, 'Support ticket deleted successfully!')
+        return redirect('support_list')
+    except Exception as e:
+        messages.error(request, f'Error deleting support ticket: {str(e)}')
+        return redirect('support_list')

@@ -153,6 +153,14 @@ urlpatterns = [
     path('exams/<int:exam_id>/edit/', views.exam_edit, name='exams_edit'),
     path('exams/<int:exam_id>/delete/', views.exam_delete, name='exams_delete'),
 
+    #staffs
+
+    path("admin/staffs", views.staffs_list, name="staffs_list"),
+    path('staffs/create/', views.staff_create, name='staffs_create'),
+    path('staffs/<int:staff_id>/view/', views.staff_view, name='staffs_view'),
+    path('staffs/<int:staff_id>/edit/', views.staff_edit, name='staffs_edit'),
+    path('staffs/<int:staff_id>/delete/', views.staff_delete, name='staffs_delete'),
+
 
     #assignments 
 
@@ -161,6 +169,22 @@ urlpatterns = [
     path('assignments/<int:assignment_id>/view/', views.assignment_view, name='assignments_view'),
     path('assignments/<int:assignment_id>/edit/', views.assignment_edit, name='assignments_edit'),
     path('assignments/<int:assignment_id>/delete/', views.assignment_delete, name='assignments_delete'),
+
+
+    # Reference files
+
+    path("admin/references", views.reference_list, name="reference_list"),
+    path('references/create/', views.reference_create, name='reference_create'),
+    path('references/<int:reference_id>/view/', views.reference_view, name='reference_view'),
+    path('references/<int:reference_id>/edit/', views.reference_edit, name='reference_edit'),
+    path('references/<int:reference_id>/delete/', views.reference_delete, name='reference_delete'),
     
+
+    #support 
+
+    path("admin/support", views.support_list, name = "support_list"),
+    path('support/<int:support_id>/view/', views.support_view, name='support_view'),
+    path('support/<int:support_id>/delete/', views.support_delete, name='support_delete'),
+    path('support/replay/<int:pk>/delete/', views.support_reply_delete, name='support_reply_delete'),
 
 ]
