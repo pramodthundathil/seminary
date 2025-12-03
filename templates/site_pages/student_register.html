@@ -821,18 +821,18 @@
                     <input type="number" name="starting_year" class="form-control"
                         value="{{ request.POST.starting_year|default:'' }}" min="2020" max="2030" required>
                          <small id="starting_year_error" class="error-message"></small>
-                </div>
+                </div>            
+                <div class="form-group">
+                        <label>Preferred Language <span class="required">*</span></label>
+                        <select name="language" class="form-select" required>
+                            <option value="">Select Language</option>
+                            {% for language in languages %}
+                            <option value="{{ language.id }}">{{ language.language_name }}</option>
+                            {% endfor %}
+                            <small id="language_error" class="error-message"></small>
+                        </select>
+                    </div>
             </div>
-            <div class="form-group">
-                    <label>Preferred Language <span class="required">*</span></label>
-                    <select name="language" class="form-select" required>
-                        <option value="">Select Language</option>
-                        {% for language in languages %}
-                        <option value="{{ language.id }}">{{ language.language_name }}</option>
-                        {% endfor %}
-                         <small id="language_error" class="error-message"></small>
-                    </select>
-                </div>
             <div class="form-row two-cols">                
                 <div class="form-group">
                     <label>Ministerial Status</label>

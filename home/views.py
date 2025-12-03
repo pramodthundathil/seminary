@@ -44,7 +44,8 @@ from .models import (
     Pages,
     Languages,
     Users,
-    AdminPages
+    AdminPages,
+    Payments
 )
 
 
@@ -780,18 +781,16 @@ def payment_options(request):
     # -------------------------------
     if request.method == "POST":
         try:
-            # -------------------------------
-            # Get form data
-            # -------------------------------
-            first_name = request.POST.get("first_name")
-            middle_name = request.POST.get("middle_name")
-            last_name = request.POST.get("last_name")
+            name = request.POST.get("full_name")
             email = request.POST.get("email")
-            contact = request.POST.get("contact")
-            nationality = request.POST.get("nationality")
+            phone_code = request.POST.get("phone_code")
+            phone_number = request.POST.get("phone")
+            person_group = request.POST.get("person_group")
+            amount = request.POST.get("amount")
+            message_text = request.POST.get("message")
 
-            
-            comments = request.POST.get("comments")
+            phone = f"{phone_code}{phone_number}" if phone_code and phone_number else None
+           
             # Get reCAPTCHA response           
             recaptcha_response = request.POST.get('g-recaptcha-response')
 
@@ -818,37 +817,35 @@ def payment_options(request):
                 messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
                 return render(request, 'site_pages/payment_options.html')
 
-            logger.info(f"Received payment Form submission from {first_name} {last_name}")
+            logger.info(f"Received payment Form submission from {name}")
+            # 1. Fetch Student (email is unique in your system)
+            student = Students.objects.select_related("course_applied").filter(email=email).first()
 
-            # -------------------------------
+            # 2. Fetch Related ChurchAdmin for this student
+            church_admin = student.church_admins.first() if student else None
+
+            # 3. Fetch Subject based on student's course
+            student_subject_record = StudentsSubjects.objects.filter(
+                student=student,
+                is_approved=True
+            ).first()
+                        # -------------------------------
             # Save to database
             # -------------------------------
             try:
-                ReferenceForm.objects.create(
-                    first_name=first_name,
-                    middle_name=middle_name,
-                    last_name=last_name,
-                    email=email,
-                    contact_number=contact,
-                    nationality=nationality,
-
-                    applicant_name=applicant_name,
-                    relation_with_applicant=relationship,
-                    since_know_applicant=known_since,
-
-                    spiritual_commitment=spiritual_commitment,
-                    learning_capacity=learning_capacity,
-                    dedication_for_loard=dedication,
-                    leadership_skills=leadership,
-                    church_involvement=church_involvement,
-                    biblical_knowledge=biblical_knowledge,
-                    moral_standard=moral_standard,
-                    how_do_you_recommend=recommendation,
-                    financial_condition=financial_condition,
-
-                    personal_comment=comments
+                Payments.objects.create(
+                name=name,
+                email=email,
+                phone=phone,
+                person_group=person_group,
+                amount=amount,
+                message=message_text,
+                is_paid=False,
+                student=student,
+                church_admin=church_admin,
+                subjects_id=student_subject_record 
                 )
-                logger.info(f"payment Form saved successfully for {first_name} {last_name}")
+                logger.info(f"payment Form saved successfully for {name}")
                 messages.success(request, "Payment Form submitted successfully!")
                 return render(request, "site_pages/payment_options.html")   
             except Exception as e:

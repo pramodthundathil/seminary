@@ -128,7 +128,7 @@
     }
 
     /* === Form Section === */
-  .form-section {
+    .form-section {
         background: white;
         border-radius: 12px;
         padding: 30px;
@@ -136,7 +136,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border: 1px solid #e5e7eb;
     }
-    
+
 
     /* === Form Fields === */
     .form-row-modern {
@@ -270,7 +270,7 @@
     }
 
     /* === Buttons === */
-   
+
     .btn-group {
         display: flex !important;
         gap: 15px;
@@ -452,7 +452,7 @@
 
     }
 
-   
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .application-container {
@@ -481,7 +481,7 @@
         }
     }
 
-   
+
 
     .alert {
         padding: 15px 20px;
@@ -641,9 +641,9 @@
         color: var(--text-gray);
         text-align: center;
     }
-    
 
-   
+
+
     .section-title {
         color: var(--dark-navy);
         font-size: 1.5rem;
@@ -763,7 +763,7 @@
         gap: 10px;
     }
 
-    
+
 
     .btn-primary,
     .btn-secondary {
@@ -807,7 +807,7 @@
         margin-top: 5px;
     }
 
-   /* Icon style */
+    /* Icon style */
     .section-icon {
         font-size: 28px;
         background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
@@ -820,7 +820,7 @@
         align-items: center;
         justify-content: center;
     }
-    
+
 
     /* Optional: Hover Color Effect */
     .section-title:hover .section-icon {
@@ -984,23 +984,26 @@
         <div class="form-section">
             <h2 class="section-title">
                 <i class="fas fa-user section-icon"></i>
-                Personal Information</h2>
-             <div class="form-row two-cols">
+                Personal Information
+            </h2>
+            <div class="form-row two-cols">
                 <div class="form-group">
                     <label for="full_name">Full Name <span class="required">*</span></label>
-                    <input type="text" id="full_name" name="full_name" class="form-select" placeholder="Enter your full name" required>
+                    <input type="text" id="full_name" name="full_name" class="form-control"
+                        placeholder="Enter your full name" required>
                     <small class="error-message" id="full_name_error"></small>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="email">Email Address <span class="required">*</span></label>
-                    <input type="email" id="email" name="email" class="form-select" placeholder="example@email.com" required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="example@email.com"
+                        required>
                     <small class="error-message" id="email_error"></small>
                 </div>
             </div>
 
             <div class="form-row two-cols">
                 <!-- Phone Number -->
-                 <div class="form-group">
+                <div class="form-group">
                     <label>Phone Number <span class="required">*</span></label>
                     <div class="phone-group">
                         <select id="phone_code" name="phone_code" class="form-select" required>
@@ -1017,8 +1020,15 @@
                     <small id="phone_number_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
-                    <label for="student_id">Student ID (Optional)</label>
-                    <input type="text" id="student_id" name="student_id" class="form-control" placeholder="Enter your student ID">
+                    <label for="person_group">Person Group<span class="required">*</span></label>
+                    <select name="person_group" class="form-select" required>
+                        <option value="">--- Select ---</option>
+                        <option value="student">Student</option>
+                        <option value="applicant">Applicant</option>
+                        <option value="guest">Guest</option>
+                        <option value="donor">Donor</option>
+                    </select>
+                    <small class="error-message" id="person_group_error"></small>
                 </div>
             </div>
         </div>
@@ -1027,51 +1037,24 @@
         <div class="form-section">
             <h2 class="section-title">
                 <i class="fas fa-credit-card section-icon"></i>
-                Payment Details</h2>          
-
-             <div class="form-row two-cols">
-                <div class="form-group">
-                    <label for="payment_type">Payment Type <span class="required">*</span></label>
-                    <select id="payment_type" name="payment_type" class="form-control" required>
-                        <option value="">--- Select Payment Type ---</option>
-                        <option value="tuition">Tuition Fee</option>
-                        <option value="enrollment">Enrollment Fee</option>
-                        <option value="application">Application Fee</option>
-                        <option value="course">Course Fee</option>
-                        <option value="library">Library Fee</option>
-                        <option value="exam">Exam Fee</option>
-                        <option value="accommodation">Accommodation Fee</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <small class="error-message" id="payment_type_error"></small>
-                </div>
-                <div class="form-group">
-                    <label for="course">Course/Program</label>
-                    <select id="course" name="course" class="form-control">
-                        <option value="">--- Select Program ---</option>
-                        <option value="undergraduate">Undergraduate Level</option>
-                        <option value="masters">Master's Level</option>
-                        <option value="doctoral">Doctoral Level</option>
-                        <option value="certificate">Certificate Program</option>
-                        <option value="continuing">Continuing Education</option>
-                    </select>
-                </div>
-            </div>         
+                Payment Details
+            </h2>
             <div class="form-group">
-                    <label for="amount">Payment Amount <span class="required">*</span></label>
-                    <div class="amount-input-wrapper">
-                        <span class="currency-symbol">$</span>
-                        <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="1" placeholder="0.00" required>
-                    </div>
-                    <small class="error-message" id="amount_error"></small>
-                </div>            
+                <label for="amount">Payment Amount <span class="required">*</span></label>
+                <div class="amount-input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="1"
+                        placeholder="0.00" required>
+                </div>
+                <small class="error-message" id="amount_error"></small>
+            </div>
         </div>
-
-        <!-- Additional Information -->         
+        <!-- Additional Information -->
         <div class="form-section">
             <h2 class="section-title">
                 <i class="fas fa-comment-alt section-icon"></i>
-                Additional Information</h2>           
+                Additional Information
+            </h2>
 
             <div class="form-field full-width">
                 <label for="message">Message/Notes (Optional)</label>
@@ -1080,17 +1063,17 @@
                 <small class="character-count">0 / 500 characters</small>
             </div>
 
-            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>  
+            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
             <div class="btn-group">
-                 <button type="button" class="btn-secondary" id="cancelBtn">
-                Cancel
-            </button>
-            <button type="submit" class="btn-primary" id="submitBtn">
-                <i class="fas fa-paper-plane"></i> Proceed to Payment
-            </button>
+                <button type="button" class="btn-secondary" id="cancelBtn">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Proceed to Payment
+                </button>
             </div>
-           
-        </div>        
+
+        </div>
     </form>
 </div>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
