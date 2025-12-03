@@ -39,9 +39,11 @@
             transform: scale(0);
             opacity: 0;
         }
+
         50% {
             transform: scale(1.1);
         }
+
         100% {
             transform: scale(1);
             opacity: 1;
@@ -194,25 +196,21 @@
 
         <!-- Success Message -->
         <p class="success-message">
-            Thank you for submitting your student application. We have received your information 
+            Thank you for submitting your student application. We have received your information
             and our admissions team will review it shortly.
         </p>
 
         <!-- Student ID Display -->
-        {% if messages %}
-            {% for message in messages %}
-                {% if 'Student ID' in message.message %}
-                    <div class="student-id-box">
-                        <div class="student-id-label">Your Student ID</div>
-                        <div class="student-id">
-                            {{ message.message|slice:"50:60" }}
-                        </div>
-                        <small style="color: var(--text-gray); margin-top: 10px; display: block;">
-                            Please save this ID for future reference
-                        </small>
-                    </div>
-                {% endif %}
-            {% endfor %}
+        {% if student %}
+        <div class="student-id-box">
+            <div class="student-id-label">Your Student ID</div>
+            <div class="student-id">
+                {{ student_id }}
+            </div>
+            <small style="color: var(--text-gray); margin-top: 10px; display: block;">
+                Please save this ID for future reference
+            </small>
+        </div>
         {% endif %}
 
         <!-- What's Next Info -->
@@ -244,7 +242,7 @@
                 <i class="bi bi-house-door" style="margin-right: 8px;"></i>
                 Go to Homepage
             </a>
-            <a href="mailto:admissions@yourdomain.com" class="btn btn-outline">
+            <a href="mailto: info@trinityseminary.edu" class="btn btn-outline">
                 <i class="bi bi-envelope" style="margin-right: 8px;"></i>
                 Contact Support
             </a>
@@ -252,9 +250,10 @@
 
         <!-- Additional Help -->
         <p style="margin-top: 40px; color: var(--text-gray); font-size: 0.95rem;">
-            Have questions? Email us at 
-            <a href="mailto:admissions@yourdomain.com" style="color: var(--primary-cyan); text-decoration: none; font-weight: 600;">
-                admissions@yourdomain.com
+            Have questions? Email us at
+            <a href="mailto: info@trinityseminary.edu"
+                style="color: var(--primary-cyan); text-decoration: none; font-weight: 600;">
+                info@trinityseminary.edu
             </a>
         </p>
     </div>

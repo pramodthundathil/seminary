@@ -1,102 +1,83 @@
 {% extends 'site_pages/index.html' %}
-{% block content %}
+{% load static %}
 
+{% block content %}
 <style>
+    body {
+        background: #d7eaff !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Application Container - Full width blue background */
     .application-container {
         max-width: 900px;
-        margin: 40px auto;
+        margin: 0 auto;
         padding: 0 20px;
-    }
-    body {
-    background: #d7eaff !important;
-    margin: 0;
-    padding: 0;
-}
- 
-/* Application Container - Full width blue background */
-.application-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px;
-    background: transparent; /* Remove container background */
-    min-height: 100vh;
-    margin-top: -120px !important;
-    padding-top: 180px !important;
-    
-}
-/* Make navbar transparent */
-/* nav.navbar {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1050;
-    background: transparent !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-} */
-.application-header {
-    text-align: center;
-    margin-bottom: 40px;
-    padding-top: 20px;
-}
+        background: transparent;
+        /* Remove container background */
+        min-height: 100vh;
+        margin-top: -120px !important;
+        padding-top: 180px !important;
 
-.application-header h1 {
-    color: var(--dark-navy);
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    font-weight: 700;
-}
-
-.application-header p {
-    color: var(--text-gray);
-    font-size: 1.1rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .application-container {
-        margin-top: -80px !important;
-        padding-top: 140px !important;
-        padding-left: 15px;
-        padding-right: 15px;
     }
 
-    .application-header h1 {
-        font-size: 2rem;
-    }
-
-    .application-header p {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .application-container {
-        padding-top: 130px !important;
-    }
-
-    .application-header h1 {
-        font-size: 1.75rem;
-    }
-}
 
     .application-header {
         text-align: center;
         margin-bottom: 40px;
+        padding-top: 20px;
     }
 
     .application-header h1 {
         color: var(--dark-navy);
-        font-size: 2.5rem;
+        font-size: 1.9rem !important;
         margin-bottom: 10px;
         font-weight: 700;
     }
 
     .application-header p {
         color: var(--text-gray);
-        font-size: 1.1rem;
+        font-size: 0.9rem !important;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .application-container {
+            margin-top: -80px !important;
+            padding-top: 140px !important;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .application-header h1 {
+            font-size: 1.75rem !important;
+        }
+
+        .section-reference-title h5 {
+            font-size: 16px !important;
+        }
+
+        .application-header p {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .application-container {
+            padding-top: 130px !important;
+        }
+
+        .application-header h1 {
+            font-size: 1.75rem !important;
+        }
+
+        .section-reference-title h5 {
+            font-size: 16px !important;
+        }
+    }
+
+
 
     .alert {
         padding: 15px 20px;
@@ -165,77 +146,71 @@
         margin-bottom: 8px;
         transition: all 0.3s;
     }
+
     /* Progress tracker */
-.progress-tracker {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    padding: 0 20px;
-    position: relative;
-    background: transparent;
-}
-
-.progress-tracker::before {
-    content: '';
-    position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #e5e7eb;
-    z-index: 0;
-}
-
-.progress-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 1;
-    background: transparent; /* Remove white background */
-    padding: 0; /* Remove padding */
-}
-
-.progress-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    color: #9ca3af;
-    margin-bottom: 8px;
-    transition: all 0.3s;
-}
-
-.progress-step.active .progress-circle {
-    background: var(--primary-cyan);
-    color: white;
-}
-
-.progress-step.completed .progress-circle {
-    background: #10b981;
-    color: white;
-}
-
-.progress-label {
-    font-size: 0.85rem;
-    color: var(--text-gray);
-    text-align: center;
-    background: transparent; /* Ensure label background is transparent */
-}
-
-/* Responsive */
-@media (max-width: 768px) {
     .progress-tracker {
-        padding: 0 10px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        padding: 0 20px;
+        position: relative;
+        background: transparent;
+    }
+
+    .progress-tracker::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+        background: transparent;
+        /* Remove white background */
+        padding: 0;
+        /* Remove padding */
+    }
+
+    .progress-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #9ca3af;
+        margin-bottom: 8px;
+        transition: all 0.3s;
+    }
+
+    .progress-step.active .progress-circle {
+        background: var(--primary-cyan);
+        color: white;
+    }
+
+    .progress-step.completed .progress-circle {
+        background: #10b981;
+        color: white;
     }
 
     .progress-label {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        text-align: center;
+        background: transparent;
+        /* Ensure label background is transparent */
     }
-}
+
 
     .progress-step.active .progress-circle {
         background: var(--primary-cyan);
@@ -269,14 +244,14 @@
         margin-bottom: 50px;
         padding-bottom: 15px;
         border-bottom: 2px solid var(--primary-cyan);
-        gap: 12px;  
-         display: flex;
-    align-items: center;
-    justify-content: center; 
-    gap: 12px;
-    text-align: center;
+        gap: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-align: center;
     }
-    
+
 
     .form-row {
         display: grid;
@@ -387,8 +362,10 @@
         gap: 15px;
         justify-content: flex-end;
         margin-top: 30px;
-         margin-bottom: 60px; /* Add space at bottom */
-    padding-bottom: 40px; /* Extra padding for better spacing */
+        margin-bottom: 60px;
+        /* Add space at bottom */
+        padding-bottom: 40px;
+        /* Extra padding for better spacing */
     }
 
     .btn-primary,
@@ -419,7 +396,7 @@
     }
 
     .btn-secondary {
-        background: #64748B!important;
+        background: #64748B !important;
         color: white
     }
 
@@ -433,46 +410,27 @@
         margin-top: 5px;
     }
 
-    /* .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
+
+    /* Icon style */
+    .section-icon {
+        font-size: 28px;
+        background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
+        -webkit-background-clip: text;
+        color: transparent;
+        /* Main theme color */
+        min-width: 28px;
+        /* Prevent shifting if icons vary */
+        display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .loading-overlay.active {
-        display: flex;
+    /* Optional: Hover Color Effect */
+    .section-title:hover .section-icon {
+        color: #0056b3;
     }
 
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--primary-cyan);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    } */
-    /* Icon style */
-.section-icon {
-    font-size: 28px;
-    color: #007bff;          /* Main theme color */
-    min-width: 28px;         /* Prevent shifting if icons vary */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Optional: Hover Color Effect */
-.section-title:hover .section-icon {
-    color: #0056b3;
-}
-.g-recaptcha iframe {
+    .g-recaptcha iframe {
         width: 100% !important;
         min-height: 78px;
         display: block !important;
@@ -480,28 +438,94 @@
         visibility: visible !important;
     }
 
-/* Responsive for small screens */
-@media (max-width: 576px) {
-    .section-title {
-        font-size: 24px;
+    /* Responsive for small screens */
+    @media (max-width: 576px) {
+        .section-title {
+            font-size: 18px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .application-header p {
+            font-size: 14px;
+        }
+
+        .btn-group {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-top: 30px;
+        }
+
+        .btn-group button {
+            max-width: 150px;
+            white-space: nowrap;
+            padding: 6px 14px;
+
+        }
+
+        .btn-group .btn-primary,
+        .btn-group .btn-secondary {
+            padding: 6px 14px;
+            /* smaller height + width */
+            font-size: 14px;
+            /* reduce text size */
+            border-radius: 6px;
+            /* optional: smaller corners */
+        }
+
+
     }
-    .section-icon {
-        font-size: 24px;
-    }
-}
 
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     @media (max-width: 768px) {
+
         .form-row.two-cols,
         .form-row.three-cols {
             grid-template-columns: 1fr;
         }
 
+        .btn-group {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-top: 30px;
+        }
+
+        .btn-group button {
+            max-width: 150px;
+            white-space: nowrap;
+            padding: 6px 14px;
+
+        }
+
+        .application-header p {
+            font-size: 14px;
+        }
+
+        .btn-group .btn-primary,
+        .btn-group .btn-secondary {
+            padding: 6px 14px;
+            /* smaller height + width */
+            font-size: 14px;
+            /* reduce text size */
+            border-radius: 6px;
+            /* optional: smaller corners */
+        }
         .phone-group {
             grid-template-columns: 100px 1fr;
         }
@@ -547,12 +571,12 @@
 
     <!-- Messages -->
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                <span>{{ message }}</span>
-            </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
     {% endif %}
 
     <!-- Progress Tracker -->
@@ -585,30 +609,37 @@
         <!-- Section 1: Personal Information -->
         <div class="form-section">
             <h2 class="section-title"><i class="section-icon fa fa-user"></i>Personal Information</h2>
-            
+
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label>First Name <span class="required">*</span></label>
-                    <input type="text" name="first_name" class="form-control" value="{{ request.POST.first_name|default:'' }}" required>
+                    <input type="text" name="first_name" class="form-control"
+                        value="{{ request.POST.first_name|default:'' }}" required>
+                    <small class="error-message" id="first_name_error"></small>
                 </div>
                 <div class="form-group">
                     <label>Middle Name</label>
-                    <input type="text" name="middle_name" class="form-control" value="{{ request.POST.middle_name|default:'' }}">
+                    <input type="text" name="middle_name" class="form-control"
+                        value="{{ request.POST.middle_name|default:'' }}">
                 </div>
                 <div class="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" class="form-control" value="{{ request.POST.last_name|default:'' }}">
+                    <input type="text" name="last_name" class="form-control"
+                        value="{{ request.POST.last_name|default:'' }}">
                 </div>
             </div>
 
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" name="email" class="form-control" value="{{ request.POST.email|default:'' }}" required>
+                    <input type="email" name="email" class="form-control" value="{{ request.POST.email|default:'' }}"
+                        required><small class="error-message" id="email_error"></small>
                 </div>
                 <div class="form-group">
                     <label>Date of Birth <span class="required">*</span></label>
-                    <input type="date" name="date_of_birth" class="form-control" value="{{ request.POST.date_of_birth|default:'' }}" required>
+                    <input type="date" name="date_of_birth" class="form-control"
+                        value="{{ request.POST.date_of_birth|default:'' }}" required>
+                        <small class="error-message" id="date_of_birth_error"></small>
                 </div>
             </div>
 
@@ -617,19 +648,20 @@
                     <label>Gender <span class="required">*</span></label>
                     <select name="gender" class="form-select" required>
                         <option value="">Select Gender</option>
-                        <option value="male" {% if request.POST.gender == 'male' %}selected{% endif %}>Male</option>
-                        <option value="female" {% if request.POST.gender == 'female' %}selected{% endif %}>Female</option>
-                        <option value="other" {% if request.POST.gender == 'other' %}selected{% endif %}>Other</option>
+                        <option value="male" {% if request.POST.gender == "male" %}selected{% endif %}>Male</option>
+                        <option value="female" {% if request.POST.gender == "female" %}selected{% endif %}>Female</option>
+                        <option value="other" {% if request.POST.gender == "other" %}selected{% endif %}>Other</option>
+                        <small class="error-message" id="gender_error"></small>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Citizenship <span class="required">*</span></label>
                     <select name="citizenship" class="form-select" required>
                         <option value="">Select Country</option>
-                        <option value="1" {% if request.POST.citizenship == '1' %}selected{% endif %}>United States</option>
-                        <option value="2" {% if request.POST.citizenship == '2' %}selected{% endif %}>India</option>
-                        <option value="3" {% if request.POST.citizenship == '3' %}selected{% endif %}>United Kingdom</option>
-                        <!-- Add more country options -->
+                        {% for country in countries %}
+                        <option value="{{ country.id }}">{{ country.name }}</option>
+                        {% endfor %}
+                        <small class="error-message" id="citizenship_error"></small>
                     </select>
                 </div>
             </div>
@@ -639,22 +671,28 @@
                     <label>Marital Status</label>
                     <select name="mrital_status" class="form-select">
                         <option value="">Select Status</option>
-                        <option value="single" {% if request.POST.mrital_status == 'single' %}selected{% endif %}>Single</option>
-                        <option value="married" {% if request.POST.mrital_status == 'married' %}selected{% endif %}>Married</option>
-                        <option value="divorced" {% if request.POST.mrital_status == 'divorced' %}selected{% endif %}>Divorced</option>
-                        <option value="widowed" {% if request.POST.mrital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                        <option value="single" {% if request.POST.mrital_status == 'single' %}selected{% endif %}>Single
+                        </option>
+                        <option value="married" {% if request.POST.mrital_status == 'married' %}selected{% endif %}>
+                            Married</option>
+                        <option value="divorced" {% if request.POST.mrital_status == 'divorced' %}selected{% endif %}>
+                            Divorced</option>
+                        <option value="widowed" {% if request.POST.mrital_status == 'widowed' %}selected{% endif %}>
+                            Widowed</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Spouse Name</label>
-                    <input type="text" name="spouse_name" class="form-control" value="{{ request.POST.spouse_name|default:'' }}">
+                    <input type="text" name="spouse_name" class="form-control"
+                        value="{{ request.POST.spouse_name|default:'' }}">
                 </div>
             </div>
 
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Number of Children</label>
-                    <input type="number" name="children" class="form-control" value="{{ request.POST.children|default:'' }}" min="0">
+                    <input type="number" name="children" class="form-control"
+                        value="{{ request.POST.children|default:'' }}" min="0">
                 </div>
                 <div class="form-group">
                     <label>Profile Photo</label>
@@ -672,37 +710,44 @@
         <!-- Section 2: Contact Information -->
         <div class="form-section">
             <h2 class="section-title"> <i class="fa fa-address-book section-icon"></i>Contact Information</h2>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Phone Number <span class="required">*</span></label>
-                    <div class="phone-group">
-                        <select name="phone_code" class="form-select" required>
-                            <option value="">Code</option>
-                            <option value="1" {% if request.POST.phone_code == '1' %}selected{% endif %}>+1</option>
-                            <option value="44" {% if request.POST.phone_code == '44' %}selected{% endif %}>+44</option>
-                            <option value="91" {% if request.POST.phone_code == '91' %}selected{% endif %}>+91</option>
-                        </select>
-                        <input type="tel" name="phone_number" class="form-control" value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
-                    </div>
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label>Phone Number <span class="required">*</span></label>
+                <div class="phone-group">
+                    <select id="phone_code" name="phone_code" class="form-select" required>
+                        <option value="">Code</option>
+                        {% for country in countries %}
+                        <option value="{{ country.phonecode }}">
+                            {{ country.name }} (+{{ country.phonecode }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="tel" name="phone_number" class="form-control"
+                        value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
+                         <small id="phone_number_error" class="error-message"></small>
                 </div>
+               
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Mailing Address <span class="required">*</span></label>
-                    <input type="text" name="mailing_address" class="form-control" value="{{ request.POST.mailing_address|default:'' }}" required>
+                    <input type="text" name="mailing_address" class="form-control"
+                        value="{{ request.POST.mailing_address|default:'' }}" required>
+                         <small id="mailing_address_error" class="error-message"></small>
                 </div>
             </div>
 
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>City <span class="required">*</span></label>
-                    <input type="text" name="city" class="form-control" value="{{ request.POST.city|default:'' }}" required>
+                    <input type="text" name="city" class="form-control" value="{{ request.POST.city|default:'' }}"
+                        required> <small id="city_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>State/Province <span class="required">*</span></label>
-                    <input type="text" name="state" class="form-control" value="{{ request.POST.state|default:'' }}" required>
+                    <input type="text" name="state" class="form-control" value="{{ request.POST.state|default:'' }}"
+                        required> <small id="state_error" class="error-message"></small>
                 </div>
             </div>
 
@@ -711,121 +756,129 @@
                     <label>Country <span class="required">*</span></label>
                     <select name="country" class="form-select" required>
                         <option value="">Select Country</option>
-                        <option value="1" {% if request.POST.country == '1' %}selected{% endif %}>United States</option>
-                        <option value="2" {% if request.POST.country == '2' %}selected{% endif %}>India</option>
-                        <option value="3" {% if request.POST.country == '3' %}selected{% endif %}>United Kingdom</option>
+                        {% for country in countries %}
+                        <option value="{{ country.id }}">{{ country.name }}</option>
+                        {% endfor %}
+                         <small id="country_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Zip/Postal Code <span class="required">*</span></label>
-                    <input type="text" name="zip_code" class="form-control" value="{{ request.POST.zip_code|default:'' }}" required>
+                    <input type="text" name="zip_code" class="form-control"
+                        value="{{ request.POST.zip_code|default:'' }}" required>
+                        <small id="zip_code_error" class="error-message"></small>
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-group">
-                    <label>Timezone <span class="required">*</span></label>
-                    <select name="timezone" class="form-select" required>
-                        <option value="">Select Timezone</option>
-                        <option value="America/New_York" {% if request.POST.timezone == 'America/New_York' %}selected{% endif %}>Eastern Time (ET)</option>
-                        <option value="America/Chicago" {% if request.POST.timezone == 'America/Chicago' %}selected{% endif %}>Central Time (CT)</option>
-                        <option value="America/Denver" {% if request.POST.timezone == 'America/Denver' %}selected{% endif %}>Mountain Time (MT)</option>
-                        <option value="America/Los_Angeles" {% if request.POST.timezone == 'America/Los_Angeles' %}selected{% endif %}>Pacific Time (PT)</option>
-                        <option value="Asia/Kolkata" {% if request.POST.timezone == 'Asia/Kolkata' %}selected{% endif %}>India Standard Time (IST)</option>
-                    </select>
-                </div>
+               <div class="form-group">
+                <label>Timezone <span class="required">*</span></label>
+                <select id="timezone" name="timezone" class="form-select" required>
+                    <option value="">Select Timezone</option>
+                </select>
+                <!-- Store previously selected timezone -->
+                <input type="hidden" id="selected_timezone" value="{{ request.POST.timezone }}">
+                <small id="timezone_error" class="error-message"></small>
+            </div>
             </div>
         </div>
 
         <!-- Section 3: Educational & Ministry Background -->
         <div class="form-section">
-            <h2 class="section-title"> <i class="fa fa-graduation-cap section-icon"></i>Educational & Ministry Background</h2>
-            
+            <h2 class="section-title"> <i class="fa fa-graduation-cap section-icon"></i>Educational & Ministry
+                Background</h2>
+
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Highest Education <span class="required">*</span></label>
                     <select name="highest_education" class="form-select" required>
                         <option value="">Select Level</option>
-                        <option value="high_school" {% if request.POST.highest_education == 'high_school' %}selected{% endif %}>High School</option>
-                        <option value="associate" {% if request.POST.highest_education == 'associate' %}selected{% endif %}>Associate Degree</option>
-                        <option value="bachelor" {% if request.POST.highest_education == 'bachelor' %}selected{% endif %}>Bachelor's Degree</option>
-                        <option value="master" {% if request.POST.highest_education == 'master' %}selected{% endif %}>Master's Degree</option>
-                        <option value="doctorate" {% if request.POST.highest_education == 'doctorate' %}selected{% endif %}>Doctorate</option>
+                        <option value="high_school" {% if request.POST.highest_education == 'high_school' %}selected{%endif %}>High School</option>
+                        <option value="associate" {% if request.POST.highest_education == 'associate' %}selected{%endif %}>Associate Degree</option>
+                        <option value="bachelor" {% if request.POST.highest_education == 'bachelor' %}selected{% endif %}>
+                            Bachelor's Degree</option>
+                        <option value="master" {% if request.POST.highest_education == 'master' %}selected{% endif %}>
+                            Master's Degree</option>
+                        <option value="doctorate" {% if request.POST.highest_education == 'doctorate' %}selected{%endif %}>Doctorate</option>
+                         <small id="highest_education_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Course Applied For <span class="required">*</span></label>
                     <select name="course_applied" class="form-select" required>
                         <option value="">Select Course</option>
-                        <option value="1" {% if request.POST.course_applied == '1' %}selected{% endif %}>Course 1</option>
-                        <option value="2" {% if request.POST.course_applied == '2' %}selected{% endif %}>Course 2</option>
+                        {% for course_applied in courses %}
+                        <option value="{{ course_applied.id }}">{{ course_applied.course_name }}</option>
+                        {% endfor %}
+                         <small id="course_applied_error" class="error-message"></small>
                     </select>
                 </div>
             </div>
 
-            <div class="form-row two-cols">
-                <div class="form-group">
-                    <label>Associate Degree</label>
-                    <select name="associate_degree" class="form-select">
-                        <option value="">Select Degree</option>
-                        <option value="1" {% if request.POST.associate_degree == '1' %}selected{% endif %}>Degree 1</option>
-                        <option value="2" {% if request.POST.associate_degree == '2' %}selected{% endif %}>Degree 2</option>
-                    </select>
-                </div>
+            <div class="form-row two-cols">                
                 <div class="form-group">
                     <label>Starting Year <span class="required">*</span></label>
-                    <input type="number" name="starting_year" class="form-control" value="{{ request.POST.starting_year|default:'' }}" min="2020" max="2030" required>
+                    <input type="number" name="starting_year" class="form-control"
+                        value="{{ request.POST.starting_year|default:'' }}" min="2020" max="2030" required>
+                         <small id="starting_year_error" class="error-message"></small>
                 </div>
             </div>
-
-            <div class="form-row two-cols">
-                <div class="form-group">
+            <div class="form-group">
                     <label>Preferred Language <span class="required">*</span></label>
                     <select name="language" class="form-select" required>
                         <option value="">Select Language</option>
-                        <option value="1" {% if request.POST.language == '1' %}selected{% endif %}>English</option>
-                        <option value="2" {% if request.POST.language == '2' %}selected{% endif %}>Spanish</option>
+                        {% for language in languages %}
+                        <option value="{{ language.id }}">{{ language.language_name }}</option>
+                        {% endfor %}
+                         <small id="language_error" class="error-message"></small>
                     </select>
                 </div>
+            <div class="form-row two-cols">                
                 <div class="form-group">
                     <label>Ministerial Status</label>
                     <select name="ministerial_status" class="form-select">
                         <option value="">Select Status</option>
-                        <option value="ordained" {% if request.POST.ministerial_status == 'ordained' %}selected{% endif %}>Ordained Minister</option>
-                        <option value="licensed" {% if request.POST.ministerial_status == 'licensed' %}selected{% endif %}>Licensed Minister</option>
-                        <option value="lay" {% if request.POST.ministerial_status == 'lay' %}selected{% endif %}>Lay Minister</option>
-                        <option value="none" {% if request.POST.ministerial_status == 'none' %}selected{% endif %}>None</option>
+                        <option value="ordained" {% if request.POST.ministerial_status == 'ordained' %}selected{% endif%}>
+                            Ordained Minister</option>
+                        <option value="licensed" {% if request.POST.ministerial_status == 'licensed' %}selected{% endif%}>
+                            Licensed Minister</option>
+                        <option value="lay" {% if request.POST.ministerial_status == 'lay' %}selected{% endif %}>Lay
+                            Minister</option>
+                        <option value="none" {% if request.POST.ministerial_status == 'none' %}selected{% endif %}>None
+                        </option>
                     </select>
                 </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
+                 <div class="form-group">
                     <label>Church Affiliation</label>
-                    <input type="text" name="church_affiliation" class="form-control" value="{{ request.POST.church_affiliation|default:'' }}" placeholder="Enter your church name">
+                    <input type="text" name="church_affiliation" class="form-control"
+                        value="{{ request.POST.church_affiliation|default:'' }}" placeholder="Enter your church name">
                 </div>
-            </div>
+            </div>            
         </div>
 
         <!-- Section 4: Financial Information -->
         <div class="form-section">
             <h2 class="section-title"> <i class="fa fa-wallet section-icon"></i>Financial Information</h2>
-            
+
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Scholarship Needed? <span class="required">*</span></label>
                     <select name="scholarship_needed" class="form-select" required>
                         <option value="">Select Option</option>
-                        <option value="yes" {% if request.POST.scholarship_needed == 'yes' %}selected{% endif %}>Yes</option>
+                        <option value="yes" {% if request.POST.scholarship_needed == 'yes' %}selected{% endif %}>Yes
+                        </option>
                         <option value="no" {% if request.POST.scholarship_needed == 'no' %}selected{% endif %}>No</option>
+                         <small id="scholarship_needed_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Currently Employed? <span class="required">*</span></label>
                     <select name="currently_employed" class="form-select" required>
                         <option value="">Select Option</option>
-                        <option value="yes" {% if request.POST.currently_employed == 'yes' %}selected{% endif %}>Yes</option>
+                        <option value="yes" {% if request.POST.currently_employed == 'yes' %}selected{% endif %}>Yes
+                        </option>
                         <option value="no" {% if request.POST.currently_employed == 'no' %}selected{% endif %}>No</option>
+                         <small id="currently_employed_error" class="error-message"></small>
                     </select>
                 </div>
             </div>
@@ -835,15 +888,20 @@
                     <label>Annual Income Range</label>
                     <select name="income" class="form-select">
                         <option value="">Select Range</option>
-                        <option value="0-25000" {% if request.POST.income == '0-25000' %}selected{% endif %}>$0 - $25,000</option>
-                        <option value="25000-50000" {% if request.POST.income == '25000-50000' %}selected{% endif %}>$25,000 - $50,000</option>
-                        <option value="50000-75000" {% if request.POST.income == '50000-75000' %}selected{% endif %}>$50,000 - $75,000</option>
-                        <option value="75000+" {% if request.POST.income == '75000+' %}selected{% endif %}>$75,000+</option>
+                        <option value="0-25000" {% if request.POST.income == '0-25000' %}selected{% endif %}>$0 - $25,000
+                        </option>
+                        <option value="25000-50000" {% if request.POST.income == '25000-50000' %}selected{% endif %}>
+                            $25,000 - $50,000</option>
+                        <option value="50000-75000" {% if request.POST.income == '50000-75000' %}selected{% endif %}>
+                            $50,000 - $75,000</option>
+                        <option value="75000+" {% if request.POST.income == '75000+' %}selected{% endif %}>$75,000+
+                        </option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Affordable Amount per Semester</label>
-                    <input type="text" name="affordable_amount" class="form-control" value="{{ request.POST.affordable_amount|default:'' }}" placeholder="Enter amount">
+                    <input type="text" name="affordable_amount" class="form-control"
+                        value="{{ request.POST.affordable_amount|default:'' }}" placeholder="Enter amount">
                 </div>
             </div>
         </div>
@@ -851,56 +909,75 @@
         <!-- Section 5: References -->
         <div class="form-section">
             <h2 class="section-title"> <i class="fa fa-users section-icon"></i>References</h2>
-            <p class="info-text mb-4">Please provide at least two references who can speak to your character and qualifications.</p>
-            
+            <p class="info-text mb-4">Please provide at least two references who can speak to your character and
+                qualifications.</p>
+
             <!-- Reference 1 -->
-            <h5 style="color: var(--dark-navy); margin-bottom: 15px;">Reference 1 <span class="required">*</span></h5>
+            <h5 class="section-reference-title" style="color: var(--dark-navy); margin-bottom: 15px;">Reference 1 <span
+                    class="required">*</span></h5>
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label>Name <span class="required">*</span></label>
-                    <input type="text" name="reference_name1" class="form-control" value="{{ request.POST.reference_name1|default:'' }}" required>
+                    <input type="text" name="reference_name1" class="form-control"
+                        value="{{ request.POST.reference_name1|default:'' }}" required>
+                         <small id="reference_name1_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" name="reference_email1" class="form-control" value="{{ request.POST.reference_email1|default:'' }}" required>
+                    <input type="email" name="" class="form-control"
+                        value="{{ request.POST.reference_email1|default:'' }}" required>
+                         <small id="reference_email1_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Phone <span class="required">*</span></label>
-                    <input type="tel" name="reference_phone1" class="form-control" value="{{ request.POST.reference_phone1|default:'' }}" required>
+                    <input type="tel" name="reference_phone1" class="form-control"
+                        value="{{ request.POST.reference_phone1|default:'' }}" required>
+                         <small id="reference_phone1_error" class="error-message"></small>
                 </div>
             </div>
 
             <!-- Reference 2 -->
-            <h5 style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 2 <span class="required">*</span></h5>
+            <h5 class="section-reference-title" style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 2 <span
+                    class="required">*</span></h5>
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label>Name <span class="required">*</span></label>
-                    <input type="text" name="reference_name2" class="form-control" value="{{ request.POST.reference_name2|default:'' }}" required>
+                    <input type="text" name="reference_name2" class="form-control"
+                        value="{{ request.POST.reference_name2|default:'' }}" required>
+                         <small id="reference_name2_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" name="reference_email2" class="form-control" value="{{ request.POST.reference_email2|default:'' }}" required>
+                    <input type="email" name="reference_email2" class="form-control"
+                        value="{{ request.POST.reference_email2|default:'' }}" required>
+                         <small id="reference_email2_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Phone <span class="required">*</span></label>
-                    <input type="tel" name="reference_phone2" class="form-control" value="{{ request.POST.reference_phone2|default:'' }}" required>
+                    <input type="tel" name="reference_phone2" class="form-control"
+                        value="{{ request.POST.reference_phone2|default:'' }}" required>
+                         <small id="reference_phone2_error" class="error-message"></small>
                 </div>
             </div>
 
             <!-- Reference 3 -->
-            <h5 style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 3 (Optional)</h5>
+            <h5 class="section-reference-title" style="color: var(--dark-navy); margin: 25px 0 15px;">Reference 3
+                (Optional)</h5>
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label>Name</label>
-                    <input type="text" name="reference_name3" class="form-control" value="{{ request.POST.reference_name3|default:'' }}">
+                    <input type="text" name="reference_name3" class="form-control"
+                        value="{{ request.POST.reference_name3|default:'' }}">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="reference_email3" class="form-control" value="{{ request.POST.reference_email3|default:'' }}">
+                    <input type="email" name="reference_email3" class="form-control"
+                        value="{{ request.POST.reference_email3|default:'' }}">
                 </div>
                 <div class="form-group">
                     <label>Phone</label>
-                    <input type="tel" name="reference_phone3" class="form-control" value="{{ request.POST.reference_phone3|default:'' }}">
+                    <input type="tel" name="reference_phone3" class="form-control"
+                        value="{{ request.POST.reference_phone3|default:'' }}">
                 </div>
             </div>
         </div>
@@ -909,7 +986,7 @@
         <div class="form-section">
             <h2 class="section-title"><i class="fa fa-file-alt section-icon"></i>Documents & Certificates</h2>
             <p class="info-text mb-4">Upload relevant certificates, transcripts, or other supporting documents.</p>
-            
+
             <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Certificate 1</label>
@@ -973,44 +1050,74 @@
         <!-- Section 7: Additional Information -->
         <div class="form-section">
             <h2 class="section-title"> <i class="fa fa-info-circle section-icon"></i>Additional Information</h2>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Personal Statement / Message</label>
-                    <textarea name="message" class="form-control" rows="6" placeholder="Tell us about yourself, your goals, and why you want to join this program...">{{ request.POST.message|default:'' }}</textarea>
-                    <small class="info-text">Share your motivations, career goals, and what you hope to achieve through this program.</small>
+                    <textarea name="message" class="form-control" rows="6"
+                        placeholder="Tell us about yourself, your goals, and why you want to join this program...">{{ request.POST.message|default:'' }}</textarea>
+                    <small class="info-text">Share your motivations, career goals, and what you hope to achieve through
+                        this program.</small>
                 </div>
             </div>
-        </div>
-        <div class="recaptcha-wrapper">
-    <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
-</div>
 
-        <!-- Submit Buttons -->
-        <div class="btn-group">
-            <button type="button" class="btn-secondary" onclick="window.history.back()">Cancel</button>
-            <button type="submit" class="btn-primary" id="submitBtn">Submit Application</button>
+            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="window.history.back()">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn">Submit Application</button>
+            </div>
         </div>
     </form>
 </div>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
+<script src="{% static 'js/timezone.js' %}"></script>
 <script>
     // File upload label update
     document.querySelectorAll('.file-upload-input').forEach(input => {
-        input.addEventListener('change', function(e) {
+        input.addEventListener('change', function (e) {
             const label = this.parentElement.querySelector('.file-upload-label span');
             if (this.files.length > 0) {
                 label.textContent = this.files[0].name;
             }
         });
     });
+    // Timezone population
+     document.addEventListener("DOMContentLoaded", function () {       
+
+        if (!window.TIMEZONE_LIST) {
+            console.error("TIMEZONE_LIST not loaded");
+            return;
+        }
+        const timezoneSelect = document.getElementById("timezone");
+        const selected = document.getElementById("selected_timezone").value;
+
+        window.TIMEZONE_LIST.forEach(tz => {
+            const option = document.createElement("option");
+            option.value = tz;
+            option.textContent = tz;
+            if (selected === tz) option.selected = true;
+            timezoneSelect.appendChild(option);
+        });
+   
+
+         /* Initialize Select2 for phone code */
+        $('#phone_code').select2({
+        placeholder: "Search code or country",
+        allowClear: true
+        });
+    });
 
     // Form submission with loading
-    document.getElementById('studentApplicationForm').addEventListener('submit', function(e) {
+    document.getElementById('studentApplicationForm').addEventListener('submit', function (e) {
+
         const requiredFields = this.querySelectorAll('[required]');
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone_number").value.trim();
+
         let isValid = true;
-        
+        let errors = [];
+
+        // Required field validation
         requiredFields.forEach(field => {
             if (!field.value.trim()) {
                 isValid = false;
@@ -1020,22 +1127,38 @@
             }
         });
 
+        // Email regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            isValid = false;
+            errors.push("Enter a valid email address.");
+        }
+
+        // Phone validation (10 digits, starts 6-9)
+        const phoneRegex = /^[6-9]\d{9}$/;
+
+        if (!phoneRegex.test(phone)) {
+            isValid = false;
+            errors.push("Enter a valid 10-digit phone number (starts with 6-9).");
+        }
+
         if (!isValid) {
             e.preventDefault();
-            alert('Please fill in all required fields.');
+            alert(errors.join("\n"));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
-            // Show loading overlay
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('submitBtn').disabled = true;
         }
     });
 
+
     // Progress tracking on scroll
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         const sections = document.querySelectorAll('.form-section');
         const progressSteps = document.querySelectorAll('.progress-step');
-        
+
         sections.forEach((section, index) => {
             const rect = section.getBoundingClientRect();
             if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
@@ -1050,5 +1173,4 @@
         });
     });
 </script>
-
 {% endblock %}

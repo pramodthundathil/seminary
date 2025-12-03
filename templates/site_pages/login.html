@@ -1,148 +1,196 @@
 {% extends "site_pages/index.html" %}
+{% load static %}
 {% block title %}
-  <title>Login - Trinity Theological Seminary</title>
+<title>Login - Trinity Theological Seminary</title>
 {% endblock %}
 {% block content %}
 <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-  
+  .bg-img {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  .login-wrapper {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .container1 {
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 420px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 30px 35px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: rgb(20, 180, 180);
+    margin-bottom: 12px;
+  }
+
+  .divider {
+    height: 1px;
+    background-color: #e5e7eb;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2845;
+    margin-bottom: 8px;
+  }
+
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s;
+    color: #374151;
+    background: white;
+  }
+
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder {
+    color: #9ca3af;
+  }
+
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    border-color: var(--primary-cyan);
+    ring: 2px;
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 400;
+    color: #4b5563;
+  }
+
+  input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    cursor: pointer;
+  }
+
+  .forgot-link {
+    font-size: 13px;
+    color: var(--primary-cyan);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .forgot-link:hover {
+    text-decoration: underline;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1B2845;
+    background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start))!important;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .submit-btn:hover {
+    background-color: #29eaed;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+  }
+
+  .register-text {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .register-link {
+    color: var(--primary-cyan);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .register-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
     .container1 {
-      background-color: white;
-      width: 100%;
-      max-width: 650px;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e5e7eb;
-      padding: 40px;
-      margin: auto;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-
-    .header {
-      margin-bottom: 32px;
+      padding: 25px 30px;
+      max-width: 380px;
     }
 
     .header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 16px;
+      font-size: 24px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-wrapper {
+      padding: 15px;
     }
 
-    .divider {
-      height: 1px;
-      background-color: #e5e7eb;
+    .container1 {
+      padding: 20px 25px;
     }
+  }
+</style>
 
-    .form-group {
-      margin-bottom: 24px;
-    }
+<img src="{% static 'img/image.avif' %}" class="bg-img" alt="Background">
 
-    label {
-      display: block;
-      font-size: 16px;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 12px;
-    }
-
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 15px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      outline: none;
-      transition: all 0.2s;
-      color: #374151;
-    }
-
-    input[type="email"]::placeholder,
-    input[type="password"]::placeholder {
-      color: #9ca3af;
-    }
-
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      border-color: #6366f1;
-      ring: 2px;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    .form-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 400;
-      color: #4b5563;
-    }
-
-    input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-      cursor: pointer;
-    }
-
-    .forgot-link {
-      font-size: 14px;
-      color: #6366f1;
-      text-decoration: none;
-    }
-
-    .forgot-link:hover {
-      text-decoration: underline;
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      background-color: var(--primary-cyan);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .submit-btn:hover {
-      background-color: #29eaed;
-    }
-
-    .register-text {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 14px;
-      color: #6b7280;
-    }
-
-    .register-link {
-      color: #6366f1;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .register-link:hover {
-      text-decoration: underline;
-    }
-  </style>
-
+<div class="login-wrapper">
   <div class="container1">
     <div class="header">
       <h1>Login</h1>
@@ -150,27 +198,15 @@
     </div>
 
     <form method="POST" action="">
-        {% csrf_token %}
+      {% csrf_token %}
       <div class="form-group">
         <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="example@gmail.com"
-          required
-        />
+        <input type="email" id="email" name="email" placeholder="example@gmail.com" required />
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          required
-        />
+        <input type="password" id="password" name="password" placeholder="Enter your password" required />
       </div>
 
       <div class="form-footer">
@@ -178,16 +214,17 @@
           <input type="checkbox" name="remember" />
           Remember me
         </label>
-        <a href="#" class="forgot-link">Forgot password?</a>
+        <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
       </div>
 
       <button type="submit" class="submit-btn">Login</button>
 
       <p class="register-text">
         Don't have an account?
-        <a href="{% url 'new_admission_form' %}" class="register-link">Register</a>
+        <a href="{% url 'register' %}" class="register-link">Register</a>
       </p>
     </form>
   </div>
+</div>
 
 {% endblock %}

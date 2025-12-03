@@ -1,5 +1,5 @@
 // ---------- Timezone List ----------
-const TIMEZONE_LIST = [
+window.TIMEZONE_LIST = [
     "Africa/Abidjan","Africa/Accra","Africa/Addis_Ababa","Africa/Algiers","Africa/Asmara",
     "Africa/Bamako","Africa/Bangui","Africa/Banjul","Africa/Bissau","Africa/Blantyre",
     "Africa/Brazzaville","Africa/Bujumbura","Africa/Cairo","Africa/Casablanca","Africa/Ceuta",

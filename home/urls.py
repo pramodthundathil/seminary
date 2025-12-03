@@ -22,11 +22,10 @@ urlpatterns = [
     path("register/",views.register,name="register"),
     path("contact-us/",views.contact,name="contact-us"),
     # path("signup_student/",views.signup_student,name="signup_student"),
-    path('student/register/', views.signup_student, name='signup_student'),
-    path('student/application/success/', views.student_application_success, name='student_application_success'),
+    path('student/register/', views.signup_student, name='signup_student'),    
+    path('student/application/success/<str:student_id>/', views.student_application_success, name='student_application_success'),
 
-    # Admissions dropdown pages
-    path('admissions/new-admission-form/', views.new_admission_form, name='new_admission_form'),
+    # Admissions dropdown pages   
     path('reference-form/', views.reference_form, name='reference_form'),
     path('make-payment/', views.payment_options, name='payment_options'),
 
@@ -35,6 +34,8 @@ urlpatterns = [
 
 
     path("check/",views.test_menu_debug,name="test_menu_debug"),
-    path("course-list/",views.courses,name="course-list")
+    path("course-list/",views.courses,name="course-list"),
+    path("forgot-password/", views.forgot_password, name="forgot_password"),
+
     
 ]
