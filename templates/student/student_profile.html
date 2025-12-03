@@ -1,0 +1,976 @@
+{% extends "student/index.html" %}
+
+{% block middle %}
+
+<style>
+  * { box-sizing: border-box; }
+  
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --primary-light: #dbeafe;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+  }
+
+  .profile-header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-avatar-header {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border: 3px solid rgba(255,255,255,0.2);
+  }
+
+  .profile-name-header {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255,255,255,0.95);
+    font-size: 0.8125rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.75rem;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-light);
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.2s ease;
+  }
+
+  .info-row:hover {
+    background: var(--bg-main);
+    margin: 0 -0.5rem;
+    padding: 0.65rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    width: 120px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .info-value {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 400;
+    word-wrap: break-word;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .btn {
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-main);
+    border-color: var(--primary);
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .reference-card {
+    background: var(--bg-main);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.875rem;
+    border-left: 3px solid var(--primary);
+    transition: all 0.2s ease;
+  }
+
+  .reference-card:hover {
+    background: var(--primary-light);
+    transform: translateX(4px);
+  }
+
+  .reference-name {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    margin-bottom: 0.625rem;
+  }
+
+  .reference-detail {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+    font-size: 0.8125rem;
+    flex-wrap: wrap;
+  }
+
+  .reference-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 70px;
+  }
+
+  .document-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem;
+    background: var(--bg-main);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .document-item:hover {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .document-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .document-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    flex-shrink: 0;
+  }
+
+  .document-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .document-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .document-size {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .btn-view {
+    padding: 0.5rem 0.875rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .btn-view:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .status-success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-warning {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .address-section {
+    background: var(--bg-main);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .address-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.875rem;
+  }
+
+  .fade-out {
+    animation: fadeOut 0.3s ease forwards;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  @keyframes fadeOut {
+    to {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .full-span {
+    grid-column: 1 / -1;
+  }
+
+  .enrollment-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Tablet */
+  @media(min-width: 640px) {
+    .profile-header {
+      padding: 2rem;
+    }
+
+    .profile-avatar-header {
+      width: 85px;
+      height: 85px;
+      font-size: 2rem;
+    }
+
+    .profile-name-header {
+      font-size: 1.5rem;
+    }
+
+    .meta-item {
+      font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      flex-direction: row;
+    }
+
+    .btn {
+      width: auto;
+    }
+
+    .info-label {
+      width: 150px;
+      font-size: 0.875rem;
+    }
+
+    .info-value {
+      font-size: 0.9375rem;
+    }
+
+    .card {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.0625rem;
+    }
+
+    .document-item {
+      flex-wrap: nowrap;
+    }
+  }
+
+  /* Desktop */
+  @media(min-width: 968px) {
+    .content-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .enrollment-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .profile-header {
+      padding: 2.5rem;
+    }
+
+    .profile-avatar-header {
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
+    }
+
+    .profile-name-header {
+      font-size: 2rem;
+    }
+
+    .profile-meta {
+      gap: 1.5rem;
+    }
+
+    .meta-item {
+      font-size: 0.9375rem;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+    }
+
+    .card {
+      padding: 1.75rem;
+    }
+
+    .info-label {
+      width: 180px;
+    }
+  }
+</style>
+
+<!-- Important Summary Section -->
+<div id="importantSection">
+  <div class="profile-header">
+    <div class="profile-header-content">
+      <div class="profile-avatar-header">SS</div>
+      <h1 class="profile-name-header">Sobha Sudheesh</h1>
+      <div class="profile-meta">
+        <div class="meta-item">
+          <span>📅</span>
+          <span>11-Aug-1987</span>
+        </div>
+        <div class="meta-item">
+          <span>👤</span>
+          <span>Female</span>
+        </div>
+        <div class="meta-item">
+          <span>🌍</span>
+          <span>Hungary</span>
+        </div>
+        <div class="badge">M.Div Program</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button id="btnViewMore" class="btn btn-primary">
+      <span>📋</span>
+      View Full Profile
+    </button>
+    <button class="btn btn-secondary">
+      <span>✉️</span>
+      Contact
+    </button>
+  </div>
+</div>
+
+<!-- Full Section -->
+<div id="fullSection" style="display:none;">
+  <div class="action-buttons" style="margin-bottom: 1.5rem;">
+    <button id="btnHideMore" class="btn btn-secondary">
+      <span>←</span>
+      Back to Summary
+    </button>
+  </div>
+
+  <div class="content-grid">
+    <!-- Personal Information -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>👤</span>
+        Personal Information
+      </h2>
+      <div class="info-row">
+        <div class="info-label">Full Name</div>
+        <div class="info-value">Sobha Sudheesh</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Date of Birth</div>
+        <div class="info-value">11-Aug-1987</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Gender</div>
+        <div class="info-value">Female</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Citizenship</div>
+        <div class="info-value">Hungary</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">ID Number</div>
+        <div class="info-value">ST2024001</div>
+      </div>
+    </div>
+
+    <!-- Contact Details -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>📞</span>
+        Contact Details
+      </h2>
+      <div class="info-row">
+        <div class="info-label">Email</div>
+        <div class="info-value">sobha.s@email.com</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Phone</div>
+        <div class="info-value">+36 70 123 4567</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Alt Phone</div>
+        <div class="info-value">+36 70 123 4568</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Time Zone</div>
+        <div class="info-value">UTC+01:00</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Language</div>
+        <div class="info-value">Hungarian, English</div>
+      </div>
+
+      <div class="address-section">
+        <div class="address-header">📍 Mailing Address</div>
+        <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
+          <div class="info-label">Address</div>
+          <div class="info-value">Andrássy út 123</div>
+        </div>
+        <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
+          <div class="info-label">City</div>
+          <div class="info-value">Budapest</div>
+        </div>
+        <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
+          <div class="info-label">Country</div>
+          <div class="info-value">Hungary</div>
+        </div>
+        <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
+          <div class="info-label">Postal Code</div>
+          <div class="info-value">1061</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academic Information -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>🎓</span>
+        Academic Information
+      </h2>
+      <div class="info-row">
+        <div class="info-label">Highest Education</div>
+        <div class="info-value">Bachelor's Degree</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Course Applied</div>
+        <div class="info-value">
+          <span class="status-badge status-success">M.Div</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Year</div>
+        <div class="info-value">3rd Year</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Enrollment Date</div>
+        <div class="info-value">September 2022</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Expected Graduation</div>
+        <div class="info-value">May 2026</div>
+      </div>
+    </div>
+
+    <!-- Family Information -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>👨‍👩‍👧‍👦</span>
+        Family Information
+      </h2>
+      <div class="info-row">
+        <div class="info-label">Marital Status</div>
+        <div class="info-value">Married</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Spouse Name</div>
+        <div class="info-value">Sudheesh Kumar</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Children</div>
+        <div class="info-value">2</div>
+      </div>
+    </div>
+
+    <!-- Enrollment Details -->
+    <div class="card full-span">
+      <h2 class="card-title">
+        <span>📝</span>
+        Enrollment Details
+      </h2>
+      <div class="enrollment-grid">
+        <div>
+          <div class="info-row">
+            <div class="info-label">Starting Year</div>
+            <div class="info-value">2026</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Ministerial Status</div>
+            <div class="info-value">
+              <span class="status-badge status-success">✓ Ordained</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Church Affiliation</div>
+            <div class="info-value">St. Luke Church</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Scholarship Needed</div>
+            <div class="info-value">
+              <span class="status-badge status-warning">Yes</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <div class="info-label">Currently Employed</div>
+            <div class="info-value">No</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Monthly Income</div>
+            <div class="info-value">$0 USD</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Affordable Amount</div>
+            <div class="info-value">$0 USD</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Message</div>
+            <div class="info-value">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- References -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>✉️</span>
+        References
+      </h2>
+      <div class="reference-card">
+        <div class="reference-name">Dr. Robert Smith</div>
+        <div class="reference-detail">
+          <span class="reference-label">Position:</span>
+          <span>Professor, MIT</span>
+        </div>
+        <div class="reference-detail">
+          <span class="reference-label">Phone:</span>
+          <span>+1 234 567 8903</span>
+        </div>
+        <div class="reference-detail">
+          <span class="reference-label">Email:</span>
+          <span>r.smith@mit.edu</span>
+        </div>
+      </div>
+      <div class="reference-card">
+        <div class="reference-name">Ms. Sarah Johnson</div>
+        <div class="reference-detail">
+          <span class="reference-label">Position:</span>
+          <span>Principal, Lincoln High School</span>
+        </div>
+        <div class="reference-detail">
+          <span class="reference-label">Phone:</span>
+          <span>+1 234 567 8904</span>
+        </div>
+        <div class="reference-detail">
+          <span class="reference-label">Email:</span>
+          <span>s.johnson@lincoln.edu</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>📄</span>
+        Documents
+      </h2>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">PDF</div>
+          <div class="document-details">
+            <div class="document-name">Transcript.pdf</div>
+            <div class="document-size">245 KB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening Transcript...')">View</button>
+      </div>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">PDF</div>
+          <div class="document-details">
+            <div class="document-name">ID_Proof.pdf</div>
+            <div class="document-size">1.2 MB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening ID Proof...')">View</button>
+      </div>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">IMG</div>
+          <div class="document-details">
+            <div class="document-name">Photo.jpg</div>
+            <div class="document-size">890 KB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening Photo...')">View</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const imp = document.getElementById("importantSection");
+  const full = document.getElementById("fullSection");
+  const btnShow = document.getElementById("btnViewMore");
+  const btnHide = document.getElementById("btnHideMore");
+
+  if (btnShow) {
+    btnShow.addEventListener("click", function () {
+      imp.classList.add('fade-out');
+      setTimeout(() => {
+        imp.style.display = "none";
+        full.style.display = "block";
+        full.classList.add('fade-in');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 300);
+    });
+  }
+
+  if (btnHide) {
+    btnHide.addEventListener("click", function () {
+      full.classList.add('fade-out');
+      setTimeout(() => {
+        full.style.display = "none";
+        imp.style.display = "block";
+        imp.classList.remove('fade-out');
+        imp.classList.add('fade-in');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 300);
+    });
+  }
+});
+</script>
+
+{% endblock %}
+
+{% block right %}
+<style>
+  .quick-stats-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .quick-stats-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem;
+    background: var(--bg-main);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .stat-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .stat-item:hover {
+    background: var(--primary-light);
+    transform: translateX(4px);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  @media(max-width: 967px) {
+    .quick-stats-card {
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media(min-width: 640px) {
+    .quick-stats-title {
+      font-size: 1.0625rem;
+    }
+  }
+
+  @media(min-width: 968px) {
+    .quick-stats-title {
+      font-size: 1.125rem;
+    }
+  }
+</style>
+
+<div class="quick-stats-card">
+  <h3 class="quick-stats-title">
+    <span>📊</span>
+    Quick Stats
+  </h3>
+  <div class="stat-item">
+    <span class="stat-label">GPA</span>
+    <span class="stat-value">3.85</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Credits</span>
+    <span class="stat-value">90/120</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Attendance</span>
+    <span class="stat-value">94%</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Assignments</span>
+    <span class="stat-value">18/20</span>
+  </div>
+</div>
+
+
+    <div class="card">
+      <h2 class="card-title">
+        <span>📄</span>
+        Documents
+      </h2>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">PDF</div>
+          <div class="document-details">
+            <div class="document-name">Transcript.pdf</div>
+            <div class="document-size">245 KB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening Transcript...')">View</button>
+      </div>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">PDF</div>
+          <div class="document-details">
+            <div class="document-name">ID_Proof.pdf</div>
+            <div class="document-size">1.2 MB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening ID Proof...')">View</button>
+      </div>
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-icon">IMG</div>
+          <div class="document-details">
+            <div class="document-name">Photo.jpg</div>
+            <div class="document-size">890 KB</div>
+          </div>
+        </div>
+        <button class="btn-view" onclick="alert('Opening Photo...')">View</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -23,7 +23,7 @@
 
     .query-textarea {
         width: 100%;
-        min-height: 120px;
+        min-height: 90px;
         padding: 0.75rem;
         border: 1px solid var(--border);
         border-radius: 0.375rem;
@@ -68,22 +68,29 @@
         border-color: var(--primary);
     }
 
-    .submit-btn {
-        background: var(--success);
-        padding: 0.625rem 2rem;
-        border: none;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-        cursor: pointer;
-        transition: background 0.2s;
-        white-space: nowrap;
-    }
+.submit-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
+    white-space: nowrap;
+}
 
-    .submit-btn:hover {
-        background: #047857;
-    }
+.submit-btn:hover {
+    background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
 
     .controls-section {
         background: var(--bg-card);
@@ -170,7 +177,7 @@
 
     .empty-state {
         text-align: center;
-        padding: 3rem 1rem;
+        padding: 1.5rem 1rem;
     }
 
     .empty-state-icon {
@@ -250,8 +257,28 @@
         color: #1e40af;
     }
 
-    /* Mobile Responsive */
-    @media screen and (max-width: 768px) {
+    /* Mobile Responsive - STACK BELOW PROFILE */
+    @media screen and (max-width: 968px) {
+        /* Force stacking order */
+        body.no-right .container {
+            display: flex !important;
+            flex-direction: column !important;
+            grid-template-columns: unset !important;
+        }
+
+        body.no-right .container > div:first-child {
+            order: 1; /* Profile card first */
+        }
+
+        body.no-right .middle-column {
+            order: 2 !important; /* Content below profile */
+            width: 100%;
+        }
+
+        .query-form-card {
+            padding: 1.25rem;
+        }
+
         .form-row {
             flex-direction: column;
             align-items: stretch;
@@ -264,24 +291,52 @@
         .controls-section {
             flex-direction: column;
             align-items: stretch;
+            padding: 1rem;
         }
 
         .show-entries, .search-box {
             justify-content: space-between;
+            width: 100%;
+        }
+
+        .show-entries select,
+        .search-box select {
+            flex: 1;
+            max-width: 200px;
         }
 
         .queries-table {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .queries-table table {
             min-width: 600px;
         }
 
+        .queries-table th,
+        .queries-table td {
+            padding: 0.875rem 1rem;
+            font-size: 0.8125rem;
+        }
+
+        .empty-state {
+            padding: 1rem 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 2.5rem;
+        }
+
         .pagination {
             flex-direction: column;
             align-items: stretch;
             text-align: center;
+            padding: 1rem;
+        }
+
+        .pagination > div:first-child {
+            margin-bottom: 0.75rem;
         }
 
         .pagination-controls {
@@ -289,34 +344,137 @@
         }
     }
 
-    @media screen and (max-width: 480px) {
+    @media screen and (max-width: 576px) {
         .query-form-card, .controls-section, .pagination {
-            padding: 1rem;
+            padding: 1rem 0.75rem;
+        }
+
+        .query-textarea {
+            min-height: 100px;
+            padding: 0.625rem;
+            font-size: 0.8125rem;
+        }
+
+        .category-select {
+            padding: 0.5rem 0.625rem;
+            font-size: 0.8125rem;
+        }
+
+        .submit-btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 0.8125rem;
+        }
+
+        .controls-section select {
+            padding: 0.5rem 0.625rem;
+            font-size: 0.8125rem;
+        }
+
+        .show-entries, .search-box {
+            font-size: 0.8125rem;
         }
 
         .queries-table th,
         .queries-table td {
-            padding: 0.75rem;
+            padding: 0.75rem 0.625rem;
+            font-size: 0.8125rem;
         }
 
         .empty-state {
-            padding: 2rem 1rem;
+            padding: 2rem 0.75rem;
+        }
+
+        .empty-state-icon {
+            font-size: 2.25rem;
+        }
+
+        .empty-state-text {
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.3125rem 0.625rem;
+            font-size: 0.75rem;
+        }
+
+        .pagination {
+            font-size: 0.8125rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .pagination-controls {
+            gap: 0.375rem;
+        }
+    }
+
+    @media screen and (max-width: 400px) {
+        .query-form-card, .controls-section, .pagination {
+            padding: 0.875rem 0.625rem;
+        }
+
+        .query-textarea {
+            min-height: 90px;
+            font-size: 0.75rem;
+        }
+
+        .category-select, .submit-btn {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .controls-section select {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .show-entries, .search-box {
+            font-size: 0.75rem;
+        }
+
+        .queries-table table {
+            min-width: 500px;
+        }
+
+        .queries-table th,
+        .queries-table td {
+            padding: 0.625rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            padding: 1.75rem 0.5rem;
+        }
+
+        .empty-state-icon {
+            font-size: 2rem;
+        }
+
+        .empty-state-text {
+            font-size: 0.8125rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.6875rem;
         }
 
         .pagination-btn {
             padding: 0.5rem 0.625rem;
-            font-size: 0.8125rem;
+            font-size: 0.75rem;
         }
-        
     }
 </style>
 
-<div style="padding:0; background:#08436a; box-shadow:none; border:none;">
+<div style="padding:0;  box-shadow:none; border:none;">
 
     <!-- QUERY FORM CARD -->
     <div class="query-form-card">
         <div class="form-group">
-            <textarea class="query-textarea" placeholder="Ask a query"></textarea>
+            <textarea id="postQueryInput" class="query-textarea" placeholder="Ask a query"></textarea>
         </div>
 
         <div class="form-row">
@@ -329,7 +487,7 @@
                 </select>
             </div>
             <div>
-                <button class="submit-btn">Submit</button>
+                <button id="postQuerySubmit" class="submit-btn">Submit</button>
             </div>
         </div>
     </div>
@@ -375,8 +533,8 @@
                 <tr>
                     <td colspan="4">
                         <div class="empty-state">
-                            <div class="empty-state-icon">📋</div>
-                            <div class="empty-state-text">No data available in table</div>
+                            <!-- <div class="empty-state-icon">📋</div> -->
+                            <div class="empty-state-text">📋 No data available in table</div>
                         </div>
                     </td>
                 </tr>
@@ -394,6 +552,25 @@
     </div>
 
 </div>
+
+<script>
+    (function(){
+        const submitBtn = document.getElementById('postQuerySubmit');
+        const input = document.getElementById('postQueryInput');
+        if (!submitBtn || !input) return;
+
+        submitBtn.addEventListener('click', function(e){
+            const val = input.value || '';
+            if (val.trim().length === 0) {
+                e.preventDefault();
+                input.focus();
+                return;
+            }
+
+            window.location.href = "{% url 'student_doubts_answers' %}";
+        });
+    })();
+</script>
 
 {% endblock %}
 

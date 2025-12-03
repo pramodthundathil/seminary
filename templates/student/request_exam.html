@@ -1,0 +1,386 @@
+{% extends "student/index.html" %}
+
+{% block title %}Request an Exam{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+{% block middle %}
+
+<style>
+    .request-exam-card {
+        background: var(--bg-card);
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .exam-form-header {
+        background: var(--primary);
+        color: white;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+    }
+
+    .exam-form-body {
+        padding: 1.5rem;
+    }
+
+    .exam-form-group {
+        margin-bottom: 1rem;
+    }
+
+    .exam-form-group:last-of-type {
+        margin-bottom: 1rem;
+    }
+
+    .exam-form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .exam-form-group select,
+    .exam-form-group input[type="text"],
+    .exam-form-group input[type="date"],
+    .exam-form-group input[type="time"] {
+        width: 100%;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 0.375rem;
+        font-family: inherit;
+        font-size: 0.875rem;
+        background: var(--bg-page);
+        color: var(--text-primary);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .exam-form-group select:focus,
+    .exam-form-group input[type="text"]:focus,
+    .exam-form-group input[type="date"]:focus,
+    .exam-form-group input[type="time"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .exam-form-group select {
+        cursor: pointer;
+    }
+
+    .exam-form-group input[type="time"] {
+        max-width: 300px;
+    }
+
+    .exam-btn-submit {
+        padding: 0.625rem 1.5rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        letter-spacing: 0.025em;
+        transition: background 0.2s;
+    }
+
+    .exam-btn-submit:hover {
+        background: var(--primary-dark);
+    }
+
+    .exam-btn-submit:active {
+        opacity: 0.9;
+    }
+
+    .exam-btn-submit:disabled {
+        background: var(--border);
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .exam-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .exam-success-message {
+        display: none;
+        background: #d1fae5;
+        border: 1px solid var(--success);
+        color: #065f46;
+        padding: 0.75rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .exam-success-message.show {
+        display: block;
+        animation: slideDown 0.3s ease-in-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Mobile Responsive */
+    @media screen and (max-width: 968px) {
+        body.no-right .container {
+            display: flex !important;
+            flex-direction: column !important;
+            grid-template-columns: unset !important;
+        }
+
+        body.no-right .container > div:first-child {
+            order: 1;
+        }
+
+        body.no-right .middle-column {
+            order: 2 !important;
+            width: 100%;
+        }
+
+        .exam-form-body {
+            padding: 1.25rem;
+        }
+
+        .exam-form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .exam-form-group input[type="time"] {
+            max-width: 100%;
+        }
+
+        .exam-btn-submit {
+            width: 100%;
+        }
+    }
+
+    @media screen and (max-width: 576px) {
+        .exam-form-header {
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        .exam-form-body {
+            padding: 1rem;
+        }
+
+        .exam-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .exam-form-group label {
+            font-size: 0.8125rem;
+        }
+
+        .exam-form-group select,
+        .exam-form-group input {
+            font-size: 0.8125rem;
+            padding: 0.5rem 0.625rem;
+        }
+
+        .exam-btn-submit {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            font-size: 0.8125rem;
+        }
+    }
+</style>
+
+<div class="request-exam-card">
+    <div class="exam-form-header">
+        📋 REQUEST AN EXAM
+    </div>
+
+    <div class="exam-form-body">
+        <div class="exam-success-message" id="successMessage">
+            ✓ Exam request submitted successfully!
+        </div>
+
+        <form id="examForm">
+            <div class="exam-form-group">
+                <label for="subject">Subject <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                <select id="subject" name="subject" required>
+                    <option value="">--- Select Subject ---</option>
+                    <option value="mathematics">Mathematics</option>
+                    <option value="physics">Physics</option>
+                    <option value="chemistry">Chemistry</option>
+                    <option value="biology">Biology</option>
+                    <option value="english">English</option>
+                    <option value="history">History</option>
+                    <option value="geography">Geography</option>
+                    <option value="computer">Computer Science</option>
+                </select>
+            </div>
+
+            <div class="exam-form-group">
+                <label for="exam">Exam <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                <select id="exam" name="exam" required disabled>
+                    <option value="">[Select a subject first]</option>
+                </select>
+            </div>
+
+            <div class="exam-form-group">
+                <label for="timezone">Timezone <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                <select id="timezone" name="timezone" required>
+                    <option value="">--- Select Timezone ---</option>
+                    <option value="UTC-12:00">(UTC-12:00) International Date Line West</option>
+                    <option value="UTC-11:00">(UTC-11:00) Coordinated Universal Time-11</option>
+                    <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
+                    <option value="UTC-09:00">(UTC-09:00) Alaska</option>
+                    <option value="UTC-08:00">(UTC-08:00) Pacific Time (US & Canada)</option>
+                    <option value="UTC-07:00">(UTC-07:00) Mountain Time (US & Canada)</option>
+                    <option value="UTC-06:00">(UTC-06:00) Central Time (US & Canada)</option>
+                    <option value="UTC-05:00">(UTC-05:00) Eastern Time (US & Canada)</option>
+                    <option value="UTC-04:00">(UTC-04:00) Atlantic Time (Canada)</option>
+                    <option value="UTC-03:00">(UTC-03:00) Buenos Aires</option>
+                    <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
+                    <option value="UTC-01:00">(UTC-01:00) Azores</option>
+                    <option value="UTC+00:00">(UTC+00:00) Dublin, London</option>
+                    <option value="UTC+01:00">(UTC+01:00) Amsterdam, Berlin, Paris</option>
+                    <option value="UTC+02:00">(UTC+02:00) Athens, Istanbul</option>
+                    <option value="UTC+03:00">(UTC+03:00) Moscow, St. Petersburg</option>
+                    <option value="UTC+04:00">(UTC+04:00) Abu Dhabi, Muscat</option>
+                    <option value="UTC+05:00">(UTC+05:00) Islamabad, Karachi</option>
+                    <option value="UTC+05:30">(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
+                    <option value="UTC+06:00">(UTC+06:00) Dhaka</option>
+                    <option value="UTC+07:00">(UTC+07:00) Bangkok, Hanoi</option>
+                    <option value="UTC+08:00">(UTC+08:00) Beijing, Hong Kong, Singapore</option>
+                    <option value="UTC+09:00">(UTC+09:00) Seoul, Tokyo</option>
+                    <option value="UTC+10:00">(UTC+10:00) Canberra, Melbourne, Sydney</option>
+                    <option value="UTC+11:00">(UTC+11:00) Solomon Islands</option>
+                    <option value="UTC+12:00">(UTC+12:00) Auckland, Wellington</option>
+                </select>
+            </div>
+
+            <div class="exam-form-group">
+                <label for="examDate">Exam Date <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                <input type="date" id="examDate" name="examDate" required>
+            </div>
+
+            <div class="exam-form-group">
+                <label for="startTime">Start Time <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                <input type="time" id="startTime" name="startTime" required>
+            </div>
+
+            <button type="submit" class="exam-btn-submit">REQUEST</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const examOptions = {
+        mathematics: [
+            { value: 'algebra', text: 'Algebra - Midterm' },
+            { value: 'calculus', text: 'Calculus - Final' },
+            { value: 'geometry', text: 'Geometry - Quiz' }
+        ],
+        physics: [
+            { value: 'mechanics', text: 'Mechanics - Midterm' },
+            { value: 'thermodynamics', text: 'Thermodynamics - Final' },
+            { value: 'optics', text: 'Optics - Quiz' }
+        ],
+        chemistry: [
+            { value: 'organic', text: 'Organic Chemistry - Midterm' },
+            { value: 'inorganic', text: 'Inorganic Chemistry - Final' },
+            { value: 'physical', text: 'Physical Chemistry - Quiz' }
+        ],
+        biology: [
+            { value: 'cell', text: 'Cell Biology - Midterm' },
+            { value: 'genetics', text: 'Genetics - Final' },
+            { value: 'ecology', text: 'Ecology - Quiz' }
+        ],
+        english: [
+            { value: 'literature', text: 'Literature - Midterm' },
+            { value: 'grammar', text: 'Grammar - Final' },
+            { value: 'composition', text: 'Composition - Quiz' }
+        ],
+        history: [
+            { value: 'ancient', text: 'Ancient History - Midterm' },
+            { value: 'modern', text: 'Modern History - Final' },
+            { value: 'world', text: 'World History - Quiz' }
+        ],
+        geography: [
+            { value: 'physical', text: 'Physical Geography - Midterm' },
+            { value: 'human', text: 'Human Geography - Final' },
+            { value: 'regional', text: 'Regional Geography - Quiz' }
+        ],
+        computer: [
+            { value: 'programming', text: 'Programming - Midterm' },
+            { value: 'database', text: 'Database - Final' },
+            { value: 'networking', text: 'Networking - Quiz' }
+        ]
+    };
+
+    const subjectSelect = document.getElementById('subject');
+    const examSelect = document.getElementById('exam');
+    const examForm = document.getElementById('examForm');
+    const successMessage = document.getElementById('successMessage');
+
+    subjectSelect.addEventListener('change', function() {
+        const selectedSubject = this.value;
+        
+        examSelect.innerHTML = '<option value="">[Select a subject first]</option>';
+        examSelect.disabled = true;
+        
+        if (selectedSubject && examOptions[selectedSubject]) {
+            examSelect.innerHTML = '<option value="">--- Select Exam ---</option>';
+            
+            examOptions[selectedSubject].forEach(exam => {
+                const option = document.createElement('option');
+                option.value = exam.value;
+                option.textContent = exam.text;
+                examSelect.appendChild(option);
+            });
+            
+            examSelect.disabled = false;
+        }
+    });
+
+    examForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            subject: document.getElementById('subject').value,
+            exam: document.getElementById('exam').value,
+            timezone: document.getElementById('timezone').value,
+            examDate: document.getElementById('examDate').value,
+            startTime: document.getElementById('startTime').value
+        };
+        
+        console.log('Form submitted:', formData);
+        
+        successMessage.classList.add('show');
+        
+        examForm.reset();
+        examSelect.disabled = true;
+        examSelect.innerHTML = '<option value="">[Select a subject first]</option>';
+        
+        setTimeout(() => {
+            successMessage.classList.remove('show');
+        }, 5000);
+    });
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('examDate').setAttribute('min', today);
+</script>
+
+{% endblock %}
+
+{% block right %}
+<!-- Right column hidden for this page -->
+{% endblock %}

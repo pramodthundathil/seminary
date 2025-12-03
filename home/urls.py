@@ -11,10 +11,17 @@ urlpatterns = [
     path("score-card/", views.student_score_card, name="student_score_card"),
     path("class-recordings/", views.student_class_recordings, name="student_class_recordings"),
     path("submitted-assignment/", views.student_submitted_assignment, name="student_submitted_assignment"),
+
+    path("pending-assignment/", views.student_pending_assignment, name="student_pending_assignment"),
+    path("doubts-answers/", views.student_doubts_answers, name="student_doubts_answers"),
+    path("request-exam/", views.student_request_exam, name="student_request_exam"),
+    path("student-profile/", views.student_profile_view, name="student_profile_view"),
+
 # Dynamic page URL (keep this last)
     path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
    
+
 
     path("student_index",views.student_index,name="student_index"),
     path("signin/",views.signin,name="signin"),

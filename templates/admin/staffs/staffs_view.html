@@ -1,0 +1,165 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Staff Details</h1>
+        <div>
+            <a href="{% url 'staffs_edit' staff.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'staffs_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container" style="max-width:900px;margin:0 auto;">
+        
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">ID</div>
+                <div class="detail-value">{{ staff.id }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">User</div>
+                <div class="detail-value">
+                    {% if staff.user %}
+                        {{ staff.user }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Staff ID</div>
+                <div class="detail-value">{{ staff.staff_id|default:"-" }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Staff Name</div>
+                <div class="detail-value">{{ staff.staff_name }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Title</div>
+                <div class="detail-value">{{ staff.title|default:"-" }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Degree</div>
+                <div class="detail-value">{{ staff.degree|default:"-" }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">{{ staff.email|default:"-" }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Phone</div>
+                <div class="detail-value">
+                    {% if staff.phone_number %}
+                        {% if staff.phone_code %}+{{ staff.phone_code }} {% endif %}{{ staff.phone_number }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Date of Joining</div>
+                <div class="detail-value">
+                    {{ staff.date_of_joining|date:"Y-m-d"|default:"-" }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Image</div>
+                <div class="detail-value">
+                    {% if staff.image %}
+                        {{ staff.image }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item" style="grid-column: span 2;">
+                <div class="detail-label">Description</div>
+                <div class="detail-value">
+                    {% if staff.description %}
+                        {{ staff.description|safe }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    {% if staff.status == 'A' or staff.status == '1' %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Priority</div>
+                <div class="detail-value">
+                    {{ staff.priority|default:"-" }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created At</div>
+                <div class="detail-value">
+                    {{ staff.created_at|date:"Y-m-d H:i"|default:"-" }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">
+                    {% if staff.created_by %}
+                        {{ staff.created_by.username|default:staff.created_by }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Updated At</div>
+                <div class="detail-value">
+                    {{ staff.updated_at|date:"Y-m-d H:i"|default:"-" }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Updated By</div>
+                <div class="detail-value">
+                    {% if staff.updated_by %}
+                        {{ staff.updated_by.username|default:staff.updated_by }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="{% url 'staffs_delete' staff.id %}" class="btn btn-danger" 
+               onclick="return confirm('Are you sure you want to delete this staff?')">
+                <i class="fas fa-trash"></i> Delete Staff
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

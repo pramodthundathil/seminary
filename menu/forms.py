@@ -367,3 +367,243 @@ class BranchesForm(forms.ModelForm):
             'status': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             
         }
+
+
+
+from home.models import Exams
+
+class ExamsForm(forms.ModelForm):
+    class Meta:
+        model = Exams
+        fields = [
+            'code',
+            'subject',
+            'exam_name',
+            'exam_type',
+            'status',
+        ]
+
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter exam code'
+            }),
+            'subject': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'exam_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter exam name'
+            }),
+            'exam_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'status': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+from home.models import Assignments
+
+class AssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Assignments
+        fields = [
+            "code",
+            "subject",
+            "assignment_name",
+            "assignment_type",
+            "total_score",
+        ]
+
+        widgets = {
+            "code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment code"
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "assignment_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment name"
+            }),
+            "assignment_type": forms.Select(attrs={
+                "class": "form-control",
+                "placeholder": "Enter assignment type"
+            }),
+            "total_score": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter total score"
+            }),
+        }
+
+
+
+from home.models import Staffs
+from django_ckeditor_5.widgets import CKEditor5Widget  # make sure django-ckeditor-5 is installed
+
+class StaffForm(forms.ModelForm):
+    class Meta:
+        model = Staffs
+        fields = [
+            
+            "staff_name",
+            "title",
+            "degree",
+            "email",
+            "phone_code",
+            "phone_number",
+            "date_of_joining",
+            "image",
+            "description",
+            "status",
+            "priority",
+        ]
+
+        widgets = {
+            
+            "staff_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter staff name",
+            }),
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter title (eg. Professor, Lecturer)",
+            }),
+            "degree": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter degree (eg. PhD, M.Tech)",
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter email address",
+            }),
+            "phone_code": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Country code (eg. 91)",
+            }),
+            "phone_number": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter phone number",
+            }),
+            "date_of_joining": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date",
+            }),
+            "image": forms.FileInput(attrs={
+                "class": "form-control",
+                "placeholder": "Image path / URL",
+            }),
+           
+            # "status": forms.BooleanField(attrs={
+            #     "class": "form-control",
+            #     "placeholder": "Status (eg. A / I)",
+            # }),
+            "priority": forms.NumberInput(attrs={
+                "class": "form-control",
+                "placeholder": "Priority (optional)",
+            }),
+        }
+
+
+
+from home.models import BookReferences, MediaLibrary
+
+from django.utils.text import slugify
+
+
+class BookReferenceForm(forms.ModelForm):
+
+    STATUS_CHOICES = (
+        (True, "Active"),
+        (False, "Inactive"),
+    )
+
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    
+    # Hidden field to store selected media ID
+    selected_media_id = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput(attrs={"id": "selected_media_id"})
+    )
+    
+    # File upload field for new PDF
+    new_pdf_file = forms.FileField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            "class": "form-control",
+            "accept": "application/pdf",
+            "style": "display:none;"
+        }),
+        label="Upload New PDF"
+    )
+
+    class Meta:
+        model = BookReferences
+        fields = [
+            "title",
+            "code",
+            "auther_name",
+            "subject",
+            "format",
+            "reference_note",
+            "description",
+            "status",
+        ]
+
+        widgets = {
+            "code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Auto-generated from title",
+                "readonly": "readonly"
+            }),
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter book title",
+                "id": "id_title"
+            }),
+            "auther_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter author name"
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "format": forms.Select(attrs={
+                "class": "form-control",
+                "id": "id_format"
+            }),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        format_type = cleaned_data.get('format')
+        
+        # Validate based on format
+        if format_type == 'PDF':
+            new_file = cleaned_data.get('new_pdf_file')
+            selected_media = cleaned_data.get('selected_media_id')
+            
+            if not new_file and not selected_media and not self.instance.reference_file_id:
+                raise forms.ValidationError(
+                    "Please either upload a new PDF or select an existing one from media library."
+                )
+        elif format_type == 'note':
+            reference_note = cleaned_data.get('reference_note')
+            if not reference_note:
+                raise forms.ValidationError(
+                    "Please provide reference note content."
+                )
+        
+        return cleaned_data
+    
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if title:
+            # Auto-generate code from title
+            self.cleaned_data['code'] = slugify(title)
+        return title

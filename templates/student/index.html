@@ -1,728 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Student Dashboard - Trinity Theological Seminary</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/student/index.css' %}">
+    <!-- <style>
 
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --primary-light: #dbeafe;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --bg-page: #f8fafc;
-            --bg-card: #ffffff;
-            --success: #059669;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-page);
-            color: var(--text-primary);
-            line-height: 1.5;
-        }
 
-        /* Top Bar */
-        .top-bar {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 0.25rem 0;
-            
-        }
-
-        .top-bar-content {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .contact-info {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .user-profile-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .user-profile-header:hover {
-            background: var(--bg-page);
-        }
-
-        .user-avatar-small {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .user-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--bg-card);
-            min-width: 200px;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border: 1px solid var(--border);
-            z-index: 1000;
-        }
-
-        .user-dropdown.show {
-            display: block;
-        }
-
-        .user-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-            font-size: 0.875rem;
-        }
-
-        .user-dropdown a:hover {
-            background: var(--bg-page);
-        }
-
-        .user-dropdown .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0.5rem 0;
-        }
-
-        /* Main Navigation */
-        .main-nav {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 999;
-        }
-
-        .nav-content {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 0;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .logo-text h1 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-primary);
-            padding: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 0.25rem;
-            align-items: center;
-        }
-
-        .nav-item {
-            position: relative;
-        }
-
-        .nav-link {
-            color: var(--text-primary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.875rem;
-            padding: 0.75rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: color 0.2s, background 0.2s;
-            border-radius: 0.375rem;
-        }
-
-        .nav-link:hover {
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: var(--bg-card);
-            min-width: 200px;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
-            margin-top: 0.25rem;
-            border: 1px solid var(--border);
-        }
-
-        .nav-item:hover .dropdown {
-            display: block;
-        }
-
-        .dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-            font-size: 0.875rem;
-        }
-
-        .dropdown a:hover {
-            background: var(--bg-page);
-        }
-
-        /* Side submenu */
-        .sub-parent {
-            position: relative;
-        }
-
-        .sub-parent > a {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-
-        .sub-parent > a:hover {
-            background: var(--bg-page);
-        }
-
-        .right-submenu {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            margin-left: 0.5rem;
-            background: var(--bg-card);
-            min-width: 200px;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
-            display: none;
-            border: 1px solid var(--border);
-            z-index: 2000;
-        }
-
-        .sub-parent:hover .right-submenu {
-            display: block;
-        }
-
-        .right-submenu a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-            font-size: 0.875rem;
-            white-space: nowrap;
-        }
-
-        .right-submenu a:hover {
-            background: var(--bg-page);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 1.5rem 1.5rem;
-            display: grid;
-            grid-template-columns: 280px 1fr 320px;
-            gap: 1.5rem;
-        }
-
-        /* Profile Card */
-        .profile-card {
-            background: var(--bg-card);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            text-align: center;
-            height: fit-content;
-            border: 1px solid var(--border);
-        }
-
-        .profile-avatar {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            background: var(--primary);
-            margin: 0 auto 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            position: relative;
-        }
-
-        .profile-avatar::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: var(--success);
-            border-radius: 50%;
-            bottom: 4px;
-            right: 4px;
-            border: 2px solid var(--bg-card);
-        }
-
-        .profile-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .profile-id {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            padding: 0.375rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        .pay-button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-        }
-
-        .pay-button:hover {
-            background: var(--primary-dark);
-        }
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem;
-    margin-top: 1rem;
-}
-
-        .stat-item {
-            background: var(--bg-page);
-            padding: 1rem;
-            border-radius: 0.375rem;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-        }
-
-        /* Details Card */
-        .details-card {
-            background: var(--bg-card);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.25rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .details-grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .detail-item {
-            display: grid;
-            grid-template-columns: 160px 1fr;
-            gap: 1rem;
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-        }
-
-        .detail-item:hover {
-            background: var(--bg-page);
-        }
-
-        .detail-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .detail-value {
-            color: var(--text-primary);
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            font-size: 0.875rem;
-        }
-
-        /* Query Form */
-        .query-card {
-            background: var(--bg-card);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            margin-top: 1.5rem;
-            border: 1px solid var(--border);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.625rem 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-family: inherit;
-            font-size: 0.875rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background: var(--bg-card);
-        }
-
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-textarea { 
-            min-height: 100px; 
-            resize: vertical; 
-        }
-
-        .submit-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-        }
-
-        .submit-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Alerts Card */
-        .alerts-card {
-            background: var(--bg-card);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .alerts-card::-webkit-scrollbar { width: 6px; }
-        .alerts-card::-webkit-scrollbar-track { background: transparent; }
-        .alerts-card::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        .alerts-card::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
-
-        .alert-item {
-            padding: 0.875rem;
-            margin-bottom: 0.75rem;
-            background: var(--primary-light);
-            border-left: 3px solid var(--primary);
-            border-radius: 0.375rem;
-            transition: background 0.15s;
-            cursor: pointer;
-        }
-
-        .alert-item:hover { 
-            background: #bfdbfe;
-        }
-        
-        .alert-item:last-child { 
-            margin-bottom: 0; 
-        }
-
-        .alert-text { 
-            color: var(--text-primary); 
-            font-size: 0.875rem; 
-            line-height: 1.5; 
-        }
-        
-        .alert-text strong { 
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
-
-        /* Quick Actions */
-        .quick-actions { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 0.75rem; 
-            margin-top: 1rem; 
-        }
-
-        .action-btn {
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 0.5rem;
-            padding: 0.75rem; 
-            background: var(--bg-page); 
-            border: 1px solid var(--border); 
-            border-radius: 0.375rem;
-            color: var(--text-primary); 
-            font-weight: 500; 
-            font-size: 0.8125rem; 
-            cursor: pointer; 
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .action-btn:hover { 
-            background: var(--primary-light);
-            border-color: var(--primary);
-        }
-        /* If child page sets "no-right", hide right column and expand middle */
-body.no-right .right-column {
-    display: none;
-}
-
-body.no-right .container {
-    grid-template-columns: 280px 1fr !important;
-}
-
-
-        /* Responsive Design */
-        @media screen and (max-width: 1200px) {
-            .container { grid-template-columns: 260px 1fr 300px; gap: 1.25rem; }
-        }
-
-        @media screen and (max-width: 968px) {
-            .top-bar-content, .nav-content { padding: 0 1rem; }
-            .contact-info { display: none; }
-            .mobile-menu-btn { display: block; }
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--bg-card);
-                flex-direction: column;
-                gap: 0;
-                box-shadow: var(--shadow-md);
-                padding: 1rem;
-                border-top: 1px solid var(--border);
-            }
-            .nav-links.active { display: flex; }
-            .nav-item { border-bottom: 1px solid var(--border); padding: 0.75rem 0; }
-            .nav-link { padding: 0.5rem 0; }
-            .dropdown { 
-                position: static; 
-                box-shadow: none; 
-                margin-top: 0.75rem; 
-                background: var(--bg-page);
-                border: none;
-            }
-            .nav-item.active .dropdown { display: block; }
-            
-            .right-submenu {
-                position: static;
-                margin-left: 1rem;
-                margin-top: 0.5rem;
-                box-shadow: none;
-                background: var(--bg-page);
-                border: none;
-            }
-            
-            .container { grid-template-columns: 1fr; padding: 1rem; gap: 1rem; }
-            .detail-item { grid-template-columns: 140px 1fr; gap: 0.75rem; }
-            .stats-grid { grid-template-columns: repeat(4, 1fr); }
-            .quick-actions { grid-template-columns: repeat(4, 1fr); }
-        }
-
-        @media screen and (max-width: 576px) {
-            .top-bar-content, .nav-content { padding: 0 0.75rem; }
-            .logo-text h1 { font-size: 0.875rem; }
-            .logo-icon { width: 36px; height: 36px; font-size: 0.875rem; }
-            .container { padding: 0.75rem; }
-            .profile-card, .details-card, .query-card, .alerts-card { padding: 1rem; }
-            .detail-item { grid-template-columns: 1fr; gap: 0.5rem; }
-            .profile-avatar { width: 80px; height: 80px; font-size: 2rem; }
-            .stats-grid, .quick-actions { grid-template-columns: repeat(2, 1fr); }
-        }
-    </style>
+    </style> -->
 </head>
 <!-- <body> -->
 <body class="{% block body_class %}{% endblock %}">
 
-
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="top-bar-content">
-            <div class="contact-info">
-                <div class="contact-item">
-                    <span>📧</span>
-                    <span>info@gmail.com</span>
-                </div>
-                <div class="contact-item">
-                    <span>📞</span>
-                    <span>+123456789</span>
-                </div>
-            </div>
-            <div class="user-profile-header" onclick="toggleUserDropdown(event)">
-                <div class="user-avatar-small">SS</div>
-                <span style="font-weight: 500;">Sobha Sudheesh</span>
-                <span style="font-size: 0.75rem;">▼</span>
-                <div class="user-dropdown" id="userDropdown" onclick="event.stopPropagation()">
-                    <a href="#">👤 My Profile</a>
-                    <a href="#">📊 Change Password</a>
-                    <div class="divider"></div>
-                    <a href="#">🚪 Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Main Navigation -->
     <div class="main-nav">
@@ -735,40 +29,82 @@ body.no-right .container {
             </div>
             <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
+
+                <li class="nav-item mobile-only" onclick="toggleDropdown(this, event)">
+                    <span class="nav-link">👤 Profile ▼</span>
+                    <div class="dropdown">
+                        <a href="#">👤 My Profile</a>
+                        <a href="#">📊 Change Password</a>
+                        <div class="divider"></div>
+                        <a href="#">🚪 Logout</a>
+                    </div>
+                </li>
+
                 <li class="nav-item">
                     <a href="{% url 'student_home' %}" class="nav-link">🏠 Home</a>
                 </li>
-                <li class="nav-item" onclick="toggleDropdown(this)">
-                    <span class="nav-link">📚 My Class ▼</span>
-                    <div class="dropdown">
-                        <a href="{% url 'student_subjects' %}">📖 Subjects</a>
-                        
-                        <div class="sub-parent" onclick="openRightMenu(event)">
-                            <a href="#">📝 Assignment ▸</a>
-                            <div class="right-submenu">
-                                <a href="#">Upload Assignment</a>
-                                <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
-                            </div>
-                        </div>
-                        
-                        <a href="{% url 'student_view_post' %}">👁️ View Post</a>
-                        <a href="#">🎥 Live Class</a>
-                    </div>
-                </li>
-                <li class="nav-item" onclick="toggleDropdown(this)">
-                    <span class="nav-link">📋 Exam ▼</span>
-                    <div class="dropdown">
-                        <a href="{% url 'student_exam_hall' %}">✍️ Exam Hall</a>
-                        <a href="{% url 'student_score_card' %}">📊 Score Card</a>
-                    </div>
-                </li>
-                <li class="nav-item" onclick="toggleDropdown(this)">
-                    <span class="nav-link">📚 Library ▼</span>
-                    <div class="dropdown">
-                        <a href="#">📑 Reference</a>
-                        <a href="{% url 'student_score_card' %}">📼 Class Records</a>
-                    </div>
-                </li>
+
+<li class="nav-item">
+    <span class="nav-link">📚 My Class ▼</span>
+    <div class="dropdown">
+        <a href="{% url 'student_subjects' %}">📖 Subjects</a>
+        
+        <div class="sub-parent" onclick="openRightMenu(event)">
+            <a href="#">📝 Assignment ▸</a>
+            <div class="right-submenu">
+                <a href="{% url 'student_pending_assignment' %}">Upload Assignment</a>
+                <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
+            </div>
+        </div>
+        
+        <a href="{% url 'student_view_post' %}">👁️ View Post</a>
+        <a href="#">🎥 Live Class</a>
+    </div>
+</li>
+
+<li class="nav-item">
+    <span class="nav-link">📋 Exam ▼</span>
+    <!-- <div class="dropdown">...</div> -->
+        <div class="dropdown">
+        <a href="{% url 'student_exam_hall' %}">✍️ Exam Hall</a>
+        
+        <div class="sub-parent" onclick="openRightMenu(event)">
+            <a href="{% url 'student_score_card' %}">📊 Score Card </a>
+        </div>
+        
+    </div>
+</li>
+<li class="nav-item">
+    <span class="nav-link">📚 Library ▼</span>
+    <!-- <div class="dropdown">...</div> -->
+        <div class="dropdown">
+        
+        <div class="sub-parent" onclick="openRightMenu(event)">
+            <a href="#">📑 References </a>
+        </div>
+        
+        <a href="{% url 'student_class_recordings' %}">📼 Class Recordings</a>
+    </div>
+</li>
+<li><br></li>
+<li>
+    <div class="user-profile-header-containe">
+        <div class="user-profile-header" onclick="toggleUserDropdown(event)">
+            <div class="user-avatar-small">{{student.first_name|slice:":2" }}</div>
+            <span style="font-size: 0.75rem;"></span>
+
+            <div class="user-dropdown" id="userDropdown" onclick="event.stopPropagation()">
+                <!-- <a href="{% url 'student_profile_view' %}">👤 My Profile</a> -->
+                <a href="#">👤 My Profile</a>
+
+                <a href="#">📊 Change Password</a>
+                <div class="divider"></div>
+                <a href="#">🚪 Logout</a>
+            </div>
+        </div>
+    </div>
+</li>
+
             </ul>
         </div>
     </div>
@@ -779,36 +115,16 @@ body.no-right .container {
         <div>
             <div class="profile-card">
                 <div class="profile-avatar">👤</div>
-                <h2 class="profile-name">Sobha Sudheesh</h2>
-                <p class="profile-id">TTSMDIV053</p>
+                <h2 class="profile-name">{{ student.first_name}}</h2>
+                <p class="profile-id">{{ student.student_id}}</p>
                 <span class="role-badge">👨‍🎓 Student</span>
                 <button class="pay-button">💳 Pay Now</button>
-
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value">12</div>
-                        <div class="stat-label">Courses</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">8</div>
-                        <div class="stat-label">Exams</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">45</div>
-                        <div class="stat-label">Assignments</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">92%</div>
-                        <div class="stat-label">Attendance</div>
-                    </div>
+                <div class="stats-wrapper">
+                <div class="stats-grid ">
+                    <br><br><br><br><br><br><br><br>
+                </div>
                 </div>
 
-                <!-- <div class="quick-actions">
-                    <button class="action-btn">📖 Subjects</button>
-                    <button class="action-btn">📝 Assignments</button>
-                    <button class="action-btn">✍️ Exams</button>
-                    <button class="action-btn">📚 Library</button>
-                </div> -->
             </div>
         </div>
 
@@ -826,6 +142,114 @@ body.no-right .container {
     </div>
 
     <script>
+
+
+const navItems = document.querySelectorAll(".nav-item");
+
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById("userDropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+            
+            // Close all nav-item dropdowns when main menu is closed
+            if (!navLinks.classList.contains('active')) {
+                navItems.forEach(item => item.classList.remove("active"));
+            }
+        }
+
+        function toggleDropdown(element, event) {
+            // This function is now only called via the event listener setup below
+            // and should handle mobile-only logic
+
+            // Check if it's a link with a valid href, if so, let it navigate (unless it's a sub-parent)
+            const link = element.querySelector('.nav-link');
+            if (link && link.href && !element.classList.contains('sub-parent')) {
+                 // For mobile, if it has a link, only toggle if it's not a parent dropdown
+                 if (element.querySelector('.dropdown')) {
+                     event.preventDefault(); // Prevent navigation on mobile if it has a dropdown
+                 }
+            } else {
+                 event.preventDefault(); // Prevent default action for mobile toggle
+            }
+            
+            event.stopPropagation();
+
+            // Close other dropdowns
+            navItems.forEach(item => {
+                if (item !== element) item.classList.remove("active");
+            });
+
+            element.classList.toggle("active");
+        }
+
+
+        function openRightMenu(event) {
+            event.stopPropagation();
+            const menu = event.currentTarget.querySelector(".right-submenu");
+            document.querySelectorAll(".right-submenu").forEach(m => {
+                if (m !== menu) m.style.display = "none";
+            });
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        document.addEventListener("click", (event) => {
+            const userDropdown = document.getElementById("userDropdown");
+            const userProfile = document.querySelector(".user-profile-header");
+            
+            // Close User Dropdown
+            if (userDropdown && userProfile && !userProfile.contains(event.target)) {
+                userDropdown.classList.remove("show");
+            }
+            
+            // Close right sub-menu
+            document.querySelectorAll(".right-submenu").forEach(m => m.style.display = "none");
+
+            // Close mobile nav dropdowns if click is outside nav bar
+            if (window.innerWidth <= 968) {
+                const nav = document.querySelector('.main-nav');
+                if (!nav.contains(event.target)) {
+                    navItems.forEach(item => item.classList.remove("active"));
+                }
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            const nav = document.querySelector('.main-nav');
+            const navLinks = document.getElementById('navLinks');
+            if (!nav.contains(event.target) && navLinks && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Add event listeners for mobile-only dropdown toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            navItems.forEach(item => {
+                const navLink = item.querySelector('.nav-link');
+                if (navLink) {
+                    navLink.addEventListener('click', function(event) {
+                        // Only run the mobile-specific toggle logic
+                        if (window.innerWidth <= 968 && item.querySelector('.dropdown')) {
+                            toggleDropdown(item, event);
+                        }
+                    });
+                }
+            });
+
+            // Re-add the mobile-only click handler to the mobile-only profile dropdown
+            const mobileProfile = document.querySelector('.nav-item.mobile-only');
+            if (mobileProfile) {
+                mobileProfile.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 968) {
+                        toggleDropdown(mobileProfile, event);
+                    }
+                });
+            }
+        });
         function toggleUserDropdown(event) {
             event.stopPropagation();
             const dropdown = document.getElementById("userDropdown");
@@ -837,11 +261,19 @@ body.no-right .container {
             navLinks.classList.toggle('active');
         }
 
-        function toggleDropdown(element) {
-            if (window.innerWidth <= 968) {
-                element.classList.toggle('active');
-            }
-        }
+function toggleDropdown(element, event) {
+    if (window.innerWidth <= 968) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        document.querySelectorAll(".nav-item").forEach(item => {
+            if (item !== element) item.classList.remove("active");
+        });
+
+        element.classList.toggle("active");
+    }
+}
+
 
         function openRightMenu(event) {
             event.stopPropagation();
@@ -870,6 +302,10 @@ body.no-right .container {
                 navLinks.classList.remove('active');
             }
         });
+        
     </script>
 </body>
 </html>
+
+
+
