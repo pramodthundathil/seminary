@@ -938,6 +938,12 @@
             width: 100%;
         }
     }
+
+    /* Progress Step Inactive State */
+    .progress-step:not(.active):not(.completed) .progress-circle {
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+    }
 </style>
 
 <div class="application-container">
@@ -1054,13 +1060,15 @@
             <h2 class="section-title">
                 <i class="fas fa-comment-alt section-icon"></i>
                 Additional Information
-            </h2>
+            </h2>           
 
-            <div class="form-field full-width">
+            <div class="form-row">
+                <div class="form-group">
                 <label for="message">Message/Notes (Optional)</label>
-                <textarea id="message" name="message" rows="5" maxlength="500"
+                <textarea id="message" name="message" class="form-control" rows="5" maxlength="500"
                     placeholder="Add any additional information or special instructions..."></textarea>
                 <small class="character-count">0 / 500 characters</small>
+            </div>
             </div>
 
             <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
@@ -1251,20 +1259,110 @@
                 if (submitBtn) submitBtn.disabled = true;
             });
         }
+    })
 
-        // Progress tracking on scroll
-        window.addEventListener('scroll', function () {
-            const sections = document.querySelectorAll('.form-section');
-            const progressSteps = document.querySelectorAll('.progress-step');
+    // Section completion tracking
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('paymentForm');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        const sections = [
+            {
+                // Section 1: Personal Information
+                fields: [
+                    'full_name',
+                    'email',
+                    'phone_code',
+                    'phone_number',
+                    'person_group'
+                ]
+            },
+            {
+                // Section 2: Payment Details
+                fields: [
+                    'amount'
+                ]
+            },
+            {
+                // Section 3: Additional Information / Confirm Section
+                fields: [
+                    'message',
+                    'g-recaptcha-response'
+                ]
+            }
+        ];
+
+
+        // Function to check if a section is complete
+        function checkSectionCompletion(sectionIndex) {
+            const sectionFields = sections[sectionIndex].fields;
+
+            // If no required fields (like documents section), mark as complete
+            if (sectionFields.length === 0) {
+                return true;
+            }
+
+            // Check if all required fields in this section are filled
+            return sectionFields.every(fieldName => {
+                const field = form.elements[fieldName];
+                if (!field) return true; // Field doesn't exist, skip
+
+                if (field.type === 'select-one') {
+                    return field.value !== '';
+                }
+                return field.value.trim() !== '';
+            });
+        }
+
+        // Function to update progress tracker
+        function updateProgressTracker() {
             sections.forEach((section, index) => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
-                    progressSteps.forEach((step, stepIndex) => {
-                        if (stepIndex <= index) step.classList.add('active');
-                        else step.classList.remove('active');
-                    });
+                if (checkSectionCompletion(index)) {
+                    progressSteps[index].classList.add('completed');
+                    progressSteps[index].classList.remove('active');
+                } else {
+                    progressSteps[index].classList.remove('completed');
                 }
             });
+
+            // Set the first incomplete section as active
+            for (let i = 0; i < sections.length; i++) {
+                if (!checkSectionCompletion(i)) {
+                    progressSteps[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        // Listen to all form field changes
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updateProgressTracker);
+            input.addEventListener('blur', updateProgressTracker);
+        });
+
+        // Initial check on page load
+        updateProgressTracker();
+    });
+
+    // Update scroll-based progress tracking to work with completion
+    window.addEventListener('scroll', function () {
+        const sections = document.querySelectorAll('.form-section');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                // Only set active if not already completed
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.add('active');
+                }
+            } else if (rect.top > window.innerHeight / 2) {
+                // Remove active when scrolling away (but keep completed)
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.remove('active');
+                }
+            }
         });
     });
 </script>

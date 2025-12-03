@@ -225,7 +225,7 @@
 
     <script>
         function handleRegister(type) {
-            alert(`Redirecting to ${type.charAt(0).toUpperCase() + type.slice(1)} Registration...`);
+            /*alert(`Redirecting to ${type.charAt(0).toUpperCase() + type.slice(1)} Registration...`);*/
             // In a real application, you would redirect to the appropriate registration form
             window.location.href = `{% url 'signup_student' %}`;
         }

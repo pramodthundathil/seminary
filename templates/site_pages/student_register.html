@@ -555,6 +555,11 @@
             width: 100%;
         }
     }
+    /* Progress Step Inactive State */
+    .progress-step:not(.active):not(.completed) .progress-circle {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+}
 </style>
 
 <div class="application-container">
@@ -924,7 +929,7 @@
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                    <input type="email" name="" class="form-control"
+                   <input type="email" name="reference_email1" class="form-control"
                         value="{{ request.POST.reference_email1|default:'' }}" required>
                          <small id="reference_email1_error" class="error-message"></small>
                 </div>
@@ -989,9 +994,9 @@
 
             <div class="form-row two-cols">
                 <div class="form-group">
-                    <label>Certificate 1</label>
+                    <label>Certificate 1<span class="required">*</span></label>
                     <div class="file-upload-wrapper">
-                        <input type="file" name="certificate1" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png">
+                        <input type="file" name="certificate1" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png" required>
                         <div class="file-upload-label">
                             <i class="bi bi-file-earmark-arrow-up"></i>
                             <span>Upload Document</span>
@@ -1169,6 +1174,107 @@
                         step.classList.remove('active');
                     }
                 });
+            }
+        });
+    });
+    // Section completion tracking
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('studentApplicationForm');
+        const progressSteps = document.querySelectorAll('.progress-step');
+        
+        // Define sections and their required fields
+        const sections = [
+            {
+                // Section 1: Personal Information
+                fields: ['first_name', 'email', 'date_of_birth', 'gender', 'citizenship']
+            },
+            {
+                // Section 2: Contact Information
+                fields: ['phone_code', 'phone_number', 'mailing_address', 'city', 'state', 'country', 'zip_code', 'timezone']
+            },
+            {
+                // Section 3: Educational & Ministry Background
+                fields: ['highest_education', 'course_applied', 'starting_year', 'language']
+            },
+            {
+                // Section 4: Financial Information (References)
+                fields: ['reference_name1', 'reference_email1', 'reference_phone1', 'reference_name2', 'reference_email2', 'reference_phone2']
+            },
+            {
+                // Section 5: Documents & Certificates
+                fields: ['certificate1','g-recaptcha-response']
+            }
+        ];
+
+        // Function to check if a section is complete
+        function checkSectionCompletion(sectionIndex) {
+            const sectionFields = sections[sectionIndex].fields;
+            
+            // If no required fields (like documents section), mark as complete
+            if (sectionFields.length === 0) {
+                return true;
+            }
+            
+            // Check if all required fields in this section are filled
+            return sectionFields.every(fieldName => {
+                const field = form.elements[fieldName];
+                if (!field) return true; // Field doesn't exist, skip
+                
+                if (field.type === 'select-one') {
+                    return field.value !== '';
+                }
+                return field.value.trim() !== '';
+            });
+        }
+
+        // Function to update progress tracker
+        function updateProgressTracker() {
+            sections.forEach((section, index) => {
+                if (checkSectionCompletion(index)) {
+                    progressSteps[index].classList.add('completed');
+                    progressSteps[index].classList.remove('active');
+                } else {
+                    progressSteps[index].classList.remove('completed');
+                }
+            });
+            
+            // Set the first incomplete section as active
+            for (let i = 0; i < sections.length; i++) {
+                if (!checkSectionCompletion(i)) {
+                    progressSteps[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        // Listen to all form field changes
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updateProgressTracker);
+            input.addEventListener('blur', updateProgressTracker);
+        });
+
+        // Initial check on page load
+        updateProgressTracker();
+    });
+
+    // Update scroll-based progress tracking to work with completion
+    window.addEventListener('scroll', function () {
+        const sections = document.querySelectorAll('.form-section');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                // Only set active if not already completed
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.add('active');
+                }
+            } else if (rect.top > window.innerHeight / 2) {
+                // Remove active when scrolling away (but keep completed)
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.remove('active');
+                }
             }
         });
     });
