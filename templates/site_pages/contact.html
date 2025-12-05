@@ -319,8 +319,8 @@
     /* Success message styling */
     .success-message {
         display: none;
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
+        background: none;
+        color: rgb(14, 149, 63);
         padding: 25px;
         border-radius: 16px;
         margin-bottom: 40px;
@@ -410,10 +410,14 @@
             <p>We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
         </div>
 
-        <div id="successMessage" class="success-message">
-            ✓ Thank you for your message! We will get back to you soon.
-        </div>
-
+       <!-- Django Success Message -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message" style="display:block;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
         <div class="contact-info-cards">
             <div class="info-card">
                 <div class="icon-wrapper">
@@ -451,7 +455,8 @@
         </div>
 
         <div class="contact-form-section">
-            <form id="contactForm">
+           <form id="contactForm" method="POST" onsubmit="return validateForm(event)">
+                {% csrf_token %}
                 <div class="form-group">
                     <label for="name">Your Name</label>
                     <input type="text" id="name" name="name" placeholder="Enter Your Name" required>
@@ -485,25 +490,31 @@
 </div>
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <script>
-    document.getElementById('contactForm').addEventListener('submit', function (e) {
-        e.preventDefault();
+function validateForm(event) {
+    const recaptcha = grecaptcha.getResponse();
 
-        // Show success message
-        const successMsg = document.getElementById('successMessage');
-        successMsg.style.display = 'block';
+    // If reCAPTCHA not checked
+    if (!recaptcha || recaptcha.length === 0) {
+        alert("Please complete the reCAPTCHA before submitting.");
+        event.preventDefault(); // STOP submission
+        return false;
+    }
 
-        // Scroll to success message
-        successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // If valid, allow submit and then reset form
+    setTimeout(() => {
+        document.getElementById("contactForm").reset();
+    }, 300);
 
-        // Reset form
-        this.reset();
+    return true;
+}
 
-        // Hide success message after 5 seconds
-        setTimeout(() => {
-            successMsg.style.display = 'none';
-        }, 5000);
-    });
+// Auto-hide Django success message after 3 seconds
+setTimeout(() => {
+    const msg = document.querySelector(".success-message");
+    if (msg) msg.style.display = "none";
+}, 5000);
 </script>
 
 {% endblock %}

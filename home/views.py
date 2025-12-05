@@ -45,7 +45,8 @@ from .models import (
     Languages,
     Users,
     AdminPages,
-    Payments
+    Payments,
+    Contacts
 )
 
 
@@ -1245,44 +1246,37 @@ def send_admin_notification_email(student):
         print(f"Failed to send admin notification: {str(e)}")
 
 def contact(request):
-    context = {
-        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
-    }
-
     if request.method == 'POST':
+        # reCAPTCHA validation
         recaptcha_response = request.POST.get('g-recaptcha-response')
 
-        if not recaptcha_response:
-            messages.error(request, "Please complete the reCAPTCHA.")
-            return render(request, "site_pages/contact.html", context)
+        data = {
+            'secret': settings.RECAPTCHA_SECRET_KEY,
+            'response': recaptcha_response
+        }
 
-        try:
-            data = {
-                'secret': settings.RECAPTCHA_SECRET_KEY,
-                'response': recaptcha_response
-            }
+        r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+        result = r.json()
 
-            r = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data=data,
-                timeout=5
+        if result.get('success'):
+            # Save contact form
+            Contacts.objects.create(
+                name=request.POST.get('name'),
+                email=request.POST.get('email'),
+                subject=request.POST.get('subject'),
+                message=request.POST.get('message'),
+                created_at=datetime.now()
             )
-            result = r.json()
 
-            if not result.get('success'):
-                messages.error(request, "Invalid reCAPTCHA. Please try again.")
-                return render(request, "site_pages/contact.html", context)
+            messages.success(request, "Your message has been sent successfully!")
+            return redirect('contact-us')  # reload same page to show success message
+        else:
+            messages.error(request, "reCAPTCHA verification failed. Please try again.")
+            return redirect('contact-us')
 
-        except requests.exceptions.RequestException:
-            messages.error(request, "Network error verifying reCAPTCHA.")
-            return render(request, "site_pages/contact.html", context)
-
-        except ValueError:
-            messages.error(request, "Invalid response from reCAPTCHA server.")
-            return render(request, "site_pages/contact.html", context)
-
-    # GET request or successful POST falls here
-    return render(request, "site_pages/contact.html", context)
+    return render(request, "site_pages/contact.html", {
+        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
+    })
 
 
     

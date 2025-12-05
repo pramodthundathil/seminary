@@ -983,7 +983,7 @@
         </div>
     </div>
 
-    <form id="paymentForm" method="POST" action="" novalidate>
+    <form id="paymentForm" method="POST" onsubmit="return validateForm(event)" action="" novalidate>
         {% csrf_token %}
 
         <!-- Personal Information -->
@@ -1365,6 +1365,23 @@
             }
         });
     });
+     function validateForm(event) {
+    const recaptcha = grecaptcha.getResponse();
+
+    // If reCAPTCHA not checked
+    if (!recaptcha || recaptcha.length === 0) {
+        alert("Please complete the reCAPTCHA before submitting.");
+        event.preventDefault(); // STOP submission
+        return false;
+    }
+
+    // If valid, allow submit and then reset form
+    setTimeout(() => {
+        document.getElementById("paymentForm").reset();
+    }, 300);
+
+    return true;
+}
 </script>
 
 {% if messages %}
