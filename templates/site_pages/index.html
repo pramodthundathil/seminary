@@ -1094,7 +1094,8 @@
         }
 
         .btn-join {
-            background: #4169e1;
+            background: #C084FC;
+            ;
             color: white;
             border: none;
             padding: 12px 35px;
@@ -1692,7 +1693,7 @@
             /* Optional fine-tuning */
             .carousel-item:nth-child(3) .carousel-caption h2 {
                 margin-top: -20px !important;
-                transform: translateX(-275px) !important;
+                transform: translateX(-260px) !important;
                 /* move left */
             }
 
@@ -1700,6 +1701,7 @@
                 margin-top: -5px !important;
                 transform: translateX(-275px) !important;
                 /* move left more if needed */
+                 font-size: 12px !important;
             }
 
             .carousel-item:nth-child(3) .learn-more-btn {
@@ -1734,7 +1736,7 @@
             .carousel-item:nth-child(2) .right-content h2 {
                 margin-top: -20px !important;
                 font-size: 1.5rem !important;
-                transform: translateX(-200px) !important;
+                transform: translateX(-170px) !important;
             }
 
             .carousel-item:nth-child(2) .slide-content {
@@ -1801,12 +1803,13 @@
                 margin-bottom: 5px !important;
             }
 
-            .church-card {
-                position: relative;
-                flex-shrink: 0;
-                margin-top: -5px !important;
-                margin-left: 15px;
-                /* Changed from -30px */
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                margin-top: 30px !important;
+                margin-left: 30px !important;
+                transform: translateY(-20px) !important;
+                position: relative !important;
             }
 
             .carousel-caption .slide-content {
@@ -1861,119 +1864,129 @@
             .carousel-item {
                 height: 500px;
             }
+         
 
-            .carousel-item:nth-child(2) .left-content h1 {
-                margin-top: -5px !important;
-                font-size: 2.3rem !important;
+            /* Move Slide 3 items slightly down & center them */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                margin: 0 auto !important;
+                text-align: center !important;
             }
 
-            .carousel-item:nth-child(2) .carousel-caption {
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-40%, -50%) !important;
-
-                width: 100%;
+            /* Fix h1 → 2 lines + reduce size */
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
                 text-align: center !important;
 
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                /* horizontal center */
-                justify-content: center !important;
-                /* vertical center */
-
-                padding: 20px;
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                font-size: 22px !important;
+                /* reduced size */
             }
 
-            .carousel-item:nth-child(2) .right-content h2 {
-                margin-top: -20px !important;
-                font-size: 1.5rem !important;
-                transform: translateX(-200px) !important;
+            /* Reduce h2 size + push down slightly */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                /* reduced size */
+                transform: translateY(25px) !important;
             }
 
-            .carousel-item:nth-child(2) .slide-content {
-                gap: 60px !important;
+            /* H1 – already LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 35px !important;
+                font-weight: 600 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: left !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+
+                transform: translateX(-140px) translateY(30px) !important;
+                /* ← MORE LEFT */
             }
 
-            .carousel-item:nth-child(2) .left-content {
-                margin-left: -30px !important;
+
+            /* MOVE H2 slightly LEFT but keep centered */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                color: navy !important;
+                text-align: left !important;
+                margin: 0 auto !important;
+                /* keeps center */
+                transform: translateX(-15px) !important;
+                /* small LEFT shift */
             }
 
-            .carousel-item:nth-child(2) .right-content p {
-                margin-right: -30px !important;
-                font-size: 1.5rem !important;
-                transform: translateX(-200px) !important;
+
+            /* P – already left */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: navy !important;
+                transform: translate(-80px, 0px) !important;
+                margin: 0 auto !important;
+                font-size: 14px !important;
             }
 
             .carousel-item:nth-child(2) .learn-more-btn {
-                align-self: center !important;
-                transform: translateX(-150px) !important;
+                transform: translate(-160px, 30px) !important;
+                /* your left shift */
+                padding: 12px 40px !important;
+                /* increase button size */
+                min-width: 165px !important;
+                /* increase button length */
+                min-height: 30px !important;
             }
 
-            /* CENTER EVERYTHING IN SLIDE 3 */
-            .carousel-item:nth-child(3) .carousel-caption {
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
+            /* H1 – already LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 35px !important;
+                font-weight: 600 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: left !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
 
-                width: 100%;
-                text-align: center !important;
-
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                /* horizontal center */
-                justify-content: center !important;
-                /* vertical center */
-
-                padding: 20px;
+                transform: translateX(-170px) translateY(80px) !important;
+                /* ← MORE LEFT */
             }
 
-            /* Center the text inside */
-            .carousel-item:nth-child(3) .carousel-caption h1,
-            .carousel-item:nth-child(3) .carousel-caption h2,
-            .carousel-item:nth-child(3) .carousel-caption p {
-                text-align: center !important;
-                width: 100%;
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                color: navy !important;
+                text-align: left !important;
+                margin: 0 auto !important;
+                transform: translate(250px,-150px) !important;
+                /* RIGHT + UP */
             }
 
-            /* Optional fine-tuning */
-            .carousel-item:nth-child(3) .carousel-caption h2 {
-                margin-top: -20px !important;
-                transform: translateX(-275px) !important;
-                /* move left */
-            }
 
-            .carousel-item:nth-child(3) .carousel-caption p {
-                margin-top: -5px !important;
-                transform: translateX(-275px) !important;
-                /* move left more if needed */
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                color: navy !important;
+                font-size: 14px !important;
+                transform: translate(250px, -150px) !important;
+                /* move RIGHT + UP */
+                margin: 0 auto !important;
+                text-align: left !important;
             }
 
             .carousel-item:nth-child(3) .learn-more-btn {
-                align-self: center !important;
-                transform: translateX(-170px) !important;
-            }
-
-            .carousel-item:nth-child(1) .carousel-caption {
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-40%, -50%) !important;
-
-                width: 100%;
-                text-align: center !important;
-
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                /* horizontal center */
-                justify-content: center !important;
-                /* vertical center */
-
-                padding: 20px;
+                transform: translate(250px, -100px) !important;
+                /* RIGHT + UP */
+                padding: 12px 40px !important;
+                min-width: 165px !important;
+                min-height: 30px !important;
             }
 
             .student-image-card {
@@ -2071,13 +2084,17 @@
                 width: 100% !important;
                 text-align: center;
             }
-
-            .church-card {
-                order: 2 !important;
-                margin: 0 auto !important;
+             .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                 order: 2 !important;
+               margin-left: 400px !important;
                 display: flex;
                 justify-content: center;
+                justify-content: flex-end !important; 
             }
+
+            
 
             .church-image img {
                 width: 220px;
@@ -2090,98 +2107,15 @@
                 display: inline-flex !important;
             }
 
-            .carousel-caption {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 90%;
-            }
 
-            .carousel-caption h1 {
-                font-size: 2rem;
-                line-height: 1.2;
-            }
 
-            .carousel-caption h2 {
-                font-size: 1.5rem;
-                line-height: 1.3;
-            }
-
-            .carousel-caption p {
-                font-size: 0.95rem;
-                margin: 10px 0;
-            }
-
-            .learn-more-btn {
-                padding: 10px 25px;
-                font-size: 0.95rem;
-            }
-
-            /* All Slides - Common responsive styles */
-            .carousel-caption {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 90%;
-                padding: 20px;
-                background: transparent !important;
-            }
 
             .carousel-indicators {
                 bottom: -35px !important;
                 /* Move DOWN */
             }
 
-            .carousel-caption .slide-content {
-                flex-direction: column !important;
-                gap: 10px !important;
-                align-items: center !important;
-            }
 
-            .carousel-caption h1 {
-                font-size: 1.5rem !important;
-                line-height: 1.2;
-                text-align: center !important;
-                color: #1B2845 !important;
-                margin-bottom: 8px !important;
-            }
-
-            .carousel-caption h2 {
-                font-size: 1.2rem !important;
-                line-height: 1.3;
-                text-align: center !important;
-                color: #1B2845 !important;
-                margin-bottom: 8px !important;
-            }
-
-            .carousel-caption p {
-                font-size: 0.85rem !important;
-                margin: 5px 0 8px 0 !important;
-                text-align: center !important;
-                color: #1B2845 !important;
-            }
-
-            /* Reset all slide margins for mobile */
-            .left-content,
-            .right-content {
-                margin: 0 !important;
-                padding: 0 15px !important;
-                width: 100% !important;
-                text-align: center !important;
-                align-items: center !important;
-            }
-
-            .learn-more-btn {
-                padding: 8px 20px !important;
-                font-size: 0.85rem !important;
-                align-self: center !important;
-                margin: 5px auto 0 auto !important;
-                background-color: #5cc3c5 !important;
-                color: #1B2845 !important;
-                display: inline-block !important;
-            }
 
             /* Maintain color scheme from desktop */
             .carousel-caption .highlight {
@@ -2194,53 +2128,8 @@
                 color: #4ade80 !important;
             }
 
-            /* Slide 1 Responsive */
-            .carousel-item:first-child .left-content,
-            .carousel-item:first-child .right-content {
-                margin: 0 auto !important;
-            }
 
-            /* Slide 2 Responsive */
-            .carousel-item:nth-child(2) .slide-content {
-                flex-direction: column !important;
-                gap: 10px !important;
-            }
 
-            .carousel-item:nth-child(2) .left-content,
-            .carousel-item:nth-child(2) .right-content {
-                margin: 0 !important;
-                text-align: center !important;
-                align-items: center !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content h2,
-            .carousel-item:nth-child(2) .right-content p {
-                margin-left: 0 !important;
-                margin-bottom: 8px !important;
-                text-align: center !important;
-            }
-
-            .carousel-item:nth-child(2) .learn-more-btn {
-                margin: 5px auto 0 auto !important;
-                display: inline-block !important;
-            }
-
-            /* Slide 3 Responsive */
-            .carousel-item:nth-child(3) .left-content {
-                margin-left: 0 !important;
-            }
-
-            .carousel-item:nth-child(3) .right-content h2,
-            .carousel-item:nth-child(3) .right-content p {
-                margin-left: 0 !important;
-                margin-bottom: 8px !important;
-                text-align: center !important;
-            }
-
-            .carousel-item:nth-child(3) .learn-more-btn {
-                margin: 5px auto 0 auto !important;
-                display: inline-block !important;
-            }
 
             .stats-container {
                 height: auto;
@@ -2280,87 +2169,13 @@
         /*************Responsive 768px*****************/
 
         @media (max-width: 768px) {
-            .carousel-item:first-child .slide-content {
-                max-width: 95% !important;
-                padding: 20px !important;
-            }
-
-            .carousel-item:first-child .left-content h1 {
-                font-size: 1.5rem !important;
-            }
-
-            .carousel-item:first-child .right-content h2 {
-                font-size: 1.2rem !important;
-            }
-
-            .carousel-item:first-child .right-content p {
-                font-size: 0.95rem !important;
-            }
-
-            .carousel-item {
-                height: 450px;
-            }
-
-            .carousel-caption {
-                width: 95%;
-                padding: 15px 10px;
-            }
 
             .why-section {
                 padding-top: 50px;
                 padding-bottom: 30px;
             }
 
-            .carousel-item:nth-child(2) .carousel-caption {
-                background: rgba(0, 0, 0, 0.35);
-                padding: 20px;
-                border-radius: 12px;
-            }
 
-            .carousel-item:nth-child(2) .left-content h1 {
-                font-size: 1.8rem !important;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            }
-
-            .carousel-item:nth-child(2) .left-content h1 .highlight {
-                color: #00CED1 !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-            }
-
-            .carousel-item:nth-child(2) .right-content h2 {
-                font-size: 1.3rem !important;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            }
-
-            .carousel-item:nth-child(2) .right-content h2 .highlight-green {
-                color: #4ade80 !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-            }
-
-            .carousel-item:nth-child(2) .right-content p {
-                font-size: 0.95rem !important;
-                color: #ffffff !important;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            }
-
-            .carousel-item:nth-child(2) .learn-more-btn {
-                padding: 10px 30px !important;
-                font-size: 15px !important;
-            }
-
-            .carousel-item:nth-child(2) .left-content h1 {
-                font-size: 1.8rem !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content h2 {
-                font-size: 1.3rem !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content p {
-                font-size: 0.9rem !important;
-            }
 
             .why-section {
                 padding-top: 60px;
@@ -2493,39 +2308,6 @@
                 height: 180px;
             }
 
-            .carousel-caption {
-                padding: 15px 10px;
-                width: 95%;
-                background: rgba(0, 0, 0, 0.4);
-                border-radius: 12px;
-            }
-
-            .carousel-caption h1 {
-                font-size: 1.5rem;
-                line-height: 1.2;
-                margin-bottom: 10px;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            }
-
-            .carousel-caption h1 br {
-                display: none;
-            }
-
-            .carousel-caption h2 {
-                font-size: 1.2rem;
-                line-height: 1.3;
-                margin-bottom: 8px;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            }
-
-            .carousel-caption p {
-                font-size: 0.85rem;
-                margin: 8px 0;
-                color: #ffffff !important;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            }
 
             .learn-more-btn {
                 padding: 8px 20px;
@@ -2549,127 +2331,8 @@
 
             }
 
-            /* Ensure slide 2 & 3 content stays high */
-            .carousel-item:nth-child(2) .carousel-caption,
-            .carousel-item:nth-child(3) .carousel-caption {
-                top: 38% !important;
-                /* Even higher for slides 2 & 3 */
-            }
 
-            /* Button always visible */
-            .learn-more-btn {
-                margin-top: 10px !important;
-                display: inline-block !important;
-                z-index: 9999 !important;
-            }
 
-            .carousel-item {
-                height: 500px !important;
-            }
-
-            .carousel-caption {
-                padding: 15px 12px;
-                width: 95%;
-                background: transparent !important;
-                border-radius: 0;
-                top: 45% !important;
-            }
-
-            /* ALL SLIDES - Maintain desktop colors (dark text) */
-            .carousel-caption h1 {
-                font-size: 1rem !important;
-                line-height: 1.2;
-                margin-bottom: 6px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-            }
-
-            .carousel-caption h1 br {
-                display: none !important;
-            }
-
-            .carousel-caption h2 {
-                font-size: 0.95rem !important;
-                line-height: 1.3;
-                margin-bottom: 10px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-            }
-
-            .carousel-caption h2 br {
-                display: inline !important;
-            }
-
-            .carousel-caption p {
-                font-size: 0.75rem !important;
-                margin: 5px 0 !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                line-height: 1.3;
-            }
-
-            .carousel-caption p br {
-                display: inline !important;
-            }
-
-            /* Highlight colors - same as desktop */
-            .carousel-caption .highlight {
-                color: #00CED1 !important;
-                text-shadow: none !important;
-            }
-
-            .carousel-caption .highlight-green,
-            .carousel-caption .for-green,
-            .carousel-caption .other-green {
-                color: #4ade80 !important;
-                text-shadow: none !important;
-            }
-
-            /* Button styling - same as desktop */
-            .learn-more-btn {
-                padding: 8px 22px !important;
-                font-size: 0.8rem !important;
-                background: #5cc3c5 !important;
-                color: #1B2845 !important;
-                font-weight: 600;
-                box-shadow: none;
-                margin: 8px auto 0 auto !important;
-                display: inline-block !important;
-                border-radius: 25px !important;
-                border: none !important;
-            }
-
-            /* Remove all left/right margins */
-            .left-content,
-            .right-content {
-                margin: 0 auto !important;
-                padding: 0 10px !important;
-            }
-
-            /* Slide-specific resets */
-            .carousel-item:nth-child(2) .right-content h2.title-line,
-            .carousel-item:nth-child(3) .right-content h2 {
-                margin-left: 0 !important;
-                margin-bottom: 6px !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content p,
-            .carousel-item:nth-child(3) .right-content p {
-                margin-left: 0 !important;
-                margin-bottom: 6px !important;
-            }
-
-            .carousel-item:nth-child(2) .learn-more-btn,
-            .carousel-item:nth-child(3) .learn-more-btn {
-                margin-left: 0 !important;
-                margin-top: 8px !important;
-                background: #5cc3c5 !important;
-                color: #1B2845 !important;
-                display: inline-block !important;
-            }
 
             .why-section {
                 padding: 40px 15px;
@@ -2822,68 +2485,113 @@
                 padding-left: 10px;
                 padding-right: 10px;
             }
+
+            /* Move Slide 3 items slightly down & center them */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Fix h1 → 2 lines + reduce size */
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                font-size: 22px !important;
+                /* reduced size */
+            }
+
+            /* Reduce h2 size + push down slightly */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                /* reduced size */
+                transform: translateY(25px) !important;
+            }
+
+
+
+            /* H1 – already LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 24px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(-20px, -10px) !important;
+            }
+
+            /* MOVE H2 slightly LEFT but keep centered */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                color: navy !important;
+                text-align: center !important;
+
+                margin: 0 auto !important;
+                /* keeps center */
+                transform: translateX(-15px) !important;
+                /* small LEFT shift */
+            }
+
+
+            /* P – already left */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: navy !important;
+                transform: translate(-50px, 0px) !important;
+                margin: 0 auto !important;
+                font-size: 14px !important;
+            }
+
+            /* BUTTON – move LEFT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-80px, 0px) !important;
+                /* ← moved LEFT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 24px !important;
+            }
         }
 
         /*************Responsive 576px*****************/
 
         @media (max-width: 576px) {
-            .carousel-item {
-                height: 400px !important;
-                /* Fixed height to prevent shifting */
-                min-height: 400px !important;
-                max-height: 400px !important;
-            }
-
-            .carousel-item img {
-                height: 400px !important;
-                min-height: 400px !important;
-                max-height: 400px !important;
-            }
-
-            .carousel-caption {
-                position: absolute !important;
-                top: 50% !important;
-                transform: translateY(-50%) translateX(-50%) !important;
-                left: 50% !important;
-            }
-
-            .carousel-item:nth-child(2) .left-content h1 {
-                font-size: 1.4rem !important;
-            }
-
-            .carousel-item:nth-child(2) .left-content h1 br {
-                display: inline !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content h2 {
-                font-size: 1.1rem !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content p {
-                font-size: 0.85rem !important;
-            }
-
-            .carousel-item:nth-child(2) .learn-more-btn {
-                padding: 9px 25px !important;
-                font-size: 14px !important;
-            }
-
-            .carousel-item:nth-child(2) .left-content h1 {
-                font-size: 1.4rem !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content h2 {
-                font-size: 1.1rem !important;
-            }
-
-            .carousel-item:nth-child(2) .right-content p {
-                font-size: 0.85rem !important;
-            }
-
-            .carousel-item:nth-child(2) .learn-more-btn {
-                padding: 10px 28px !important;
-                font-size: 14px !important;
-            }
 
             .student-image-card {
                 flex: 1 1 100%;
@@ -2960,59 +2668,6 @@
                 padding: 9px 14px;
             }
 
-            .carousel-item {
-                min-height: 400px;
-                max-height: 500px;
-            }
-
-            .carousel-item img {
-                min-height: 400px;
-                max-height: 500px;
-                object-fit: cover;
-            }
-
-            .carousel-caption {
-                padding: 10px 8px;
-                width: 98%;
-                background: rgba(0, 0, 0, 0.5);
-                border-radius: 10px;
-            }
-
-            .carousel-caption h1 {
-                font-size: 1.1rem;
-                line-height: 1.2;
-                margin-bottom: 8px;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-                font-weight: 700;
-            }
-
-            .carousel-caption h2 {
-                font-size: 0.95rem;
-                line-height: 1.3;
-                margin-bottom: 6px;
-                color: #ffffff !important;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-                font-weight: 600;
-            }
-
-            .carousel-caption p {
-                font-size: 0.75rem;
-                margin: 6px 0;
-                line-height: 1.4;
-                color: #ffffff !important;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            }
-
-            .learn-more-btn {
-                padding: 8px 18px;
-                font-size: 0.85rem;
-                margin-top: 10px;
-                background: #00CED1;
-                color: white !important;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            }
 
             .highlight {
                 color: #22d3ee !important;
@@ -3059,243 +2714,114 @@
                 object-fit: cover;
             }
 
-            /* SLIDE-1 CAPTION → align left like slide-2 */
-            #trinityCarousel .carousel-item:nth-child(1) .carousel-caption {
-                left: 0 !important;
-                transform: translateX(0) !important;
-                width: 100% !important;
-                padding-left: 20px !important;
-                /* same as slide 2 */
-                padding-right: 20px !important;
-                top: 40% !important;
+            /* Move Slide 3 items slightly down & center them */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                margin: 0 auto !important;
                 text-align: center !important;
-                /* same center alignment */
             }
 
-            /* SLIDE-1 TITLE (H1) → same styling as slide-2 text */
-            #trinityCarousel .carousel-item:nth-child(1) .left-content h1 {
-                font-size: 0.95rem !important;
-                line-height: 1.1 !important;
-                margin: 0 0 6px 0 !important;
-                width: 100% !important;
-                text-align: center !important;
-                /* same center */
-                color: #1B2845 !important;
-                text-shadow: none !important;
-            }
-
-            /* SLIDE-1 H2 → center like slide-2 */
-            #trinityCarousel .carousel-item:nth-child(1) .right-content h2 {
-                font-size: 0.85rem !important;
-                line-height: 1.1 !important;
-                margin: 4px 0 !important;
-                width: 100% !important;
-                text-align: center !important;
-                color: #1B2845 !important;
-            }
-
-            /* SLIDE-1 PARAGRAPH → center like slide-2 */
-            #trinityCarousel .carousel-item:nth-child(1) .right-content p {
-                font-size: 0.65rem !important;
-                line-height: 1.1 !important;
-                margin: 4px 0 !important;
-                text-align: center !important;
-                width: 100% !important;
-                color: #1B2845 !important;
-            }
-
-            /* SLIDE-1 BUTTON → centered same as slide-2 */
-            #trinityCarousel .carousel-item:nth-child(1) .learn-more-btn {
+            /* Fix h1 → 2 lines + reduce size */
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
                 display: block !important;
-                margin: 8px auto 0 auto !important;
-                padding: 7px 18px !important;
-                background: #5cc3c5 !important;
-                color: #1B2845 !important;
-                border-radius: 20px !important;
-                font-size: 0.7rem !important;
+                text-align: center !important;
+
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                font-size: 22px !important;
+                /* reduced size */
             }
 
-            /* SLIDE-2 CAPTION aligned left */
-            #trinityCarousel .carousel-item:nth-child(2) .carousel-caption {
-                left: 0 !important;
-                transform: translateX(0) !important;
-                width: 100% !important;
-                padding-left: 20px !important;
-                top: 40% !important;
-                /* adjust down */
+            /* Reduce h2 size + push down slightly */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                /* reduced size */
+                transform: translateY(25px) !important;
+            }
+
+
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 24px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(-80px, -10px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: navy !important;
+                /* ← remove comma */
+                transform: translate(-30px, 0px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: cyan !important;
+                transform: translate(-50px, 0px) !important;
+                margin: 0 auto !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(60px, 0px) !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
                 text-align: center !important;
             }
 
-            /* SLIDE-2: RIGHT CONTENT = H2 + p right aligned */
-            #trinityCarousel .carousel-item:nth-child(2) .right-content {
-                text-align: center !important;
-                padding-right: 20px !important;
-                width: 100% !important;
-                margin-top: 10px !important;
-            }
-
-            /* SLIDE 2 — H2 behaves like caption H2 */
-            #trinityCarousel .carousel-item:nth-child(2) .left-content h1 {
-                font-size: 0.85rem !important;
-                /* same as caption */
-                line-height: 1 !important;
-                margin-bottom: 5px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                /* same alignment */
-                width: 100% !important;
-            }
-
-            /* SLIDE 2 — P behaves like caption P */
-            #trinityCarousel .carousel-item:nth-child(2) .right-content h2 {
-                font-size: 0.75rem !important;
-                /* same as caption */
-                line-height: 1 !important;
-                margin: 4px 0 !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                /* same alignment */
-                width: 100% !important;
-            }
-
-            #trinityCarousel .carousel-item:nth-child(2) .right-content p {
-                font-size: 0.65rem !important;
-                /* same as caption */
-                line-height: 1 !important;
-                margin: 4px 0 !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                /* same alignment */
-                width: 100% !important;
-            }
-
-            #trinityCarousel .carousel-item:nth-child(2) .right-content h2,
-            #trinityCarousel .carousel-item:nth-child(2) .right-content p {
-                text-align: center !important;
-            }
-
-            /* SLIDE-2 BUTTON → CENTER */
-            #trinityCarousel .carousel-item:nth-child(2) .learn-more-btn {
-                margin: 10px auto 0 auto !important;
+            /* Force H1 to break into 2 lines */
+            carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
                 display: block !important;
-                /* center button */
                 text-align: center !important;
-            }
 
-            /* SLIDE 3 — move caption slightly down and align left */
-            #trinityCarousel .carousel-item:nth-child(3) .carousel-caption {
-                left: 0 !important;
-                transform: translateX(0) !important;
-                width: 100% !important;
-                padding-left: 20px !important;
-                top: 40% !important;
-                /* adjust down */
-                text-align: center !important;
-            }
-
-            /* H1 → LEFT */
-            #trinityCarousel .carousel-item:nth-child(3) .left-content h1 {
-                text-align: left !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding-left: 20px !important;
-                text-align: center !important;
-            }
-
-            /* RIGHT CONTENT — H2 + P right aligned */
-            #trinityCarousel .carousel-item:nth-child(3) .right-content {
-                text-align: center !important;
-                width: 100% !important;
-                padding-right: 20px !important;
-                margin-top: 8px !important;
-            }
-
-            /* SLIDE 3 — H2 behaves like caption H2 */
-            #trinityCarousel .carousel-item:nth-child(3) .right-content h2 {
-                font-size: 0.85rem !important;
-                /* same as caption */
-                line-height: 1 !important;
-                margin-bottom: 5px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                /* same alignment */
-                width: 100% !important;
-            }
-
-
-            /* SLIDE 3 — P behaves like caption P */
-            #trinityCarousel .carousel-item:nth-child(3) .right-content p {
-                font-size: 0.65rem !important;
-                /* same as caption */
-                line-height: 1 !important;
-                margin: 4px 0 !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-                text-align: center !important;
-                /* same alignment */
-                width: 100% !important;
-            }
-
-            /* BUTTON → CENTER */
-            #trinityCarousel .carousel-item:nth-child(3) .learn-more-btn {
-                display: block !important;
-                margin: 6px auto 0 auto !important;
-                padding: 7px 18px !important;
-                background: #5cc3c5 !important;
-                color: #1B2845 !important;
-                border-radius: 20px !important;
-            }
-
-            .carousel-caption {
-                padding: 10px 8px;
-                width: 98%;
-                background: transparent !important;
-                border-radius: 0;
-                top: 42% !important;
-            }
-
-            #trinityCarousel .carousel-caption h1 {
-                font-size: 0.95rem !important;
-                line-height: 1;
-                margin-bottom: 5px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-            }
-
-            #trinityCarousel .carousel-caption h2 {
-                font-size: 0.85rem !important;
-                line-height: 1;
-                margin-bottom: 5px !important;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-            }
-
-            #trinityCarousel .carousel-caption p {
-                font-size: 0.65rem !important;
-                margin: 4px 0 !important;
-                line-height: 1;
-                color: #1B2845 !important;
-                text-shadow: none !important;
-            }
-
-            .learn-more-btn {
-                padding: 7px 18px !important;
-                font-size: 0.7rem !important;
-                margin-top: 6px !important;
-                border-radius: 20px !important;
-                background: #5cc3c5 !important;
-                color: #1B2845 !important;
-                display: inline-block !important;
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 24px !important;
             }
 
             /* Highlight colors - maintain desktop scheme */
             .highlight {
                 color: #00CED1 !important;
                 text-shadow: none !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
             }
 
             .highlight-green,
@@ -3303,13 +2829,6 @@
             .other-green {
                 color: #4ade80 !important;
                 text-shadow: none !important;
-            }
-
-            /* Ensure buttons visible on slides 2 and 3 */
-            .carousel-item:nth-child(2) .learn-more-btn,
-            .carousel-item:nth-child(3) .learn-more-btn {
-                margin-top: 6px !important;
-                display: inline-block !important;
             }
 
             .student-image-wrapper {
@@ -3452,7 +2971,6 @@
                 left: -20px;
             }
 
-
             .wrapper .circle-right {
                 width: 75px;
                 height: 75px;
@@ -3461,19 +2979,69 @@
             }
 
             .stat-number {
-                font-size: 0.3rem!important;
+                font-size: 1.5rem !important;
             }
 
             .stat-label {
-                font-size: 0.3rem !important;
+                font-size: 0.95rem !important;
             }
 
             .stat-icon {
                 width: 50px;
                 height: 50px;
-                font-size: 0.7rem!important;
+                font-size: 0.9rem !important;
             }
 
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(60px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p,
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translateX(60px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                color: cyan !important;
+                -webkit-text-fill-color: rgb(36, 117, 117) !important;
+            }
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(30px, -100px) !important;
+                /* combine X + Y */
+                text-align: left !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                /* allow wrapping */
+                max-width: 280px !important;
+                /* force text to wrap */
+                line-height: 1.2 !important;
+                display: block !important;
+                transform: translate(100px, -100px) !important;
+                /* combine X + Y */
+            }
         }
     </style>
     <!-- Font Awesome -->
