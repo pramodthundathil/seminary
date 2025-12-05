@@ -1119,7 +1119,19 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            /* center horizontally */
+            clear: both;
+            flex-basis: 100%;
         }
+
+        .show-more-wrapper {
+            flex-basis: 100% !important;
+            width: 100% !important;
+            display: block !important;
+        }
+
 
         .btn-show-more:hover {
             background: #e6574c
@@ -1141,7 +1153,7 @@
         .dot-red {
             background: #f44336;
         }
-       
+
         /*scholarship-section */
         /* Scholarship section — keep background image safe */
         .scholarship-section {
@@ -1444,7 +1456,7 @@
         .btn-read-more i {
             font-size: 14px;
         }
-           
+
         /*company list in footer */
 
         .no-bullets {
@@ -1638,470 +1650,133 @@
                 width: 100%;
                 opacity: 0.5;
             }
-        }     
+        }
 
 
+        /*************Responsive 1200px*****************/
 
 
-
-
-        
-
-
-
-
-
-
-
-        /* ================================
-   Why Trinity Section Responsiveness
-================================ */
         @media (max-width: 1200px) {
-           
-        }
-
-        @media (max-width: 768px) {
-            .why-section {
-                padding: 40px 15px;
+            .carousel-item {
+                height: 550px;
             }
 
-            .why-card {
-                flex: 1 1 100%;
-                margin-bottom: 20px;
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
             }
 
-            .why-card h3 {
-                font-size: 1.1rem;
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
             }
 
-            .why-card p {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .student-image-wrapper {
-                width: 200px;
-                height: 240px;
+            /* Optional fine-tuning */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                margin-top: -20px !important;
+                transform: translateX(-275px) !important;
+                /* move left */
             }
 
-            .student-image-wrapper .frame-blue,
-            .student-image-wrapper .frame-green {
-                width: 160px;
-                height: 200px;
+            .carousel-item:nth-child(3) .carousel-caption p {
+                margin-top: -5px !important;
+                transform: translateX(-275px) !important;
+                /* move left more if needed */
             }
 
-            .student-image-wrapper .image-frame {
-                width: 160px;
-                height: 200px;
-            }
-        }
-
-        /* ================================
-        Statistics Section Enhanced Responsiveness
-        ================================ */
-        @media (max-width: 1200px) {
-            .stats-container {
-                max-width: 800px;
-                padding: 25px 30px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .stats-container {
-                height: auto;
-                padding: 30px 25px;
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-170px) !important;
             }
 
-            .stat-number {
-                font-size: 2.5rem;
+            .carousel-item:nth-child(2) .left-content h1 {
+                margin-top: -5px !important;
+                font-size: 2.3rem !important;
             }
 
-            .stat-label {
-                font-size: 0.95rem !important;
-            }
-        }
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
 
-        @media (max-width: 768px) {
+                width: 100%;
+                text-align: center !important;
 
-            .wrapper .circle-left {
-                width: 80px;
-                height: 80px;
-                top: -25px;
-                left: -25px;
-            }
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
 
-            .wrapper .circle-right {
-                position: absolute;
-                width: 120px;
-                height: 120px;
-                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-                border-radius: 50%;
-                bottom: -35px;
-                /* move half outside */
-                right: -35px;
-                z-index: 1;
-            }
-        }
-
-        @media (max-width: 576px) {
-
-            .wrapper .circle-left {
-                width: 60px;
-                height: 60px;
-                top: -20px;
-                left: -20px;
+                padding: 20px;
             }
 
-
-            .wrapper .circle-right {
-                width: 75px;
-                height: 75px;
-                bottom: 8px;
-                right: -15px;
-            }
-        }
-
-
-        @media (max-width: 576px) {
-            .stat-number {
-                font-size: 2rem;
+            .carousel-item:nth-child(2) .right-content h2 {
+                margin-top: -20px !important;
+                font-size: 1.5rem !important;
+                transform: translateX(-200px) !important;
             }
 
-            .stat-label {
-                font-size: 0.85rem !important;
+            .carousel-item:nth-child(2) .slide-content {
+                gap: 60px !important;
             }
 
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-        }
-
-        /* ================================
-        Courses Section Responsiveness
-        ================================ */
-        @media (max-width: 1200px) {
-            .courses-container {
-                gap: 20px;
+            .carousel-item:nth-child(2) .left-content {
+                margin-left: -30px !important;
             }
 
-            .course-card {
-                width: 320px;
+            .carousel-item:nth-child(2) .right-content p {
+                margin-right: -30px !important;
+                font-size: 1.5rem !important;
+                transform: translateX(-200px) !important;
             }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-150px) !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
 
             .dot-connector {
-                display: none;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .courses-section {
-                padding: 50px 20px;
-            }
-
-            .course-card {
-                width: 300px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .section-title {
-                font-size: 28px;
-            }
-
-            .course-card {
-                width: 100%;
-                max-width: 400px;
-                margin: 0 auto;
-            }
-
-            .badge-icon {
-                width: 60px;
-                height: 60px;
-                top: -50px;
-                left: -35px;
-            }
-
-            .badge-icon i {
-                font-size: 28px;
-            }
-
-            .badge-icon::after {
-                width: 48px;
-                height: 48px;
-            }
-
-            .course-img-container {
-                height: 180px;
-            }
-
-            .course-title {
-                font-size: 18px;
-            }
-
-            .course-desc {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .courses-section {
-                padding: 40px 15px;
-            }
-
-            .section-title {
-                font-size: 24px;
-                padding-top: 10px;
-            }
-
-            .course-card {
-                padding: 35px 20px 25px;
-                border-radius: 30px;
-            }
-
-            .btn-join {
-                padding: 10px 30px;
-                font-size: 14px;
-            }
-        }
-
-        /* ================================
-        Scholarship Section Responsiveness
-        ================================ */
-        @media (max-width: 992px) {
-            .scholarship-section {
-                padding: 50px 20px;
-            }
-
-            .scholarship-title {
-                font-size: 20px;
-                padding: 0 15px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .scholarship-section {
-                padding: 40px 20px;
-            }
-
-            .scholarship-title {
-                font-size: 18px;
-                line-height: 1.5;
-            }
-
-            .btn-new-admission {
-                width: 220px;
-                height: 32px;
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .scholarship-title {
-                font-size: 16px;
-                max-width: 100%;
-            }
-
-            .btn-new-admission {
-                width: 200px;
-                height: 30px;
-                font-size: 13px;
-            }
-
-            .oval-wrapper {
-                padding: 3px;
-            }
-        }
-
-
-
-        /* ================================
-        Footer Responsiveness
-        ================================ */
-        @media (max-width: 992px) {
-            footer .col-md-3 {
-                margin-bottom: 30px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            footer {
-                padding: 40px 20px;
-            }
-
-            footer h3 {
-                font-size: 1.2rem;
-                margin-bottom: 15px;
-            }
-
-            footer p,
-            footer a {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            footer {
-                padding: 30px 15px;
-            }
-
-            footer h3 {
-                font-size: 1.1rem;
-            }
-
-            footer p,
-            footer a {
-                font-size: 0.85rem;
-            }
-
-            .newsletter-form input,
-            .newsletter-form button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            .social-icons {
-                justify-content: center;
-                margin-top: 15px;
-            }
-        }
-
-        /* ================================
-        Loader Responsiveness
-        ================================ */
-        @media (max-width: 768px) {
-            .logo {
-                max-width: 100px;
-                max-height: 100px;
-            }
-
-            .spinner {
-                width: 150px;
-                height: 150px;
-            }
-
-            .loading-text {
-                font-size: 20px;
-                letter-spacing: 2px;
-            }
-
-            .progress-bar {
-                width: 200px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .logo {
-                max-width: 80px;
-                max-height: 80px;
-            }
-
-            .spinner {
-                width: 120px;
-                height: 120px;
-            }
-
-            .loading-text {
-                font-size: 18px;
-            }
-
-            .progress-bar {
-                width: 180px;
-            }
-        }
-
-        /* ================================
-        General Section Padding Adjustments
-        ================================ */
-        @media (max-width: 768px) {
-            .section-title {
-                font-size: 1.75rem;
-                margin-bottom: 1.5rem;
-                padding-bottom: 12px;
-            }
-
-            .section-title:after {
-                width: 60px;
-                height: 2px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .section-title {
-                font-size: 1.5rem;
-                margin-bottom: 1.25rem;
-            }
-        }
-
-        /* ================================
-        Container Padding for Mobile
-        ================================ */
-        @media (max-width: 576px) {
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-        }
-
-        /* ================================
-        Ensure Images Don't Overflow
-        ================================ */
-        @media (max-width: 768px) {
-            img {
-                max-width: 100%;
-                height: auto;
-            }
-        }
-
-        /* ================================
-        Fix Horizontal Scrolling Issues
-        ================================ */
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-            }
-
-            .row {
-                margin-left: 0;
-                margin-right: 0;
-            }
-
-            [class*="col-"] {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-
-
-            /*************Responsive 1200px*****************/
-
-
-            @media (max-width: 1200px) {
-                .carousel-item {
-                    height: 550px;
-                }
-
-                .carousel-item:nth-child(2) .left-content h1 {
-                    font-size: 2.3rem !important;
-                }
-
-                .carousel-item:nth-child(2) .right-content h2 {
-                    font-size: 1.5rem !important;
-                }
-
-                .carousel-item:nth-child(2) .slide-content {
-                    gap: 60px !important;
-                }
-
-                .carousel-item:nth-child(2) .left-content {
-                    margin-left: -30px !important;
-                }
-
-                .carousel-item:nth-child(2) .right-content {
-                    margin-right: -30px !important;
-                }
-                  .dot-connector {
                 display: none;
             }
 
@@ -2121,16 +1796,19 @@
                 margin: 20px auto 0 auto;
                 gap: 20px;
             }
+
             .btn-new-admission {
                 margin-bottom: 5px !important;
             }
+
             .church-card {
                 position: relative;
                 flex-shrink: 0;
-                margin-top: -20px;
-                margin-left: 5px;
+                margin-top: -5px !important;
+                margin-left: 15px;
                 /* Changed from -30px */
             }
+
             .carousel-caption .slide-content {
                 flex-direction: column;
                 gap: 20px;
@@ -2150,107 +1828,192 @@
                 text-align: center;
                 width: 100%;
             }
-             .why-cards-row {
+
+            .why-cards-row {
                 gap: 20px;
             }
 
             .why-card {
                 flex: 1 1 calc(50% - 20px);
             }
+
+            .stats-container {
+                max-width: 800px;
+                padding: 25px 30px;
             }
 
-            /*************Responsive 992px*****************/
+            .courses-container {
+                gap: 20px;
+            }
 
-            @media (max-width: 992px) {
-                .carousel-item {
-                    height: 500px;
-                }
+            .course-card {
+                width: 320px;
+            }
 
-                .carousel-item:nth-child(2) .slide-content {
-                    flex-direction: column !important;
-                    gap: 30px !important;
-                    text-align: center !important;
-                }
+            .dot-connector {
+                display: none;
+            }
+        }
 
-                .carousel-item:nth-child(2) .left-content,
-                .carousel-item:nth-child(2) .right-content {
-                    text-align: center !important;
-                    align-items: center !important;
-                    margin: 0 !important;
-                    width: 100% !important;
-                }
+        /*************Responsive 992px*****************/
 
-                .carousel-item:nth-child(2) .left-content h1,
-                .carousel-item:nth-child(2) .right-content h2,
-                .carousel-item:nth-child(2) .right-content p {
-                    text-align: center !important;
-                    max-width: 100% !important;
-                }
+        @media (max-width: 992px) {
+            .carousel-item {
+                height: 500px;
+            }
 
-                .carousel-item:nth-child(2) .learn-more-btn {
-                    align-self: center !important;
-                }
+            .carousel-item:nth-child(2) .left-content h1 {
+                margin-top: -5px !important;
+                font-size: 2.3rem !important;
+            }
 
-                .carousel-item:nth-child(2) .slide-content {
-                    flex-direction: column !important;
-                    gap: 30px !important;
-                    align-items: center !important;
-                }
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
 
-                .carousel-item:nth-child(2) .left-content,
-                .carousel-item:nth-child(2) .right-content {
-                    text-align: center !important;
-                    align-items: center !important;
-                    margin: 0 !important;
-                }
+                width: 100%;
+                text-align: center !important;
 
-                .carousel-item:nth-child(2) .left-content h1,
-                .carousel-item:nth-child(2) .right-content h2,
-                .carousel-item:nth-child(2) .right-content p {
-                    text-align: center !important;
-                }
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
 
-                .carousel-item:nth-child(2) .learn-more-btn {
-                    align-self: center !important;
-                }
+                padding: 20px;
+            }
 
-                .student-image-card {
-                    flex: 1 1 45%;
-                    margin-bottom: 20px;
-                }
+            .carousel-item:nth-child(2) .right-content h2 {
+                margin-top: -20px !important;
+                font-size: 1.5rem !important;
+                transform: translateX(-200px) !important;
+            }
 
-                .why-section {
-                    padding-top: 60px;
-                    padding-bottom: 40px;
-                }
+            .carousel-item:nth-child(2) .slide-content {
+                gap: 60px !important;
+            }
 
-                .why-card {
-                    flex: 1 1 45%;
-                    margin-bottom: 20px;
-                }
+            .carousel-item:nth-child(2) .left-content {
+                margin-left: -30px !important;
+            }
 
-                .stats-container {
-                    padding: 30px 30px;
-                    gap: 30px;
-                    max-width: 700px !important;
-                    max-height: 100px !important;
-                    overflow: visible !important;
-                }
+            .carousel-item:nth-child(2) .right-content p {
+                margin-right: -30px !important;
+                font-size: 1.5rem !important;
+                transform: translateX(-200px) !important;
+            }
 
-                .stat-number {
-                    font-size: 2.5rem;
-                }
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-150px) !important;
+            }
 
-                .stat-label {
-                    font-size: 1rem;
-                }
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
 
-                .stat-icon {
-                    width: 50px;
-                    height: 50px;
-                    font-size: 1.5rem;
-                }
-                 .about-section {
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            /* Optional fine-tuning */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                margin-top: -20px !important;
+                transform: translateX(-275px) !important;
+                /* move left */
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption p {
+                margin-top: -5px !important;
+                transform: translateX(-275px) !important;
+                /* move left more if needed */
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-170px) !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            .student-image-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
+
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+
+            .why-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
+
+            .stats-container {
+                padding: 30px 30px;
+                gap: 30px;
+                max-width: 700px !important;
+                max-height: 100px !important;
+                overflow: visible !important;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .about-section {
                 padding: 70px 30px;
             }
 
@@ -2326,7 +2089,8 @@
                 margin: 15px auto 0 auto !important;
                 display: inline-flex !important;
             }
-             .carousel-caption {
+
+            .carousel-caption {
                 position: absolute;
                 top: 50%;
                 left: 50%;
@@ -2353,7 +2117,8 @@
                 padding: 10px 25px;
                 font-size: 0.95rem;
             }
-             /* All Slides - Common responsive styles */
+
+            /* All Slides - Common responsive styles */
             .carousel-caption {
                 position: absolute;
                 top: 50%;
@@ -2476,133 +2241,168 @@
                 margin: 5px auto 0 auto !important;
                 display: inline-block !important;
             }
+
+            .stats-container {
+                height: auto;
+                padding: 30px 25px;
             }
 
-            /*************Responsive 768px*****************/
+            .stat-number {
+                font-size: 2.5rem;
+            }
 
-            @media (max-width: 768px) {
-                .carousel-item:first-child .slide-content {
-                    max-width: 95% !important;
-                    padding: 20px !important;
-                }
+            .stat-label {
+                font-size: 0.95rem !important;
+            }
 
-                .carousel-item:first-child .left-content h1 {
-                    font-size: 1.5rem !important;
-                }
+            .courses-section {
+                padding: 50px 20px;
+            }
 
-                .carousel-item:first-child .right-content h2 {
-                    font-size: 1.2rem !important;
-                }
+            .course-card {
+                width: 300px;
+            }
 
-                .carousel-item:first-child .right-content p {
-                    font-size: 0.95rem !important;
-                }
+            .scholarship-section {
+                padding: 50px 20px;
+            }
 
-                .carousel-item {
-                    height: 450px;
-                }
+            .scholarship-title {
+                font-size: 20px;
+                padding: 0 15px;
+            }
 
-                .carousel-caption {
-                    width: 95%;
-                    padding: 15px 10px;
-                }
+            footer .col-md-3 {
+                margin-bottom: 30px;
+            }
+        }
 
-                .why-section {
-                    padding-top: 50px;
-                    padding-bottom: 30px;
-                }
+        /*************Responsive 768px*****************/
 
-                .carousel-item:nth-child(2) .carousel-caption {
-                    background: rgba(0, 0, 0, 0.35);
-                    padding: 20px;
-                    border-radius: 12px;
-                }
+        @media (max-width: 768px) {
+            .carousel-item:first-child .slide-content {
+                max-width: 95% !important;
+                padding: 20px !important;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 {
-                    font-size: 1.8rem !important;
-                    color: #ffffff !important;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-                }
+            .carousel-item:first-child .left-content h1 {
+                font-size: 1.5rem !important;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 .highlight {
-                    color: #00CED1 !important;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-                }
+            .carousel-item:first-child .right-content h2 {
+                font-size: 1.2rem !important;
+            }
 
-                .carousel-item:nth-child(2) .right-content h2 {
-                    font-size: 1.3rem !important;
-                    color: #ffffff !important;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-                }
+            .carousel-item:first-child .right-content p {
+                font-size: 0.95rem !important;
+            }
 
-                .carousel-item:nth-child(2) .right-content h2 .highlight-green {
-                    color: #4ade80 !important;
-                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-                }
+            .carousel-item {
+                height: 450px;
+            }
 
-                .carousel-item:nth-child(2) .right-content p {
-                    font-size: 0.95rem !important;
-                    color: #ffffff !important;
-                    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-                }
+            .carousel-caption {
+                width: 95%;
+                padding: 15px 10px;
+            }
 
-                .carousel-item:nth-child(2) .learn-more-btn {
-                    padding: 10px 30px !important;
-                    font-size: 15px !important;
-                }
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 {
-                    font-size: 1.8rem !important;
-                }
+            .carousel-item:nth-child(2) .carousel-caption {
+                background: rgba(0, 0, 0, 0.35);
+                padding: 20px;
+                border-radius: 12px;
+            }
 
-                .carousel-item:nth-child(2) .right-content h2 {
-                    font-size: 1.3rem !important;
-                }
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.8rem !important;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
 
-                .carousel-item:nth-child(2) .right-content p {
-                    font-size: 0.9rem !important;
-                }
+            .carousel-item:nth-child(2) .left-content h1 .highlight {
+                color: #00CED1 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
 
-                .why-section {
-                    padding-top: 60px;
-                    padding-bottom: 40px;
-                }
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.3rem !important;
+                color: #ffffff !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
 
-                .stats-container {
-                    padding: 40px 30px;
-                    gap: 30px;
-                    max-width: 700px !important;
-                    overflow: visible !important;
-                }
+            .carousel-item:nth-child(2) .right-content h2 .highlight-green {
+                color: #4ade80 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
 
-                .wrapper .circle-right {
-                    bottom: -20px !important;
-                    right: 10px !important;
-                    width: 100px !important;
-                    height: 100px !important;
-                }
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.95rem !important;
+                color: #ffffff !important;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            }
 
-                .wrapper .circle-left {
-                    top: -20px !important;
-                    left: 40px !important;
-                    width: 100px !important;
-                    height: 100px !important;
-                }
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 10px 30px !important;
+                font-size: 15px !important;
+            }
 
-                .stat-number {
-                    font-size: 2rem;
-                }
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.8rem !important;
+            }
 
-                .stat-label {
-                    font-size: 0.7rem;
-                }
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.3rem !important;
+            }
 
-                .stat-icon {
-                    width: 50px;
-                    height: 50px;
-                    font-size: 1rem;
-                }
-                 .section-title {
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.9rem !important;
+            }
+
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+
+            .stats-container {
+                padding: 40px 30px;
+                gap: 30px;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .wrapper .circle-left {
+                top: -20px !important;
+                left: 40px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+
+            .section-title {
                 font-size: 36px;
             }
 
@@ -2625,10 +2425,12 @@
                 /* stack cards */
                 gap: 20px;
             }
+
             .btn-new-admission {
                 margin-bottom: 5px !important;
             }
-             .dot-cyan {
+
+            .dot-cyan {
                 position: absolute !important;
                 top: 12px !important;
                 right: 12px !important;
@@ -2690,6 +2492,7 @@
                 width: 180px;
                 height: 180px;
             }
+
             .carousel-caption {
                 padding: 15px 10px;
                 width: 95%;
@@ -2728,7 +2531,8 @@
                 padding: 8px 20px;
                 font-size: 0.9rem;
             }
-             #trinityCarousel .carousel-indicators {
+
+            #trinityCarousel .carousel-indicators {
                 bottom: 30px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
@@ -2866,120 +2670,274 @@
                 color: #1B2845 !important;
                 display: inline-block !important;
             }
+
+            .why-section {
+                padding: 40px 15px;
             }
 
-            /*************Responsive 576px*****************/
+            .why-card {
+                flex: 1 1 100%;
+                margin-bottom: 20px;
+            }
 
-            @media (max-width: 576px) {
-                .carousel-item {
-                    height: 400px !important;
-                    /* Fixed height to prevent shifting */
-                    min-height: 400px !important;
-                    max-height: 400px !important;
-                }
+            .why-card h3 {
+                font-size: 1.1rem;
+            }
 
-                .carousel-item img {
-                    height: 400px !important;
-                    min-height: 400px !important;
-                    max-height: 400px !important;
-                }
+            .why-card p {
+                font-size: 0.9rem;
+            }
 
-                .carousel-caption {
-                    position: absolute !important;
-                    top: 50% !important;
-                    transform: translateY(-50%) translateX(-50%) !important;
-                    left: 50% !important;
-                }
+            .wrapper .circle-left {
+                width: 80px;
+                height: 80px;
+                top: -25px;
+                left: -25px;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 {
-                    font-size: 1.4rem !important;
-                }
+            .wrapper .circle-right {
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+                border-radius: 50%;
+                bottom: -35px;
+                /* move half outside */
+                right: -35px;
+                z-index: 1;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 br {
-                    display: inline !important;
-                }
+            .section-title {
+                font-size: 28px;
+            }
 
-                .carousel-item:nth-child(2) .right-content h2 {
-                    font-size: 1.1rem !important;
-                }
+            .course-card {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
 
-                .carousel-item:nth-child(2) .right-content p {
-                    font-size: 0.85rem !important;
-                }
+            .badge-icon {
+                width: 60px;
+                height: 60px;
+                top: -50px;
+                left: -35px;
+            }
 
-                .carousel-item:nth-child(2) .learn-more-btn {
-                    padding: 9px 25px !important;
-                    font-size: 14px !important;
-                }
+            .badge-icon i {
+                font-size: 28px;
+            }
 
-                .carousel-item:nth-child(2) .left-content h1 {
-                    font-size: 1.4rem !important;
-                }
+            .badge-icon::after {
+                width: 48px;
+                height: 48px;
+            }
 
-                .carousel-item:nth-child(2) .right-content h2 {
-                    font-size: 1.1rem !important;
-                }
+            .course-img-container {
+                height: 180px;
+            }
 
-                .carousel-item:nth-child(2) .right-content p {
-                    font-size: 0.85rem !important;
-                }
+            .course-title {
+                font-size: 18px;
+            }
 
-                .carousel-item:nth-child(2) .learn-more-btn {
-                    padding: 10px 28px !important;
-                    font-size: 14px !important;
-                }
+            .course-desc {
+                font-size: 14px;
+            }
 
-                .student-image-card {
-                    flex: 1 1 100%;
-                }
+            .scholarship-section {
+                padding: 40px 20px;
+            }
 
-                .why-section {
-                    padding-top: 50px;
-                    padding-bottom: 30px;
-                }
+            .scholarship-title {
+                font-size: 18px;
+                line-height: 1.5;
+            }
 
-                .why-card {
-                    flex: 1 1 100%;
-                }
+            .btn-new-admission {
+                width: 220px;
+                height: 32px;
+                font-size: 14px;
+            }
 
-                .stats-container {
-                    padding: 40px 5px !important;
-                    gap: 30px;
-                    margin-top: -20px !important;
-                    max-width: 700px !important;
-                    overflow: visible !important;
-                }
+            footer {
+                padding: 40px 20px;
+            }
 
-                .wrapper .circle-right {
-                    bottom: -20px !important;
-                    right: 10px !important;
-                    width: 80px !important;
-                    height: 80px !important;
-                }
+            footer h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
 
-                .wrapper .circle-left {
-                    bottom: -20px !important;
-                    left: 15px !important;
-                    width: 80px !important;
-                    height: 80px !important;
-                }
+            footer p,
+            footer a {
+                font-size: 0.9rem;
+            }
 
-                .stat-number {
-                    font-size: 1.5rem;
-                }
+            .logo {
+                max-width: 100px;
+                max-height: 100px;
+            }
 
-                .stat-label {
-                    font-size: 0.5rem;
-                }
+            .spinner {
+                width: 150px;
+                height: 150px;
+            }
 
-                .stat-icon {
-                    width: 50px;
-                    height: 50px;
-                    font-size: 0.7rem;
-                }
-                .btn-new-admission {
+            .loading-text {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+
+            .progress-bar {
+                width: 200px;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 12px;
+            }
+
+            .section-title:after {
+                width: 60px;
+                height: 2px;
+            }
+
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            body {
+                overflow-x: hidden;
+            }
+
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            [class*="col-"] {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        /*************Responsive 576px*****************/
+
+        @media (max-width: 576px) {
+            .carousel-item {
+                height: 400px !important;
+                /* Fixed height to prevent shifting */
+                min-height: 400px !important;
+                max-height: 400px !important;
+            }
+
+            .carousel-item img {
+                height: 400px !important;
+                min-height: 400px !important;
+                max-height: 400px !important;
+            }
+
+            .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                transform: translateY(-50%) translateX(-50%) !important;
+                left: 50% !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.4rem !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 br {
+                display: inline !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.85rem !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 9px 25px !important;
+                font-size: 14px !important;
+            }
+
+            .carousel-item:nth-child(2) .left-content h1 {
+                font-size: 1.4rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content h2 {
+                font-size: 1.1rem !important;
+            }
+
+            .carousel-item:nth-child(2) .right-content p {
+                font-size: 0.85rem !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                padding: 10px 28px !important;
+                font-size: 14px !important;
+            }
+
+            .student-image-card {
+                flex: 1 1 100%;
+            }
+
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
+
+            .why-card {
+                flex: 1 1 100%;
+            }
+
+            .stats-container {
+                padding: 40px 5px !important;
+                gap: 30px;
+                margin-top: -20px !important;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .wrapper .circle-left {
+                bottom: -20px !important;
+                left: 15px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem;
+            }
+
+            .btn-new-admission {
                 margin-bottom: 10px !important;
             }
+
             .about-section {
                 padding: 40px 12px;
             }
@@ -3001,6 +2959,7 @@
                 font-size: 15px;
                 padding: 9px 14px;
             }
+
             .carousel-item {
                 min-height: 400px;
                 max-height: 500px;
@@ -3064,6 +3023,7 @@
                 color: #08b547 !important;
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
             }
+
             #trinityCarousel>.carousel-indicators {
                 bottom: 55% !important;
                 /* Move indicators UP to caption level */
@@ -3166,8 +3126,6 @@
                 text-align: center !important;
             }
 
-
-
             /* SLIDE-2: RIGHT CONTENT = H2 + p right aligned */
             #trinityCarousel .carousel-item:nth-child(2) .right-content {
                 text-align: center !important;
@@ -3213,7 +3171,6 @@
                 /* same alignment */
                 width: 100% !important;
             }
-
 
             #trinityCarousel .carousel-item:nth-child(2) .right-content h2,
             #trinityCarousel .carousel-item:nth-child(2) .right-content p {
@@ -3354,10 +3311,168 @@
                 margin-top: 6px !important;
                 display: inline-block !important;
             }
+
+            .student-image-wrapper {
+                width: 200px;
+                height: 240px;
+            }
+
+            .student-image-wrapper .frame-blue,
+            .student-image-wrapper .frame-green {
+                width: 160px;
+                height: 200px;
+            }
+
+            .student-image-wrapper .image-frame {
+                width: 160px;
+                height: 200px;
+            }
+
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
             }
 
 
-      
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -15px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .courses-section {
+                padding: 40px 15px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                padding-top: 10px;
+            }
+
+            .course-card {
+                padding: 35px 20px 25px;
+                border-radius: 30px;
+            }
+
+            .btn-join {
+                padding: 10px 30px;
+                font-size: 14px;
+            }
+
+            .scholarship-title {
+                font-size: 16px;
+                max-width: 100%;
+            }
+
+            .btn-new-admission {
+                width: 200px;
+                height: 30px;
+                font-size: 13px;
+            }
+
+            .oval-wrapper {
+                padding: 3px;
+            }
+
+            footer {
+                padding: 30px 15px;
+            }
+
+            footer h3 {
+                font-size: 1.1rem;
+            }
+
+            footer p,
+            footer a {
+                font-size: 0.85rem;
+            }
+
+            .newsletter-form input,
+            .newsletter-form button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .social-icons {
+                justify-content: center;
+                margin-top: 15px;
+            }
+
+            .logo {
+                max-width: 80px;
+                max-height: 80px;
+            }
+
+            .spinner {
+                width: 120px;
+                height: 120px;
+            }
+
+            .loading-text {
+                font-size: 18px;
+            }
+
+            .progress-bar {
+                width: 180px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -15px;
+            }
+
+            .stat-number {
+                font-size: 0.3rem!important;
+            }
+
+            .stat-label {
+                font-size: 0.3rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem!important;
+            }
 
         }
     </style>
@@ -3662,7 +3777,7 @@
                     Join Now
                 </button>
             </div>
-            <div>
+            <div class="show-more-wrapper">
                 <button class="btn-show-more" onclick="window.location.href='{% url 'course-list' %}'">
                     Show More..
                 </button>
