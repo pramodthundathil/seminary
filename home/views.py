@@ -39,7 +39,7 @@ from .models import (
     StudentsExams,
     ReferenceForm,
     StudentsSubjects,
-    Assignments,
+    ChurchAdmins,
     StudentsAssignment,
     Pages,
     Languages,
@@ -1088,6 +1088,8 @@ def signup_student(request):
                     username=student.student_id,   # Student ID becomes username
                     created_at=timezone.now(),
                     updated_at=timezone.now(),
+                    is_active=False,
+                    image=photo_path,
                 )
 
                 # Set hashed password
@@ -1367,3 +1369,431 @@ def forgot_password(request):
         return redirect("forgot_password")
 
     return render(request, "site_pages/forgot_password.html")
+
+def signup_guest(request):
+    """
+    Handle guest registration form submission
+    GET: Display the registration form
+    POST: Process and save the registration
+    """
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Generate unique guest ID
+                guest_id = f"GST{uuid.uuid4().hex[:8].upper()}"
+                print("guest_id:", guest_id)
+                
+                # Validate required fields
+                required_fields = ['first_name', 'last_name', 'email', 'phone_number', 
+                                 'date_of_birth', 'gender', 'mailing_address', 'city', 
+                                 'state', 'country', 'zipcode', 'timezone', 'language', 
+                                 'church_affiliation', 'associate_degree', 'phone_code']
+                missing_fields = []
+                
+                for field in required_fields:
+                    if not request.POST.get(field):
+                        missing_fields.append(field.replace('_', ' ').title())
+                
+                if missing_fields:
+                    messages.error(request, f"Missing required fields: {', '.join(missing_fields)}")
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                
+                # Get language instance
+                language_id = request.POST.get('language')
+                try:
+                    language = Languages.objects.get(id=language_id)
+                except Languages.DoesNotExist:
+                    messages.error(request, 'Invalid language selection.')
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                
+                # Check if email already exists
+                if Users.objects.filter(email=request.POST.get('email')).exists():
+                    messages.error(request, 'A guest account with this email already exists.')
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                
+                # Check if email already exists in Users table
+                if Users.objects.filter(email=request.POST.get('email')).exists():
+                    messages.error(request, 'An account with this email already exists.')
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                
+                # Get reCAPTCHA response
+                recaptcha_response = request.POST.get('g-recaptcha-response')
+                
+                try:
+                    data = {
+                        'secret': settings.RECAPTCHA_SECRET_KEY,
+                        'response': recaptcha_response
+                    }
+                    
+                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', 
+                                    data=data, timeout=5)
+                    result = r.json()
+                    
+                    if not result.get('success'):
+                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                        context = get_guest_context()
+                        return render(request, 'site_pages/guest_register.html', context)
+                        
+                except requests.exceptions.RequestException:
+                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                    
+                except ValueError:
+                    messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                    context = get_guest_context()
+                    return render(request, 'site_pages/guest_register.html', context)
+                
+                # # Create guest record
+                # guest = Users.objects.create(
+                #     guest_id=guest_id,
+                #     associate_degree_id=request.POST.get('associate_degree') or None,
+                #     first_name=request.POST.get('first_name'),
+                #     middle_name=request.POST.get('middle_name') or None,
+                #     last_name=request.POST.get('last_name'),
+                #     email=request.POST.get('email'),
+                #     phone_code=int(request.POST.get('phone_code')) if request.POST.get('phone_code') else None,
+                #     phone_number=request.POST.get('phone_number'),
+                #     date_of_birth=request.POST.get('date_of_birth'),
+                #     gender=request.POST.get('gender'),
+                #     mailing_address=request.POST.get('mailing_address'),
+                #     city=request.POST.get('city'),
+                #     state=request.POST.get('state'),
+                #     country_id=request.POST.get('country'),
+                #     zipcode=request.POST.get('zipcode'),
+                #     timezone=request.POST.get('timezone'),
+                #     language_id=language.id,
+                #     church_affiliation=request.POST.get('church_affiliation'),
+                #     created_at=timezone.now(),
+                #     updated_at=timezone.now(),
+                #     status=False,
+                #     active=False
+                # )
+                
+                # Generate random password
+                password = get_random_string(10)               
+                
+                first_name=request.POST.get('first_name'),
+                middle_name=request.POST.get('middle_name') or None,
+                last_name=request.POST.get('last_name'),
+                email=request.POST.get('email'),
+                user = Users.objects.create(
+                    name=f"{first_name} {last_name or ''}".strip(),
+                    email=email,
+                    username=guest_id,   # Student ID becomes username
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                    is_active=False,                   
+                )      
+                
+                # Set hashed password
+                user.set_password(password)
+                user.save()
+                
+                # Send email
+                try:
+                    subject = "Your Guest Account Login Details"
+                    message = f"""
+                    Hello {first_name},
+
+                    Your guest account has been created successfully.
+
+                    Login Details:
+                    Email: {email}
+                    Username: {guest_id}
+                    Temporary Password: {password}
+
+                    Please log in and change your password immediately for security reasons.
+
+                    Login here: {request.build_absolute_uri('/signin/')}
+
+                    Best regards,
+                    Trinity Theological Seminary
+                                        """
+                    
+                    email_sent = send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                    
+                    if email_sent:
+                        messages.success(request, f'Guest account created successfully! Login details sent to {email}')
+                        logger.info(f'Email sent successfully to {email}')
+                    else:
+                        messages.warning(request, 'Guest account created but email could not be sent.')
+                        logger.warning(f'Email failed to send to {email}')
+                        
+                except Exception as e:
+                    messages.warning(request, f'Guest account created but error sending email: {str(e)}')
+                    logger.error(f'Email error: {str(e)}')
+                
+                return redirect('guest_registration_success', guest_id=guest_id)
+                
+        except Languages.DoesNotExist:
+            messages.error(request, 'Invalid language selection.')
+            context = get_guest_context()
+            return render(request, 'site_pages/guest_register.html', context)
+            
+        except ValueError as e:
+            messages.error(request, f'Invalid data format: {str(e)}')
+            context = get_guest_context()
+            return render(request, 'site_pages/guest_register.html', context)
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred while submitting your registration. Please try again.')
+            print(f"Error in guest registration: {str(e)}")
+            logger.error(f"Guest registration error: {str(e)}")
+            context = get_guest_context()
+            return render(request, 'site_pages/guest_register.html', context)
+    
+    # GET request - display the form
+    else:
+        context = get_guest_context()
+        return render(request, 'site_pages/guest_register.html', context)
+
+def get_guest_context():
+    """Helper function to get context for guest registration form"""
+    return {
+        'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),
+        'countries': Countries.objects.all(),        
+        'courses': Courses.objects.all(), 
+        'RECAPTCHA_SITE_KEY': settings.RECAPTCHA_SITE_KEY
+    }
+
+def signup_church_admin(request):
+    """
+    Handle church admin registration form submission
+    GET: Display the registration form
+    POST: Process and save the registration
+    """
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Generate unique church admin ID
+                admin_id = f"CHA{uuid.uuid4().hex[:8].upper()}"
+                
+                # Validate required fields
+                required_fields = ['register_as', 'church_code', 'associate_degree', 'first_name', 
+                                 'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 
+                                 'gender', 'mailing_address', 'city', 'state', 'country', 'zipcode', 
+                                 'timezone', 'language', 'church_affiliation']
+                missing_fields = []
+                
+                for field in required_fields:
+                    if not request.POST.get(field):
+                        missing_fields.append(field.replace('_', ' ').title())
+                
+                if missing_fields:
+                    messages.error(request, f"Missing required fields: {', '.join(missing_fields)}")
+                    context = get_church_admin_context()
+                    return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # Validate church code
+                church_code = request.POST.get('church_code')
+                # try:
+                #     church_code_obj = ChurchCodes.objects.get(code=church_code, status=True)
+                # except ChurchCodes.DoesNotExist:
+                #     messages.error(request, 'Invalid or inactive church code. Please contact support.')
+                #     context = get_church_admin_context()
+                #     return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # Get language instance
+                language_id = request.POST.get('language')
+                try:
+                    language = Languages.objects.get(id=language_id)
+                except Languages.DoesNotExist:
+                    messages.error(request, 'Invalid language selection.')
+                    context = get_church_admin_context()
+                    return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # # Check if email already exists
+                # if ChurchAdmins.objects.filter(email=request.POST.get('email')).exists():
+                #     messages.error(request, 'A church admin account with this email already exists.')
+                #     context = get_church_admin_context()
+                #     return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # Check if email already exists in Users table
+                if Users.objects.filter(email=request.POST.get('email')).exists():
+                    messages.error(request, 'An account with this email already exists.')
+                    context = get_church_admin_context()
+                    return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # Get reCAPTCHA response
+                recaptcha_response = request.POST.get('g-recaptcha-response')
+                
+                try:
+                    data = {
+                        'secret': settings.RECAPTCHA_SECRET_KEY,
+                        'response': recaptcha_response
+                    }
+                    
+                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', 
+                                    data=data, timeout=5)
+                    result = r.json()
+                    
+                    if not result.get('success'):
+                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                        context = get_church_admin_context()
+                        return render(request, 'site_pages/church_admin_register.html', context)
+                        
+                except requests.exceptions.RequestException:
+                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                    context = get_church_admin_context()
+                    return render(request, 'site_pages/church_admin_register.html', context)
+                    
+                except ValueError:
+                    messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                    context = get_church_admin_context()
+                    return render(request, 'site_pages/church_admin_register.html', context)
+                
+                # Create church admin record
+              
+                church_admin = ChurchAdmins.objects.create(
+                    student=None,  # or link to Students model if required
+                    name_of_church=request.POST.get('name_of_church')or None,
+                    name_of_paster=request.POST.get('name_of_paster')or None,
+                    church_address=request.POST.get('church_address')or None,
+
+                    church_code_id=request.POST.get('church_code')or None,
+                    code=request.POST.get('church_code')or None,
+
+                    amount=0.0,  
+                    max_user_no=0,
+                    current_user_no=0,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                )                   
+                
+                # Generate random password
+                password = get_random_string(10)              
+                first_name = request.POST.get('first_name')
+                last_name = request.POST.get('last_name')
+                email = request.POST.get('email')
+                # Create user record
+                user = Users.objects.create(
+                    name=f"{first_name} {last_name or ''}".strip(),
+                    email=email,
+                    username=admin_id,
+                    church_admin=church_admin,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                    is_active=False,                    
+                )
+                
+                # Set hashed password
+                user.set_password(password)
+                user.save()
+                
+                # Send email
+                try:
+                    subject = "Your Church Admin Account Login Details"
+                    message = f"""
+                    Hello {first_name},
+
+                    Your church admin account has been created successfully.
+
+                    Login Details:
+                    Email: {email}
+                    Username: {admin_id}
+                    Temporary Password: {password}
+                    Church Code: {church_code}
+
+                    Please log in and change your password immediately for security reasons.
+
+                    Login here: {request.build_absolute_uri('/signin/')}
+
+                    Best regards,
+                    Trinity Theological Seminary
+                                        """
+                    
+                    email_sent = send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                    
+                    if email_sent:
+                        messages.success(request, f'Church admin account created successfully! Login details sent to {church_admin.email}')
+                        logger.info(f'Email sent successfully to {email}')
+                    else:
+                        messages.warning(request, 'Church admin account created but email could not be sent.')
+                        logger.warning(f'Email failed to send to {email}')
+                        
+                except Exception as e:
+                    messages.warning(request, f'Church admin account created but error sending email: {str(e)}')
+                    logger.error(f'Email error: {str(e)}')
+                
+                return redirect('church_admin_registration_success', admin_id=admin_id)             
+        
+            
+        except Languages.DoesNotExist:
+            messages.error(request, 'Invalid language selection.')
+            context = get_church_admin_context()
+            return render(request, 'site_pages/church_admin_register.html', context)
+            
+        except ValueError as e:
+            messages.error(request, f'Invalid data format: {str(e)}')
+            context = get_church_admin_context()
+            return render(request, 'site_pages/church_admin_register.html', context)
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred while submitting your registration. Please try again.')
+            print(f"Error in church admin registration: {str(e)}")
+            logger.error(f"Church admin registration error: {str(e)}")
+            context = get_church_admin_context()
+            return render(request, 'site_pages/church_admin_register.html', context)
+    
+    # GET request - display the form
+    else:
+        context = get_church_admin_context()
+        return render(request, 'site_pages/church_admin_register.html', context)
+
+
+def get_church_admin_context():
+    """Helper function to get context for church admin registration form"""
+    return {
+        'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),
+        'countries': Countries.objects.all(),
+        'courses': Courses.objects.all(),
+        'RECAPTCHA_SITE_KEY': settings.RECAPTCHA_SITE_KEY
+    }
+
+
+# Success page views
+def guest_registration_success(request, guest_id):
+    """Display success page after guest registration"""
+    try:
+        guest = Users.objects.get(username=guest_id)
+        context = {
+            'guest': guest,
+            'title': 'Registration Successful'
+        }
+        return render(request, 'site_pages/guest_success.html', context)
+    except Users.DoesNotExist:
+        messages.error(request, 'Guest account not found.')
+        return redirect('guest_register')
+
+
+def church_admin_registration_success(request, admin_id):
+    """Display success page after church admin registration"""
+    try:
+        admin = Users.objects.get(username=admin_id)
+        context = {
+            'admin': admin,
+            'title': 'Registration Successful'
+        }
+        return render(request, 'site_pages/church_admin_success.html', context)
+    except ChurchAdmins.DoesNotExist:
+        messages.error(request, 'Church admin account not found.')
+        return redirect('church_admin_register')
