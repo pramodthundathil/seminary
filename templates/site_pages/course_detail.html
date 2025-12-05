@@ -1229,18 +1229,19 @@
                         <div class="card-body">
                             <div class="card-code">{{ related.course_code }}</div>
                             <h3 class="card-title">{{ related.course_name }}</h3>
-                            <p class="card-text">
-                                {{ related.meta_description|default:"Explore this course to enhance your theological
-                                education."|truncatewords:15 }}
-                            </p>
+                            {% if related.meta_description and related.meta_description|lower != "null" %}
+                                <p class="card-text">
+                                    {{ related.meta_description|truncatewords:15 }}
+                                </p>
+                            {% else %}
+                                <p class="card-text">
+                                    Description will be coming soon.
+                                </p>
+                            {% endif %}
                             <div class="card-footer">
                                 <span class="card-meta">{{ related.credit_hours }} Credits</span>
                                 <a href="{% url 'course_detail' slug=related.course_code %}" class="card-view">
                                     View Course
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd"
-                                            d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
-                                    </svg>
                                 </a>
                             </div>
                         </div>
