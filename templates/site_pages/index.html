@@ -22,7 +22,7 @@
 
 
         /* Dropdown menu styling */
-        
+
         .section-title {
             font-weight: 700;
             text-align: center;
@@ -1129,7 +1129,7 @@
 
         /* 3-Statistics Section */
         .stats-section {
-            padding: 60px 0;
+            padding: 40px 0 !important;
             background: #f8f9fa;
             position: relative;
             overflow: visible;
@@ -1141,6 +1141,8 @@
             background: white;
             border-radius: 29999px;
             /* ensures full capsule shape */
+            margin-top: -20px !important;
+            margin-bottom: 2px !important;
             padding: 30px 40px;
             display: flex;
             justify-content: space-around;
@@ -1249,15 +1251,11 @@
         /* Responsive Design */
         @media (max-width: 992px) {
             .stats-container {
-                padding: 40px 30px;
+                padding: 30px 30px;
                 gap: 30px;
                 max-width: 700px !important;
+                max-height: 100px !important;
                 overflow: visible !important;
-            }
-
-            .wrapper .circle-right {
-                bottom: -20px !important;
-                right: -20px !important;
             }
 
             .stat-number {
@@ -1277,48 +1275,76 @@
 
         @media (max-width: 768px) {
             .stats-container {
-                flex-direction: column;
-                padding: 40px 20px;
-                gap: 15px;
-                border-radius: 30px;
-                position: relative;
+                padding: 40px 30px;
+                gap: 30px;
+                max-width: 700px !important;
                 overflow: visible !important;
-                max-width: 180px !important;
-                margin-top: 15px !important;
-            }
-
-            .stat-item {
-                width: 100%;
-            }
-
-            .wrapper .circle-left {
-                width: 80px !important;
-                height: 80px !important;
-                top: -20px !important;
-                left: 55px !important;
-                z-index: 1 !important;
             }
 
             .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
                 width: 100px !important;
                 height: 100px !important;
-                bottom: -20px !important;
-                right: 55px !important;
-                z-index: 1 !important;
+            }
+
+            .wrapper .circle-left {
+                top: -20px !important;
+                left: 40px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
             }
         }
 
         @media (max-width: 576px) {
-            .stats-section {
-                padding: 40px 15px;
+            .stats-container {
+                padding: 40px 5px !important;
+                gap: 30px;
+                margin-top: -20px !important;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .wrapper .circle-left {
+                bottom: -20px !important;
+                left: 15px !important;
+                width: 80px !important;
+                height: 80px !important;
             }
 
             .stat-number {
-                font-size: 2.2rem;
+                font-size: 1.5rem;
             }
 
             .stat-label {
-                font-size: 0.95rem;
+                font-size: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem;
             }
         }
 
@@ -1514,13 +1540,25 @@
             background: #f44336;
         }
 
-        @media (max-width: 1200px) {
-            .courses-container {
-                gap: 20px;
-            }
+        @media (max-width: 1200px) {            
 
             .dot-connector {
                 display: none;
+            }
+            .btn-show-more {
+                display: block;
+                width: 100%;
+                max-width: 280px;
+                margin: 20px auto 0 auto;
+                /* center it */
+            }
+             .courses-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                /* stack cards */
+                 justify-items: center !important;  
+                margin: 20px auto 0 auto;
+                gap: 20px;
             }
         }
 
@@ -1532,6 +1570,21 @@
             .course-card {
                 width: 100%;
                 max-width: 400px;
+            }
+
+            .btn-show-more {
+                display: block;
+                width: 100%;
+                max-width: 280px;
+                margin: 20px auto 0 auto;
+                /* center it */
+            }
+
+            .courses-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                /* stack cards */
+                gap: 20px;
             }
         }
 
@@ -1607,7 +1660,23 @@
             /* clean spacing */
         }
 
+        @media (max-width: 1200px) {
+            .btn-new-admission {
+                margin-bottom: 5px !important;
+            }
+        }
 
+        @media (max-width: 768px) {
+            .btn-new-admission {
+                margin-bottom: 5px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .btn-new-admission {
+                margin-bottom: 10px !important;
+            }
+        }
 
         /* About Section */
         .about-section {
@@ -1842,6 +1911,16 @@
         /* ================================
         TABLET VIEW (MAX 992px)
         ================================ */
+         @media (max-width: 1200px) {
+           .church-card {
+            position: relative;
+            flex-shrink: 0;
+            margin-top: -20px;
+             margin-left: 5px;
+            /* Changed from -30px */
+        }
+            
+        }
         @media (max-width: 992px) {
 
             .about-section {

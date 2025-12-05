@@ -5,6 +5,9 @@ import os
 import uuid
 from datetime import datetime, timedelta
 import logging
+import requests
+import random
+import string
 
 # -------------------------------
 # Django Core Imports
@@ -21,6 +24,10 @@ from django.db import transaction
 from django.conf import settings
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
 
 # -------------------------------
 # Local App Imports
@@ -37,7 +44,8 @@ from .models import (
     Pages,
     Languages,
     Users,
-    AdminPages
+    AdminPages,
+    Payments
 )
 
 
@@ -298,7 +306,7 @@ def course_detail(request, slug):
     return render(request, 'site_pages/course_detail.html', context)
 
 
-def new_admission_form(request):
+def student_register(request):
     """
     New admission form for students with full error handling
     """
@@ -362,7 +370,7 @@ def new_admission_form(request):
         except Exception as e:
             logger.error(f"Error reading form fields: {e}", exc_info=True)
             messages.error(request, f"Error reading form fields: {e}")
-            return render(request, "site_pages/new_admission_form.html")
+            return render(request, "site_pages/register.html")
 
         # -------------------------------
         # CONVERT STRING VALUES TO OBJECTS
@@ -403,7 +411,7 @@ def new_admission_form(request):
         except Exception as e:
             logger.error(f" Error converting values to objects: {e}", exc_info=True)
             messages.error(request, f"Error processing form data: {e}")
-            return render(request, "site_pages/new_admission_form.html")
+            return render(request, "site_pages/register.html")
 
         # -------------------------------
         # FILE UPLOAD HANDLING
@@ -560,7 +568,39 @@ def new_admission_form(request):
             logger.info(f"Email: {student.email}")
             logger.info(f"Citizenship: {student.citizenship}")
             logger.info(f"Country: {student.country}")
-            logger.info(f"Course: {student.course_applied}")
+            logger.info(f"Course: {student.course_applied}")       
+
+            
+            # Get reCAPTCHA response           
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+
+            try:
+                data = {
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_response
+                }
+
+                r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
+                result = r.json()
+
+                # If Google says "failed"
+                if not result.get('success'):
+                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                    return redirect('register')
+
+            except requests.exceptions.RequestException:
+                # Network or API failure
+                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                return redirect('register')
+
+            except ValueError:
+                # JSON decoding failed
+                messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                return redirect('register')
+
+            # If everything is OK → continue
+            messages.success(request, "Application submitted successfully!")
+            return redirect('register')                
 
         except IntegrityError as e:
             logger.error(f" Database integrity error: {e}", exc_info=True)
@@ -580,21 +620,22 @@ def new_admission_form(request):
         except Exception as e:
             logger.error(f"Database save error: {e}", exc_info=True)
             messages.error(request, f"Database save error: {e}")
-            return render(request, "site_pages/new_admission_form.html")
+            return render(request, "site_pages/student_register.html")
 
         # -------------------------------
         # SUCCESS
         # -------------------------------
         logger.info(f" Application submitted successfully for {first_name} {last_name}")
         messages.success(request, "Your application has been submitted successfully!")
-        return redirect("new_admission_form")  # <--- POST/Redirect/GET
+        return redirect("student_register")  # <--- POST/Redirect/GET    
 
     # Default GET
     logger.info("Rendering new admission form (GET request)")
-    return render(request, "site_pages/new_admission_form.html", {
+    return render(request, "site_pages/student_register.html", {
         "countries": Countries.objects.all(),
         "courses": Courses.objects.all(),
-        "languages": Languages.objects.all(),        
+        "languages": Languages.objects.all(), 
+        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY       
     })
 
 
@@ -602,7 +643,8 @@ def reference_form(request):
     # -------------------------------
     # Reference Details of the student
     # -------------------------------
-    try:        
+    try: 
+        countries = Countries.objects.all()       
         logger.info("Countries fetched successfully for dropdown")
     except Exception as e:
         logger.error(f"Error fetching countries: {e}", exc_info=True)
@@ -639,6 +681,31 @@ def reference_form(request):
             financial_condition = request.POST.get("financial_condition")
 
             comments = request.POST.get("comments")
+            # Get reCAPTCHA response           
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+
+            try:
+                data = {
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_response
+                }
+
+                r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
+                result = r.json()
+
+                # If Google says "failed"
+                if not result.get('success'):
+                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                    return render(request, 'site_pages/reference_form.html')
+            except requests.exceptions.RequestException:
+                # Network or API failure
+                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                return render(request, 'site_pages/reference_form.html')
+
+            except ValueError:
+                # JSON decoding failed
+                messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                return render(request, 'site_pages/reference_form.html')
 
             logger.info(f"Received Reference Form submission from {first_name} {last_name}")
 
@@ -685,15 +752,126 @@ def reference_form(request):
     # Default GET request
     # -------------------------------
     try:
-        return render(request, "site_pages/reference_form.html", {"countries": Countries.objects.all()})
+       
+        context = {               
+            'countries': countries,           
+            "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
+        }   
+
+        return render(request, "site_pages/reference_form.html", context)
     except Exception as e:
         logger.error(f"Error rendering reference form page: {e}", exc_info=True)
         messages.error(request, "Could not load the reference form page.")
         return render(request, "site_pages/reference_form.html")
 
 def payment_options(request):
-    return render(request,"site_pages/payment_options.html")
+    # -------------------------------
+    # Payment Details of the student
+    # -------------------------------
+    try: 
+        countries = Countries.objects.all()       
+        logger.info("Countries fetched successfully for dropdown")
+    except Exception as e:
+        logger.error(f"Error fetching countries: {e}", exc_info=True)
+        messages.error(request, "Could not load country list. Please try again later.")
+        countries = []
 
+    # -------------------------------
+    # Handle POST request
+    # -------------------------------
+    if request.method == "POST":
+        try:
+            name = request.POST.get("full_name")
+            email = request.POST.get("email")
+            phone_code = request.POST.get("phone_code")
+            phone_number = request.POST.get("phone")
+            person_group = request.POST.get("person_group")
+            amount = request.POST.get("amount")
+            message_text = request.POST.get("message")
+
+            phone = f"{phone_code}{phone_number}" if phone_code and phone_number else None
+           
+            # Get reCAPTCHA response           
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+
+            try:
+                data = {
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_response
+                }
+
+                r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
+                result = r.json()
+
+                # If Google says "failed"
+                if not result.get('success'):
+                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                    return render(request, 'site_pages/payment_options.html')
+            except requests.exceptions.RequestException:
+                # Network or API failure
+                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                return render(request, 'site_pages/payment_options.html')
+
+            except ValueError:
+                # JSON decoding failed
+                messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                return render(request, 'site_pages/payment_options.html')
+
+            logger.info(f"Received payment Form submission from {name}")
+            # 1. Fetch Student (email is unique in your system)
+            student = Students.objects.select_related("course_applied").filter(email=email).first()
+
+            # 2. Fetch Related ChurchAdmin for this student
+            church_admin = student.church_admins.first() if student else None
+
+            # 3. Fetch Subject based on student's course
+            student_subject_record = StudentsSubjects.objects.filter(
+                student=student,
+                is_approved=True
+            ).first()
+                        # -------------------------------
+            # Save to database
+            # -------------------------------
+            try:
+                Payments.objects.create(
+                name=name,
+                email=email,
+                phone=phone,
+                person_group=person_group,
+                amount=amount,
+                message=message_text,
+                is_paid=False,
+                student=student,
+                church_admin=church_admin,
+                subjects_id=student_subject_record 
+                )
+                logger.info(f"payment Form saved successfully for {name}")
+                messages.success(request, "Payment Form submitted successfully!")
+                return render(request, "site_pages/payment_options.html")   
+            except Exception as e:
+                logger.error(f"Error saving payment Form: {e}", exc_info=True)
+                messages.error(request, f"Could not save form: {e}")
+        
+        except Exception as e:
+            logger.error(f"Error processing payment Form submission: {e}", exc_info=True)
+            messages.error(request, f"Error processing form: {e}")
+
+    # -------------------------------
+    # Default GET request
+    # -------------------------------
+    try:
+       
+        context = {               
+            'countries': countries,           
+            "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
+        }   
+
+        return render(request, "site_pages/payment_options.html", context)
+    except Exception as e:
+        logger.error(f"Error rendering payment form page: {e}", exc_info=True)
+        messages.error(request, "Could not load the payment form page.")
+        return render(request, "site_pages/payment_options.html")    
+    
 
 def signin(request):
     users =  Users.objects.all()
@@ -727,6 +905,7 @@ def signup_student(request):
             with transaction.atomic():
                 # Generate unique student ID
                 student_id = f"STU{uuid.uuid4().hex[:8].upper()}"
+                print("stud",student_id)
                 
                 # Validate required fields
                 required_fields = ['first_name', 'email', 'date_of_birth', 'gender', 
@@ -786,8 +965,10 @@ def signup_student(request):
                 
                 # Get language instance
                 language_id = request.POST.get('language')
+                print("lang",language_id)
                 try:
                     language = Languages.objects.get(id=language_id)
+                    print("lang",language_id)
                 except Languages.DoesNotExist:
                     messages.error(request, 'Invalid language selection.')
                     return render(request, 'site_pages/student_register.html')
@@ -795,6 +976,32 @@ def signup_student(request):
                 # Check if email already exists
                 if Students.objects.filter(email=request.POST.get('email')).exists():
                     messages.error(request, 'An application with this email already exists.')
+                    return render(request, 'site_pages/student_register.html')
+                
+                # Get reCAPTCHA response           
+                recaptcha_response = request.POST.get('g-recaptcha-response')
+
+                try:
+                    data = {
+                        'secret': settings.RECAPTCHA_SECRET_KEY,
+                        'response': recaptcha_response
+                    }
+
+                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
+                    result = r.json()
+
+                    # If Google says "failed"
+                    if not result.get('success'):
+                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                        return render(request, 'site_pages/student_register.html')
+                except requests.exceptions.RequestException:
+                    # Network or API failure
+                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                    return render(request, 'site_pages/student_register.html')
+
+                except ValueError:
+                    # JSON decoding failed
+                    messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
                     return render(request, 'site_pages/student_register.html')
                 
                 # Create student record
@@ -807,7 +1014,11 @@ def signup_student(request):
                     last_name=request.POST.get('last_name') or None,
                     email=request.POST.get('email'),
                     gender=request.POST.get('gender'),
-                    citizenship=int(request.POST.get('citizenship')) if request.POST.get('citizenship') else None,
+
+                    citizenship_id=request.POST.get('citizenship') or None,
+                    country_id=request.POST.get('country') or None,
+                    course_applied_id=request.POST.get('course_applied') or None,                    
+                    
                     date_of_birth=request.POST.get('date_of_birth') or None,
                     mrital_status=request.POST.get('mrital_status') or None,
                     spouse_name=request.POST.get('spouse_name') or None,
@@ -820,16 +1031,15 @@ def signup_student(request):
                     mailing_address=request.POST.get('mailing_address') or None,
                     city=request.POST.get('city') or None,
                     state=request.POST.get('state') or None,
-                    country=int(request.POST.get('country')) if request.POST.get('country') else None,
+                   
                     zip_code=request.POST.get('zip_code') or None,
                     timezone=request.POST.get('timezone'),
                     
                     # Educational & Ministry Background
                     highest_education=request.POST.get('highest_education') or None,
-                    course_applied=int(request.POST.get('course_applied')) if request.POST.get('course_applied') else None,
-                    associate_degree=int(request.POST.get('associate_degree')) if request.POST.get('associate_degree') else None,
+                
                     starting_year=int(request.POST.get('starting_year')) if request.POST.get('starting_year') else None,
-                    language_id=language,
+                    language_id=language.id,
                     ministerial_status=request.POST.get('ministerial_status') or None,
                     church_affiliation=request.POST.get('church_affiliation') or None,
                     
@@ -866,21 +1076,74 @@ def signup_student(request):
                     status=False,  # Pending approval
                     active=False   # Not active until approved
                 )
-                
-                # Send success message with student ID
-                messages.success(
-                    request, 
-                    f'Application submitted successfully! Your Student ID is: {student_id}. '
-                    'You will receive an email once your application is reviewed.'
+                # Generate random password
+                password = get_random_string(10)   # Example: "A8sd92LkPq"
+
+                print("pass",password)
+
+                # Create user record
+                user = Users.objects.create(
+                    name=f"{student.first_name} {student.last_name or ''}".strip(),
+                    email=student.email,
+                    username=student.student_id,   # Student ID becomes username
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
                 )
+
+                # Set hashed password
+                user.set_password(password)
+                user.save()
+                # Send email
+                subject = "Your Student Login Details"
+                message = f"""
+                Hello {student.first_name},
+
+                Your student account has been created successfully.
+
+                Login Details:
+                Email: {student.email}
+                Temporary Password: {password}
+
+                Please log in and change your password immediately for security reasons.
+
+                Login here: {request.build_absolute_uri('/signin/')}
+
+                Best regards,
+                Trinity Theological Seminary
+                        """
+                        
+                email_sent = send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[student.email],
+                    fail_silently=False,
+                )
+                print("email sent",email_sent)
+                if email_sent:
+                    messages.success(request, f'Student created and login details sent to {student.email}')
+                    logger.info(f'Email sent successfully to {student.email}')
+                else:
+                    messages.warning(request, 'Student created but email could not be sent.')
+                    logger.warning(f'Email failed to send to {student.email}')
+                        
+            # except BadHeaderError:
+            #     messages.error(request, 'Invalid header found in email.')
+            #     logger.error('Bad header in email')
                 
-                # Optional: Send email notification to student
-                # send_application_confirmation_email(student)
+            # except Exception as e:
+            #     messages.error(request, f'Error sending email: {str(e)}')
+            #     logger.error(f'Email error: {str(e)}')
                 
-                # Optional: Send email notification to admin
-                # send_admin_notification_email(student)
-                
-                return redirect('student_application_success')
+            return redirect('student_application_success', student_id=student_id)
+            
+            # Optional: Send email notification to student
+            # send_application_confirmation_email(student)
+            
+            # Optional: Send email notification to admin
+            # send_admin_notification_email(student)
+            
+           
                 
         except Languages.DoesNotExist:
             messages.error(request, 'Invalid language selection.')
@@ -898,18 +1161,18 @@ def signup_student(request):
     # GET request - display the form
     else:
         context = {
-            'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),
-            # Add other dropdown options as needed
-            # 'countries': Country.objects.all(),
-            # 'courses': Course.objects.all(),
+            'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),          
+            'countries': Countries.objects.all(),
+            'courses': Courses.objects.all(),
+            "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
         }
         return render(request, 'site_pages/student_register.html', context)
 
 
-def student_application_success(request):
+def student_application_success(request,  student_id):
     """Success page after application submission"""
-    return render(request, 'site_pages/application_success.html')
-
+    student = Students.objects.get(student_id=student_id)
+    return render(request, "site_pages/application_success.html", {"student": student.student_id})
 
 # Optional: Email notification functions
 def send_application_confirmation_email(student):
@@ -980,16 +1243,49 @@ def send_admin_notification_email(student):
         print(f"Failed to send admin notification: {str(e)}")
 
 def contact(request):
-    return render(request,"site_pages/contact.html")
+    context = {
+        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
+    }
 
-def register(request):
-    return render(request,"site_pages/register.html" )
+    if request.method == 'POST':
+        recaptcha_response = request.POST.get('g-recaptcha-response')
 
+        if not recaptcha_response:
+            messages.error(request, "Please complete the reCAPTCHA.")
+            return render(request, "site_pages/contact.html", context)
+
+        try:
+            data = {
+                'secret': settings.RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_response
+            }
+
+            r = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data=data,
+                timeout=5
+            )
+            result = r.json()
+
+            if not result.get('success'):
+                messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                return render(request, "site_pages/contact.html", context)
+
+        except requests.exceptions.RequestException:
+            messages.error(request, "Network error verifying reCAPTCHA.")
+            return render(request, "site_pages/contact.html", context)
+
+        except ValueError:
+            messages.error(request, "Invalid response from reCAPTCHA server.")
+            return render(request, "site_pages/contact.html", context)
+
+    # GET request or successful POST falls here
+    return render(request, "site_pages/contact.html", context)
+
+
+    
 def admin_functions():
     print(AdminPages.objects.all())
-
-
-
 
 @login_required
 def student_index(request):
@@ -1007,3 +1303,67 @@ def student_index(request):
 def courses(request):
     courses = Courses.objects.filter(status=1).order_by('id')
     return render(request, 'site_pages/course_list.html', {'courses': courses})
+
+def register(request):
+   
+    return render(request, 'site_pages/register.html')
+
+def generate_password(length=10):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        try:
+            # Find the student
+            student = Users.objects.get(email=email)
+        except Users.DoesNotExist:
+            messages.error(request, "No account found with this email.")
+            return redirect("forgot_password")
+
+        # Generate new password
+        new_password = get_random_string(length=10)
+
+        # Save new password
+        student.set_password(new_password)
+        student.save()
+        student_data = Students.objects.get(email=email)
+        # Email content (same format as your register email)
+        subject = "Your Password Reset Request"
+        message = f"""
+        Hello {student_data.first_name},
+               
+        We received a request to reset your password.
+
+        Your new temporary login details are:
+
+        Email: {student.email}
+        Temporary Password: {new_password}
+
+        Please log in and change your password immediately for security purposes.
+
+        Login here: {request.build_absolute_uri('/signin/')}
+
+        Best regards,
+        Trinity Theological Seminary
+        """
+
+        # Send email
+        email_sent = send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[student.email],
+            fail_silently=False,
+        )
+
+        if email_sent:
+            messages.success(request, f"New password has been sent to {student.email}")
+        else:
+            messages.error(request, "Password reset failed. Unable to send email.")
+
+        return redirect("forgot_password")
+
+    return render(request, "site_pages/forgot_password.html")

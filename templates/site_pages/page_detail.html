@@ -17,6 +17,7 @@
 
 {% block content %}
 <style>
+  
    :root {
             --primary: #00CED1;
             --primary-dark: #1B2845;
@@ -50,8 +51,39 @@
     .page-wrapper {
         min-height: 100vh;
         background: var(--bg-page);
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', sans-serif;
+        font-family: inherit !important;
+        /*font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Oxygen', 'Ubuntu', sans-serif;*/
     }
+/* Full Page Background - Uses your color palette */
+.page-wrapper {
+    background: var(--bg-gray);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative dots (cyan + red + green) */
+.page-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 120%;
+    height: 120%;
+    background-image:
+        radial-gradient(var(--primary-cyan) 2px, transparent 2px),   /* cyan dots */
+        radial-gradient(var(--danger) 2px, transparent 2px),         /* red dots */
+        radial-gradient(var(--success) 2px, transparent 2px);        /* green dots */
+    background-size: 50px 50px, 70px 70px, 90px 90px;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Keep all page content above decorative dots */
+.page-wrapper > * {
+    position: relative;
+    z-index: 2;
+}
 
     /* Hero Banner */
     .page-hero {
@@ -427,6 +459,33 @@
         margin-bottom: 1rem;
         opacity: 0.3;
     }
+    /* Full Page Background with Light Blue + Decorative Dots */
+.page-wrapper {
+    background: #E8F3FF; /* soft light blue */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative dots pattern overlay */
+.page-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 120%;
+    height: 120%;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.4) 2px, transparent 2px);
+    background-size: 40px 40px;   /* adjust dot spacing */
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ensure content stays above the dots */
+.page-wrapper > * {
+    position: relative;
+    z-index: 2;
+}
 
     /* Responsive */
     @media (max-width: 768px) {
