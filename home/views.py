@@ -1321,10 +1321,13 @@ def forgot_password(request):
 
         # Generate new password
         new_password = get_random_string(length=10)
+        try:
+            # Save new password
+            student.set_password(new_password)
+            student.save()
+        except Exception as e:
+            print("Password update error:", e)
 
-        # Save new password
-        student.set_password(new_password)
-        student.save()
         student_data = Students.objects.get(email=email)
         # Email content (same format as your register email)
         subject = "Your Password Reset Request"
