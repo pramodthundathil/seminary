@@ -18,7 +18,86 @@
         1-Global Styles & Typography
         ================================ */
         /* Make navbar completely transparent */
+        /* ================================
+        DROPDOWN MENU FIXES - Remove Blue Background
+        ================================ */
 
+        /* Remove blue background from dropdown menu */
+        .dropdown-menu {
+            background: white !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 8px !important;
+            padding: 8px 0 !important;
+        }
+
+        /* Style dropdown items */
+        .dropdown-item {
+            color: #1B2845 !important;
+            background: transparent !important;
+            padding: 10px 20px !important;
+            font-size: 14px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        /* Dropdown item hover state */
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: white !important;
+            color: white !important;
+            transform: translateX(4px) !important;
+        }
+
+        /* Active dropdown item */
+        .dropdown-item.active,
+        .dropdown-item:active {
+            background: white !important;
+            color: #1B2845 !important;
+        }
+
+        /* Submenu dropdown styling */
+        .dropdown-submenu .dropdown-menu {
+            top: 0 !important;
+            left: 100% !important;
+            margin-top: -1px !important;
+            background: white !important;
+        }
+
+        /* Remove any Bootstrap default blue backgrounds */
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus,
+        .dropdown-menu .dropdown-item.active {
+            background-color: white !important;
+        }
+
+        /* Ensure dropdown toggle button doesn't have blue */
+        .dropdown-toggle {
+            background: transparent !important;
+        }
+
+        .dropdown-toggle:hover,
+        .dropdown-toggle:focus {
+            background: transparent !important;
+        }
+
+        /* Override Bootstrap's primary button blue */
+        .btn-primary.dropdown-toggle {
+            background: transparent !important;
+            border-color: transparent !important;
+        }
+
+        .btn-primary.dropdown-toggle:hover,
+        .btn-primary.dropdown-toggle:focus,
+        .btn-primary.dropdown-toggle:active {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Show class override for dropdown */
+        .dropdown-menu.show {
+            background: white !important;
+        }
 
 
         /* Dropdown menu styling */
@@ -157,6 +236,7 @@
             white-space: normal;
             /* allow span text to wrap */
         }
+
 
 
 
@@ -3130,11 +3210,12 @@
                 height: 50px;
                 font-size: 0.9rem !important;
             }
+
             .stats-container {
                 gap: 10px !important;
                 /* Reduce spacing */
-                height:80px!important;
-                width:450px!important;
+                height: 80px !important;
+                width: 450px !important;
             }
 
             .our-aim-section>.church-card,
@@ -3298,7 +3379,7 @@
             .stats-container {
                 gap: 10px !important;
                 /* Reduce spacing */
-                height:80px!important;
+                height: 80px !important;
             }
 
             .our-aim-section>.church-card,
@@ -3348,14 +3429,16 @@
                 font-size: 18px !important;
                 font-weight: 300 !important;
                 text-align: center !important;
-                color: #1B2845 !important;;
+                color: #1B2845 !important;
+                ;
                 /* ← remove comma */
                 transform: translate(-140px, 50px) !important;
             }
 
             /* P TAG */
             .carousel .carousel-item:nth-child(2) .carousel-caption p {
-                color: #1B2845 !important;;
+                color: #1B2845 !important;
+                ;
                 transform: translate(-120px, 70px) !important;
                 margin: 0 auto !important;
                 text-align: center !important;
