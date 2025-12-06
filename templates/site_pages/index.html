@@ -3101,7 +3101,168 @@
             }
         }
 
-        @media (max-width: 500px) {
+        /************ BELOW 480px (small phones) ************/
+        @media (max-width: 480px) {
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -20px;
+            }
+
+            .stat-number {
+                font-size: 1.2rem !important;
+            }
+
+            .stat-label {
+                font-size: 0.75rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.9rem !important;
+            }
+            .stats-container {
+                gap: 10px !important;
+                /* Reduce spacing */
+                height:80px!important;
+                width:450px!important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 140px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(60px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(170px, -100px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845;
+                /* ← remove comma */
+                transform: translate(-170px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: cyan !important;
+                transform: translate(-170px, 80px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-170px, 100px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(190px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translateY(20px) !important;
+            }
+
+        }
+
+        /************ BELOW 400px (very small phones) ************/
+        @media (max-width: 400px) {
+
             .wrapper .circle-left {
                 width: 60px;
                 height: 60px;
@@ -3117,17 +3278,42 @@
             }
 
             .stat-number {
-                font-size: 1.5rem !important;
+                font-size: 0.75rem !important;
+                line-height: 1 !important;
             }
 
             .stat-label {
-                font-size: 0.95rem !important;
+                font-size: 0..45rem !important;
+                line-height: 1 !important;
             }
 
             .stat-icon {
                 width: 50px;
                 height: 50px;
-                font-size: 0.9rem !important;
+                font-size: 0.75rem !important;
+                margin-bottom: 1px !important;
+                /* reduce gap */
+            }
+
+            .stats-container {
+                gap: 10px !important;
+                /* Reduce spacing */
+                height:80px!important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 100px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
             }
 
             .carousel-item:nth-child(3) .carousel-caption h1,
@@ -3142,44 +3328,113 @@
                 text-align: left !important;
             }
 
-            .carousel-item:nth-child(2) .carousel-caption h1,
-            .carousel-item:nth-child(2) .carousel-caption h2,
-            .carousel-item:nth-child(2) .carousel-caption p,
-            .carousel-item:nth-child(2) .learn-more-btn {
-                transform: translateX(60px) !important;
-                /* FORCE move right */
-                transform: translateY(-40px) !important;
-                /* Move UP */
-
-                text-align: left !important;
-            }
-
-            .carousel-item:nth-child(2) .carousel-caption h1 {
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
                 color: cyan !important;
-                -webkit-text-fill-color: rgb(36, 117, 117) !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(170px, -100px) !important;
+                /* ← move LEFT */
             }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845 !important;;
+                /* ← remove comma */
+                transform: translate(-140px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: #1B2845 !important;;
+                transform: translate(-120px, 70px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+                /* Force MAX 2 lines */
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                /* limit to 2 lines */
+                -webkit-box-orient: vertical !important;
+
+
+                /* Optional: control width so it wraps to exactly 2 lines */
+                max-width: 330px !important;
+                /* increase width */
+                white-space: normal !important;
+                line-height: 1 !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-140px, 100px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(190px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
 
             /* Move items */
             .carousel-item:nth-child(1) .carousel-caption h1,
             .carousel-item:nth-child(1) .carousel-caption h2,
             .carousel-item:nth-child(1) .carousel-caption p,
             .carousel-item:nth-child(1) .learn-more-btn {
-                transform: translate(30px, -100px) !important;
+                transform: translate(-20px, -10px) !important;
                 /* combine X + Y */
-                text-align: left !important;
+                margin: 0 auto !important;
+                text-align: center !important;
             }
 
             /* Force H1 to break into 2 lines */
             .carousel-item:nth-child(1) .carousel-caption h1 {
                 white-space: normal !important;
-                /* allow wrapping */
-                max-width: 280px !important;
-                /* force text to wrap */
+                max-width: 300px !important;
+                margin: 0 auto !important;
                 line-height: 1.2 !important;
                 display: block !important;
-                transform: translate(100px, -100px) !important;
-                /* combine X + Y */
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
             }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translateY(20px) !important;
+            }
+
+
         }
     </style>
     <!-- Font Awesome -->
