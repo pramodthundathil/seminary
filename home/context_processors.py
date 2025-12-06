@@ -7,7 +7,9 @@ def student_processor(request):
 
     try:
         # student = Students.objects.get(user_id=request.user.id)
-        student = Students.objects.get(id=166)
+        student = Students.objects.filter(user_id=request.user.id).first()
+
+        # student = Students.objects.get(id=166)
     except Students.DoesNotExist:
         student = None
 

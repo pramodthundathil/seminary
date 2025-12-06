@@ -21,19 +21,18 @@
     <!-- Main Navigation -->
     <div class="main-nav">
         <div class="nav-content">
-            <div class="logo-section">
-                <div class="logo-icon">TTS</div>
-                <div class="logo-text">
-                    <h1>Trinity Theological Seminary</h1>
-                </div>
-            </div>
+<div class="logo-section">
+<img src="{% static 'img/Trinity_final2.png' %}" style="width:180px; height: 50px;">
+
+</div>
+
             <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
 
                 <li class="nav-item mobile-only" onclick="toggleDropdown(this, event)">
                     <span class="nav-link">👤 Profile ▼</span>
                     <div class="dropdown">
-                        <a href="#">👤 My Profile</a>
+                        <a href="{% url 'student_profile_view' %}">👤 My Profile</a>
                         <a href="#">📊 Change Password</a>
                         <div class="divider"></div>
                         <a href="#">🚪 Logout</a>
@@ -44,23 +43,47 @@
                     <a href="{% url 'student_home' %}" class="nav-link">🏠 Home</a>
                 </li>
 
-<li class="nav-item">
-    <span class="nav-link">📚 My Class ▼</span>
-    <div class="dropdown">
-        <a href="{% url 'student_subjects' %}">📖 Subjects</a>
-        
-        <div class="sub-parent" onclick="openRightMenu(event)">
-            <a href="#">📝 Assignment ▸</a>
-            <div class="right-submenu">
-                <a href="{% url 'student_pending_assignment' %}">Upload Assignment</a>
-                <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
+
+                <!-- <h1>user=={{request.user.user_roles.first.role.name }}</h1> -->
+
+{% if request.user.user_roles.first.role.name == "Student" %}
+    <li class="nav-item">
+        <span class="nav-link">📚 My Class ▼</span>
+        <div class="dropdown">
+            <a href="{% url 'student_subjects' %}">📖 Subjects</a>
+
+            <div class="sub-parent" onclick="openRightMenu(event)">
+                <a href="#">📝 Assignment ▸</a>
+                <div class="right-submenu">
+                    <a href="{% url 'student_pending_assignment' %}">Upload Assignment</a>
+                    <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
+                </div>
             </div>
+
+            <a href="{% url 'student_view_post' %}">👁️ View Post</a>
+            <a href="#">🎥 Live Class</a>
         </div>
-        
-        <a href="{% url 'student_view_post' %}">👁️ View Post</a>
-        <a href="#">🎥 Live Class</a>
-    </div>
-</li>
+    </li>
+{% else %}
+    <li class="nav-item">
+        <span class="nav-link">📚 My Class ▼</span>
+        <div class="dropdown">
+            <a href="{% url 'student_subjects' %}">📖 Subjects</a>
+
+            <!-- <div class="sub-parent" onclick="openRightMenu(event)">
+                <a href="#">📝 Assignment ▸</a>
+                <div class="right-submenu">
+                    <a href="{% url 'student_pending_assignment' %}">Upload Assignment</a>
+                    <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
+                </div>
+            </div> -->
+
+            <!-- <a href="{% url 'student_view_post' %}">👁️ View Post</a> -->
+            <!-- <a href="#">🎥 Live Class</a> -->
+        </div>
+    </li>
+{% endif %}
+
 
 <li class="nav-item">
     <span class="nav-link">📋 Exam ▼</span>
@@ -95,9 +118,9 @@
 
             <div class="user-dropdown" id="userDropdown" onclick="event.stopPropagation()">
                 <!-- <a href="{% url 'student_profile_view' %}">👤 My Profile</a> -->
-                <a href="#">👤 My Profile</a>
+                <a href="{% url 'student_profile_view' %}">👤 My Profile</a>
 
-                <a href="#">📊 Change Password</a>
+                <a href="{% url 'student_change_password' %}">📊 Change Password</a>
                 <div class="divider"></div>
                 <a href="#">🚪 Logout</a>
             </div>
@@ -118,7 +141,8 @@
                 <h2 class="profile-name">{{ student.first_name}}</h2>
                 <p class="profile-id">{{ student.student_id}}</p>
                 <span class="role-badge">👨‍🎓 Student</span>
-                <button class="pay-button">💳 Pay Now</button>
+                 <br><br>
+                 <a href="{% url 'student_payment_input' %}" target="_blank" class="pay-button" style="text-decoration: none !important;">💳 Pay Now</a>
                 <div class="stats-wrapper">
                 <div class="stats-grid ">
                     <br><br><br><br><br><br><br><br>

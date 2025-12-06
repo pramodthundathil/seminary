@@ -603,6 +603,20 @@
     }
 </style>
 
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+{% else %}
+
+
 <div class="exam-page exam-container">
 
     <!-- Header -->
@@ -614,7 +628,7 @@
                 <p>You have no scheduled exams</p>
             </div>
         </div>
-        <button class="request-exam-btn" onclick="location.href='/request-exam/'">Request Exam</button>
+        <button class="request-exam-btn" onclick="location.href='request-exam/'">Request Exam</button>
     </div>
 
     <!-- Table Section -->
@@ -630,8 +644,8 @@
             </thead>
             <tbody id="examTableBody">
 
-                    {% if context.exam_list %}
-                        {% for e in context.exam_list %}
+                    {% if exam_list %}
+                        {% for e in exam_list %}
                         <tr>
                             <td data-label="Exam">
                                 <div class="exam-name">{{ e.exam_name }}</div>
@@ -668,19 +682,13 @@
                             </td>
                         </tr>
                     {% endif %}
-                <!-- <tr>
-                    <td data-label="Exam"><div class="exam-name">OT UNIT 1</div></td>
-                    <td data-label="Subject"><div class="exam-subject">Old Testament</div></td>
-                    <td data-label="Requested Date"><div class="exam-time">Jul 5, 2022 12:10 PM</div></td>
-                    <td data-label="Status"><span class="status-badge approved">Approved</span></td>
-                </tr> -->
 
             </tbody>
         </table>
     </div>
 
 </div>
-
+{% endif %}
 {% endblock %}
 
 {% block right %}

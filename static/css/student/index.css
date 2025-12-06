@@ -155,8 +155,11 @@ body {
     transform: translateY(-1px);
 }
 
+
+
+
 .user-avatar-small {
-    width: 36px;
+    width: 56px;
     height: 36px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);

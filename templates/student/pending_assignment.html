@@ -3,6 +3,21 @@
 {% block title %}Pending Assignments{% endblock %}
 {% block body_class %}no-right{% endblock %}
 {% block middle %}
+
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+
+{% else %}
+
 <div class="details-card">
     <div class="card-header">
         <h2 class="card-title">⏳ Pending Assignments</h2>
@@ -552,6 +567,8 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
     });
 });
 </script>
+
+{% endif %}
 {% endblock %}
 
 {% block right %}

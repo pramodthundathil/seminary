@@ -21,6 +21,8 @@ from django.db import transaction
 from django.conf import settings
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_POST
+
 
 # -------------------------------
 # Local App Imports
@@ -37,103 +39,263 @@ from .models import (
     Pages,
     Languages,
     Users,
-    AdminPages
+    AdminPages,
+    Support,Notifications,
+    Subjects,StudentsInstructor,
+    Exams
+
 )
-
-
 
 # Set up logger
 logger = logging.getLogger(__name__)
+from django.db import DatabaseError
+# -------------------------------
+#  permissions imports
+# -------------------------------
+
+from .permissions import student_only, student_or_church_user
 
 
+# -------------------------------
+#  STUDENT HOMEPAGE VIEWS
+# -------------------------------
 
-
-from home.models import Students,Notifications,Subjects,StudentsInstructor,Exams
-
+@login_required
+@student_or_church_user
 def student_home(request):
     try:
-       student=Students.objects.get(id=166)
-    except:   
-        student=None
-    if not student:
-        return render(request, "student/home.html", {"error": "Student not found"})    
-    notifications=Notifications.objects.filter(notification_type="Exam", student_id=student.id)
-
-    if student:
-        lang = Languages.objects.filter(id=student.language_id_id).first()
-        if lang:
-            language= lang.language_name
-        else:
-            language=None
-    else:
-        language=None
-
-    try:
-        instructor_relation = StudentsInstructor.objects.get(student_id=student.id)
-    except StudentsInstructor.DoesNotExist:
-        instructor_relation = None
-
-    instructor_name = None
-    if instructor_relation:
-        try:
-            instructor_user = Users.objects.get(id=instructor_relation.instructor_id)
-            instructor_name = instructor_user.name
-        except Users.DoesNotExist:
-            instructor_name = None
-
-    try:
-        course = student.course_applied
-    except :
-        course = None
-
-    context={
-        # "student":student,
-        "notifications":notifications,
-        "course":course, 
-        "instructor_name":instructor_name,
-        "language":language,
-    }
-
-    return render(request, "student/home.html",{"context": context})
-
-
-def student_subjects(request):
-
-    subjects = Subjects.objects.filter(
-        students_subject_id__student_id=166
-    )
+        student = Students.objects.select_related("language").filter(user=request.user).first()
+        if student is None:
+            return render(request, "student/home.html", {"error": "Student not found"})
+    except DatabaseError as e:
+        logger.error(f"Student fetch failed: {e}")
+        return render(request, "student/home.html", {"error": "Database error while fetching student"})
     
-    context={
-        "subjects":subjects,
+    # store student_id once (production practice)
+    student_id = student.id
+    
+    # ------------------- NOTIFICATIONS -------------------
+    try:
+        notifications = Notifications.objects.filter(
+            # notification_type=EXAM_NOTIFICATION,
+            student_id=student_id
+        )
+    except DatabaseError as e:
+        logger.error(f"Failed to fetch notifications for student {student_id}: {e}")
+        notifications = []
+
+    # ------------------- LANGUAGE -------------------
+    try:
+        language = student.language.language_name if student.language else None
+    except Exception as e:
+        logger.error(f"Failed to fetch language for student {student_id}: {e}")
+        language = None
+
+    # ------------------- INSTRUCTOR -------------------
+    instructor_name = None
+
+    try:
+        instructor_relation = StudentsInstructor.objects.select_related("instructor").filter(student_id=student_id).first()
+        if instructor_relation:
+            instructor_name = instructor_relation.instructor.staff_name
+        else:
+            instructor_name = None
+    except Exception as e:
+        logger.error(f"Failed to fetch instructor for student {student_id}: {e}")
+        instructor_name = None
+
+    # ------------------- COURSE -------------------
+    try:
+        course_obj = student.course_applied
+        course = {
+            "id": course_obj.id,
+            "name": course_obj.course_name,
+            "code": course_obj.course_code,
+        } if course_obj else None
+    except Exception as e:
+        logger.error(f"Failed to fetch course for student {student_id}: {e}")
+        course = None
+               
+    notifications = list(notifications)
+
+    context = {
+        "notifications": notifications,
+        "course": course,
+        "instructor_name": instructor_name,
+        "language": language,
     }
 
+    return render(request, "student/home.html", context)
 
-    return render(request, "student/subjects.html",context)
 
+
+# -------------------------------
+#  STUDENT SUBJECT PAGE VIEWS
+# -------------------------------
+
+@login_required
+@student_or_church_user
+def student_subjects(request):
+    try:
+        student = Students.objects.select_related("user").filter(user=request.user).first()
+        if student is None:
+            return render(request, "student/subjects.html", {"error": "Student not found"})
+    except Exception as e:
+        logger.error(f"Failed to fetch student for user {request.user.id}: {e}")
+        return render(request, "student/subjects.html", {"error": "Database error while fetching student"})
+
+    # ---------------- SUBJECTS ----------------
+    try:
+        subjects = StudentsSubjects.objects.select_related("subject").filter(
+            student=student,
+            # is_approved=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch student subjects for {student.id}: {e}")
+        subjects = []
+
+    # ---------------- ALL SUBJECTS ----------------
+    try:
+        all_subject = Subjects.objects.all()
+    except Exception as e:
+        logger.error(f"Failed to fetch all subjects: {e}")
+        all_subject = []
+
+    context = {
+        "subjects": list(subjects),
+        "all_subject": list(all_subject),
+    }
+
+    return render(request, "student/subjects.html", context)
+
+# -----------------------------------------
+#  STUDENT UPLOADED ASSIGNMENT PAGE VIEWS
+# -----------------------------------------
+
+@student_only
+def student_pending_assignment(request):
+    try:
+        student = Students.objects.select_related("user").filter(user=request.user).first()
+        if student is None:
+            return render(request, "student/pending_assignment.html", {"error": "Student not found"})
+    except Exception as e:
+        logger.error(f"Failed to fetch student for user {request.user.id}: {e}")
+        return render(request, "student/pending_assignment.html", {"error": "Database error while fetching student"})
+
+    # ---------------- PENDING ASSIGNMENTS ----------------
+    try:
+        pending_assignments = StudentsAssignment.objects.filter(
+            student_id=student.id,
+            submitted_on__isnull=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch pending assignments for student {student.id}: {e}")
+        pending_assignments = []
+
+    context = {
+        "pending_assignments": list(pending_assignments)
+    }
+
+    return render(request, "student/pending_assignment.html", context)
+
+
+# -----------------------------------------
+#  STUDENT SUBMITTED ASSIGNMENT PAGE VIEWS
+# -----------------------------------------
+
+@student_only
+def student_submitted_assignment(request):
+
+    # ------------------- STUDENT -------------------
+    try:
+        student = Students.objects.get(user=request.user)
+    except Students.DoesNotExist:
+        student = None
+
+    if not student:
+        return render(request, "student/submitted_assignment.html", {
+            "error": "Student not found"
+        })
+
+    student_id = student.id
+
+    # ------------------- SUBMITTED ASSIGNMENTS -------------------
+    try:
+        submitted_assignments = StudentsAssignment.objects.filter(
+            student_id=student_id,
+            submitted_on__isnull=False
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch submitted assignments for student {student_id}: {e}")
+        submitted_assignments = []
+
+    # ------------------- CONTEXT -------------------
+    context = {
+        "submitted_assignments": submitted_assignments
+    }
+
+    return render(request, "student/submitted_assignment.html", context)
+
+
+# -----------------------------------------
+#  STUDENT VIEW POST PAGE VIEWS
+# -----------------------------------------
+
+@student_only
 def student_view_post(request):
     return render(request, "student/view_posts.html")
 
-def student_exam_hall(request):
-    try:
-        student = Students.objects.get(id=166)
-    except Students.DoesNotExist:
-        return render(request, "student/exam_hall.html", {"error": "Student not found"})
 
-    exams = StudentsExams.objects.filter(student_id=student.id)
+# -----------------------------------------
+#  STUDENT EXAM  PAGE VIEWS
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+def student_exam_hall(request):
+
+    # ----- Fetch student safely -----
+    try:
+        student = (
+            Students.objects
+            .select_related('course_applied')
+            .only('id', 'course_applied__course_name')
+            .get(user=request.user)
+        )
+    except Students.DoesNotExist:
+        logger.error(f"Student not found for user {request.user.id}")
+        return render(request, "student/exam_hall.html", {
+            "error": "Student not found"
+        })
+
+    # ----- Prefetch exams & subjects -----
+    exams = (
+        StudentsExams.objects
+        .filter(student=student)
+        .select_related("exam", "exam__subject")
+        .only(
+            "exam__exam_name",
+            "exam__subject__subject_name",
+            "created_at",
+            "is_exam_started",
+            "is_exam_ended",
+        )
+    )
+
     exam_list = []
 
+    # ----- Build formatted data safely -----
     for e in exams:
-        # SAFE exam fetch
-        exam_obj = Exams.objects.filter(id=e.exam_id_id).first()
-        if not exam_obj:
-            continue  # skip broken exam rows
-
-        # SAFE subject fetch
-        subject_obj = Subjects.objects.filter(id=exam_obj.subject_id_id).first()
+        try:
+            exam_obj = e.exam
+            subject_obj = exam_obj.subject if exam_obj else None
+        except Exception as ex:
+            logger.error(f"Failed to read exam/subject for exam entry {e.id}: {ex}")
+            continue
 
         exam_list.append({
-            "exam_name": exam_obj.exam_name if exam_obj else "N/A",
-            "subject_name": subject_obj.subject_name if subject_obj else "N/A",
+            "exam_name": getattr(exam_obj, "exam_name", "N/A"),
+            "subject_name": getattr(subject_obj, "subject_name", "N/A"),
             "requested_time": e.created_at,
             "status": (
                 "Completed" if e.is_exam_ended else
@@ -141,81 +303,550 @@ def student_exam_hall(request):
                 "Pending"
             )
         })
-    context={
+    exam_list = sorted(exam_list, key=lambda x: x["requested_time"], reverse=True)    
+
+    return render(request, "student/exam_hall.html", {
         "exam_list": exam_list,
-        "request_exam_url": "/student/request-exam/"  # or use reverse('student_request_exam')
-    }
-    return render(request, "student/exam_hall.html", context)
-
-def student_score_card(request):
-    # assignment_mark = StudentsAssignment.objects.filter(student_id=166)
-    assignment_mark = StudentsAssignment.objects.filter(student_id=166).select_related("assignment_id")
-
-    # for item in assignment_mark:
-    #     print(item.assignment_id.code, item.assignment_id.assignment_name, item.assignment_id.total_score)
-
-    student_exams = StudentsExams.objects.filter(student_id=166).select_related("exam_id")
-
-    # for item in student_exams:
-    #     print(item.exam_id.code, item.exam_id.exam_name)
-
-    context={
-        "assignment_mark":assignment_mark,
-        "student_exams":student_exams,
-        }
-    return render(request, "student/score_card.html",context)
-
-def student_class_recordings(request):
-    return render(request, "student/class_recordings.html")
-def student_doubts_answers(request):
-    return render(request, "student/doubts_answers.html")
-
-def student_request_exam(request):
-    return render(request, "student/request_exam.html")
-
-def student_profile_view(request):
-    return render(request, "student/student_profile.html")
-
-def student_pending_assignment(request):
-    try:
-        student = Students.objects.get(id=166)
-    except Students.DoesNotExist:
-        student = None
-
-    if not student:
-        return render(request, "student/pending_assignment.html", {"error": "Student not found"})
-
-    pending_assignments = StudentsAssignment.objects.filter(
-        student_id=student.id,
-        submitted_on__isnull=True
-    )
-
-    return render(request, "student/pending_assignment.html", {
-        "pending_assignments": pending_assignments
+        "request_exam_url": "/student/request-exam/",
     })
 
 
-def student_submitted_assignment(request):
+# -----------------------------------------
+#  STUDENT EXAM SCORE PAGE VIEWS
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+def student_score_card(request):
+
+    # ---- Get student safely ----
     try:
-       student=Students.objects.get(id=166)
-    except:   
-        student=None
+        student = Students.objects.get(user=request.user)
+    except Students.DoesNotExist:
+        return render(request, "student/score_card.html", {"error": "Student not found"})
 
-    if not student:
-        return render(request, "student/submitted_assignment.html", {"error": "Student not found"})    
-
-    submitted_assignments = StudentsAssignment.objects.filter(
-        student_id=student.id,
-        submitted_on__isnull=False   # means submitted
+    # ---- Assignments ----
+    assignment_mark = (
+        StudentsAssignment.objects
+        .filter(student=student)
+        .select_related("assignment")
+        .only(
+            "total_marks",
+            "assignment__code",
+            "assignment__assignment_name",
+            "assignment__total_score",
+        )
     )
-    context={"submitted_assignments":submitted_assignments}
-    return render(request, "student/submitted_assignment.html",context)
+
+    # ---- Exams ----
+    student_exams = (
+        StudentsExams.objects
+        .filter(student=student,is_approved=True)
+        .select_related("exam")
+        .only(
+            "show_on_score",
+            "exam__code",
+            "exam__exam_name",
+        )
+    )
+
+    context = {
+        "assignment_mark": assignment_mark,
+        "student_exams": student_exams,
+    }
+    return render(request, "student/score_card.html", context)
+
+
+# -----------------------------------------
+#  CLASS RECORDED VIDEO PAGE VIEWS
+# -----------------------------------------
+@login_required
+@student_or_church_user
+def student_class_recordings(request):
+    return render(request, "student/class_recordings.html")
+
+
+# -----------------------------------------
+#  STUDENT PROFILE PAGE VIEWS
+# -----------------------------------------
+
+
+@login_required
+@student_or_church_user
+def student_profile_view(request):
+    # ---- Fetch student safely ----
+    try:
+        student = (
+            Students.objects
+            .select_related("course_applied", "language", "citizenship", "country")
+            .get(user=request.user)
+        )
+    except Students.DoesNotExist:
+        logger.error(f"[PROFILE] Student not found for user ID: {request.user.id}")
+        return render(
+            request,
+            "student/student_profile.html",
+            {"error": "Student profile not found."}
+        )
+    except Exception as ex:
+        logger.exception(f"[PROFILE] Unexpected error loading profile for user {request.user.id}: {ex}")
+        return render(
+            request,
+            "student/student_profile.html",
+            {"error": "Unable to load your profile at the moment."}
+        )
+
+    # ---- Log success ----
+    logger.info(f"[PROFILE] Student profile loaded successfully for user {request.user.id}")
+
+    # ---- Render ----
+    return render(
+        request,
+        "student/student_profile.html",
+        {"student": student}
+    )
+
+
+# -----------------------------------------
+#  STUDENT DOUBT ADD VIEWS
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+@require_POST
+def student_support_create(request):
+    # ----- Get student safely -----
+    student = Students.objects.filter(user=request.user).first()
+    if not student:
+        return JsonResponse({"error": "Student not found"}, status=404)
+
+    # ----- Read input -----
+    doubt = request.POST.get("doubt", "").strip()
+    category = request.POST.get("category", "").strip()
+
+    if not doubt:
+        return JsonResponse({"error": "Doubt field is required"}, status=400)
+
+    # ----- Create record -----
+    Support.objects.create(
+        student=student,
+        doubt_question=doubt,
+        category=category,
+        status="1",
+        created_by=request.user,
+        updated_by=request.user,
+    )
+    return JsonResponse({"success": True}, status=201)
+
+# -----------------------------------------
+#  STUDENT DOUBT PAGE VIEWS
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+def student_doubts_answers(request):
+    try:
+        doubt = (
+            Support.objects
+            .filter(student__user=request.user)
+            .select_related("student")
+            .order_by("-created_at")
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch doubts for user {request.user.id}: {e}")
+        doubt = []
+
+    return render(request, "student/doubts_answers.html", {
+        "doubt": doubt
+    })
+
+
+# -----------------------------------------
+#  STUDENT REQUEST SUBJECT VIEWS
+# -----------------------------------------
+
+@require_POST
+@student_or_church_user
+@login_required
+def request_subject_view(request):
+    subject_id = request.POST.get("subject_id")
+
+    if not subject_id:
+        return JsonResponse(
+            {"status": "error", "message": "Subject ID required"},
+            status=400
+        )
+
+    # Get student safely
+    try:
+        student = Students.objects.get(user=request.user)
+    except Students.DoesNotExist:
+        return JsonResponse(
+            {"status": "error", "message": "Student not found"},
+            status=404
+        )
+
+    # Validate subject exists
+    if not Subjects.objects.filter(id=subject_id).exists():
+        return JsonResponse(
+            {"status": "error", "message": "Invalid subject"},
+            status=400
+        )
+
+    # Prevent duplicate request
+    exists = StudentsSubjects.objects.filter(
+        student=student,
+        subject_id=subject_id,
+        deleted_at__isnull=True
+    ).exists()
+
+    if exists:
+        return JsonResponse(
+            {"status": "error", "message": "Subject already requested"},
+            status=400
+        )
+
+    # Create record
+    StudentsSubjects.objects.create(
+        student=student,
+        subject_id=subject_id,
+        requested_by=request.user,
+        is_approved=False,
+        reject_reason=None,
+        is_optional=False,
+        created_by=request.user,
+        updated_by=request.user,
+    )
+
+    return JsonResponse(
+        {"status": "success", "message": "Subject requested successfully"}
+    )
+
+
+# -----------------------------------------
+#  STUDENT REQUEST SUBJECT VIEWS
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+def student_request_exam(request):
+    
+    student = Students.objects.filter(user=request.user).first()
+    if not student:
+        return render(request, "student/request_exam.html", {
+            "error": "Student not found"
+        })
+
+    subjects = Subjects.objects.filter(
+        students__student=student,
+        students__is_approved=True
+    )
+
+    hours = range(1, 13)
+    minutes = ["00","05","10","15","20","25","30","35","40","45","50","55"]
+
+    student_exam = StudentsExams.objects.filter(student_id=student.id)
+
+    context = {
+        "subjects": subjects,
+        "student_exam": student_exam,
+        "hours": hours,
+        "minutes": minutes,
+    }
+
+    return render(request, "student/request_exam.html", context)
 
 
 
+from django.http import JsonResponse
+from .models import Exams
+
+def get_exams(request, subject_id):
+    exams = Exams.objects.filter(subject_id=subject_id).values("id", "exam_name")
+    # print("exams=====-------------",exams)
+
+    return JsonResponse(list(exams), safe=False)
+
+from datetime import datetime
+from django.utils.timezone import make_aware
+from .models import StudentsExams, Students, Exams
+
+
+@login_required
+def submit_request_exam(request):
+    if request.method == "POST":
+
+        subject_id = request.POST.get("subject")
+        exam_id = request.POST.get("exam")
+        timezone_val = request.POST.get("timezone")
+        exam_date = request.POST.get("examDate")
+        start_time = request.POST.get("startTime")
+
+        print("------ RECEIVED DATA ------")
+        print(subject_id, exam_id, timezone_val, exam_date, start_time)
+
+        # ---------------------------
+        # GET STUDENT & EXAM OBJECTS
+        # ---------------------------
+        student = Students.objects.get(user=request.user)
+        exam = Exams.objects.get(id=exam_id)
+
+        # ---------------------------
+        # COMBINE DATE + TIME → DATETIME
+        # ---------------------------
+        final_datetime_str = f"{exam_date} {start_time}"   # "2025-12-17 17:56"
+        final_datetime = datetime.strptime(final_datetime_str, "%Y-%m-%d %H:%M")
+        final_datetime = make_aware(final_datetime)  # MAKE TZ-aware
+
+        # ---------------------------
+        # CREATE THE RECORD
+        # ---------------------------
+        StudentsExams.objects.create(
+            student=student,
+            exam=exam,
+            start_time=final_datetime,
+            end_time=None,
+            exam_duration=exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+            timezone=timezone_val,
+            requested_by=request.user,
+            created_by=request.user,
+            updated_by=request.user,
+            show_on_score=0,
+        )
+
+        messages.success(request, "Exam request submitted!")
+        return redirect("student_request_exam")
+
+
+
+
+
+@login_required(login_url='signin')
+def student_payment_input(request):
+    student = Students.objects.get(user=request.user)
+
+    full_name = " ".join(
+        filter(None, [student.first_name, student.middle_name, student.last_name])
+    )
+
+    context = {
+        "student_name": full_name,
+        "student_email": student.email or student.user.email,
+        "student_phone": student.phone_number,
+        "student": student,
+    }
+
+    return render(request, "student/payment_input.html", context)
+
+def student_confirm_payment(request):
+    payment = request.session.get("payment_temp")
+    
+    context={
+        "payment":payment,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID, 
+    }
+    print("payment=====",payment)
+    return render(request, "student/confirm_payment.html",context)
+
+def student_change_password(request):
+    return render(request, "student/change_password.html")
+
+def student_doubt_view(request,id):
+    return render(request, "student/doubt_view.html")
+
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Payments
+
+@login_required
+def make_payment(request):
+    if request.method == "POST":
+        student = request.user.student.first()  # Logged-in student
+
+        Payments.objects.create(
+            name=request.POST.get("name"),
+            email=request.POST.get("email"),
+            phone=request.POST.get("phone"),
+            person_group="student",
+            amount=request.POST.get("amount"),
+            message=request.POST.get("message"),
+            student=student,
+            is_paid=False  # still pending
+        )
+
+        return render(request, "payment_success.html")
+
+    return render(request, "make_payment.html")
+
+
+
+from django.http import JsonResponse
+import json
+
+@login_required
+def save_payment_temp(request):
+    # data = json.loads(request.body)
+    data = json.loads(request.body.decode("utf-8"))
+
+    print("payment temp data=====",data)
+
+    request.session["payment_temp"] = {
+        "name": data["name"],
+        "email": data["email"],
+        "phone": data["phone"],
+        "group": data["group"],
+        "amount": data["amount"],
+        "message": data["message"],
+    }
+
+    return JsonResponse({"status": "ok"})
+
+
+
+
+import json
+import requests
+from django.http import JsonResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def create_paypal_order(request):
+    data = json.loads(request.body)
+    amount = data.get("amount", "10.00")   # dynamic amount
+
+    CLIENT_ID = settings.PAYPAL_CLIENT_ID
+    CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+
+    # 1) Get Access Token
+    token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+    token_headers = {
+        "Accept": "application/json",
+        "Accept-Language": "en_US"
+    }
+    token_data = {"grant_type": "client_credentials"}
+
+    token_response = requests.post(
+        token_url,
+        headers=token_headers,
+        data=token_data,
+        auth=(CLIENT_ID, CLIENT_SECRET)
+    )
+
+    access_token = token_response.json()["access_token"]
+
+    # 2) Create Order
+    order_url = "https://api-m.sandbox.paypal.com/v2/checkout/orders"
+    order_headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    body = {
+        "intent": "CAPTURE",
+        "purchase_units": [
+            {
+                "amount": {
+                    "currency_code": "USD",
+                    "value": str(amount)
+                }
+            }
+        ]
+    }
+
+    order_response = requests.post(order_url, json=body, headers=order_headers)
+    order_json = order_response.json()
+
+    if "id" in order_json:
+        return JsonResponse({"orderID": order_json["id"]})
+    else:
+        return JsonResponse({
+            "error": True,
+            "details": order_json
+        }, status=400)
+
+
+
+
+
+import json
+import requests
+from django.http import JsonResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def capture_paypal_order(request):
+    data = json.loads(request.body)
+    order_id = data.get("orderID")
+
+    CLIENT_ID = settings.PAYPAL_CLIENT_ID
+    CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+
+    # 1) Get Access Token
+    token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+    token_headers = {
+        "Accept": "application/json",
+        "Accept-Language": "en_US"
+    }
+    token_data = {"grant_type": "client_credentials"}
+
+    token_response = requests.post(
+        token_url,
+        headers=token_headers,
+        data=token_data,
+        auth=(CLIENT_ID, CLIENT_SECRET)
+    )
+
+    access_token = token_response.json()["access_token"]
+
+    # 2) Capture order
+    capture_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
+    capture_headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    capture_response = requests.post(capture_url, headers=capture_headers)
+    capture_json = capture_response.json()
+
+    # SUCCESS?
+    status = capture_json.get("status")
+
+    if status == "COMPLETED":
+        # save payment in your DB here
+        # clear session if needed
+        return JsonResponse({"status": "success", "details": capture_json})
+
+    return JsonResponse({"status": "failed", "details": capture_json})
+
+
+
+def payment_success(request):
+    return render(request, "student/payment_success.html")
+
+
+def payment_failed(request):
+    return render(request, "student/payment_failed.html")
+
+# @login_required(login_url='signin')
+
+
+# @login_required(login_url='signin')
+
+
+
+@login_required(login_url='signin')
 def index(request): 
     pages = Pages.objects.all()
-    student=Students.objects.get(id=10600)
+    # student=Students.objects.get(id=10600)
+    student=Students.objects.get(user=request.user)
     context = {"pages":pages,"student":student}
     return render(request,"site_pages/index.html",context)
 
@@ -471,7 +1102,8 @@ def new_admission_form(request):
         try:
             lang_obj = None
             if language:
-                lang_obj = Languages.objects.filter(language_name__icontains=language).first()
+                # lang_obj = Languages.objects.filter(language_name__icontains=language).first()
+                lang_obj = Languages.objects.filter(id=language).first()
                 if lang_obj:
                     logger.info(f" Language lookup: {lang_obj.language_name} (ID: {lang_obj.id})")
                 else:
@@ -705,6 +1337,10 @@ def signin(request):
         user = authenticate(request, email = username, password = password)
         if user is not None:
             login(request,user)
+            role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
+            if role == "Student":
+                return redirect('student_home')
+
             return redirect('admin_index')
         else:
             messages.info(request,"User name or password incorrect")
@@ -995,10 +1631,14 @@ def admin_functions():
 def student_index(request):
     try:
         # student  = request.user.student
-        student= Students.objects.get(id=166)
+        student= Students.objects.get(user=request.user)
     except:
         student = None
     print("--------------",student)
+    print("LOGGED USER =", request.user.id)
+    print("USER EMAIL =", request.user.email)
+    print("USER NAME =", request.user.username)
+
     context = {
         'student': student,
     }

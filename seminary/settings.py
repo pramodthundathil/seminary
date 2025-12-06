@@ -17,6 +17,10 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+PAYPAL_CLIENT_ID = "AUT5f14PL6EVvVK7hr8u2Mweloqi2CwT0bFDsqcD7bZyW_ogWbv9p8WrSjDsUzLMnUTs1qRdo4VsLEwA"
+PAYPAL_CLIENT_SECRET = "EM4MPEwnLx3SsCq9GQt4-7szLoHyKMWWk2C-DI0xKIsuiADPk1L_7ytDRr-KcvXmqMc-NDYEcBAFpwdf"
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -269,3 +273,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGIN_URL = '/signin/'

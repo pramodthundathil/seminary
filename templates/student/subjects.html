@@ -242,8 +242,9 @@
         border-radius: 0.75rem;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         max-width: 500px;
-        width: 90%;
-        max-height: 80vh;
+        width: 150%;
+        height: 80%;
+        /* max-height: 100vh; */
         overflow-y: auto;
         animation: slideUp 0.3s ease-in-out;
         border: 1px solid var(--border);
@@ -656,12 +657,253 @@
             font-size: 0.75rem;
         }
     }
+    /* Enhanced Searchable Dropdown Styles */
+.modal-form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.subject-search-input {
+    width: 100% !important;
+    padding: 0.75rem 2.5rem 0.75rem 1rem !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.9375rem !important;
+    background: var(--bg-page) !important;
+    color: var(--text-primary) !important;
+    position: relative;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.subject-search-input:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.subject-search-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* Search icon indicator */
+.modal-form-group::after {
+    content: "🔍";
+    position: absolute;
+    right: 1rem;
+    top: 2.5rem;
+    pointer-events: none;
+    opacity: 0.5;
+    font-size: 0.875rem;
+}
+
+.subject-dropdown {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
+/* Custom scrollbar for dropdown */
+.subject-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.subject-dropdown::-webkit-scrollbar-track {
+    background: var(--bg-page);
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.subject-dropdown::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.subject-dropdown::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.subject-option {
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.15s ease;
+    font-size: 0.9375rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    line-height: 1.4;
+}
+
+.subject-option:last-child {
+    border-bottom: none;
+}
+
+.subject-option:hover {
+    background: var(--bg-page);
+    padding-left: 1.25rem;
+}
+
+.subject-option.selected {
+    background: linear-gradient(90deg, var(--primary) 0%, #00B8BA 100%);
+    color: white;
+    font-weight: 500;
+    padding-left: 1.25rem;
+}
+
+.subject-option.selected::before {
+    content: "✓";
+    position: absolute;
+    left: 0.5rem;
+    font-weight: bold;
+}
+
+.subject-option.hidden {
+    display: none;
+}
+
+/* Empty state for no results */
+.subject-dropdown.no-results::after {
+    content: "No subjects found";
+    display: block;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.subject-dropdown.no-results .subject-option {
+    display: none;
+}
+
+/* Dropdown appears animation */
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subject-dropdown[style*="display: block"] {
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+/* Selected subject display badge */
+.selected-subject-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+    color: white;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.selected-subject-badge .clear-selection {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    font-weight: bold;
+}
+
+.selected-subject-badge .clear-selection:hover {
+    opacity: 1;
+}
+
+/* Mobile responsive adjustments */
+@media screen and (max-width: 576px) {
+    .subject-search-input {
+        padding: 0.625rem 2.25rem 0.625rem 0.875rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    .subject-dropdown {
+        max-height: 220px;
+    }
+
+    .subject-option {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .subject-option:hover,
+    .subject-option.selected {
+        padding-left: 1rem;
+    }
+
+    .modal-form-group::after {
+        right: 0.875rem;
+        top: 2.25rem;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .subject-search-input {
+        padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    .subject-dropdown {
+        max-height: 180px;
+    }
+
+    .subject-option {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+}
+.subject-dropdown {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    max-height: 540px;      /* height for exactly 5 items */
+    overflow-y: auto;        /* scroll after 5 items */
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
 </style>
 
+
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+{% endif %}
+{% if not error %}
 <div style="padding:0; background:transparent; box-shadow:none; border:none;">
 
     <!-- PAGE HEADER -->
-    <div class="page-header">
+    <div class="page-header" >
         <h1>📚 My Subjects</h1>
         <button id="requestSubjectBtn" class="request-btn">Request a Subject</button>
     </div>
@@ -703,9 +945,9 @@
             <tbody>
                 {% for s in subjects %}
                 <tr>
-                    <td>{{ s.subject_name }}</td>
+                    <td>{{ s.subject.subject_name }}</td>
                     <td>
-                        <span class="status-badge">{{ s.status }}</span>
+                        <span class="status-badge">{{ s.is_approved }}</span>
                     </td>
                 </tr>
                 {% empty %}
@@ -735,8 +977,8 @@
 
 <!-- REQUEST SUBJECT MODAL -->
 <div id="requestSubjectModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
+    <div class="modal-content" >
+        <div class="modal-header" >
             <h2>Request a Subject</h2>
             <button id="closeModalBtn" class="modal-close">&times;</button>
         </div>
@@ -752,19 +994,18 @@
                         class="subject-search-input"
                         placeholder="Search and select a subject..."
                     >
-                    <div id="subjectDropdown" class="subject-dropdown" >
+                        <div id="subjectDropdown" class="subject-dropdown">
+                            {% for s in all_subject %}
+                                <div class="subject-option" 
+                                    data-value="{{ s.id }}"
+                                    data-text="{{ s.subject_name }} ({{ s.subject_code }})">
+                                    {{ s.subject_name }} ({{ s.subject_code }})
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
-                <div class="modal-form-group">
-                    <label>Selected Subject: <span id="selectedSubjectDisplay" style="font-weight: bold; color: var(--primary);"></span></label>
-                    <input type="hidden" id="selectedSubject" name="category" value="">
-                </div>
             </form>
-        </div>
-
-        <div class="modal-footer">
-            <button id="cancelModalBtn" class="modal-btn secondary">Cancel</button>
-            <button id="submitRequestBtn" class="modal-btn primary">Submit Request</button>
         </div>
     </div>
 </div>
@@ -774,16 +1015,12 @@
         const modal = document.getElementById('requestSubjectModal');
         const openBtn = document.getElementById('requestSubjectBtn');
         const closeBtn = document.getElementById('closeModalBtn');
-        const cancelBtn = document.getElementById('cancelModalBtn');
-        const submitBtn = document.getElementById('submitRequestBtn');
         const form = document.getElementById('requestSubjectForm');
 
         // Search functionality
         const searchInput = document.getElementById('subjectSearch');
         const dropdown = document.getElementById('subjectDropdown');
         const options = document.querySelectorAll('.subject-option');
-        const selectedSubjectDisplay = document.getElementById('selectedSubjectDisplay');
-        const selectedSubjectInput = document.getElementById('selectedSubject');
 
         if (!modal || !openBtn) return;
 
@@ -801,15 +1038,11 @@
             form.reset();
             searchInput.value = '';
             dropdown.style.display = 'none';
-            selectedSubjectDisplay.textContent = 'None';
-            selectedSubjectInput.value = '';
             options.forEach(opt => opt.classList.remove('hidden', 'selected'));
         }
 
         closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
 
-        // Close when clicking outside modal
         modal.addEventListener('click', function(e){
             if (e.target === modal) {
                 closeModal();
@@ -831,41 +1064,51 @@
                 }
             });
 
-            dropdown.style.display = searchTerm.length > 0 && hasVisibleOptions ? 'block' : 'none';
+            dropdown.style.display = hasVisibleOptions ? 'block' : 'none';
+
         });
 
-        // Show dropdown on focus
-        searchInput.addEventListener('focus', function(){
-            if (this.value.length > 0) {
-                dropdown.style.display = 'block';
-            }
+
+        searchInput.addEventListener('focus', function () {
+            options.forEach(opt => opt.classList.remove('hidden'));
+            dropdown.style.display = 'block';
         });
 
-        // Hide dropdown on blur (with small delay for click handling)
-        searchInput.addEventListener('blur', function(){
-            setTimeout(() => {
-                dropdown.style.display = 'none';
-            }, 200);
+
+        searchInput.addEventListener('blur', function(e){
         });
 
-        // Option selection
+
+            // Option selection
         options.forEach(option => {
-            option.addEventListener('click', function(){
-                const value = this.getAttribute('data-value');
-                const text = this.textContent;
+            option.addEventListener('click', function () {
 
-                searchInput.value = text;
-                selectedSubjectDisplay.textContent = text;
-                selectedSubjectInput.value = value;
-                dropdown.style.display = 'none';
+                const text = this.getAttribute('data-text');
 
-                // Mark as selected
-                options.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
+                // close modal
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+
+                setTimeout(() => {
+                    if (confirm(`Do you want to request this subject?\n\n${text}`)) {
+                        
+                        fetch("/request-subject/", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            },
+                            body: "subject_id=" + this.dataset.value
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            alert(data.message);
+                        });
+                    }
+                }, 150);
             });
         });
 
-        // Error message element
         const errorMessage = document.getElementById('errorMessage');
 
         function showError(message) {
@@ -877,33 +1120,16 @@
             errorMessage.classList.remove('show');
             errorMessage.textContent = '';
         }
-
-        // Handle submit
-        submitBtn.addEventListener('click', function(){
-            clearError();
-
-            if (selectedSubjectInput.value.trim() === '') {
-                showError('Please choose a subject');
-                return;
-            }
-
-            console.log('Form submitted:', {
-                subject: selectedSubjectDisplay.textContent,
-                value: selectedSubjectInput.value
-            });
-            alert('Subject request submitted successfully!');
-            closeModal();
-        });
-
-        // Close on Escape key
         document.addEventListener('keydown', function(e){
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 closeModal();
             }
         });
     })();
-</script>
 
+    
+</script>
+{% endif %}
 {% endblock %}
 
 {% block right %}

@@ -722,8 +722,8 @@
                     {% if student_exams %}
                         {% for item in student_exams %}
                             <tr>
-                                <td>{{ item.exam_id.code }}</td>
-                                <td>{{ item.exam_id.exam_name }}</td>
+                                <td>{{ item.exam.code }}</td>
+                                <td>{{ item.exam.exam_name }}</td>
                                 <td>total_score </td>
                                 <td>{{ item.show_on_score }}</td>
                                 <td>percentage</td>
@@ -772,9 +772,9 @@
                         {% if assignment_mark %}
                             {% for item in assignment_mark %}
                                 <tr>
-                                    <td>{{ item.assignment_id.code }}</td>
-                                    <td>{{ item.assignment_id.assignment_name }}</td>
-                                    <td>{{ item.assignment_id.total_score }}</td>
+                                    <td>{{ item.assignment.code }}</td>
+                                    <td>{{ item.assignment.assignment_name }}</td>
+                                    <td>{{ item.assignment.total_score }}</td>
                                     <td>{{ item.total_marks }}</td>
                                     <td>Percentage</td>
                                     <td>-GRADE</td>
@@ -814,24 +814,24 @@
                     <tbody id="finalScoreBody">
                         <tr>
                             <td data-label="Particular">Exam</td>
-                            <td data-label="Total Score" id="examTotalScore">0</td>
-                            <td data-label="Score" id="examScore">0</td>
-                            <td data-label="Percentage" id="examPercentage">0%</td>
-                            <td data-label="Grade"><span class="grade-badge grade-failed">Failed</span></td>
+                            <td data-label="Total Score" id="examTotalScore">N/A</td>
+                            <td data-label="Score" id="examScore">N/A</td>
+                            <td data-label="Percentage" id="examPercentage">N/A</td>
+                            <td data-label="Grade"><span class="grade-badge grade-failed">N/A</span></td>
                         </tr>
                         <tr>
                             <td data-label="Particular">Assignment</td>
-                            <td data-label="Total Score" id="assignmentTotalScore">0</td>
-                            <td data-label="Score" id="assignmentScore">0</td>
-                            <td data-label="Percentage" id="assignmentPercentage">0%</td>
-                            <td data-label="Grade"><span class="grade-badge grade-failed">Failed</span></td>
+                            <td data-label="Total Score" id="assignmentTotalScore">N/A</td>
+                            <td data-label="Score" id="assignmentScore">N/A</td>
+                            <td data-label="Percentage" id="assignmentPercentage">N/A</td>
+                            <td data-label="Grade"><span class="grade-badge grade-failed">N/A</span></td>
                         </tr>
                         <tr>
                             <td data-label="Particular"><strong>Total</strong></td>
-                            <td data-label="Total Score"><strong id="grandTotalScore">0</strong></td>
-                            <td data-label="Score"><strong id="grandScore">0</strong></td>
-                            <td data-label="Percentage"><strong id="grandPercentage">0%</strong></td>
-                            <td data-label="Grade"><span id="finalGrade" class="grade-badge grade-failed">Failed</span></td>
+                            <td data-label="Total Score"><strong id="grandTotalScore">N/A</strong></td>
+                            <td data-label="Score"><strong id="grandScore">N/A</strong></td>
+                            <td data-label="Percentage"><strong id="grandPercentage">N/A</strong></td>
+                            <td data-label="Grade"><span id="finalGrade" class="grade-badge grade-failed">N/A</span></td>
                         </tr>
                     </tbody>
                 </table>

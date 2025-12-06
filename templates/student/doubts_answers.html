@@ -168,16 +168,38 @@
                     <th>Category</th>
                     <th>Last Updated</th>
                     <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                <tr>
-                    <td>Sample question about course requirements</td>
-                    <td>General</td>
-                    <td>27 Nov, 2025 06:49 AM</td>
-                    <td><span class="status-badge status-open">Open</span></td>
-                </tr>
-            </tbody>
+                <tbody id="tableBody">
+                {% if doubt %}
+                    {% for d in doubt %}
+                        <tr>
+                            <td>{{ d.doubt_question }}</td>
+                            <td>{{ d.category }}</td>
+                            <td>{{ d.updated_at }}</td>
+                            <td>
+                                <span class="status-badge status-open">
+                                    {% if d.status == "1" %}Open{% else %}Closed{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'student_doubt_view' d.id %}" 
+                                style="text-decoration:none; font-size:18px; cursor:pointer;">
+                                🔍
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:15px; color:#64748b;">
+                            No doubts found.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+
         </table>
     </div>
 
