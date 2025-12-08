@@ -331,7 +331,7 @@
         width: 60px;
         height: 3px;
         background: var(--primary-cyan);
-        box-shadow: 0 0 10px rgba(0, 206, 209, 0.4);
+        box-shadow: none !important;
     }
 
     .content-body h2:first-child {
@@ -371,12 +371,7 @@
         gap: 0.5rem;
     }
 
-    .content-body h4::before {
-        content: "▸";
-        color: var(--primary-cyan);
-        font-size: 1.2em;
-    }
-
+   
     .content-body p {
         margin-bottom: 1.5rem;
         line-height: 1.8;
@@ -407,16 +402,16 @@
     }
 
     .content-body ul li::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0.6em;
-        width: 8px;
-        height: 8px;
-        background: var(--primary-cyan);
-        border-radius: 50%;
-        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.15);
-    }
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-cyan);
+    border-radius: 50%;
+    box-shadow: none !important;   /* REMOVE CYAN OUTLINE */
+}
 
     .content-body ul li:hover::before {
         background: var(--success);
