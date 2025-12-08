@@ -606,7 +606,7 @@
         </div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" id="studentApplicationForm">
+    <form method="POST" onsubmit="return validateForm(event)" enctype="multipart/form-data" id="studentApplicationForm">
         {% csrf_token %}
 
         <!-- Section 1: Referee Information -->
@@ -1036,6 +1036,23 @@
             }
         });
     });
+     function validateForm(event) {
+    const recaptcha = grecaptcha.getResponse();
+
+    // If reCAPTCHA not checked
+    if (!recaptcha || recaptcha.length === 0) {
+        alert("Please complete the reCAPTCHA before submitting.");
+        event.preventDefault(); // STOP submission
+        return false;
+    }
+
+    // If valid, allow submit and then reset form
+    setTimeout(() => {
+        document.getElementById("studentApplicationForm").reset();
+    }, 300);
+
+    return true;
+}
 
 </script>
 {% endblock %}

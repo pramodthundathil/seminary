@@ -43,6 +43,13 @@ urlpatterns = [
     path("check/",views.test_menu_debug,name="test_menu_debug"),
     path("course-list/",views.courses,name="course-list"),
     path("forgot-password/", views.forgot_password, name="forgot_password"),
-
+    
+   # Guest Registration
+    path('guest/register/', views.signup_guest, name='guest_register'),
+    path('guest/success/<str:guest_id>/', views.guest_registration_success, name='guest_registration_success'),
+    
+    # Church Admin Registration
+    path('church-admin/register/', views.signup_church_admin, name='church_admin_register'),
+    path('church-admin/success/<str:admin_id>/', views.church_admin_registration_success, name='church_admin_registration_success'),
     
 ]
