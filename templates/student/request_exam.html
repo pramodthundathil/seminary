@@ -365,7 +365,46 @@
     const examForm = document.getElementById('examForm');
     const successMessage = document.getElementById('successMessage');
 
-subjectSelect.addEventListener("change", function () {
+    // Handle form submission with success message
+    examForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        // Create FormData object
+        const formData = new FormData(examForm);
+        
+        // Submit the form via fetch
+        fetch(examForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Scroll to top to show the message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // After 2 seconds, redirect to exam hall
+                setTimeout(() => {
+                    window.location.href = '/student/exam-hall/';
+                }, 2000);
+            } else {
+                // If there's an error, submit the form normally to show Django error messages
+                examForm.submit();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // If there's a network error, submit the form normally
+            examForm.submit();
+        });
+    });
+
+    subjectSelect.addEventListener("change", function () {
     const subjectId = this.value;
 
     examSelect.innerHTML = '<option value="">[Select a subject first]</option>';

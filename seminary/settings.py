@@ -179,6 +179,7 @@ TEMPLATES = [
                 'home.context_processors.student_processor',
                 'home.context_processors.menu_context',
                 'home.context_processors.settings_context',
+                'home.context_processors.role_context',
 
             ],
         },

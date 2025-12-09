@@ -27,6 +27,20 @@ def student_processor(request):
         "student": student
     }
 
+
+def role_context(request):
+    role = ""
+    if request.user.is_authenticated:
+        user_role = request.user.user_roles.first()
+        if user_role:
+            role = user_role.role.name.lower().replace(" ", "_")  
+
+    return {
+        "role": role   
+    }
+
+
+
 # context_processors.py
 from django.urls import reverse
 from .models import Menus, MenuItems, Pages  

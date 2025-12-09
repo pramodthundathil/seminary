@@ -25,7 +25,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
-
+from django.core.paginator import Paginator
 
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
@@ -155,13 +155,35 @@ def student_subjects(request):
 
     # ---------------- SUBJECTS ----------------
     try:
-        subjects = StudentsSubjects.objects.select_related("subject").filter(
-            student=student,
-            # is_approved=True
-        )
+        subjects_queryset = StudentsSubjects.objects.select_related("subject").filter(
+            student=student
+        ).order_by('-id')
+        
+        # Apply filter based on selection
+        filter_option = request.GET.get('filter', 'all')
+        if filter_option == 'requested':
+            # Show subjects where is_approved is False (requested but not approved)
+            subjects_queryset = subjects_queryset.filter(is_approved=False)
+        elif filter_option == 'inprogress':
+            # Show subjects where is_approved is False (in progress)
+            subjects_queryset = subjects_queryset.filter(is_approved=False)
+        elif filter_option == 'rejected':
+            # For now, there's no reject_reason field being used, so show none
+            subjects_queryset = subjects_queryset.none()
+        elif filter_option == 'completed':
+            # Show subjects where is_approved is True
+            subjects_queryset = subjects_queryset.filter(is_approved=True)
+        # 'all' shows all subjects (no additional filter)
+        
+        # Pagination - 5 items per page
+        paginator = Paginator(subjects_queryset, 5)
+        page_number = request.GET.get('page')
+        subjects = paginator.get_page(page_number)
+        
     except Exception as e:
         logger.error(f"Failed to fetch student subjects for {student.id}: {e}")
         subjects = []
+        paginator = None
 
     # ---------------- ALL SUBJECTS ----------------
     try:
@@ -171,11 +193,19 @@ def student_subjects(request):
         all_subject = []
 
     context = {
-        "subjects": list(subjects),
+        "subjects": subjects,
         "all_subject": list(all_subject),
+        "paginator": paginator,
+        "current_filter": filter_option,
     }
 
+    # Check if this is an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Return only the table and pagination parts for AJAX updates
+        return render(request, "student/subjects.html", context)
+    
     return render(request, "student/subjects.html", context)
+
 
 # -----------------------------------------
 #  STUDENT UPLOADED ASSIGNMENT PAGE VIEWS
@@ -278,7 +308,7 @@ def student_exam_hall(request):
         })
 
     # ----- Prefetch exams & subjects -----
-    exams = (
+    exams_queryset = (
         StudentsExams.objects
         .filter(student=student)
         .select_related("exam", "exam__subject")
@@ -289,12 +319,18 @@ def student_exam_hall(request):
             "is_exam_started",
             "is_exam_ended",
         )
+        .order_by('-created_at')  # Order by most recent first
     )
+
+    # Pagination - 5 items per page
+    paginator = Paginator(exams_queryset, 5)
+    page_number = request.GET.get('page')
+    exams_page = paginator.get_page(page_number)
 
     exam_list = []
 
     # ----- Build formatted data safely -----
-    for e in exams:
+    for e in exams_page:
         try:
             exam_obj = e.exam
             subject_obj = exam_obj.subject if exam_obj else None
@@ -312,10 +348,11 @@ def student_exam_hall(request):
                 "Pending"
             )
         })
-    exam_list = sorted(exam_list, key=lambda x: x["requested_time"], reverse=True)    
 
     return render(request, "student/exam_hall.html", {
         "exam_list": exam_list,
+        "paginator": paginator,
+        "exams_page": exams_page,
         "request_exam_url": "/student/request-exam/",
     })
 
@@ -455,18 +492,36 @@ def student_support_create(request):
 @student_or_church_user
 def student_doubts_answers(request):
     try:
-        doubt = (
+        doubt_queryset = (
             Support.objects
             .filter(student__user=request.user)
             .select_related("student")
             .order_by("-created_at")
         )
+        
+        # Search functionality
+        search_query = request.GET.get('search', '')
+        print("serach========",search_query)
+        if search_query:
+            doubt_queryset = doubt_queryset.filter(
+                doubt_question__icontains=search_query
+            )
+        
+        # Pagination - 5 items per page
+        paginator = Paginator(doubt_queryset, 5)
+        page_number = request.GET.get('page')
+        doubts_page = paginator.get_page(page_number)
+        
     except Exception as e:
         logger.error(f"Failed to fetch doubts for user {request.user.id}: {e}")
-        doubt = []
+        doubts_page = []
+        paginator = None
 
     return render(request, "student/doubts_answers.html", {
-        "doubt": doubt
+        "doubt": doubts_page,
+        "paginator": paginator,
+        "doubts_page": doubts_page,
+        "search_query": search_query,
     })
 
 
@@ -581,53 +636,98 @@ from django.utils.timezone import make_aware
 from .models import StudentsExams, Students, Exams
 
 
+@require_POST
 @login_required
+@student_or_church_user
 def submit_request_exam(request):
-    if request.method == "POST":
-
+    try:
+        # ---------------------------
+        # GET STUDENT & EXAM OBJECTS
+        # ---------------------------
+        student = Students.objects.get(user=request.user)
+        
         subject_id = request.POST.get("subject")
         exam_id = request.POST.get("exam")
         timezone_val = request.POST.get("timezone")
         exam_date = request.POST.get("examDate")
         start_time = request.POST.get("startTime")
 
-        print("------ RECEIVED DATA ------")
-        print(subject_id, exam_id, timezone_val, exam_date, start_time)
+        # Validate required fields
+        if not all([subject_id, exam_id, timezone_val, exam_date, start_time]):
+            messages.error(request, "All fields are required")
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"status": "error", "message": "All fields are required"})
+            return redirect("student_request_exam")
 
-        # ---------------------------
-        # GET STUDENT & EXAM OBJECTS
-        # ---------------------------
-        student = Students.objects.get(user=request.user)
         exam = Exams.objects.get(id=exam_id)
 
         # ---------------------------
         # COMBINE DATE + TIME → DATETIME
         # ---------------------------
-        final_datetime_str = f"{exam_date} {start_time}"   # "2025-12-17 17:56"
-        final_datetime = datetime.strptime(final_datetime_str, "%Y-%m-%d %H:%M")
-        final_datetime = make_aware(final_datetime)  # MAKE TZ-aware
+        datetime_str = f"{exam_date} {start_time}"
+        try:
+            exam_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            final_datetime_str = f"{exam_date} {start_time}"   # "2025-12-17 17:56"
+            final_datetime = datetime.strptime(final_datetime_str, "%Y-%m-%d %H:%M")
+            final_datetime = make_aware(final_datetime)  # MAKE TZ-aware
+        except ValueError:
+            messages.error(request, "Invalid date or time format")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"status": "error", "message": "Invalid date or time format"}, status=400)
+            return redirect("student_request_exam")
 
         # ---------------------------
         # CREATE THE RECORD
         # ---------------------------
-        StudentsExams.objects.create(
-            student=student,
-            exam=exam,
-            start_time=final_datetime,
-            end_time=None,
-            exam_duration=exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
-            timezone=timezone_val,
-            requested_by=request.user,
-            created_by=request.user,
-            updated_by=request.user,
-            show_on_score=0,
-        )
+        try:
+            StudentsExams.objects.create(
+                student=student,
+                exam=exam,
+                start_time=final_datetime,
+                end_time=None,
+                exam_duration=exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                timezone=timezone_val,
+                requested_by=request.user,
+                created_by=request.user,
+                updated_by=request.user,
+                show_on_score=0,
+            )
 
-        messages.success(request, "Exam request submitted!")
+            messages.success(request, "Exam request submitted successfully!")
+            
+            # Handle AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"status": "success", "message": "Exam request submitted successfully!"})
+            
+            return redirect("student_exam_hall")
+            
+        except Exception as e:
+            messages.error(request, f"Failed to submit exam request: {str(e)}")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"status": "error", "message": f"Failed to submit exam request: {str(e)}"}, status=500)
+            return redirect("student_request_exam")
+
+    except Students.DoesNotExist:
+        messages.error(request, "Student not found")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "message": "Student not found"})
         return redirect("student_request_exam")
-
-
-
+        
+    except Exams.DoesNotExist:
+        messages.error(request, "Exam not found")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "message": "Exam not found"})
+        return redirect("student_request_exam")
+        
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"})
+        return redirect("student_request_exam")
 
 
 @login_required(login_url='signin')
@@ -1519,6 +1619,8 @@ def signin(request):
             role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
             if role == "Student":
                 return redirect('student_home')
+            elif role=="Church User":  
+                return redirect('church_user_home')  
 
             return redirect('admin_index')
         else:

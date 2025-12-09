@@ -291,7 +291,7 @@
         .then(data => {
             if (data.success) {
                 input.value = "";
-                window.location.href = "{% url 'student_doubts_answers' %}";
+                window.location.href = "{% url role|add:'_doubts_answers' %}";
             }
         });
     });

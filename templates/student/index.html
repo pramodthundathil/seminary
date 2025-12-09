@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Student Dashboard - Trinity Theological Seminary</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 <link rel="stylesheet" href="{% static 'css/student/index.css' %}">
     <!-- <style>
 
@@ -40,7 +40,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="{% url 'student_home' %}" class="nav-link">🏠 Home</a>
+                    <a href="{% url role|add:'_home' %}" class="nav-link">🏠 Home</a>
                 </li>
 
 
@@ -50,7 +50,7 @@
     <li class="nav-item">
         <span class="nav-link">📚 My Class ▼</span>
         <div class="dropdown">
-            <a href="{% url 'student_subjects' %}">📖 Subjects</a>
+            <a href="{% url role|add:'_subjects' %}">📖 Subjects</a>
 
             <div class="sub-parent" onclick="openRightMenu(event)">
                 <a href="#">📝 Assignment ▸</a>
@@ -68,18 +68,8 @@
     <li class="nav-item">
         <span class="nav-link">📚 My Class ▼</span>
         <div class="dropdown">
-            <a href="{% url 'student_subjects' %}">📖 Subjects</a>
+            <a href="{% url role|add:'_subjects' %}">📖 Subjects</a>
 
-            <!-- <div class="sub-parent" onclick="openRightMenu(event)">
-                <a href="#">📝 Assignment ▸</a>
-                <div class="right-submenu">
-                    <a href="{% url 'student_pending_assignment' %}">Upload Assignment</a>
-                    <a href="{% url 'student_submitted_assignment' %}">Submitted Assignments</a>
-                </div>
-            </div> -->
-
-            <!-- <a href="{% url 'student_view_post' %}">👁️ View Post</a> -->
-            <!-- <a href="#">🎥 Live Class</a> -->
         </div>
     </li>
 {% endif %}
@@ -89,10 +79,10 @@
     <span class="nav-link">📋 Exam ▼</span>
     <!-- <div class="dropdown">...</div> -->
         <div class="dropdown">
-        <a href="{% url 'student_exam_hall' %}">✍️ Exam Hall</a>
+        <a href="{% url role|add:'_exam_hall' %}">✍️ Exam Hall</a>
         
         <div class="sub-parent" onclick="openRightMenu(event)">
-            <a href="{% url 'student_score_card' %}">📊 Score Card </a>
+            <a href="{% url role|add:'_score_card' %}">📊 Score Card </a>
         </div>
         
     </div>
@@ -106,21 +96,25 @@
             <a href="#">📑 References </a>
         </div>
         
-        <a href="{% url 'student_class_recordings' %}">📼 Class Recordings</a>
+        <a href="{% url role|add:'_class_recordings' %}">📼 Class Recordings</a>
     </div>
 </li>
 <li><br></li>
 <li>
-    <div class="user-profile-header-containe">
-        <div class="user-profile-header" onclick="toggleUserDropdown(event)">
-            <div class="user-avatar-small">{{student.first_name|slice:":2" }}</div>
-            <span style="font-size: 0.75rem;"></span>
+    <div class="user-profile-header-containe " >
+        <div class="user-profile-header"  onclick="toggleUserDropdown(event)">
+            <div class="user-avatar-small" style="width: 40px !important; height: 40px !important; border-radius: 50% !important; aspect-ratio: 1/1;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: white;">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </div>
+            <!-- <span style="font-size: 0.75rem; margin-left: 8px; font-weight: 600; color: #374151;">{{student.first_name|slice:":1"|upper}}</span> -->
 
             <div class="user-dropdown" id="userDropdown" onclick="event.stopPropagation()">
                 <!-- <a href="{% url 'student_profile_view' %}">👤 My Profile</a> -->
-                <a href="{% url 'student_profile_view' %}">👤 My Profile</a>
+                <a href="{% url role|add:'_profile_view' %}">👤 My Profile</a>
 
-                <a href="{% url 'student_change_password' %}">📊 Change Password</a>
+                <a href="{% url role|add:'_change_password' %}">📊 Change Password</a>
                 <div class="divider"></div>
                 <a href="#">🚪 Logout</a>
             </div>
@@ -142,7 +136,7 @@
                 <p class="profile-id">{{ student.student_id}}</p>
                 <span class="role-badge">👨‍🎓 Student</span>
                  <br><br>
-                 <a href="{% url 'student_payment_input' %}" target="_blank" class="pay-button" style="text-decoration: none !important;">💳 Pay Now</a>
+                 <a href="{% url role|add:'_payment_input' %}" target="_blank" class="pay-button" style="text-decoration: none !important;">💳 Pay Now</a>
                 <div class="stats-wrapper">
                 <div class="stats-grid ">
                     <br><br><br><br><br><br><br><br>
