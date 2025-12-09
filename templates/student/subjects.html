@@ -947,7 +947,9 @@
                 <tr>
                     <td>{{ s.subject.subject_name }}</td>
                     <td>
-                        <span class="status-badge">{{ s.is_approved }}</span>
+                        <span class="status-badge {% if s.is_approved %}completed{% endif %}">
+                            {% if s.is_approved %}completed{% else %}inprogress{% endif %}
+                        </span>
                     </td>
                 </tr>
                 {% empty %}

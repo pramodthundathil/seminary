@@ -1,0 +1,793 @@
+{% extends 'site_pages/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background: #d7eaff !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .application-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+        background: transparent;
+        min-height: 100vh;
+        margin-top: -120px !important;
+        padding-top: 180px !important;
+    }
+
+    .application-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-top: 20px;
+    }
+
+    .application-header h1 {
+        color: var(--dark-navy);
+        font-size: 1.9rem !important;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .application-header p {
+        color: var(--text-gray);
+        font-size: 0.9rem !important;
+    }
+
+    @media (max-width: 768px) {
+        .application-container {
+            margin-top: -80px !important;
+            padding-top: 140px !important;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .application-header h1 {
+            font-size: 1.75rem !important;
+        }
+
+        .application-header p {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .application-container {
+            padding-top: 130px !important;
+        }
+
+        .application-header h1 {
+            font-size: 1.75rem !important;
+        }
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+    }
+
+    .progress-tracker {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        padding: 0 20px;
+        position: relative;
+    }
+
+    .progress-tracker::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+        background: transparent;
+        padding: 0;
+    }
+
+    .progress-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #9ca3af;
+        margin-bottom: 8px;
+        transition: all 0.3s;
+    }
+
+    .progress-step.active .progress-circle {
+        background: var(--primary-cyan);
+        color: white;
+    }
+
+    .progress-step.completed .progress-circle {
+        background: #10b981;
+        color: white;
+    }
+
+    .progress-step:not(.active):not(.completed) .progress-circle {
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+    }
+
+    .progress-label {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        text-align: center;
+        background: transparent;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+    }
+
+    .section-title {
+        color: var(--dark-navy);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 50px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--primary-cyan);
+        gap: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-row.two-cols {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row.three-cols {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 15px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s;
+        color: #374151;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-cyan);
+        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
+    }
+
+    .form-control.error {
+        border-color: #ef4444;
+    }
+
+    .error-message {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .phone-group {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 10px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        margin-bottom: 60px;
+        padding-bottom: 40px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-secondary {
+        background: #64748B !important;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569 !important;
+    }
+
+    .section-icon {
+        font-size: 28px;
+        background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
+        -webkit-background-clip: text;
+        color: transparent;
+        min-width: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+    .select2-container .select2-selection--single {
+        height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+    }
+
+    .select2-container .select2-selection__rendered {
+        line-height: 50px !important;
+        padding-left: 12px !important;
+        font-size: 15px !important;
+    }
+
+    .select2-container .select2-selection__arrow {
+        height: 50px !important;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .form-row.two-cols,
+        .form-row.three-cols {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-group {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-top: 30px;
+        }
+
+        .btn-group button {
+            max-width: 150px;
+            white-space: nowrap;
+            padding: 6px 14px;
+        }
+
+        .btn-group .btn-primary,
+        .btn-group .btn-secondary {
+            padding: 6px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        .phone-group {
+            grid-template-columns: 100px 1fr;
+        }
+
+        .progress-tracker {
+            padding: 0 10px;
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .section-title {
+            font-size: 18px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .application-header p {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="application-container">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="application-header">
+        <h1>Church Registration Form</h1>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Progress Tracker -->
+    <div class="progress-tracker">
+        <div class="progress-step active">
+            <div class="progress-circle">1</div>
+            <span class="progress-label">Church Info</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-circle">2</div>
+            <span class="progress-label">Admin Details</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-circle">3</div>
+            <span class="progress-label">Contact</span>
+        </div>
+    </div>
+
+    <form method="POST" onsubmit="return validateForm(event)" enctype="multipart/form-data" id="churchRegistrationForm">
+        {% csrf_token %}
+
+        <!-- Section 1: Church Information -->
+        <div class="form-section">
+            <h2 class="section-title"><i class="section-icon fa fa-church"></i>CHURCH INFORMATION</h2>
+
+            <div class="form-row three-cols">
+                <div class="form-group">
+                    <label>Register As <span class="required">*</span></label>
+                    <select name="register_as" class="form-select" required>
+                        <option value="">User</option>
+                        <option value="church_admin">Church Admin</option>
+                        <option value="pastor">Pastor</option>
+                        <option value="elder">Elder</option>
+                    </select>
+                    <small class="error-message" id="register_as_error"></small>
+                </div>
+                <div class="form-group">
+                    <label>Enter church Code <span class="required">*</span></label>
+                    <input type="text" name="church_code" class="form-control" value="{{ request.POST.church_code|default:'' }}" required>
+                    <small class="error-message" id="church_code_error"></small>
+                </div>
+                <div class="form-group">
+                    <label>Associate Degree <span class="required">*</span></label>
+                    <select name="associate_degree" class="form-select" required>
+                        <option value="">Select Degree</option>
+                        {% for course_applied in courses %}
+                        <option value="{{ course_applied.id }}">{{ course_applied.course_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="error-message" id="associate_degree_error"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Other Details -->
+        <div class="form-section">
+            <h2 class="section-title"><i class="fa fa-user section-icon"></i>OTHER DETAILS</h2>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>First Name <span class="required">*</span></label>
+                    <input type="text" name="first_name" class="form-control" value="{{ request.POST.first_name|default:'' }}" required>
+                    <small class="error-message" id="first_name_error"></small>
+                </div>
+                <div class="form-group">
+                    <label>Middle Name</label>
+                    <input type="text" name="middle_name" class="form-control" value="{{ request.POST.middle_name|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Last Name <span class="required">*</span></label>
+                    <input type="text" name="last_name" class="form-control" value="{{ request.POST.last_name|default:'' }}" required>
+                    <small class="error-message" id="last_name_error"></small>
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ request.POST.email|default:'' }}" required>
+                    <small class="error-message" id="email_error"></small>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                 <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <div class="phone-group">
+                        <select style="height:50px !important" id="phone_code" name="phone_code" class="form-select"
+                            required>
+                            <option value="">Code</option>
+                            {% for country in countries %}
+                            <option value="{{ country.phonecode }}">
+                                {{ country.name }} (+{{ country.phonecode }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <input type="tel" name="phone_number" class="form-control"
+                            value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
+                    </div>
+                    <small id="phone_number_error" class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth <span class="required">*</span></label>
+                    <input type="date" name="date_of_birth" class="form-control" value="{{ request.POST.date_of_birth|default:'' }}" required>
+                    <small class="error-message" id="date_of_birth_error"></small>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Gender <span class="required">*</span></label>
+                    <select name="gender" class="form-select" required>
+                        <option value="">---Select Gender---</option>
+                        <option value="male" {% if request.POST.gender == "male" %}selected{% endif %}>Male</option>
+                        <option value="female" {% if request.POST.gender == "female" %}selected{% endif %}>Female</option>
+                        <option value="other" {% if request.POST.gender == "other" %}selected{% endif %}>Other</option>
+                    </select>
+                    <small class="error-message" id="gender_error"></small>
+                </div>
+                <div class="form-group">
+                    <label>Mailing Address <span class="required">*</span></label>
+                    <input type="text" name="mailing_address" class="form-control" value="{{ request.POST.mailing_address|default:'' }}" required>
+                    <small id="mailing_address_error" class="error-message"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Contact Information -->
+        <div class="form-section">
+            <h2 class="section-title"><i class="fa fa-address-book section-icon"></i>Contact Information</h2>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>City <span class="required">*</span></label>
+                    <input type="text" name="city" class="form-control" value="{{ request.POST.city|default:'' }}" required>
+                    <small id="city_error" class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>State <span class="required">*</span></label>
+                    <input type="text" name="state" class="form-control" value="{{ request.POST.state|default:'' }}" required>
+                    <small id="state_error" class="error-message"></small>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Country <span class="required">*</span></label>
+                    <select name="country" class="form-select" required>
+                        <option value="">--- Select Country ---</option>
+                        {% for country in countries %}
+                        <option value="{{ country.id }}">{{ country.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small id="country_error" class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>Zipcode <span class="required">*</span></label>
+                    <input type="text" name="zipcode" class="form-control" value="{{ request.POST.zipcode|default:'' }}" required>
+                    <small id="zipcode_error" class="error-message"></small>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label>Timezone <span class="required">*</span></label>
+                    <select id="timezone" name="timezone" class="form-select" required>
+                        <option value="">--- Select Timezone ---</option>
+                    </select>
+                    <input type="hidden" id="selected_timezone" value="{{ request.POST.timezone }}">
+                    <small id="timezone_error" class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>Language Medium <span class="required">*</span></label>
+                    <select name="language" class="form-select" required>
+                        <option value="">--- Select Language ---</option>
+                        {% for language in languages %}
+                        <option value="{{ language.id }}">{{ language.language_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small id="language_error" class="error-message"></small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Church Affiliation <span class="required">*</span></label>
+                    <input type="text" name="church_affiliation" class="form-control" value="{{ request.POST.church_affiliation|default:'' }}" required placeholder="Enter your church name">
+                    <small id="church_affiliation_error" class="error-message"></small>
+                </div>
+            </div>
+
+            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="window.history.back()">Cancel</button>
+                <button type="submit" class="btn-primary" id="submitBtn">REGISTER</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="{% static 'js/timezone.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!window.TIMEZONE_LIST) {
+            console.error("TIMEZONE_LIST not loaded");
+            return;
+        }
+        const timezoneSelect = document.getElementById("timezone");
+        const selected = document.getElementById("selected_timezone").value;
+
+        window.TIMEZONE_LIST.forEach(tz => {
+            const option = document.createElement("option");
+            option.value = tz;
+            option.textContent = tz;
+            if (selected === tz) option.selected = true;
+            timezoneSelect.appendChild(option);
+        });
+
+        $('#phone_code').select2({
+            placeholder: "Search code or country",
+            allowClear: true
+        });
+    });
+
+    // Form submission with loading and validation
+    document.getElementById('churchRegistrationForm').addEventListener('submit', function (e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone_number").value.trim();
+
+        let isValid = true;
+        let errors = [];
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
+            } else {
+                field.classList.remove('error');
+            }
+        });
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            isValid = false;
+            errors.push("Enter a valid email address.");
+        }
+
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            isValid = false;
+            errors.push("Enter a valid 10-digit phone number (starts with 6-9).");
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert(errors.join("\n"));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+        }
+    });
+
+    // Progress tracking
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('churchRegistrationForm');
+        const progressSteps = document.querySelectorAll('.progress-step');
+        
+        const sections = [
+            {
+                fields: ['register_as', 'church_code', 'associate_degree']
+            },
+            {
+                fields: ['first_name', 'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 'gender', 'mailing_address']
+            },
+            {
+                fields: ['city', 'state', 'country', 'zipcode', 'timezone', 'language', 'church_affiliation', 'g-recaptcha-response']
+            }
+        ];
+
+        function checkSectionCompletion(sectionIndex) {
+            const sectionFields = sections[sectionIndex].fields;
+            if (sectionFields.length === 0) return true;
+            
+            return sectionFields.every(fieldName => {
+                const field = form.elements[fieldName];
+                if (!field) return true;
+                
+                if (field.type === 'select-one') {
+                    return field.value !== '';
+                }
+                return field.value.trim() !== '';
+            });
+        }
+
+        function updateProgressTracker() {
+            sections.forEach((section, index) => {
+                if (checkSectionCompletion(index)) {
+                    progressSteps[index].classList.add('completed');
+                    progressSteps[index].classList.remove('active');
+                } else {
+                    progressSteps[index].classList.remove('completed');
+                }
+            });
+            
+            for (let i = 0; i < sections.length; i++) {
+                if (!checkSectionCompletion(i)) {
+                    progressSteps[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updateProgressTracker);
+            input.addEventListener('blur', updateProgressTracker);
+        });
+
+        updateProgressTracker();
+    });
+
+    window.addEventListener('scroll', function () {
+        const sections = document.querySelectorAll('.form-section');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.add('active');
+                }
+            } else if (rect.top > window.innerHeight / 2) {
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.remove('active');
+                }
+            }
+        });
+    });
+     function validateForm(event) {
+    const recaptcha = grecaptcha.getResponse();
+
+    // If reCAPTCHA not checked
+    if (!recaptcha || recaptcha.length === 0) {
+        alert("Please complete the reCAPTCHA before submitting.");
+        event.preventDefault(); // STOP submission
+        return false;
+    }
+
+    // If valid, allow submit and then reset form
+    setTimeout(() => {
+        document.getElementById("churchRegistrationForm").reset();
+    }, 300);
+
+    return true;
+}
+</script>
+{% endblock %}

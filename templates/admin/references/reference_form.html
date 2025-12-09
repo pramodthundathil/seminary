@@ -1,0 +1,627 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.pdf-option-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdf-option-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+}
+
+.pdf-option-card i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+.pdf-option-card h4 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.pdf-option-card p {
+    margin: 8px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.media-item {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.media-item:hover {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+}
+
+.media-item.selected {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.media-item i {
+    font-size: 36px;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.media-item .file-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    margin: 8px 0;
+    word-break: break-word;
+}
+
+.media-item .file-size {
+    font-size: 11px;
+    color: #666;
+}
+
+.current-pdf-display {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.current-pdf-display i {
+    font-size: 48px;
+    color: #dc3545;
+    margin-bottom: 10px;
+}
+
+.btn-change-pdf {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.btn-change-pdf:hover {
+    background-color: #c82333;
+}
+
+.btn-remove-pdf {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-remove-pdf:hover {
+    background-color: #5a6268;
+}
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{{ action }} Reference</h1>
+        <a href="{% url 'reference_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="form-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        <form method="post" enctype="multipart/form-data" id="referenceForm">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Please correct the following errors:</strong>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <!-- Title Field -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                            {{ form.title.label }}
+                            <span style="color:red;">*</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.title.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Code Field (Auto-generated, readonly) -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.code.id_for_label }}" class="form-label">
+                            {{ form.code.label }}
+                            <span style="color:red;">*</span>
+                        </label>
+                        {{ form.code }}
+                        <small class="form-text text-muted">Auto-generated from title</small>
+                        {% if form.code.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.code.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Author Name -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.auther_name.id_for_label }}" class="form-label">
+                            {{ form.auther_name.label }}
+                        </label>
+                        {{ form.auther_name }}
+                        {% if form.auther_name.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.auther_name.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Subject -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.subject.id_for_label }}" class="form-label">
+                            {{ form.subject.label }}
+                            <span style="color:red;">*</span>
+                        </label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.subject.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Format Selection -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.format.id_for_label }}" class="form-label">
+                            {{ form.format.label }}
+                            <span style="color:red;">*</span>
+                        </label>
+                        {{ form.format }}
+                        {% if form.format.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.format.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">
+                            {{ form.status.label }}
+                            <span style="color:red;">*</span>
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.status.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- PDF Section (Hidden by default) -->
+                <div class="col-md-12" id="pdfSection" style="display:none;">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Reference File <span style="color:red;">*</span></label>
+                        
+                        <div id="pdfDisplayArea">
+                            {% if reference.reference_file %}
+                            <div class="current-pdf-display">
+                                <i class="fas fa-file-pdf"></i>
+                                <h5>{{ reference.reference_file.file_name }}</h5>
+                                <p class="text-muted">{{ reference.reference_file.file_size }} bytes</p>
+                                <button type="button" class="btn-change-pdf" onclick="openPdfModal()">
+                                    <i class="fas fa-edit"></i> Change PDF
+                                </button>
+                                <button type="button" class="btn-remove-pdf" onclick="removePdf()">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </div>
+                            {% else %}
+                            <button type="button" class="btn btn-primary" onclick="openPdfModal()">
+                                <i class="fas fa-file-pdf"></i> Select PDF
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        {{ form.selected_media_id }}
+                        {{ form.new_pdf_file }}
+                    </div>
+                </div>
+
+                <!-- Note Section (Hidden by default) -->
+                <div class="col-md-12" id="noteSection" style="display:none;">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.reference_note.id_for_label }}" class="form-label">
+                            Notes <span style="color:red;">*</span>
+                        </label>
+                        {{ form.media }}
+                        {{ form.reference_note }}
+                        {% if form.reference_note.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.reference_note.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger" style="font-size: 0.875rem;">
+                                {{ form.description.errors|striptags }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top:30px;padding-top:20px;border-top:1px solid #dee2e6;">
+                <button type="submit" class="btn btn-primary" style="min-width:120px;">
+                    <i class="fas fa-save"></i> {{ action }}
+                </button>
+                <a href="{% url 'reference_list' %}" class="btn btn-secondary" style="min-width:120px;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PDF Selection Modal -->
+<div id="pdfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Select PDF Source</h3>
+            <button class="close" onclick="closePdfModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalContent">
+            <!-- Initial choice view -->
+            <div id="choiceView">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="pdf-option-card" onclick="showUploadView()">
+                            <i class="fas fa-upload"></i>
+                            <h4>Upload New PDF</h4>
+                            <p>Upload a PDF from your computer</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pdf-option-card" onclick="showMediaLibraryView()">
+                            <i class="fas fa-folder-open"></i>
+                            <h4>Select from Library</h4>
+                            <p>Choose from existing PDFs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload view -->
+            <div id="uploadView" style="display:none;">
+                <button class="btn btn-secondary mb-3" onclick="showChoiceView()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div class="text-center" style="padding: 40px;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 64px; color: #007bff; margin-bottom: 20px;"></i>
+                    <h4>Upload PDF File</h4>
+                    <button type="button" class="btn btn-primary mt-3" onclick="document.getElementById('id_new_pdf_file').click()">
+                        <i class="fas fa-file-upload"></i> Choose File
+                    </button>
+                    <div id="uploadFileName" class="mt-3" style="font-weight: 500;"></div>
+                </div>
+            </div>
+
+            <!-- Media library view -->
+            <div id="mediaLibraryView" style="display:none;">
+                <button class="btn btn-secondary mb-3" onclick="showChoiceView()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div id="mediaGrid" class="media-grid">
+                    <!-- Media items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedMediaId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const titleField = document.getElementById('id_title');
+    const codeField = document.getElementById('id_code');
+    const formatField = document.getElementById('id_format');
+    const pdfSection = document.getElementById('pdfSection');
+    const noteSection = document.getElementById('noteSection');
+    const fileInput = document.getElementById('id_new_pdf_file');
+
+    // Auto-generate code from title
+    if (titleField && codeField) {
+        titleField.addEventListener('input', function() {
+            const title = this.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            codeField.value = title;
+        });
+    }
+
+    // File input change handler
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                document.getElementById('uploadFileName').textContent = 'Selected: ' + fileName;
+                updatePdfDisplay(fileName, null, 'upload');
+                closePdfModal();
+            }
+        });
+    }
+
+    // Toggle PDF/Note sections based on format
+    function toggleFormatSections() {
+        const selectedFormat = formatField.value;
+        
+        if (selectedFormat === 'PDF') {
+            pdfSection.style.display = 'block';
+            noteSection.style.display = 'none';
+        } else if (selectedFormat === 'note') {
+            pdfSection.style.display = 'none';
+            noteSection.style.display = 'block';
+        } else {
+            pdfSection.style.display = 'none';
+            noteSection.style.display = 'none';
+        }
+    }
+
+    // Initial state
+    if (formatField) {
+        toggleFormatSections();
+        formatField.addEventListener('change', toggleFormatSections);
+    }
+});
+
+function openPdfModal() {
+    document.getElementById('pdfModal').style.display = 'block';
+    showChoiceView();
+}
+
+function closePdfModal() {
+    document.getElementById('pdfModal').style.display = 'none';
+}
+
+function showChoiceView() {
+    document.getElementById('choiceView').style.display = 'block';
+    document.getElementById('uploadView').style.display = 'none';
+    document.getElementById('mediaLibraryView').style.display = 'none';
+}
+
+function showUploadView() {
+    document.getElementById('choiceView').style.display = 'none';
+    document.getElementById('uploadView').style.display = 'block';
+    document.getElementById('mediaLibraryView').style.display = 'none';
+}
+
+function showMediaLibraryView() {
+    document.getElementById('choiceView').style.display = 'none';
+    document.getElementById('uploadView').style.display = 'none';
+    document.getElementById('mediaLibraryView').style.display = 'block';
+    loadMediaLibrary();
+}
+
+function loadMediaLibrary() {
+    // You'll need to create this endpoint
+    fetch('/admin/get-media-pdfs/')
+        .then(response => response.json())
+        .then(data => {
+            const grid = document.getElementById('mediaGrid');
+            grid.innerHTML = '';
+            
+            if (data.pdfs.length === 0) {
+                grid.innerHTML = '<p class="text-center">No PDFs found in media library</p>';
+                return;
+            }
+            
+            data.pdfs.forEach(pdf => {
+                const item = document.createElement('div');
+                item.className = 'media-item';
+                item.onclick = () => selectMedia(pdf.id, pdf.file_name, item);
+                item.innerHTML = `
+                    <i class="fas fa-file-pdf"></i>
+                    <div class="file-name">${pdf.file_name}</div>
+                    <div class="file-size">${formatFileSize(pdf.file_size)}</div>
+                `;
+                grid.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading media library:', error);
+            document.getElementById('mediaGrid').innerHTML = '<p class="text-center text-danger">Error loading media library</p>';
+        });
+}
+
+function selectMedia(mediaId, fileName, element) {
+    // Remove previous selection
+    document.querySelectorAll('.media-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Add selection to clicked item
+    element.classList.add('selected');
+    selectedMediaId = mediaId;
+    
+    // Update hidden field
+    document.getElementById('selected_media_id').value = mediaId;
+    
+    // Update display
+    updatePdfDisplay(fileName, mediaId, 'library');
+    
+    // Close modal
+    setTimeout(() => {
+        closePdfModal();
+    }, 300);
+}
+
+function updatePdfDisplay(fileName, mediaId, source) {
+    const displayArea = document.getElementById('pdfDisplayArea');
+    displayArea.innerHTML = `
+        <div class="current-pdf-display">
+            <i class="fas fa-file-pdf"></i>
+            <h5>${fileName}</h5>
+            <p class="text-muted">${source === 'upload' ? 'New upload' : 'From media library'}</p>
+            <button type="button" class="btn-change-pdf" onclick="openPdfModal()">
+                <i class="fas fa-edit"></i> Change PDF
+            </button>
+            <button type="button" class="btn-remove-pdf" onclick="removePdf()">
+                <i class="fas fa-trash"></i> Remove
+            </button>
+        </div>
+    `;
+}
+
+function removePdf() {
+    document.getElementById('selected_media_id').value = '';
+    document.getElementById('id_new_pdf_file').value = '';
+    selectedMediaId = null;
+    
+    const displayArea = document.getElementById('pdfDisplayArea');
+    displayArea.innerHTML = `
+        <button type="button" class="btn btn-primary" onclick="openPdfModal()">
+            <i class="fas fa-file-pdf"></i> Select PDF
+        </button>
+    `;
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('pdfModal');
+    if (event.target == modal) {
+        closePdfModal();
+    }
+}
+</script>
+
+{% endblock %}

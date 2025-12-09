@@ -1,7 +1,7 @@
 {% load static %}
 
 <!-- navbar.html - Backend Processed Navigation -->
-<nav class="navbar navbar-expand-lg sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{% url 'index' %}">
             <img src="{% static 'img/Trinity_final-nobg.png' %}" style="max-width: 100px;" alt="Trinity Logo">
@@ -104,12 +104,14 @@
 <style>
 /* Navbar Styles */
 .navbar {
-    background: #ffffff;
+    background: #ffffff !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
     padding: 1rem 0;
 }
 
 .navbar-brand img {
+    width: 250px;
+    height: 50px; 
     transition: transform 0.3s ease;
 }
 
@@ -259,13 +261,16 @@
 /* Login Button */
 .btn-login {
     background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
-    color: #ffffff !important;
+    color:black !important;
     border: none;
-    padding: 0.65rem 1.75rem;
-    border-radius: 25px;
-    font-weight: 600;
+    
+    padding: 0.30rem 1rem;   /* MUCH SMALLER */
+    border-radius: 18px;     /* smaller curve */
+    font-size: 14px;         /* smaller text */
+    font-weight: 500;        /* lighter weight */
+    
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+    box-shadow: 0 3px 10px rgba(20, 184, 166, 0.25);
 }
 
 .btn-login:hover {

@@ -1,4 +1,14 @@
 
+from django.conf import settings
+
+def settings_context(request):
+    """
+    Context processor to make Django settings available in templates
+    """
+    return {
+        'settings': settings
+    }
+
 from .models import Students
 
 def student_processor(request):

@@ -1,0 +1,106 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Assignment Details</h1>
+        <div>
+            <a href="{% url 'assignments_edit' assignment.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'assignments_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container" style="max-width:900px;margin:0 auto;">
+        
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">ID</div>
+                <div class="detail-value">{{ assignment.id }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Assignment Code</div>
+                <div class="detail-value">{{ assignment.code }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Assignment Name</div>
+                <div class="detail-value">{{ assignment.assignment_name }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Subject</div>
+                <div class="detail-value">
+                    {% if assignment.subject %}
+                        {{ assignment.subject }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Assignment Type</div>
+                <div class="detail-value">
+                    {{ assignment.assignment_type|default:"-" }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Total Score</div>
+                <div class="detail-value">
+                    {{ assignment.total_score }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created At</div>
+                <div class="detail-value">
+                    {{ assignment.created_at|date:"Y-m-d H:i"|default:"-" }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Created By</div>
+                <div class="detail-value">
+                    {% if assignment.created_by %}
+                        {{ assignment.created_by.username|default:assignment.created_by }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Updated At</div>
+                <div class="detail-value">
+                    {{ assignment.updated_at|date:"Y-m-d H:i"|default:"-" }}
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Updated By</div>
+                <div class="detail-value">
+                    {% if assignment.updated_by %}
+                        {{ assignment.updated_by.username|default:assignment.updated_by }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="{% url 'assignments_delete' assignment.id %}" class="btn btn-danger" 
+               onclick="return confirm('Are you sure you want to delete this assignment?')">
+                <i class="fas fa-trash"></i> Delete Assignment
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

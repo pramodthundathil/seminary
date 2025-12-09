@@ -1,0 +1,394 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    .support-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border, #e0e0e0);
+    }
+
+    .support-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-left: 4px solid #007bff;
+    }
+
+    .support-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+    }
+
+    .support-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .support-meta .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .badge-open { background: #28a745; color: white; }
+    .badge-closed { background: #dc3545; color: white; }
+    .badge-pending { background: #ffc107; color: #000; }
+
+    .support-question {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .support-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .detail-item {
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 4px;
+    }
+
+    .detail-value {
+        color: #6c757d;
+    }
+
+    .replies-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .replies-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+    }
+
+    .reply-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        position: relative;
+        border-left: 3px solid #6c757d;
+    }
+
+    .reply-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .reply-author {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 0.9rem;
+    }
+
+    .reply-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .reply-content {
+        color: #333;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .reply-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .reply-form {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .reply-form h3 {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.3;
+    }
+
+    .alert {
+        padding: 12px 20px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+<div class="support-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-comments"></i> Support Query Details</h1>
+        <div>
+            <a href="{% url 'support_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Support Question Card -->
+    <div class="support-card">
+        <div class="support-header">
+            <div>
+                <h2 style="margin: 0 0 10px 0; color: #333;">Question #{{ support.id }}</h2>
+                <div class="support-meta">
+                    <i class="fas fa-user"></i> {{ support.student.name|default:"Student" }}
+                    <span class="badge badge-{% if support.status == '1' %}open{% elif support.status == '0' %}closed{% else %}pending{% endif %}">
+                        {% if support.status == '1' %}Open{% elif support.status == '0' %}Closed{% else %}Pending{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="support-meta" style="text-align: right;">
+                <div><i class="fas fa-clock"></i> {{ support.created_at|date:"M d, Y H:i" }}</div>
+                <div><i class="fas fa-tag"></i> {{ support.category|default:"General" }}</div>
+            </div>
+        </div>
+
+        <div class="support-question">
+            <strong>Question:</strong><br>
+            {{ support.doubt_question }}
+        </div>
+
+        {% if support.doubt_answer %}
+        <div class="support-question" style="background: #e7f3ff; border-left: 3px solid #007bff;">
+            <strong>Initial Answer:</strong><br>
+            {{ support.doubt_answer }}
+        </div>
+        {% endif %}
+
+        <div class="support-details">
+            {% if support.subjects %}
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-book"></i> Subject</div>
+                <div class="detail-value">{{ support.subjects.name }}</div>
+            </div>
+            {% endif %}
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-user-edit"></i> Created By</div>
+                <div class="detail-value">{{ support.created_by.username }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label"><i class="fas fa-calendar"></i> Last Updated</div>
+                <div class="detail-value">{{ support.updated_at|date:"M d, Y H:i" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Replies Section -->
+    <div class="replies-section">
+        <div class="replies-header">
+            <i class="fas fa-reply-all"></i> Replies ({{ replies.count }})
+        </div>
+
+        {% if replies %}
+            {% for reply in replies %}
+            <div class="reply-item">
+                <div class="reply-header">
+                    <div>
+                        <span class="reply-author">
+                            <i class="fas fa-user-circle"></i> {{ reply.created_by.username }}
+                        </span>
+                    </div>
+                    <span class="reply-time">
+                        <i class="fas fa-clock"></i> {{ reply.created_at|date:"M d, Y H:i" }}
+                    </span>
+                </div>
+                
+                <div class="reply-content">
+                    {{ reply.doubt_answer }}
+                </div>
+
+                <div class="reply-actions">
+                    <form method="post" action="{% url 'support_reply_delete' reply.id %}" 
+                          onsubmit="return confirm('Are you sure you want to delete this reply?')" 
+                          style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <p>No replies yet. Be the first to respond!</p>
+            </div>
+        {% endif %}
+
+        <!-- Reply Form -->
+        <div class="reply-form">
+            <h3><i class="fas fa-reply"></i> Add a Reply</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="doubt_answer">Your Reply</label>
+                    <textarea 
+                        name="doubt_answer" 
+                        id="doubt_answer" 
+                        class="form-control" 
+                        rows="5" 
+                        placeholder="Type your reply here..."
+                        required
+                    ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send Reply
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

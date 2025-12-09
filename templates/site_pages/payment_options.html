@@ -13,13 +13,19 @@
     .application-header {
         text-align: center;
         margin-bottom: 40px;
+        padding-top: 20px;
     }
 
     .application-header h1 {
         color: var(--dark-navy);
-        font-size: 2.5rem;
+        font-size: 1.9rem !important;
         margin-bottom: 10px;
         font-weight: 700;
+    }
+
+    .application-header p {
+        color: var(--text-gray);
+        font-size: 0.9rem !important;
     }
 
     .info-text {
@@ -126,36 +132,11 @@
         background: white;
         border-radius: 12px;
         padding: 30px;
-        margin-bottom: 30px;
+        margin-bottom: 30px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border: 1px solid #e5e7eb;
     }
 
-   .section-header {
-    display: flex;
-    justify-content: center;   /* centers icon + title horizontally */
-    align-items: center;        /* vertical center */
-    gap: 10px;
-    
-    margin-bottom: 50px;
-
-    padding: 0;
-    background: none;
-    border: none;
-    box-shadow: none;
-}
-
-.section-header i {
-    font-size: 1.7rem;
-    color: #007bff;
-}
-
-.section-header h3 {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: 600;
-    color: #0D1B3E;
-}
 
     /* === Form Fields === */
     .form-row-modern {
@@ -289,12 +270,18 @@
     }
 
     /* === Buttons === */
+
     .btn-group {
-        display: flex;
+        display: flex !important;
         gap: 15px;
-        justify-content: flex-end;
+        justify-content: flex-end !important;
         margin-top: 30px;
+        margin-bottom: 60px !important;
+        /* Add space at bottom */
+        padding-bottom: 40px;
+        /* Extra padding for better spacing */
     }
+
 
     .btn-primary,
     .btn-secondary {
@@ -326,7 +313,7 @@
     }
 
     .btn-secondary {
-        background: #64748B!important;
+        background: #64748B !important;
         color: white
     }
 
@@ -465,35 +452,6 @@
 
     }
 
-    /* Make navbar transparent */
-    nav.navbar {
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1050;
-        background: transparent !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
-    }
-
-    .application-header {
-        text-align: center;
-        margin-bottom: 40px;
-        padding-top: 20px;
-    }
-
-    .application-header h1 {
-        color: var(--dark-navy);
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-
-    .application-header p {
-        color: var(--text-gray);
-        font-size: 1.1rem;
-    }
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
@@ -523,22 +481,7 @@
         }
     }
 
-    .application-header {
-        text-align: center;
-        margin-bottom: 40px;
-    }
 
-    .application-header h1 {
-        color: var(--dark-navy);
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-
-    .application-header p {
-        color: var(--text-gray);
-        font-size: 1.1rem;
-    }
 
     .alert {
         padding: 15px 20px;
@@ -699,20 +642,13 @@
         text-align: center;
     }
 
-    .form-section {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e5e7eb;
-    }
+
 
     .section-title {
         color: var(--dark-navy);
         font-size: 1.5rem;
         font-weight: 600;
-        margin-bottom: 20px;
+        margin-bottom: 50px;
         padding-bottom: 15px;
         border-bottom: 2px solid var(--primary-cyan);
         gap: 12px;
@@ -827,16 +763,7 @@
         gap: 10px;
     }
 
-    .btn-group {
-        display: flex;
-        gap: 15px;
-        justify-content: flex-end;
-        margin-top: 30px;
-        margin-bottom: 60px;
-        /* Add space at bottom */
-        padding-bottom: 40px;
-        /* Extra padding for better spacing */
-    }
+
 
     .btn-primary,
     .btn-secondary {
@@ -880,36 +807,12 @@
         margin-top: 5px;
     }
 
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .loading-overlay.active {
-        display: flex;
-    }
-
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--primary-cyan);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
     /* Icon style */
     .section-icon {
         font-size: 28px;
-        color: #007bff;
+        background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
+        -webkit-background-clip: text;
+        color: transparent;
         /* Main theme color */
         min-width: 28px;
         /* Prevent shifting if icons vary */
@@ -917,6 +820,7 @@
         align-items: center;
         justify-content: center;
     }
+
 
     /* Optional: Hover Color Effect */
     .section-title:hover .section-icon {
@@ -926,12 +830,39 @@
     /* Responsive for small screens */
     @media (max-width: 576px) {
         .section-title {
-            font-size: 24px;
+            font-size: 18px;
         }
 
         .section-icon {
-            font-size: 24px;
+            font-size: 18px;
         }
+
+        .btn-group {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-top: 30px;
+        }
+
+        .btn-group button {
+            max-width: 150px;
+            white-space: nowrap;
+            padding: 6px 14px;
+
+        }
+
+        .btn-group .btn-primary,
+        .btn-group .btn-secondary {
+            padding: 6px 14px;
+            /* smaller height + width */
+            font-size: 14px;
+            /* reduce text size */
+            border-radius: 6px;
+            /* optional: smaller corners */
+        }
+
+
     }
 
 
@@ -951,6 +882,32 @@
         .form-row.three-cols {
             grid-template-columns: 1fr;
         }
+
+        .btn-group {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-top: 30px;
+        }
+
+        .btn-group button {
+            max-width: 150px;
+            white-space: nowrap;
+            padding: 6px 14px;
+
+        }
+
+        .btn-group .btn-primary,
+        .btn-group .btn-secondary {
+            padding: 6px 14px;
+            /* smaller height + width */
+            font-size: 14px;
+            /* reduce text size */
+            border-radius: 6px;
+            /* optional: smaller corners */
+        }
+
 
         .phone-group {
             grid-template-columns: 100px 1fr;
@@ -980,6 +937,12 @@
         .btn-secondary {
             width: 100%;
         }
+    }
+
+    /* Progress Step Inactive State */
+    .progress-step:not(.active):not(.completed) .progress-circle {
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
     }
 </style>
 
@@ -1020,118 +983,108 @@
         </div>
     </div>
 
-    <form id="paymentForm" method="POST" action="" novalidate>
+    <form id="paymentForm" method="POST" onsubmit="return validateForm(event)" action="" novalidate>
         {% csrf_token %}
 
         <!-- Personal Information -->
         <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-user"></i>
-                <h3>Personal Information</h3>
-            </div>
-
-            <div class="form-row-modern">
-                <div class="form-field">
+            <h2 class="section-title">
+                <i class="fas fa-user section-icon"></i>
+                Personal Information
+            </h2>
+            <div class="form-row two-cols">
+                <div class="form-group">
                     <label for="full_name">Full Name <span class="required">*</span></label>
-                    <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+                    <input type="text" id="full_name" name="full_name" class="form-control"
+                        placeholder="Enter your full name" required>
                     <small class="error-message" id="full_name_error"></small>
                 </div>
-                <div class="form-field">
+                <div class="form-group">
                     <label for="email">Email Address <span class="required">*</span></label>
-                    <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="example@email.com"
+                        required>
                     <small class="error-message" id="email_error"></small>
                 </div>
             </div>
 
-            <div class="form-row-modern">
-                <div class="form-field">
-                    <label for="contact">Contact Number <span class="required">*</span></label>
-                    <input type="tel" id="contact" name="contact" placeholder="(555) 123-4567" required>
-                    <small class="error-message" id="contact_error"></small>
+            <div class="form-row two-cols">
+                <!-- Phone Number -->
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <div class="phone-group">
+                        <select id="phone_code" name="phone_code" class="form-select" required>
+                            <option value="">Code</option>
+                            {% for country in countries %}
+                            <option value="{{ country.phonecode }}">
+                                {{ country.name }} (+{{ country.phonecode }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <input type="tel" name="phone_number" class="form-control"
+                            value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
+                    </div>
+                    <small id="phone_number_error" class="error-message"></small>
                 </div>
-                <div class="form-field">
-                    <label for="student_id">Student ID (Optional)</label>
-                    <input type="text" id="student_id" name="student_id" placeholder="Enter your student ID">
+                <div class="form-group">
+                    <label for="person_group">Person Group<span class="required">*</span></label>
+                    <select name="person_group" class="form-select" required>
+                        <option value="">--- Select ---</option>
+                        <option value="student">Student</option>
+                        <option value="applicant">Applicant</option>
+                        <option value="guest">Guest</option>
+                        <option value="donor">Donor</option>
+                    </select>
+                    <small class="error-message" id="person_group_error"></small>
                 </div>
             </div>
         </div>
 
         <!-- Payment Details -->
         <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-credit-card"></i>
-                <h3>Payment Details</h3>
-            </div>
-
-            <div class="form-row-modern">
-                <div class="form-field">
-                    <label for="payment_type">Payment Type <span class="required">*</span></label>
-                    <select id="payment_type" name="payment_type" required>
-                        <option value="">--- Select Payment Type ---</option>
-                        <option value="tuition">Tuition Fee</option>
-                        <option value="enrollment">Enrollment Fee</option>
-                        <option value="application">Application Fee</option>
-                        <option value="course">Course Fee</option>
-                        <option value="library">Library Fee</option>
-                        <option value="exam">Exam Fee</option>
-                        <option value="accommodation">Accommodation Fee</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <small class="error-message" id="payment_type_error"></small>
+            <h2 class="section-title">
+                <i class="fas fa-credit-card section-icon"></i>
+                Payment Details
+            </h2>
+            <div class="form-group">
+                <label for="amount">Payment Amount <span class="required">*</span></label>
+                <div class="amount-input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="1"
+                        placeholder="0.00" required>
                 </div>
-                <div class="form-field">
-                    <label for="course">Course/Program</label>
-                    <select id="course" name="course">
-                        <option value="">--- Select Program ---</option>
-                        <option value="undergraduate">Undergraduate Level</option>
-                        <option value="masters">Master's Level</option>
-                        <option value="doctoral">Doctoral Level</option>
-                        <option value="certificate">Certificate Program</option>
-                        <option value="continuing">Continuing Education</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row-modern">
-                <div class="form-field">
-                    <label for="amount">Payment Amount <span class="required">*</span></label>
-                    <div class="amount-input-wrapper">
-                        <span class="currency-symbol">$</span>
-                        <input type="number" id="amount" name="amount" step="0.01" min="1" placeholder="0.00" required>
-                    </div>
-                    <small class="error-message" id="amount_error"></small>
-                </div>
-
+                <small class="error-message" id="amount_error"></small>
             </div>
         </div>
-
         <!-- Additional Information -->
         <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-comment-alt"></i>
-                <h3>Additional Information</h3>
-            </div>
+            <h2 class="section-title">
+                <i class="fas fa-comment-alt section-icon"></i>
+                Additional Information
+            </h2>           
 
-            <div class="form-field full-width">
+            <div class="form-row">
+                <div class="form-group">
                 <label for="message">Message/Notes (Optional)</label>
-                <textarea id="message" name="message" rows="5" maxlength="500"
+                <textarea id="message" name="message" class="form-control" rows="5" maxlength="500"
                     placeholder="Add any additional information or special instructions..."></textarea>
                 <small class="character-count">0 / 500 characters</small>
             </div>
-        </div>
+            </div>
 
-        <!-- Submit Buttons -->
-        <div class="btn-group">
-            <button type="button" class="btn-secondary" id="cancelBtn">
-                 Cancel
-            </button>
-            <button type="submit" class="btn-primary" id="submitBtn">
-                <i class="fas fa-paper-plane"></i> Proceed to Payment
-            </button>
+            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" id="cancelBtn">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Proceed to Payment
+                </button>
+            </div>
+
         </div>
     </form>
 </div>
-
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('paymentForm');
@@ -1156,6 +1109,12 @@
                 form.querySelectorAll('.error-message').forEach(e => { e.textContent = ''; e.style.display = 'none'; });
             });
         }
+        $(document).ready(function () {
+            $('#phone_code').select2({
+                placeholder: "Search code or country",
+                allowClear: true
+            });
+        });
 
         // Character counter
         if (messageTextarea && charCount) {
@@ -1300,22 +1259,129 @@
                 if (submitBtn) submitBtn.disabled = true;
             });
         }
+    })
 
-        // Progress tracking on scroll
-        window.addEventListener('scroll', function () {
-            const sections = document.querySelectorAll('.form-section');
-            const progressSteps = document.querySelectorAll('.progress-step');
+    // Section completion tracking
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('paymentForm');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        const sections = [
+            {
+                // Section 1: Personal Information
+                fields: [
+                    'full_name',
+                    'email',
+                    'phone_code',
+                    'phone_number',
+                    'person_group'
+                ]
+            },
+            {
+                // Section 2: Payment Details
+                fields: [
+                    'amount'
+                ]
+            },
+            {
+                // Section 3: Additional Information / Confirm Section
+                fields: [
+                    'message',
+                    'g-recaptcha-response'
+                ]
+            }
+        ];
+
+
+        // Function to check if a section is complete
+        function checkSectionCompletion(sectionIndex) {
+            const sectionFields = sections[sectionIndex].fields;
+
+            // If no required fields (like documents section), mark as complete
+            if (sectionFields.length === 0) {
+                return true;
+            }
+
+            // Check if all required fields in this section are filled
+            return sectionFields.every(fieldName => {
+                const field = form.elements[fieldName];
+                if (!field) return true; // Field doesn't exist, skip
+
+                if (field.type === 'select-one') {
+                    return field.value !== '';
+                }
+                return field.value.trim() !== '';
+            });
+        }
+
+        // Function to update progress tracker
+        function updateProgressTracker() {
             sections.forEach((section, index) => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
-                    progressSteps.forEach((step, stepIndex) => {
-                        if (stepIndex <= index) step.classList.add('active');
-                        else step.classList.remove('active');
-                    });
+                if (checkSectionCompletion(index)) {
+                    progressSteps[index].classList.add('completed');
+                    progressSteps[index].classList.remove('active');
+                } else {
+                    progressSteps[index].classList.remove('completed');
                 }
             });
+
+            // Set the first incomplete section as active
+            for (let i = 0; i < sections.length; i++) {
+                if (!checkSectionCompletion(i)) {
+                    progressSteps[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        // Listen to all form field changes
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updateProgressTracker);
+            input.addEventListener('blur', updateProgressTracker);
+        });
+
+        // Initial check on page load
+        updateProgressTracker();
+    });
+
+    // Update scroll-based progress tracking to work with completion
+    window.addEventListener('scroll', function () {
+        const sections = document.querySelectorAll('.form-section');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                // Only set active if not already completed
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.add('active');
+                }
+            } else if (rect.top > window.innerHeight / 2) {
+                // Remove active when scrolling away (but keep completed)
+                if (!progressSteps[index].classList.contains('completed')) {
+                    progressSteps[index].classList.remove('active');
+                }
+            }
         });
     });
+     function validateForm(event) {
+    const recaptcha = grecaptcha.getResponse();
+
+    // If reCAPTCHA not checked
+    if (!recaptcha || recaptcha.length === 0) {
+        alert("Please complete the reCAPTCHA before submitting.");
+        event.preventDefault(); // STOP submission
+        return false;
+    }
+
+    // If valid, allow submit and then reset form
+    setTimeout(() => {
+        document.getElementById("paymentForm").reset();
+    }, 300);
+
+    return true;
+}
 </script>
 
 {% if messages %}

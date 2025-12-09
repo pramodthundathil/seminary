@@ -13,6 +13,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+import ssl, certifi
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,9 +35,13 @@ PAYPAL_CLIENT_SECRET = "EM4MPEwnLx3SsCq9GQt4-7szLoHyKMWWk2C-DI0xKIsuiADPk1L_7ytD
 SECRET_KEY = 'django-insecure-7cg!gvx@8ej(2wr_8c_oeyv%ecn=km6rvb3cqw@r*3qhwx*v7('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
+RECAPTCHA_SITE_KEY = "6LegFxwsAAAAAPuKJ6Fhea_53wqGHMW1gYtXWAJG"
+RECAPTCHA_SECRET_KEY = "6LegFxwsAAAAAAJiRfIuSh95YkkVSMmPmL0wX_BB"
+
 
 
 # Application definition
@@ -142,6 +153,7 @@ CKEDITOR_5_CONFIGS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -149,6 +161,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = 'seminary.urls'
 
@@ -165,6 +178,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'home.context_processors.student_processor',
                 'home.context_processors.menu_context',
+                'home.context_processors.settings_context',
 
             ],
         },
@@ -276,3 +290,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 LOGIN_URL = '/signin/'
+
+#email sending settings
+
+ssl._create_default_https_context = ssl._create_unverified_context
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'profitgym.management@gmail.com'
+EMAIL_HOST_PASSWORD = 'psoovwzscskarabv'
+SITE_URL= "http://127.0.0.1:8000/"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

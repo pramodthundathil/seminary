@@ -2,49 +2,49 @@
 {% load static %}
 
 {% block title %}
-    <title>{{ course.browser_title|default:course.course_name }} - Trinity Theological Seminary</title>
+<title>{{ course.browser_title|default:course.course_name }} - Trinity Theological Seminary</title>
 {% endblock %}
 
 {% block meta %}
-    {% if course.meta_description %}
-    <meta name="description" content="{{ course.meta_description }}">
-    {% endif %}
-    
-    {% if course.meta_keywords %}
-    <meta name="keywords" content="{{ course.meta_keywords }}">
-    {% endif %}
+{% if course.meta_description %}
+<meta name="description" content="{{ course.meta_description }}">
+{% endif %}
+
+{% if course.meta_keywords %}
+<meta name="keywords" content="{{ course.meta_keywords }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
 <style>
     :root {
-            --primary: #00CED1;
-            --primary-dark: #1B2845;
-            --secondary: #64748B;
-            --success: #10B981;
-            --danger: #EF4444;
-            --border: #666666;
+        --primary: #00CED1;
+        --primary-dark: #1B2845;
+        --secondary: #64748B;
+        --success: #10B981;
+        --danger: #EF4444;
+        --border: #666666;
 
-            --bg-gray: #F8FAFC;
-            --text-dark: #1E293B;
-            --text-light: #64748B;
-            --primary-cyan: #00CED1;
-            --light-cyan: #E0F7F7;
-            --dark-navy: #1B2845;
-            --purple-gradient-start: #A78BFA;
-            --purple-gradient-end: #C084FC;
-            --green-card: #90EE90;
-            --blue-button: #4169E1;
-            --text-gray: #666666;
-            --sidebar-width: 250px;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-900: #111827;
-        }
+        --bg-gray: #F8FAFC;
+        --text-dark: #1E293B;
+        --text-light: #64748B;
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+        --sidebar-width: 250px;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+    }
 
 
     /* Page Wrapper */
@@ -114,26 +114,54 @@
         display: flex;
         flex-wrap: wrap;
         gap: 2rem;
+        /* Your new spacing */
         margin-top: 1.5rem;
+        justify-content: center;
     }
 
+    /* Modern card-like meta item */
     .meta-item {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
-        opacity: 0.95;
+        justify-content: center;
+        gap: 0.6rem;
+        padding: 12px 18px;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(6px);
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Decorative star */
+    .meta-item::after {
+        content: "✦";
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 40px;
+        opacity: 0.08;
+    }
+
+    /* Optional icon beside label */
+    .meta-icon {
+        font-size: 1rem;
+        opacity: 0.9;
     }
 
     .meta-label {
-        font-weight: 600;
-        opacity: 0.8;
+        font-weight: 700;
+        opacity: 0.9;
+        letter-spacing: 0.3px;
     }
 
     .meta-value {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.35);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     /* Container */
@@ -174,35 +202,80 @@
     }
 
     /* Course Info Cards */
+    /* Course Info Cards Grid */
     .course-info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
         gap: 1.5rem;
-        margin-bottom: 3rem;
-        padding-bottom: 3rem;
-        border-bottom: 2px solid var(--border);
+        margin-top: 2rem;
     }
 
+    /* Each Info Card */
     .info-card {
-        background: var(--bg-page);
-        padding: 1.5rem;
-        border-radius: 8px;
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(8px);
+        padding: 1.4rem 1.6rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
+    /* Decorative floating glow */
+    .info-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start));
+        border-radius: 50%;
+        opacity: 0.8;
+        z-index: 1;
+    }
+
+    /* Hover Motion */
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 26px rgba(209, 91, 0, 0.35);
+        border-color: var(--primary-cyan);
+    }
+
+    /* Label Text */
     .info-card-label {
-        font-size: 0.875rem;
-        color: var(--text-light);
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #C084FC !important;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 2;
+        position: relative;
     }
 
+    /* Small Icon Before Labels */
+    .info-card-label::before {
+        content: "★";
+        font-size: 0.9rem;
+        color: red;
+        opacity: 0.9;
+    }
+
+    /* Value Text */
     .info-card-value {
-        font-size: 1.25rem;
-        color: var(--dark-navy);
-        font-weight: 600;
+        margin-top: 0.4rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.18);
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        z-index: 2;
+        position: relative;
     }
 
     /* Typography */
@@ -307,26 +380,6 @@
         font-weight: 500;
     }
 
-    .btn-apply {
-        display: inline-block;
-        padding: 1rem 3rem;
-        background: var(--primary-cyan);
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 1.125rem;
-        transition: all 0.3s;
-        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.3);
-    }
-
-    .btn-apply:hover {
-        background: var(--dark-navy);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 206, 209, 0.4);
-        color: white;
-    }
-
     /* Related Courses */
     .related-section {
         margin-top: 3rem;
@@ -338,9 +391,9 @@
     }
 
     .related-title {
-        font-size: 2.25rem;
+        font-size: 2rem;
         font-weight: 700;
-        color: var(--dark-navy);
+        color: var(--primary-cyan) !important;
         margin: 0 0 0.5rem;
     }
 
@@ -364,6 +417,7 @@
         border: 1px solid var(--border);
         display: flex;
         flex-direction: column;
+        max-height: 620px;
     }
 
     .course-card:hover {
@@ -521,520 +575,683 @@
             font-size: 1.75rem;
         }
     }
+
     /*style for course details*/
-/* Course Detail Main Content Section */
-.main-content {
-    background: white;
-    border-radius: 40px;
-    padding: 3.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
-    position: relative;
-}
-
-/* Container with decorative dots */
-.content-container {
-    position: relative;
-    overflow: visible;
-}
-
-/* Decorative dots */
-.dot-decoration {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    z-index: 1;
-}
-
-.dot-cyan {
-    background: var(--primary-cyan);
-    top: 50px;
-    right: 100px;
-}
-
-.dot-red {
-    background: var(--danger);
-    top: 90px;
-    right: 60px;
-}
-
-.dot-green {
-    background: var(--success);
-    bottom: 150px;
-    left: 80px;
-}
-
-.dot-purple {
-    background: var(--purple-gradient-start);
-    top: 200px;
-    left: 50px;
-}
-
-/* Course Info Grid */
-.course-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 2.5rem;
-}
-
-.info-card {
-    background: linear-gradient(135deg, var(--light-cyan) 0%, #b8ecec 100%);
-    border: 2px solid var(--primary-cyan);
-    border-radius: 20px;
-    padding: 25px 20px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 206, 209, 0.15);
-    transition: all 0.3s ease;
-}
-
-.info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 206, 209, 0.25);
-    border-color: var(--primary-cyan);
-}
-
-.info-card-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--primary-cyan);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.info-card-value {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--dark-navy);
-}
-
-/* Apply CTA */
-.apply-cta {
-    background: linear-gradient(135deg, var(--light-cyan) 0%, #B8ECEC 100%);
-    border: 2px solid var(--primary-cyan);
-    border-radius: 25px;
-    padding: 2.5rem;
-    text-align: center;
-    margin: 2.5rem 0;
-    box-shadow: 0 4px 15px rgba(0, 206, 209, 0.15);
-}
-
-.apply-cta-text {
-    font-size: 1.125rem;
-    color: var(--dark-navy);
-    margin-bottom: 1.25rem;
-    font-weight: 600;
-}
-
-.btn-apply {
-    display: inline-block;
-    padding: 12px 35px;
-    background: var(--blue-button);
-    color: white;
-    text-decoration: none;
-    border-radius: 25px;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
-    border: none;
-}
-
-.btn-apply:hover {
-    background: #3154c4;
-    transform: translateY(-2px);
-    color: white;
-    box-shadow: 0 6px 18px rgba(65, 105, 225, 0.4);
-}
-
-/* Content Body */
-.content-body {
-    font-size: 1.125rem;
-    line-height: 1.8;
-    color: var(--text-dark);
-}
-
-.content-body h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--dark-navy);
-    margin: 3rem 0 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 3px solid var(--primary-cyan);
-    position: relative;
-}
-
-.content-body h2:first-child {
-    margin-top: 0;
-}
-
-.content-body h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--primary-cyan);
-    margin: 2.5rem 0 1rem;
-}
-
-.content-body h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--dark-navy);
-    margin: 2rem 0 0.875rem;
-}
-
-.content-body p {
-    margin-bottom: 1.5rem;
-    line-height: 1.8;
-    color: var(--text-dark);
-}
-
-.content-body strong {
-    color: var(--dark-navy);
-    font-weight: 700;
-}
-
-.highlight {
-    color: var(--primary-cyan);
-    font-weight: inherit;
-}
-
-.content-body ul,
-.content-body ol {
-    margin: 1.5rem 0;
-    padding-left: 2rem;
-}
-
-.content-body li {
-    margin-bottom: 0.75rem;
-    line-height: 1.7;
-    color: var(--text-dark);
-}
-
-.content-body a {
-    color: var(--primary-cyan);
-    text-decoration: none;
-    font-weight: 600;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-}
-
-.content-body a:hover {
-    border-bottom-color: var(--primary-cyan);
-}
-
-.content-body img {
-    max-width: 100%;
-    height: auto;
-    margin: 2.5rem 0;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.content-body blockquote {
-    border-left: 4px solid var(--primary-cyan);
-    padding: 1.5rem 2rem;
-    margin: 2rem 0;
-    background: var(--light-cyan);
-    border-radius: 0 15px 15px 0;
-    font-style: italic;
-    color: var(--text-dark);
-}
-
-.content-body table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 2rem 0;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.content-body th,
-.content-body td {
-    padding: 1rem;
-    border: 1px solid var(--gray-300);
-    text-align: left;
-}
-
-.content-body th {
-    background: linear-gradient(135deg, var(--dark-navy) 0%, #2A4365 100%);
-    font-weight: 700;
-    color: white;
-}
-
-.content-body tr:nth-child(even) {
-    background: var(--gray-50);
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--text-light);
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.3;
-}
-/* Content Body Tables - Beautiful Purple Style */
-.content-body table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 2rem 0;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.content-body th,
-.content-body td {
-    padding: 1rem;
-    border: 1px solid var(--gray-300);
-    text-align: left;
-}
-
-.content-body th {
-    background: linear-gradient(135deg, var(--purple-gradient-start) 0%, var(--purple-gradient-end) 100%);
-    font-weight: 700;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 14px;
-}
-
-.content-body tr:nth-child(even) {
-    background: #faf5ff;
-}
-
-.content-body tr:hover {
-    background: #f3e8ff;
-    transition: background 0.3s ease;
-}
-
-.content-body td {
-    color: var(--text-dark);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
+    /* Course Detail Main Content Section */
     .main-content {
-        padding: 2rem 1.5rem;
-        border-radius: 30px;
+        background: white;
+        border-radius: 40px;
+        padding: 3.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
     }
 
-    .course-info-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
+    /* Container with decorative dots */
+    .content-container {
+        position: relative;
+        overflow: visible;
     }
 
-    .info-card {
-        padding: 20px 15px;
+    /* Decorative dots */
+    .dot-decoration {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        z-index: 1;
     }
 
-    .info-card-value {
-        font-size: 20px;
-    }
-
-    /* Adjust decorative dots for mobile */
     .dot-cyan {
-        top: 20px;
-        right: 20px;
+        background: var(--primary-cyan);
+        top: 50px;
+        right: 100px;
     }
 
     .dot-red {
-        top: 50px;
-        right: 10px;
+        background: var(--danger);
+        top: 90px;
+        right: 60px;
     }
 
     .dot-green {
-        bottom: 100px;
-        left: 20px;
+        background: var(--success);
+        bottom: 150px;
+        left: 80px;
     }
 
     .dot-purple {
-        display: none;
+        background: var(--purple-gradient-start);
+        top: 200px;
+        left: 50px;
     }
 
-    .apply-cta {
-        padding: 2rem 1.5rem;
-        border-radius: 20px;
-    }
-
-    .btn-apply {
-        padding: 10px 30px;
-        font-size: 14px;
-    }
-
-    .content-body h2 {
-        font-size: 1.5rem;
-    }
-
-    .content-body h3 {
-        font-size: 1.25rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .main-content {
-        padding: 1.5rem 1rem;
-        border-radius: 25px;
+    /* Course Info Grid */
+    .course-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 2.5rem;
     }
 
     .info-card {
-        padding: 18px 12px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #b8ecec 100%);
+        border: 2px solid var(--primary-cyan);
+        border-radius: 20px;
+        padding: 25px 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 206, 209, 0.25);
+        border-color: var(--primary-cyan);
     }
 
     .info-card-label {
-        font-size: 11px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--primary-cyan);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
 
     .info-card-value {
-        font-size: 18px;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--dark-navy);
     }
 
-    /* Hide some dots on very small screens */
-    .dot-green {
-        display: none;
-    }
-
+    /* Apply CTA */
     .apply-cta {
-        padding: 1.5rem 1rem;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #dff9fb 0%, #c7f3f3 100%);
+        border-radius: 30px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin: 3rem 0;
+        box-shadow: 0 8px 25px rgba(0, 206, 209, 0.2);
+        border: 1px solid rgba(0, 206, 209, 0.4);
+
+        /* smooth fade-in */
+        animation: fadeInUp 0.8s ease-out;
     }
 
+    /* Decorative floating circles with fading animation */
+    .apply-cta::before,
+    .apply-cta::after {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        background: rgba(209, 45, 0, 0.18);
+        /* soft cyan glow */
+        border-radius: 50%;
+        z-index: 0;
+        animation: fadeCircle 10s ease-in-out infinite alternate;
+    }
+
+    .apply-cta::before {
+        top: -60px;
+        left: -70px;
+    }
+
+    .apply-cta::after {
+        bottom: -70px;
+        right: -50px;
+    }
+
+    /* Fade animation */
+    @keyframes fadeCircle {
+        0% {
+            opacity: 0.15;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.35;
+            transform: scale(1.08);
+        }
+
+        100% {
+            opacity: 0.15;
+            transform: scale(1);
+        }
+    }
+
+
+    /* Text */
     .apply-cta-text {
-        font-size: 1rem;
+        font-size: 1.7rem;
+        font-weight: 600;
+        margin-bottom: 1.4rem;
+        color: #0b3c3f;
+        position: relative;
+        z-index: 2;
     }
-}
+
+    /* Button */
+    .btn-apply {
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start)) !important;
+        color: white;
+        padding: 14px 32px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 40px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 206, 209, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 206, 209, 0.6);
+        background: linear-gradient(135deg, #00d0d0, #009c9c) !important;
+    }
+
+    .btn-apply:active {
+        transform: scale(0.96);
+    }
+
+    /* Button */
+    .btn-join {
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start)) !important;
+        color: white;
+        padding: 14px 32px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 40px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 206, 209, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-join:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 206, 209, 0.6);
+        background: linear-gradient(135deg, #00d0d0, #009c9c) !important;
+    }
+
+    .btn-join:active {
+        transform: scale(0.96);
+    }
+
+    .card-view {
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start)) !important;
+        color: white;
+        padding: 8px 18px;
+        /* reduced */
+        font-size: 0.9rem;
+        font-weight: 400;
+        border-radius: 25px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 206, 209, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 206, 209, 0.6);
+        background: linear-gradient(135deg, #00d0d0, #009c9c) !important;
+    }
+
+    .card-view:active {
+        transform: scale(0.97);
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+
+
+
+
+    /* Fade animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+
+    /* Content Body */
+    .content-body {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: var(--text-dark);
+    }
+
+    .content-body h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin: 3rem 0 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid var(--primary-cyan);
+        position: relative;
+    }
+
+    .content-body h2:first-child {
+        margin-top: 0;
+    }
+
+    .content-body h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-cyan);
+        margin: 2.5rem 0 1rem;
+    }
+
+    .content-body h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-navy);
+        margin: 2rem 0 0.875rem;
+    }
+
+    .content-body p {
+        margin-bottom: 1.5rem;
+        line-height: 1.8;
+        color: var(--text-dark);
+    }
+
+    .content-body strong {
+        color: var(--dark-navy);
+        font-weight: 700;
+    }
+
+    .highlight {
+        color: var(--primary-cyan);
+        font-weight: inherit;
+    }
+
+    .content-body ul,
+    .content-body ol {
+        margin: 1.5rem 0;
+        padding-left: 2rem;
+    }
+
+    .content-body li {
+        margin-bottom: 0.75rem;
+        line-height: 1.7;
+        color: var(--text-dark);
+    }
+
+    .content-body a {
+        color: var(--primary-cyan);
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .content-body a:hover {
+        border-bottom-color: var(--primary-cyan);
+    }
+
+    .content-body img {
+        max-width: 100%;
+        height: auto;
+        margin: 2.5rem 0;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .content-body blockquote {
+        border-left: 4px solid var(--primary-cyan);
+        padding: 1.5rem 2rem;
+        margin: 2rem 0;
+        background: var(--light-cyan);
+        border-radius: 0 15px 15px 0;
+        font-style: italic;
+        color: var(--text-dark);
+    }
+
+    .content-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .content-body th,
+    .content-body td {
+        padding: 1rem;
+        border: 1px solid var(--gray-300);
+        text-align: left;
+    }
+
+    .content-body th {
+        background: linear-gradient(135deg, var(--dark-navy) 0%, #2A4365 100%);
+        font-weight: 700;
+        color: white;
+    }
+
+    .content-body tr:nth-child(even) {
+        background: var(--gray-50);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    /* Content Body Tables - Beautiful Purple Style */
+    .content-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .content-body th,
+    .content-body td {
+        padding: 1rem;
+        border: 1px solid var(--gray-300);
+        text-align: left;
+    }
+
+    .content-body th {
+        background: linear-gradient(135deg, var(--primary-cyan), var(--purple-gradient-start));
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 14px;
+    }
+
+    .content-body tr:nth-child(even) {
+        background: #faf5ff;
+    }
+
+    .content-body tr:hover {
+        background: #f3e8ff;
+        transition: background 0.3s ease;
+    }
+
+    .content-body td {
+        color: var(--text-dark);
+        background: linear-gradient(135deg, #dff9fb 0%, #c7f3f3 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 2rem 1.5rem;
+            border-radius: 30px;
+        }
+
+        .course-info-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .info-card {
+            padding: 20px 15px;
+        }
+
+        .info-card-value {
+            font-size: 20px;
+        }
+
+        /* Adjust decorative dots for mobile */
+        .dot-cyan {
+            top: 20px;
+            right: 20px;
+        }
+
+        .dot-red {
+            top: 50px;
+            right: 10px;
+        }
+
+        .dot-green {
+            bottom: 100px;
+            left: 20px;
+        }
+
+        .dot-purple {
+            display: none;
+        }
+
+        .apply-cta {
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .btn-apply {
+            padding: 10px 30px;
+            font-size: 14px;
+        }
+
+        .content-body h2 {
+            font-size: 1.5rem;
+        }
+
+        .content-body h3 {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-content {
+            padding: 1.5rem 1rem;
+            border-radius: 25px;
+        }
+
+        .info-card {
+            padding: 18px 12px;
+        }
+
+        .info-card-label {
+            font-size: 11px;
+        }
+
+        .info-card-value {
+            font-size: 18px;
+        }
+
+        /* Hide some dots on very small screens */
+        .dot-green {
+            display: none;
+        }
+
+        .apply-cta {
+            padding: 1.5rem 1rem;
+        }
+
+        .apply-cta-text {
+            font-size: 1rem;
+        }
+
+        .starry-bg {
+            position: relative;
+            background-color: white;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(140, 82, 255, 0.35) 2px, transparent 3px),
+                radial-gradient(circle at 70% 40%, rgba(0, 220, 255, 0.35) 2px, transparent 3px),
+                radial-gradient(circle at 40% 80%, rgba(255, 70, 70, 0.35) 2px, transparent 3px),
+                radial-gradient(circle at 90% 10%, rgba(140, 82, 255, 0.3) 1.5px, transparent 3px),
+                radial-gradient(circle at 20% 90%, rgba(0, 220, 255, 0.3) 1.8px, transparent 3px),
+                radial-gradient(circle at 50% 50%, rgba(255, 70, 70, 0.35) 2px, transparent 3px);
+            background-size: 300px 300px;
+            background-repeat: repeat;
+        }
+
+        body {
+            background: white;
+        }
+
+        body.starry {
+            background: white;
+        }
+    }
 </style>
+<div class="starry-bg">
+    <div class="course-wrapper">
+        <!-- Hero Section -->
+        <section class="course-hero">
+            <div class="content-container">
+                <div class="hero-content">
+                    <nav class="hero-breadcrumb">
+                        <a href="/">Home</a>
+                        <span>/</span>
+                        <a href="{% url 'course_detail' slug=course.course_code %}">Courses</a>
+                        <span>/</span>
+                        <span>{{ course.course_name }}</span>
+                    </nav>
+                    <h1 class="course-title">{{ course.course_name }}</h1>
 
-<div class="course-wrapper">
-    <!-- Hero Section -->
-    <section class="course-hero">
-        <div class="content-container">
-            <div class="hero-content">
-                <nav class="hero-breadcrumb">
-                    <a href="/">Home</a>
-                    <span>/</span>
-                    <a href="{% url 'course_detail' slug=course.course_code %}">Courses</a>
-                    <span>/</span>
-                    <span>{{ course.course_name }}</span>
-                </nav>
-                <h1 class="course-title">{{ course.course_name }}</h1>
-                
-                <div class="course-meta-row">
-                    <div class="meta-item">
-                        <span class="meta-label">Course Code:</span>
-                        <span class="meta-value">{{ course.course_code }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <span class="meta-label">Credit Hours:</span>
-                        <span class="meta-value">{{ course.credit_hours }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <span class="meta-label">Qualification:</span>
-                        <span class="meta-value">{{ course.highest_qualification }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Image -->
-    {% if course.media %}
-    <div class="featured-image">
-        <div class="image-box">
-            <img src="{{ course.media.file.url }}" alt="{{ course.course_name }}">
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <div class="content-container">
-        <article class="main-content">
-            
-            <!-- Course Info Cards -->
-            <div class="course-info-grid">
-                <div class="info-card">
-                    <div class="info-card-label">Course Code</div>
-                    <div class="info-card-value">{{ course.course_code }}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Credit Hours</div>
-                    <div class="info-card-value">{{ course.credit_hours }}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Qualification Level</div>
-                    <div class="info-card-value">{{ course.highest_qualification }}</div>
-                </div>
-            </div>
-
-            {% if course.apply_button_top %}
-            <div class="apply-cta">
-                <p class="apply-cta-text">Ready to enroll in this course?</p>
-                <button class="btn-join" onclick="window.location.href='{% url 'register' %}'">
-                    Apply Now
-                </button>
-            </div>
-            {% endif %}
-
-            {% if course.description %}
-            <div class="content-body">
-                {{ course.description|safe }}
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">📚</div>
-                <p>Course description coming soon...</p>
-            </div>
-            {% endif %}
-
-            {% if course.apply_button_bottom %}
-            <div class="apply-cta">
-                <p class="apply-cta-text">Ready to enroll in this course?</p>
-                <a href="{%url 'signup_student' %}" class="btn-apply">Apply Now</a>
-            </div>
-            {% endif %}
-        </article>
-
-        <!-- Related Courses -->
-        {% if related_courses %}
-        <section class="related-section">
-            <div class="related-header">
-                <h2 class="related-title">Related Courses</h2>
-                <p class="related-subtitle">Explore more courses in this qualification</p>
-            </div>
-            <div class="cards-grid">
-                {% for related in related_courses %}
-                <article class="course-card">
-                    {% if related.media %}
-                    <img src="{{ related.media.file.url }}" class="card-img" alt="{{ related.course_name }}">
-                    {% else %}
-                    <div class="card-img-placeholder">📖</div>
-                    {% endif %}
-                    <div class="card-body">
-                        <div class="card-code">{{ related.course_code }}</div>
-                        <h3 class="card-title">{{ related.course_name }}</h3>
-                        <p class="card-text">
-                            {{ related.meta_description|default:"Explore this course to enhance your theological education."|truncatewords:15 }}
-                        </p>
-                        <div class="card-footer">
-                            <span class="card-meta">{{ related.credit_hours }} Credits</span>
-                            <a href="{% url 'course_detail' slug=related.course_code %}" class="card-link">
-                                View Course
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                                </svg>
-                            </a>
+                    <div class="course-meta-row">
+                        <div class="meta-item">
+                            <span class="meta-icon">🎓</span>
+                            <span class="meta-label">Course Code:</span>
+                            <span class="meta-value">{{ course.course_code }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🎓</span>
+                            <span class="meta-label">Credit Hours:</span>
+                            <span class="meta-value">{{ course.credit_hours }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🎓</span>
+                            <span class="meta-label">Qualification:</span>
+                            <span class="meta-value">{{ course.highest_qualification }}</span>
                         </div>
                     </div>
-                </article>
-                {% endfor %}
+                </div>
             </div>
         </section>
+
+        <!-- Featured Image -->
+        {% if course.media %}
+        <div class="featured-image">
+            <div class="image-box">
+                <img src="{{ course.media.file.url }}" alt="{{ course.course_name }}">
+            </div>
+        </div>
         {% endif %}
+
+        <!-- Main Content -->
+        <div class="content-container">
+            <article class="main-content">
+
+                <!-- Course Info Cards -->
+                <div class="course-info-grid">
+                    <div class="info-card">
+                        <div class="info-card-label">Course Code</div>
+                        <div class="info-card-value">{{ course.course_code }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Credit Hours</div>
+                        <div class="info-card-value">{{ course.credit_hours }}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Qualification Level</div>
+                        <div class="info-card-value">{{ course.highest_qualification }}</div>
+                    </div>
+                </div>
+
+                {% if course.apply_button_top %}
+                <div class="apply-cta">
+                    <p class="apply-cta-text">Ready to enroll in this course?</p>
+                    <button class="btn-join" onclick="window.location.href='{% url 'register' %}'">
+                        Apply Now
+                    </button>
+                </div>
+                {% endif %}
+
+                {% if course.description %}
+                <div class="content-body">
+                    {{ course.description|safe }}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <p>Course description coming soon...</p>
+                </div>
+                {% endif %}
+
+                {% if course.apply_button_bottom %}
+                <div class="apply-cta">
+                    <p class="apply-cta-text">Ready to enroll in this course?</p>
+                    <a href="{%url 'signup_student' %}" class="btn-apply">Apply Now</a>
+                </div>
+                {% endif %}
+            </article>
+
+            <!-- Related Courses -->
+            {% if related_courses %}
+            <section class="related-section">
+                <div class="related-header">
+                    <h2 class="related-title">Related Courses</h2>
+                    <p class="related-subtitle">Explore more courses in this qualification</p>
+                </div>
+                <div class="cards-grid">
+                    {% for related in related_courses %}
+                    <article class="course-card">
+                        {% if related.media %}
+                        <img src="{{ related.media.file.url }}" class="card-img" alt="{{ related.course_name }}">
+                        {% else %}
+                        <img src="{% static 'img/bth.jpg' %}" alt="{{ course.course_name }}" class="course-img">
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="card-code">{{ related.course_code }}</div>
+                            <h3 class="card-title">{{ related.course_name }}</h3>
+                            {% if related.meta_description and related.meta_description|lower != "null" %}
+                                <p class="card-text">
+                                    {{ related.meta_description|truncatewords:15 }}
+                                </p>
+                            {% else %}
+                                <p class="card-text">
+                                    Description will be coming soon.
+                                </p>
+                            {% endif %}
+                            <div class="card-footer">
+                                <span class="card-meta">{{ related.credit_hours }} Credits</span>
+                                <a href="{% url 'course_detail' slug=related.course_code %}" class="card-view">
+                                    View Course
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
     </div>
 </div>
+
 {% endblock %}
