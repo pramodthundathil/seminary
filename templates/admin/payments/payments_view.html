@@ -1,0 +1,64 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Payment Details</h1>
+        <a href="{% url 'payments_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Payments
+        </a>
+    </div>
+
+    <div class="card" style="padding:20px;">
+        <dl class="row">
+            <dt class="col-md-3">ID</dt>
+            <dd class="col-md-9">{{ payment.id }}</dd>
+
+            <dt class="col-md-3">Name</dt>
+            <dd class="col-md-9">{{ payment.name }}</dd>
+
+            <dt class="col-md-3">Email</dt>
+            <dd class="col-md-9">{{ payment.email }}</dd>
+
+            <dt class="col-md-3">Phone</dt>
+            <dd class="col-md-9">{{ payment.phone|default:"-" }}</dd>
+
+            <dt class="col-md-3">Person Group</dt>
+            <dd class="col-md-9">{{ payment.person_group }}</dd>
+
+            <dt class="col-md-3">Amount</dt>
+            <dd class="col-md-9">
+                {% if payment.amount %}{{ payment.amount|floatformat:2 }}{% else %}-{% endif %}
+            </dd>
+
+            <dt class="col-md-3">Status</dt>
+            <dd class="col-md-9">
+                {% if payment.is_paid %}
+                    <span class="status-badge status-active">Paid</span>
+                {% else %}
+                    <span class="status-badge status-inactive">Pending</span>
+                {% endif %}
+            </dd>
+
+            <dt class="col-md-3">Paid Date</dt>
+            <dd class="col-md-9">
+                {% if payment.is_paid %}
+                    {{ payment.updated_at|date:"Y-m-d H:i" }}
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt class="col-md-3">Message</dt>
+            <dd class="col-md-9">{{ payment.message|default:"-" }}</dd>
+
+            <dt class="col-md-3">Student</dt>
+            <dd class="col-md-9">{{ payment.student|default:"-" }}</dd>
+
+            <dt class="col-md-3">Created At</dt>
+            <dd class="col-md-9">{{ payment.created_at|date:"Y-m-d H:i" }}</dd>
+        </dl>
+    </div>
+</div>
+
+{% endblock %}

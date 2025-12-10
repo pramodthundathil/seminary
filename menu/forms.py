@@ -607,3 +607,86 @@ class BookReferenceForm(forms.ModelForm):
             # Auto-generate code from title
             self.cleaned_data['code'] = slugify(title)
         return title
+    
+
+
+
+from home.models import Roles
+
+class RolesForm(forms.ModelForm):
+    class Meta:
+        model = Roles
+        fields = ["name", "guard_name", "status"]
+
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter role name"
+            }),
+            "guard_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter guard name"
+            }),
+            "status": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }
+
+
+
+from home.models import Uploads
+
+class UploadForm(forms.ModelForm):
+    class Meta:
+        model = Uploads
+        fields = [
+            "code",
+            "upload_name",
+            "description",
+            "format",
+            "video_id",
+            "youtube",
+            "aws_url",
+            "subject",
+            "media",
+            "status",
+        ]
+
+        widgets = {
+            "code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter upload code"
+            }),
+            "upload_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter upload name"
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Enter description (optional)"
+            }),
+            "format": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "e.g. mp4, pdf, docx"
+            }),
+            "video_id": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "youtube": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "aws_url": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "AWS file URL (optional)"
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "media": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "status": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }

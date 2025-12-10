@@ -55,22 +55,21 @@ urlpatterns = [
 
 
 
-    # Slider management
-    path('admin/sliders', views.slider_list, name='slider_list'),
+    # Slider Management URLs
+    path('admin/sliders/', views.slider_list, name='slider_list'),
     path('sliders/datatable/', views.slider_datatable, name='slider_datatable'),
     path('sliders/create/', views.slider_create, name='slider_create'),
     path('sliders/get/<int:slider_id>/', views.slider_get, name='slider_get'),
     path('sliders/update/<int:slider_id>/', views.slider_update, name='slider_update'),
     path('sliders/delete/<int:slider_id>/', views.slider_delete, name='slider_delete'),
     
-    # Slider photos management
+    # Slider Photos URLs
     path('sliders/<int:slider_id>/photos/', views.slider_photos_list, name='slider_photos_list'),
     path('sliders/<int:slider_id>/photos/datatable/', views.slider_photos_datatable, name='slider_photos_datatable'),
     path('sliders/<int:slider_id>/photos/create/', views.slider_photo_create, name='slider_photo_create'),
     path('sliders/photos/get/<int:photo_id>/', views.slider_photo_get, name='slider_photo_get'),
     path('sliders/photos/update/<int:photo_id>/', views.slider_photo_update, name='slider_photo_update'),
     path('sliders/photos/delete/<int:photo_id>/', views.slider_photo_delete, name='slider_photo_delete'),
-
 
     path("admin/categories", views.category_list, name= "category_list"),
     path('categories/create/', views.category_create, name='category_create'),
@@ -109,8 +108,11 @@ urlpatterns = [
 
 
     #roles and permissions
-
     path("admin/roles",views.roles,name="roles"),
+    path("roles/create/", views.roles_create, name="roles_create"),
+    path("roles/<int:id>/view/", views.roles_view, name="roles_view"),
+    path("roles/<int:id>/edit/", views.roles_edit, name="roles_edit"),
+    path("roles/<int:id>/delete/", views.roles_delete, name="roles_delete"),
 
 
     # languages
@@ -139,7 +141,6 @@ urlpatterns = [
     path("admin/branches/<int:branch_id>/delete", views.branches_delete, name="branches_delete"),
 
     #contact request
-
     path("admin/contact",views.contact_list, name='contact_list'),
     path('contacts/delete/<int:id>/', views.contact_delete, name='contact_delete'),
     path('contacts/permanent-delete/<int:id>/', views.contact_permanent_delete, name='contact_permanent_delete'),
@@ -187,4 +188,25 @@ urlpatterns = [
     path('support/<int:support_id>/delete/', views.support_delete, name='support_delete'),
     path('support/replay/<int:pk>/delete/', views.support_reply_delete, name='support_reply_delete'),
 
+    
+    #uploads 
+    path("admin/uploads/", views.uploads_list, name="uploads_list"),
+    path("uploads/create/", views.uploads_create, name="uploads_create"),
+    path("uploads/<int:id>/", views.uploads_view, name="uploads_view"),
+    path("uploads/<int:id>/edit/", views.uploads_edit, name="uploads_edit"),
+    path("uploads/<int:id>/delete/", views.uploads_delete, name="uploads_delete"),
+
+
+    #payments 
+
+    path("admin/payments/", views.payments_list, name="payments_list"),
+    path("payments/<int:id>/view/", views.payments_view, name="payments_view"),
+    path("payments/<int:id>/delete/", views.payments_delete, name="payments_delete"),
+
+
+    #users 
+
+    path("admin/users/", views.users_list, name="users_list"),
+    path("users/<int:id>/view/", views.users_view, name="users_view"),
+    path("users/<int:id>/delete/", views.users_delete, name="users_delete"),
 ]

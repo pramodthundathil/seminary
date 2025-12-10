@@ -1,0 +1,75 @@
+{# templates/admin/uploads/uploads_view.html #}
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Upload Details</h1>
+        <a href="{% url 'uploads_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Uploads
+        </a>
+        <a href="{% url 'uploads_edit' upload.id %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+    </div>
+
+    <div class="card" style="padding:20px;">
+        <dl class="row">
+            <dt class="col-md-3">ID</dt>
+            <dd class="col-md-9">{{ upload.id }}</dd>
+
+            <dt class="col-md-3">Code</dt>
+            <dd class="col-md-9">{{ upload.code }}</dd>
+
+            <dt class="col-md-3">Upload Name</dt>
+            <dd class="col-md-9">{{ upload.upload_name }}</dd>
+
+            <dt class="col-md-3">Description</dt>
+            <dd class="col-md-9">{{ upload.description|default:"-" }}</dd>
+
+            <dt class="col-md-3">Format</dt>
+            <dd class="col-md-9">{{ upload.format|upper }}</dd>
+
+            <dt class="col-md-3">Subject</dt>
+            <dd class="col-md-9">{{ upload.subject|default:"-" }}</dd>
+
+            <dt class="col-md-3">Video</dt>
+            <dd class="col-md-9">{{ upload.video_id|default:"-" }}</dd>
+
+            <dt class="col-md-3">YouTube</dt>
+            <dd class="col-md-9">{{ upload.youtube|default:"-" }}</dd>
+
+            <dt class="col-md-3">AWS URL</dt>
+            <dd class="col-md-9">
+                {% if upload.aws_url %}
+                    <a href="{{ upload.aws_url }}" target="_blank">{{ upload.aws_url }}</a>
+                {% else %}
+                    -
+                {% endif %}
+            </dd>
+
+            <dt class="col-md-3">Status</dt>
+            <dd class="col-md-9">
+                {% if upload.status %}
+                    <span class="status-badge status-active">Active</span>
+                {% else %}
+                    <span class="status-badge status-inactive">Inactive</span>
+                {% endif %}
+            </dd>
+
+            <dt class="col-md-3">Created By</dt>
+            <dd class="col-md-9">{{ upload.created_by|default:"-" }}</dd>
+
+            <dt class="col-md-3">Created At</dt>
+            <dd class="col-md-9">{{ upload.created_at|date:"Y-m-d H:i" }}</dd>
+
+            <dt class="col-md-3">Updated By</dt>
+            <dd class="col-md-9">{{ upload.updated_by|default:"-" }}</dd>
+
+            <dt class="col-md-3">Updated At</dt>
+            <dd class="col-md-9">{{ upload.updated_at|date:"Y-m-d H:i" }}</dd>
+        </dl>
+    </div>
+</div>
+
+{% endblock %}

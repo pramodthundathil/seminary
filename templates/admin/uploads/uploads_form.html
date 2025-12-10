@@ -1,0 +1,108 @@
+{# templates/admin/uploads/uploads_form.html #}
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <a href="{% url 'uploads_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Uploads
+        </a>
+    </div>
+
+    <div class="card" style="padding:20px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Code</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        <div class="text-danger small">{{ form.code.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Upload Name</label>
+                    {{ form.upload_name }}
+                    {% if form.upload_name.errors %}
+                        <div class="text-danger small">{{ form.upload_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Format</label>
+                    {{ form.format }}
+                    {% if form.format.errors %}
+                        <div class="text-danger small">{{ form.format.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Subject</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                        <div class="text-danger small">{{ form.subject.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Media Library</label>
+                    {{ form.media }}
+                    {% if form.media.errors %}
+                        <div class="text-danger small">{{ form.media.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Video</label>
+                    {{ form.video_id }}
+                    {% if form.video_id.errors %}
+                        <div class="text-danger small">{{ form.video_id.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">YouTube Video</label>
+                    {{ form.youtube }}
+                    {% if form.youtube.errors %}
+                        <div class="text-danger small">{{ form.youtube.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">AWS URL</label>
+                    {{ form.aws_url }}
+                    {% if form.aws_url.errors %}
+                        <div class="text-danger small">{{ form.aws_url.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <div class="form-check">
+                        {{ form.status }}
+                        <label class="form-check-label">Active</label>
+                    </div>
+                    {% if form.status.errors %}
+                        <div class="text-danger small">{{ form.status.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

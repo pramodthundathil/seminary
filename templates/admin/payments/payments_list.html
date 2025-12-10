@@ -1,0 +1,112 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Payments</h1>
+    </div>
+
+    <div class="table-container">
+        <table id="paymentsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Person Group</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Paid Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>{{ p.id }}</td>
+
+                    <td>
+                        <div style="line-height:1.4;">
+                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);">
+                                {{ p.name }}
+                            </div>
+                            <div style="font-size:13px;color:var(--text-light);">
+                                {{ p.email }}{% if p.phone %} · {{ p.phone }}{% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>{{ p.person_group }}</td>
+
+                    <td>
+                        {% if p.amount %}
+                            {{ p.amount|floatformat:2 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if p.is_paid %}
+                            <span class="status-badge status-active">Paid</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if p.is_paid %}
+                            {{ p.updated_at|date:"Y-m-d H:i" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'payments_view' p.id %}" class="action-btn view" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'payments_delete' p.id %}" class="action-btn delete"
+                           onclick="return confirm('Are you sure you want to delete this payment?')"
+                           title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#paymentsTable').DataTable({
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48], [12, 24, 48]],
+            order: [[0, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [1, 6] },
+                { width: '60px', targets: 0 },
+                { width: '260px', targets: 1 },
+                { width: '120px', targets: 2 },
+                { width: '120px', targets: 3 },
+                { width: '100px', targets: 4 },
+                { width: '150px', targets: 5 },
+                { width: '110px', targets: 6 }
+            ],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ payments",
+                info: "Showing _START_ to _END_ of _TOTAL_ payments",
+                zeroRecords: "No matching payments found",
+                emptyTable: "No payments available"
+            }
+        });
+    });
+</script>
+
+{% endblock %}

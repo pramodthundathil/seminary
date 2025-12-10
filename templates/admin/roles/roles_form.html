@@ -1,0 +1,355 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>{{ action }} Role</h1>
+        <div>
+            <a href="{% url 'roles' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container" style="max-width:1200px;margin:0 auto;">
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            
+            <!-- Role Basic Information -->
+            <div class="form-section">
+                <h3 class="section-title">Role Information</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_name" class="form-label required">Role Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="error-message">
+                                {{ form.name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_guard_name" class="form-label required">Guard Name</label>
+                        {{ form.guard_name }}
+                        {% if form.guard_name.errors %}
+                            <div class="error-message">
+                                {{ form.guard_name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_status" class="form-label">Status</label>
+                        <div class="checkbox-wrapper">
+                            {{ form.status }}
+                            <span class="checkbox-label">Active</span>
+                        </div>
+                        {% if form.status.errors %}
+                            <div class="error-message">
+                                {{ form.status.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Section -->
+            <div class="form-section" style="margin-top:30px;">
+                <div class="section-header">
+                    <h3 class="section-title">Permissions</h3>
+                    <div class="permission-actions">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="selectAllPermissions()">
+                            <i class="fas fa-check-double"></i> Select All
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="deselectAllPermissions()">
+                            <i class="fas fa-times"></i> Deselect All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="permissions-container">
+                    {% for group_name, permissions in permissions_by_group.items %}
+                    <div class="permission-group">
+                        <div class="permission-group-header">
+                            <h4>{{ group_name }}</h4>
+                            <label class="group-select-all">
+                                <input type="checkbox" 
+                                       onchange="toggleGroupPermissions(this, '{{ group_name }}')"
+                                       class="group-checkbox">
+                                <span>Select All</span>
+                            </label>
+                        </div>
+                        
+                        <div class="permission-list">
+                            {% for permission in permissions %}
+                            <div class="permission-item">
+                                <label class="permission-checkbox">
+                                    <input type="checkbox" 
+                                           name="permissions" 
+                                           value="{{ permission.id }}"
+                                           data-group="{{ group_name }}"
+                                           {% if permission.id in current_permissions %}checked{% endif %}>
+                                    <span class="permission-name">{{ permission.name }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{% url 'roles' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-section {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 20px 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.permission-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.permissions-container {
+    display: grid;
+    gap: 25px;
+}
+
+.permission-group {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.permission-group-header {
+    background: var(--bg-tertiary);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.permission-group-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.group-select-all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.group-select-all input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.permission-list {
+    padding: 15px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.permission-item {
+    display: flex;
+}
+
+.permission-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+.permission-checkbox:hover {
+    background: var(--hover-bg);
+}
+
+.permission-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.permission-name {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    background: var(--hover-bg);
+}
+</style>
+
+<script>
+function selectAllPermissions() {
+    document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    updateGroupCheckboxes();
+}
+
+function deselectAllPermissions() {
+    document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateGroupCheckboxes();
+}
+
+function toggleGroupPermissions(groupCheckbox, groupName) {
+    const isChecked = groupCheckbox.checked;
+    document.querySelectorAll(`input[data-group="${groupName}"]`).forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+}
+
+function updateGroupCheckboxes() {
+    document.querySelectorAll('.group-checkbox').forEach(groupCheckbox => {
+        const groupName = groupCheckbox.closest('.permission-group-header').querySelector('h4').textContent.trim();
+        const groupPermissions = document.querySelectorAll(`input[data-group="${groupName}"]`);
+        const checkedCount = Array.from(groupPermissions).filter(cb => cb.checked).length;
+        groupCheckbox.checked = checkedCount === groupPermissions.length;
+        groupCheckbox.indeterminate = checkedCount > 0 && checkedCount < groupPermissions.length;
+    });
+}
+
+// Update group checkboxes when individual permissions are toggled
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateGroupCheckboxes);
+    });
+    updateGroupCheckboxes();
+});
+</script>
+
+{% endblock %}

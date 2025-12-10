@@ -1617,10 +1617,11 @@ def signin(request):
         if user is not None:
             login(request,user)
             role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
-            if role == "Student":
-                return redirect('student_home')
-            elif role=="Church User":  
-                return redirect('church_user_home')  
+            # if role == "Student":
+            #     return redirect('student_home')
+            # elif role=="Church User":  
+            #     return redirect('church_user_home')
+              
 
             return redirect('admin_index')
         else:

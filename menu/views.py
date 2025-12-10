@@ -1315,280 +1315,115 @@ def media_library_list(request):
         }, status=500)
 
 
+# sliders and slider Photos.....
 
-
-
-
+# Helper function to safely get media URL
+def get_media_url(media_object, default='https://s3-alpha.figma.com/hub/file/4093188630/561dfe3e-e5f8-415c-9b26-fbdf94897722-cover.png'):
+    """Safely extract URL from media object's file_path field"""
+    if not media_object:
+        return default
+    
+    try:
+        file_path = media_object.file_path
+        if not file_path:
+            return default
+        # Check if it's a FileField/ImageField with .url attribute
+        if hasattr(file_path, 'url'):
+            try:
+                return file_path.url
+            except ValueError:
+                return default
+        # If it's a CharField, convert to string
+        return str(file_path)
+    except (AttributeError, Exception) as e:
+        print(f"Error getting media URL: {e}")
+        return default
 
 @login_required
 def slider_list(request):
-    """Main slider list view with pagination"""
-    sliders_list = Sliders.objects.all().order_by('-id')
-    
-    # Pagination
-    page = request.GET.get('page', 1)
-    paginator = Paginator(sliders_list, 12)  # 12 items per page
-    
-    try:
-        sliders = paginator.page(page)
-    except PageNotAnInteger:
-        sliders = paginator.page(1)
-    except EmptyPage:
-        sliders = paginator.page(paginator.num_pages)
-
+    """Main slider list view - renders the page with DataTables"""
     context = {
-        "sliders": sliders,
-        "total_sliders": sliders_list.count()
+        "page_title": "Slider Management"
     }
-
     return render(request, 'admin/sliders/list.html', context)
 
-####@login_required
+@login_required
 def slider_datatable(request):
     """DataTables server-side processing for sliders"""
-    draw = int(request.GET.get('draw', 1))
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 12))
-    search_value = request.GET.get('search[value]', '')
-    order_column_index = int(request.GET.get('order[0][column]', 0))
-    order_direction = request.GET.get('order[0][dir]', 'desc')
-
-    # Define column mapping
-    columns = ['id', 'slider_name', 'code', 'width', 'height', 'created_at']
-    order_column = columns[order_column_index] if order_column_index < len(columns) else 'id'
-    
-    if order_direction == 'desc':
-        order_column = f'-{order_column}'
-
-    # Query sliders
-    # sliders = Sliders.objects.annotate(photo_count=Count('photos'))
-    sliders = Sliders.objects.annotate(photo_count=Count('sliders_photos_slider'))
-
-    
-    # Apply search
-    if search_value:
-        sliders = sliders.filter(
-            Q(slider_name__icontains=search_value) |
-            Q(code__icontains=search_value)
-        )
-
-    # Get total count
-    total_records = sliders.count()
-    
-    # Apply ordering and pagination
-    sliders = sliders.order_by(order_column)[start:start + length]
-
-    # Prepare data
-    data = []
-    for slider in sliders:
-        data.append({
-            'id': slider.id,
-            'slider_info': f'''
-                <div class="slider-info">
-                    <div class="slider-name">{slider.slider_name}</div>
-                    <div class="slider-meta">
-                        <span class="code-badge">{slider.code}</span>
-                        <span class="dimension-badge">{slider.width}x{slider.height}</span>
-                        <span class="photo-count-badge">{slider.photo_count} photos</span>
-                    </div>
-                </div>
-            ''',
-            'dimensions': f'{slider.width} × {slider.height}',
-            'photos': slider.photo_count,
-            'created_at': slider.created_at.strftime('%Y-%m-%d'),
-            'actions': f'''
-                <div class="action-buttons">
-                    <button class="btn-action btn-photos" onclick="managePhotos({slider.id})" title="Manage Photos">
-                        <i class="fas fa-images"></i>
-                    </button>
-                    <button class="btn-action btn-edit" onclick="editSlider({slider.id})" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-action btn-delete" onclick="deleteSlider({slider.id}, '{slider.slider_name}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            '''
-        })
-
-    return JsonResponse({
-        'draw': draw,
-        'recordsTotal': total_records,
-        'recordsFiltered': total_records,
-        'data': data
-    })
-
-####@login_required
-@require_http_methods(["POST"])
-def slider_create(request):
-    """Create new slider"""
-    try:
-        slider_name = request.POST.get('slider_name')
-        code = request.POST.get('code')
-        width = int(request.POST.get('width'))
-        height = int(request.POST.get('height'))
-
-        # Check if code already exists
-        if Sliders.objects.filter(code=code).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Slider code already exists'
-            })
-
-        slider = Sliders.objects.create(
-            slider_name=slider_name,
-            code=code,
-            width=width,
-            height=height,
-            created_by=request.user.id,
-            updated_by=request.user.id,
-            created_at=timezone.now()
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Slider created successfully',
-            'slider_id': slider.id
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
-
-####@login_required
-def slider_get(request, slider_id):
-    """Get slider details"""
-    try:
-        slider = get_object_or_404(Sliders, id=slider_id)
-        return JsonResponse({
-            'success': True,
-            'data': {
-                'id': slider.id,
-                'slider_name': slider.slider_name,
-                'code': slider.code,
-                'width': slider.width,
-                'height': slider.height,
-                'created_at': slider.created_at.strftime('%Y-%m-%d %H:%M')
-            }
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
-
-####@login_required
-@require_http_methods(["POST"])
-def slider_update(request, slider_id):
-    """Update slider"""
-    try:
-        slider = get_object_or_404(Sliders, id=slider_id)
-        
-        slider_name = request.POST.get('slider_name')
-        code = request.POST.get('code')
-        width = int(request.POST.get('width'))
-        height = int(request.POST.get('height'))
-
-        # Check if code exists for other sliders
-        if Sliders.objects.filter(code=code).exclude(id=slider_id).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Slider code already exists'
-            })
-
-        slider.slider_name = slider_name
-        slider.code = code
-        slider.width = width
-        slider.height = height
-        slider.updated_by = request.user.id
-        slider.save()
-
-        return JsonResponse({
-            'success': True,
-            'message': 'Slider updated successfully'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
-
-####@login_required
-@require_http_methods(["POST"])
-def slider_delete(request, slider_id):
-    """Delete slider"""
-    try:
-        slider = get_object_or_404(Sliders, id=slider_id)
-        slider.delete()
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Slider deleted successfully'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
-
-####@login_required
-###@login_required
-def slider_photos_list(request, slider_id):
-    """Slider photos management view"""
-    slider = get_object_or_404(Sliders, id=slider_id)
-    return render(request, 'admin/sliders/photos.html', {'slider': slider})
-
-###@login_required
-def slider_photos_datatable(request, slider_id):
-    """DataTables for slider photos"""
     try:
         draw = int(request.GET.get('draw', 1))
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 12))
+        search_value = request.GET.get('search[value]', '')
+        order_column_index = int(request.GET.get('order[0][column]', 0))
+        order_direction = request.GET.get('order[0][dir]', 'desc')
 
-        photos = SliderPhotos.objects.filter(
-            sliders_id=slider_id,
-            deleted_at__isnull=True
-        ).select_related('media')
+        # Define column mapping
+        columns = ['id', 'slider_name', 'code', 'width', 'height', 'created_at']
+        order_column = columns[order_column_index] if order_column_index < len(columns) else 'id'
+        
+        if order_direction == 'desc':
+            order_column = f'-{order_column}'
 
-        total_records = photos.count()
-        photos = photos.order_by('id')[start:start + length]
+        # Query sliders with photo count
+        sliders = Sliders.objects.annotate(
+            photo_count=Count('photos', filter=Q(photos__deleted_at__isnull=True))
+        )
+        
+        # Apply search
+        if search_value:
+            sliders = sliders.filter(
+                Q(slider_name__icontains=search_value) |
+                Q(code__icontains=search_value)
+            )
 
+        # Get total count
+        total_records = sliders.count()
+        
+        # Apply ordering and pagination
+        sliders = sliders.order_by(order_column)[start:start + length]
+
+        # Prepare data
         data = []
-        for photo in photos:
-            # Safely get media URL
-            media_url = ''
-            try:
-                media_url = photo.media.file_path if photo.media else ''
-            except:
-                media_url = '/static/placeholder.jpg'
-            
-            # Safely format title and alt text
-            title = photo.title or 'Untitled'
-            alt_text = photo.alt_text or title
-            
+        for slider in sliders:
             data.append({
-                'id': photo.id,
-                'preview': f'<img src="{media_url}" class="photo-preview" alt="{alt_text}">',
-                'info': f'''<div class="photo-info">
-                    <div class="photo-title">{title}</div>
-                    <div class="photo-button-info">
-                        {f'<span class="button-badge">{photo.button_text}</span>' if photo.button_text else ''}
+                'id': slider.id,
+                'slider_info': f'''
+                    <div class="slider-info">
+                        <div class="slider-name">{slider.slider_name}</div>
+                        <div class="slider-meta">
+                            <span class="code-badge">{slider.code}</span>
+                        </div>
                     </div>
-                </div>''',
-                'created_at': photo.created_at.strftime('%Y-%m-%d') if photo.created_at else '-',
-                'actions': f'''<div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewPhoto({photo.id})" title="View">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn-action btn-edit" onclick="editPhoto({photo.id})" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-action btn-delete" onclick="deletePhoto({photo.id})" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>'''
+                ''',
+                'dimensions': f'''
+                    <span class="dimension-badge">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                        {slider.width}×{slider.height}
+                    </span>
+                ''',
+                'photos': f'''
+                    <span class="photo-count-badge">
+                        <i class="fas fa-images"></i>
+                        {slider.photo_count}
+                    </span>
+                ''',
+                'created_at': slider.created_at.strftime('%b %d, %Y') if slider.created_at else '-',
+                'actions': f'''
+                    <div class="action-buttons">
+                        <button class="btn-action btn-photos" onclick="managePhotos({slider.id})" title="Manage Photos">
+                            <i class="fas fa-images"></i>
+                        </button>
+                        <button class="btn-action btn-edit" onclick="editSlider({slider.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" 
+                            onclick="deleteSlider({slider.id}, '{slider.slider_name.replace("'", "\\'")}')" 
+                            title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                '''
             })
 
         return JsonResponse({
@@ -1606,36 +1441,54 @@ def slider_photos_datatable(request, slider_id):
             'data': []
         })
 
-###@login_required
+@login_required
 @require_http_methods(["POST"])
-def slider_photo_create(request, slider_id):
-    """Add photo to slider"""
+def slider_create(request):
+    """Create new slider"""
     try:
-        media_id = request.POST.get('media_id')
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        alt_text = request.POST.get('alt_text')
-        button_text = request.POST.get('button_text')
-        button_link = request.POST.get('button_link')
-        button_link_target = request.POST.get('button_link_target', '_self')
+        slider_name = request.POST.get('slider_name', '').strip()
+        code = request.POST.get('code', '').strip()
+        width = int(request.POST.get('width', 0))
+        height = int(request.POST.get('height', 0))
 
-        photo = SliderPhotos.objects.create(
-            sliders_id=slider_id,
-            media_id=media_id,
-            title=title,
-            description=description,
-            alt_text=alt_text,
-            button_text=button_text,
-            button_link=button_link,
-            button_link_target=button_link_target,
-            created_by=request.user.id,
-            updated_by=request.user.id,
-            created_at=timezone.now()
+        # Validation
+        if not slider_name or not code:
+            return JsonResponse({
+                'success': False,
+                'message': 'Slider name and code are required'
+            })
+
+        if width <= 0 or height <= 0:
+            return JsonResponse({
+                'success': False,
+                'message': 'Width and height must be positive numbers'
+            })
+
+        # Check if code already exists
+        if Sliders.objects.filter(code=code).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Slider code already exists'
+            })
+
+        slider = Sliders.objects.create(
+            slider_name=slider_name,
+            code=code,
+            width=width,
+            height=height,
+            created_by=request.user,
+            updated_by=request.user
         )
 
         return JsonResponse({
             'success': True,
-            'message': 'Photo added successfully'
+            'message': 'Slider created successfully',
+            'slider_id': slider.id
+        })
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid width or height value'
         })
     except Exception as e:
         return JsonResponse({
@@ -1643,17 +1496,249 @@ def slider_photo_create(request, slider_id):
             'message': str(e)
         })
 
-###@login_required
+@login_required
+def slider_get(request, slider_id):
+    """Get slider details"""
+    try:
+        slider = get_object_or_404(Sliders, id=slider_id)
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'id': slider.id,
+                'slider_name': slider.slider_name,
+                'code': slider.code,
+                'width': slider.width,
+                'height': slider.height,
+                'created_at': slider.created_at.strftime('%Y-%m-%d %H:%M') if slider.created_at else None
+            }
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        })
+
+@login_required
+@require_http_methods(["POST"])
+def slider_update(request, slider_id):
+    """Update slider"""
+    try:
+        slider = get_object_or_404(Sliders, id=slider_id)
+        
+        slider_name = request.POST.get('slider_name', '').strip()
+        code = request.POST.get('code', '').strip()
+        width = int(request.POST.get('width', 0))
+        height = int(request.POST.get('height', 0))
+
+        # Validation
+        if not slider_name or not code:
+            return JsonResponse({
+                'success': False,
+                'message': 'Slider name and code are required'
+            })
+
+        if width <= 0 or height <= 0:
+            return JsonResponse({
+                'success': False,
+                'message': 'Width and height must be positive numbers'
+            })
+
+        # Check if code exists for other sliders
+        if Sliders.objects.filter(code=code).exclude(id=slider_id).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Slider code already exists'
+            })
+
+        slider.slider_name = slider_name
+        slider.code = code
+        slider.width = width
+        slider.height = height
+        slider.updated_by = request.user
+        slider.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Slider updated successfully'
+        })
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid width or height value'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        })
+
+@login_required
+@require_http_methods(["POST"])
+def slider_delete(request, slider_id):
+    """Delete slider and all associated photos"""
+    try:
+        slider = get_object_or_404(Sliders, id=slider_id)
+        slider.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Slider deleted successfully'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        })
+
+# ============= SLIDER PHOTOS VIEWS =============
+
+@login_required
+def slider_photos_list(request, slider_id):
+    """Slider photos management view"""
+    slider = get_object_or_404(Sliders, id=slider_id)
+    context = {
+        'slider': slider,
+        'page_title': f'Photos - {slider.slider_name}'
+    }
+    return render(request, 'admin/sliders/photos.html', context)
+
+@login_required
+def slider_photos_datatable(request, slider_id):
+    """DataTables for slider photos"""
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 12))
+        search_value = request.GET.get('search[value]', '')
+
+        photos = SliderPhotos.objects.filter(
+            sliders_id=slider_id,
+            deleted_at__isnull=True
+        ).select_related('media')
+
+        # Apply search
+        if search_value:
+            photos = photos.filter(
+                Q(title__icontains=search_value) |
+                Q(button_text__icontains=search_value)
+            )
+
+        total_records = photos.count()
+        photos = photos.order_by('-id')[start:start + length]
+
+        data = []
+        for photo in photos:
+            # Use helper function to get media URL
+            media_url = get_media_url(photo.media)
+            title = photo.title or 'Untitled'
+            
+            data.append({
+                'id': photo.id,
+                'preview': f'<img src="{media_url}" class="photo-preview" alt="{photo.alt_text or title}">',
+                'info': f'''
+                    <div class="photo-info">
+                        <div class="photo-title">{title}</div>
+                        <div class="photo-button-info">
+                            {f'<span class="button-badge">{photo.button_text}</span>' if photo.button_text else ''}
+                        </div>
+                    </div>
+                ''',
+                'created_at': photo.created_at.strftime('%b %d, %Y') if photo.created_at else '-',
+                'actions': f'''
+                    <div class="action-buttons">
+                        <button class="btn-action btn-view" onclick="viewPhoto({photo.id})" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action btn-edit" onclick="editPhoto({photo.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deletePhoto({photo.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                '''
+            })
+
+        return JsonResponse({
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': total_records,
+            'data': data
+        })
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'draw': int(request.GET.get('draw', 1)),
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': []
+        })
+
+@login_required
+@require_http_methods(["POST"])
+def slider_photo_create(request, slider_id):
+    """Add photo to slider"""
+    try:
+        media_id = request.POST.get('media_id')
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        alt_text = request.POST.get('alt_text', '').strip()
+        button_text = request.POST.get('button_text', '').strip()
+        button_link = request.POST.get('button_link', '').strip()
+        button_link_target = request.POST.get('button_link_target', '_self')
+
+        # Validation
+        if not media_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please select an image'
+            })
+
+        # Verify slider exists
+        slider = get_object_or_404(Sliders, id=slider_id)
+
+        # Verify media exists
+        media = get_object_or_404(MediaLibrary, id=media_id)
+
+        photo = SliderPhotos.objects.create(
+            sliders=slider,
+            media=media,
+            title=title if title else None,
+            description=description if description else None,
+            alt_text=alt_text if alt_text else None,
+            button_text=button_text if button_text else None,
+            button_link=button_link if button_link else None,
+            button_link_target=button_link_target,
+            created_by=request.user,
+            updated_by=request.user
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Photo added successfully',
+            'photo_id': photo.id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        })
+
+@login_required
 def slider_photo_get(request, photo_id):
     """Get slider photo details"""
     try:
         photo = get_object_or_404(SliderPhotos, id=photo_id, deleted_at__isnull=True)
+        
+        # Use helper function to get media URL
+        media_url = get_media_url(photo.media)
+
         return JsonResponse({
             'success': True,
             'data': {
                 'id': photo.id,
                 'media_id': photo.media_id,
-                'media_url': photo.media.file_path,
+                'media_url': media_url,
                 'title': photo.title or '',
                 'description': photo.description or '',
                 'alt_text': photo.alt_text or '',
@@ -1668,20 +1753,27 @@ def slider_photo_get(request, photo_id):
             'message': str(e)
         })
 
-###@login_required
+@login_required
 @require_http_methods(["POST"])
 def slider_photo_update(request, photo_id):
     """Update slider photo"""
     try:
         photo = get_object_or_404(SliderPhotos, id=photo_id, deleted_at__isnull=True)
         
-        photo.title = request.POST.get('title')
-        photo.description = request.POST.get('description')
-        photo.alt_text = request.POST.get('alt_text')
-        photo.button_text = request.POST.get('button_text')
-        photo.button_link = request.POST.get('button_link')
-        photo.button_link_target = request.POST.get('button_link_target', '_self')
-        photo.updated_by = request.user.id
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        alt_text = request.POST.get('alt_text', '').strip()
+        button_text = request.POST.get('button_text', '').strip()
+        button_link = request.POST.get('button_link', '').strip()
+        button_link_target = request.POST.get('button_link_target', '_self')
+
+        photo.title = title if title else None
+        photo.description = description if description else None
+        photo.alt_text = alt_text if alt_text else None
+        photo.button_text = button_text if button_text else None
+        photo.button_link = button_link if button_link else None
+        photo.button_link_target = button_link_target
+        photo.updated_by = request.user
         photo.save()
 
         return JsonResponse({
@@ -1694,7 +1786,7 @@ def slider_photo_update(request, photo_id):
             'message': str(e)
         })
 
-###@login_required
+@login_required
 @require_http_methods(["POST"])
 def slider_photo_delete(request, photo_id):
     """Soft delete slider photo"""
@@ -1713,10 +1805,7 @@ def slider_photo_delete(request, photo_id):
             'message': str(e)
         })
 
-
-
-
-
+# slider photos end 
 
 
 ##@login_required
@@ -2848,7 +2937,121 @@ def video_delete(request, video_id):
 # roles and permissions 
 @login_required
 def roles(request):
-    return render(request,"admin/roles/roles.html")
+    roles = Roles.objects.filter(
+        deleted_at__isnull=True
+    ).order_by('-id')
+
+    context = {
+        "roles":roles
+    }
+    return render(request,"admin/roles/roles.html",context)
+
+
+@login_required
+def roles_create(request):
+    """Create new role"""
+    if request.method == 'POST':
+        form = RolesForm(request.POST)
+        if form.is_valid():
+            role = form.save(commit=False)
+            role.created_by = request.user
+            role.updated_by = request.user
+            role.created_at = timezone.now()
+            role.save()
+            messages.success(request, 'Role created successfully!')
+            return redirect('roles')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RolesForm()
+    
+    return render(request, 'admin/roles/roles_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+@login_required
+def roles_view(request, id):
+    """View role details"""
+    role = get_object_or_404(
+        Roles,
+        id=id,
+        deleted_at__isnull=True)
+    
+    return render(request, 'admin/roles/roles_view.html', {
+        'role': role
+    })
+
+from django.db import transaction
+
+@login_required
+def roles_edit(request, id):
+    """Edit existing role and its permissions"""
+    role = get_object_or_404(Roles, id=id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = RolesForm(request.POST, instance=role)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Save the role
+                    role = form.save(commit=False)
+                    role.updated_by = request.user
+                    role.save()
+                    
+                    # Get selected permissions from POST data
+                    selected_permissions = request.POST.getlist('permissions')
+                    
+                    # Delete existing permissions for this role
+                    RoleHasPermissions.objects.filter(role=role).delete()
+                    
+                    # Create new permissions
+                    for permission_id in selected_permissions:
+                        RoleHasPermissions.objects.create(
+                            role=role,
+                            permission_id=permission_id
+                        )
+                    
+                    messages.success(request, 'Role and permissions updated successfully!')
+                    return redirect('roles')
+            except Exception as e:
+                messages.error(request, f'Error updating role: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RolesForm(instance=role)
+    
+    # Get all permissions grouped by group_name
+    all_permissions = Permissions.objects.all().order_by('group_name', 'name')
+    
+    # Get current permissions for this role
+    current_permissions = RoleHasPermissions.objects.filter(
+        role=role
+    ).values_list('permission_id', flat=True)
+    
+    # Group permissions by group_name
+    permissions_by_group = {}
+    for permission in all_permissions:
+        if permission.group_name not in permissions_by_group:
+            permissions_by_group[permission.group_name] = []
+        permissions_by_group[permission.group_name].append(permission)
+    
+    return render(request, 'admin/roles/roles_form.html', {
+        'form': form,
+        'action': 'Update',
+        'role': role,
+        'permissions_by_group': permissions_by_group,
+        'current_permissions': list(current_permissions)
+    })
+
+@login_required
+def roles_delete(request, id):
+    """Soft delete role"""
+    role = get_object_or_404(Roles, id=id, deleted_at__isnull=True)
+    role.deleted_at = timezone.now()
+    role.save()
+    messages.success(request, 'Role deleted successfully!')
+    return redirect('roles')
 
 
 # languages
@@ -3755,3 +3958,168 @@ def support_delete(request, support_id):
     except Exception as e:
         messages.error(request, f'Error deleting support ticket: {str(e)}')
         return redirect('support_list')
+    
+
+
+
+#uploads
+
+
+@login_required
+def uploads_list(request):
+    uploads = Uploads.objects.select_related(
+        "subject", "video_id", "youtube", "media", "created_by"
+    ).order_by("-id")
+
+    context = {"uploads": uploads}
+    return render(request, "admin/uploads/uploads_list.html", context)
+
+
+@login_required
+def uploads_create(request):
+    if request.method == "POST":
+        form = UploadForm(request.POST)
+        if form.is_valid():
+            upload = form.save(commit=False)
+            upload.created_by = request.user
+            upload.updated_by = request.user
+            upload.save()
+            messages.success(request, "Upload created successfully.")
+            return redirect("uploads_list")
+    else:
+        form = UploadForm()
+
+    return render(request, "admin/uploads/uploads_form.html", {
+        "form": form,
+        "title": "Add Upload",
+    })
+
+
+@login_required
+def uploads_edit(request, id):
+    upload = get_object_or_404(Uploads, id=id)
+
+    if request.method == "POST":
+        form = UploadForm(request.POST, instance=upload)
+        if form.is_valid():
+            upload = form.save(commit=False)
+            upload.updated_by = request.user
+            upload.save()
+            messages.success(request, "Upload updated successfully.")
+            return redirect("uploads_list")
+    else:
+        form = UploadForm(instance=upload)
+
+    return render(request, "admin/uploads/uploads_form.html", {
+        "form": form,
+        "title": "Edit Upload",
+        "upload": upload,
+    })
+
+
+@login_required
+def uploads_view(request, id):
+    upload = get_object_or_404(Uploads, id=id)
+    return render(request, "admin/uploads/uploads_view.html", {
+        "upload": upload
+    })
+
+
+@login_required
+def uploads_delete(request, id):
+    upload = get_object_or_404(Uploads, id=id)
+    upload.delete()
+    messages.success(request, "Upload deleted successfully.")
+    return redirect("uploads_list")
+
+
+# payments 
+
+
+
+@login_required
+def payments_list(request):
+    payments = Payments.objects.filter(deleted_at__isnull=True).order_by("-id")
+    return render(request, "admin/payments/payments_list.html", {"payments": payments})
+
+
+@login_required
+def payments_view(request, id):
+    payment = get_object_or_404(Payments, id=id, deleted_at__isnull=True)
+    # determine a sensible "paid date" — we use updated_at if the record is marked paid, otherwise -
+    paid_date = payment.updated_at if payment.is_paid else None
+    return render(request, "admin/payments/payments_view.html", {
+        "payment": payment,
+        "paid_date": paid_date
+    })
+
+
+@login_required
+def payments_delete(request, id):
+    payment = get_object_or_404(Payments, id=id, deleted_at__isnull=True)
+    # soft-delete: set deleted_at so other parts of app that check deleted_at stay consistent
+    payment.deleted_at = timezone.now()
+    payment.save()
+    messages.success(request, "Payment deleted successfully.")
+    return redirect("payments_list")
+
+
+
+
+@login_required
+def users_list(request):
+    # Queryset (filter as needed)
+    qs = Users.objects.filter(deleted_at__isnull=True).order_by("-id")
+
+    # get page size from query param (with sensible defaults)
+    try:
+        per_page = int(request.GET.get("per_page", 25))
+    except ValueError:
+        per_page = 25
+    if per_page <= 0:
+        per_page = 25
+
+    paginator = Paginator(qs, per_page)
+
+    page = request.GET.get("page", 1)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # optional: preserve GET params for pagination links
+    get_params = request.GET.copy()
+    if "page" in get_params:
+        del get_params["page"]
+    querystring = get_params.urlencode()
+
+    context = {
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
+        "per_page": per_page,
+        "querystring": querystring,
+    }
+    return render(request, "admin/users/users_list.html", context)
+
+
+@login_required
+def users_view(request, id):
+    user = get_object_or_404(Users, id=id, deleted_at__isnull=True)
+    return render(request, "admin/users/users_view.html", {
+        "user": user,
+        "now": timezone.now(),
+    })
+
+
+@login_required
+def users_delete(request, id):
+    user = get_object_or_404(Users, id=id, deleted_at__isnull=True)
+    user.deleted_at = timezone.now()  # Soft delete
+    user.is_active = False
+    user.save()
+    messages.success(request, "User deleted successfully.")
+    return redirect("users_list")
+

@@ -1885,9 +1885,2067 @@
             }
         }
     </style>
+    <style>
+        /* * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        } */
+
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 50%, #c8e3f0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .logo {
+            max-width: 120px;
+            max-height: 120px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+        }
+
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: #4a9d8f;
+            border-right-color: #6ba854;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-ring:nth-child(2) {
+            width: 90%;
+            height: 90%;
+            top: 5%;
+            left: 5%;
+            border-top-color: #d4a574;
+            border-right-color: transparent;
+            animation-duration: 2s;
+            animation-direction: reverse;
+        }
+
+        .loading-text {
+            color: #2d5f7f;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            width: 30px;
+            text-align: left;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        .progress-bar {
+            width: 250px;
+            height: 4px;
+            background: rgba(45, 95, 127, 0.2);
+            border-radius: 2px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9d8f 0%, #6ba854 50%, #d4a574 100%);
+            border-radius: 2px;
+            animation: progress 2.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '';
+            }
+
+            40% {
+                content: '.';
+            }
+
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
+        }
+
+        @keyframes progress {
+            0% {
+                width: 0%;
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                width: 100%;
+                opacity: 0.5;
+            }
+        }
+
+
+        /*************Responsive 1200px*****************/
+
+
+        @media (max-width: 1200px) {
+            .carousel-item {
+                height: 550px;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 30px !important;
+                transform: translateX(20px) !important;
+            }
+
+            /* Optional fine-tuning */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                margin-top: -20px !important;
+                font-size: 24px !important;
+                transform: translateX(-260px) !important;
+                /* move left */
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption p {
+                margin-top: -5px !important;
+                transform: translateX(-275px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-170px) !important;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -210px !important;
+                font-size: 30px !important;
+                color: #00CED1 !important;
+                transform: translateX(350px) !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                /* Move LEFT */
+                transform: translate(-250px, 30px) !important;
+
+                /* Optional spacing */
+                margin-top: 20px !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-400px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #00CED1 !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-370px, 30px) !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                font-size: 30px !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 24px !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                font-size: 18px !important;
+
+            }
+
+
+            .dot-connector {
+                display: none;
+            }
+
+            .btn-show-more {
+                display: block;
+                width: 100%;
+                max-width: 280px;
+                margin: 20px auto 0 auto;
+                /* center it */
+            }
+
+            .courses-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                /* stack cards */
+                justify-items: center !important;
+                margin: 20px auto 0 auto;
+                gap: 20px;
+            }
+
+            .btn-new-admission {
+                margin-bottom: 5px !important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                margin-top: 30px !important;
+                margin-left: 30px !important;
+                transform: translateY(-20px) !important;
+                position: relative !important;
+            }
+
+            .carousel-caption .slide-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.8rem;
+            }
+
+            .left-content,
+            .right-content {
+                text-align: center;
+                width: 100%;
+            }
+
+            .why-cards-row {
+                gap: 20px;
+            }
+
+            .why-card {
+                flex: 1 1 calc(50% - 20px);
+            }
+
+            .stats-container {
+                max-width: 800px;
+                padding: 25px 30px;
+            }
+
+            .courses-container {
+                gap: 20px;
+            }
+
+            .course-card {
+                width: 320px;
+            }
+
+            .dot-connector {
+                display: none;
+            }
+        }
+
+        /*************Responsive 992px*****************/
+
+        @media (max-width: 992px) {
+            .carousel-item {
+                height: 500px;
+            }
+
+
+            /* Move Slide 3 items slightly down & center them */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Fix h1 → 2 lines + reduce size */
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                font-size: 22px !important;
+                /* reduced size */
+            }
+
+            /* Reduce h2 size + push down slightly */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                /* reduced size */
+                transform: translateY(25px) !important;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -180px !important;
+                font-size: 30px !important;
+                color: #00CED1 !important;
+                transform: translateX(280px) !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                /* Move LEFT */
+                transform: translate(-190px, 30px) !important;
+                color: #4ade80 !important;
+                /* Optional spacing */
+                margin-top: 20px !important;
+                text-align: center;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-420px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #A78BFA !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-330px, 30px) !important;
+            }
+
+            /* H1 – already LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 35px !important;
+                font-weight: 600 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: left !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+
+                transform: translateX(-200px) translateY(100px) !important;
+                /* ← MORE LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                color: navy !important;
+                text-align: center !important;
+                margin: 0 auto !important;
+                transform: translate(250px, -150px) !important;
+                /* RIGHT + UP */
+            }
+
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                color: navy !important;
+                font-size: 16px !important;
+                transform: translate(250px, -150px) !important;
+                /* move RIGHT + UP */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(250px, -130px) !important;
+                /* RIGHT + UP */
+                padding: 12px 40px !important;
+                min-width: 165px !important;
+                min-height: 30px !important;
+            }
+
+            .student-image-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
+
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+
+            .why-card {
+                flex: 1 1 45%;
+                margin-bottom: 20px;
+            }
+
+            .stats-container {
+                padding: 30px 30px;
+                gap: 30px;
+                max-width: 700px !important;
+                max-height: 100px !important;
+                overflow: visible !important;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .about-section {
+                padding: 70px 30px;
+            }
+
+            .dot-cyan {
+                position: absolute !important;
+                top: 20px !important;
+                right: 20px !important;
+                width: 14px !important;
+                height: 14px !important;
+                background: #4dd0e1 !important;
+                border-radius: 50% !important;
+                z-index: 5 !important;
+            }
+
+            .who-we-are {
+                flex-direction: column;
+                text-align: center;
+                display: flex;
+                flex-wrap: wrap;
+                order: 1;
+            }
+
+            .who-we-are-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .who-we-are-title {
+                text-align: center;
+            }
+
+            .who-we-are-image {
+                order: 2 !important;
+                width: 100% !important;
+                margin: -40px auto 0 auto !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+
+            .who-we-are-image img {
+                width: 85% !important;
+                max-width: 400px !important;
+                display: block !important;
+            }
+
+            .our-aim-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .our-aim-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 370px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            }
+
+            .btn-read-more {
+                order: 3 !important;
+                margin: 15px auto 0 auto !important;
+                display: inline-flex !important;
+            }
+
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 280px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            /* Maintain color scheme from desktop */
+            .carousel-caption .highlight {
+                color: #00CED1 !important;
+            }
+
+            .carousel-caption .highlight-green,
+            .carousel-caption .for-green,
+            .carousel-caption .other-green {
+                color: #4ade80 !important;
+            }
+
+            .stats-container {
+                height: auto;
+                padding: 30px 25px;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.95rem !important;
+            }
+
+            .courses-section {
+                padding: 50px 20px;
+            }
+
+            .course-card {
+                width: 300px;
+            }
+
+            .scholarship-section {
+                padding: 50px 20px;
+            }
+
+            .scholarship-title {
+                font-size: 20px;
+                padding: 0 15px;
+            }
+
+            footer .col-md-3 {
+                margin-bottom: 30px;
+            }
+
+            #trinityCarousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                color: #4ade80 !important;
+                /* green */
+                font-size: 20px !important;
+            }
+        }
+
+        /*************Responsive 768px*****************/
+
+        @media (max-width: 768px) {
+
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
+
+
+
+            .why-section {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+
+            .stats-container {
+                padding: 40px 30px;
+                gap: 30px;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .wrapper .circle-left {
+                top: -20px !important;
+                left: 40px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+
+            .course-card {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .btn-show-more {
+                display: block;
+                width: 100%;
+                max-width: 280px;
+                margin: 20px auto 0 auto;
+                /* center it */
+            }
+
+            .courses-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                /* stack cards */
+                gap: 20px;
+            }
+
+            .btn-new-admission {
+                margin-bottom: 5px !important;
+            }
+
+            .dot-cyan {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                width: 12px !important;
+                height: 12px !important;
+                background: #4dd0e1 !important;
+                border-radius: 50% !important;
+                z-index: 5 !important;
+            }
+
+            .who-we-are-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .who-we-are-image {
+                order: 2 !important;
+                width: 100% !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin: -60px auto 0 auto !important;
+                justify-content: center;
+            }
+
+            .who-we-are-image img {
+                width: 85% !important;
+                max-width: 350px !important;
+                display: block !important;
+            }
+
+            .our-aim-content {
+                order: 1 !important;
+                width: 100% !important;
+                text-align: center;
+            }
+
+            .church-card {
+                order: 2 !important;
+                margin: 0 auto !important;
+                display: flex;
+                justify-content: center;
+            }
+
+            .btn-read-more {
+                order: 3 !important;
+                margin: 15px auto 0 auto !important;
+                display: inline-flex !important;
+                text-align: center;
+            }
+
+            .who-we-are-description,
+            .our-aim-description {
+                font-size: 16px;
+            }
+
+            .church-image img {
+                width: 180px;
+                height: 180px;
+            }
+
+
+            .learn-more-btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 220px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+
+            }
+
+            .why-section {
+                padding: 40px 15px;
+            }
+
+            .why-card {
+                flex: 1 1 100%;
+                margin-bottom: 20px;
+            }
+
+            .why-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .why-card p {
+                font-size: 0.9rem;
+            }
+
+            .wrapper .circle-left {
+                width: 80px;
+                height: 80px;
+                top: -25px;
+                left: -25px;
+            }
+
+            .wrapper .circle-right {
+                position: absolute;
+                width: 120px;
+                height: 120px;
+                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+                border-radius: 50%;
+                bottom: -35px;
+                /* move half outside */
+                right: -35px;
+                z-index: 1;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .course-card {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .badge-icon {
+                width: 60px;
+                height: 60px;
+                top: -50px;
+                left: -35px;
+            }
+
+            .badge-icon i {
+                font-size: 28px;
+            }
+
+            .badge-icon::after {
+                width: 48px;
+                height: 48px;
+            }
+
+            .course-img-container {
+                height: 180px;
+            }
+
+            .course-title {
+                font-size: 18px;
+            }
+
+            .course-desc {
+                font-size: 14px;
+            }
+
+            .scholarship-section {
+                padding: 40px 20px;
+            }
+
+            .scholarship-title {
+                font-size: 18px;
+                line-height: 1.5;
+            }
+
+            .btn-new-admission {
+                width: 220px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            footer {
+                padding: 40px 20px;
+            }
+
+            footer h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            footer p,
+            footer a {
+                font-size: 0.9rem;
+            }
+
+            .logo {
+                max-width: 100px;
+                max-height: 100px;
+            }
+
+            .spinner {
+                width: 150px;
+                height: 150px;
+            }
+
+            .loading-text {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+
+            .progress-bar {
+                width: 200px;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 12px;
+            }
+
+            .section-title:after {
+                width: 60px;
+                height: 2px;
+            }
+
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            body {
+                overflow-x: hidden;
+            }
+
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            [class*="col-"] {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                transform: translate(-170px, 140px) !important;
+                /* move left more if needed */
+                font-size: 30px !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 24px !important;
+                font-weight: 200 !important;
+
+                /* Move RIGHT or LEFT here */
+                transform: translate(190px, -140px) !important;
+                text-align: center !important;
+                position: relative !important;
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                transform: translate(190px, -120px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(190px, -100px) !important;
+            }
+
+
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -170px !important;
+                font-size: 30px !important;                
+                transform: translateX(280px) !important;
+            }
+
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                font-weight: 200 !important;
+                transform: translate(-200px, 30px) !important;
+                text-align: center !important;
+                margin: 0 auto !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-400px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #A78BFA !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-300px, 30px) !important;
+            }
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 24px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-40px, 20px) !important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 280px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+             .carousel-item:nth-child(2) .carousel-caption h1 {
+                 color: #22d3ee !important;
+             }
+
+        }
+
+        /*************Responsive 576px*****************/
+
+        @media (max-width: 576px) {
+
+            .student-image-card {
+                flex: 1 1 100%;
+            }
+
+            .why-section {
+                padding-top: 50px;
+                padding-bottom: 30px;
+            }
+
+            .why-card {
+                flex: 1 1 100%;
+            }
+
+            .stats-container {
+                padding: 40px 5px !important;
+                gap: 30px;
+                margin-top: -20px !important;
+                max-width: 700px !important;
+                overflow: visible !important;
+            }
+
+            .wrapper .circle-right {
+                bottom: -20px !important;
+                right: 10px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .wrapper .circle-left {
+                bottom: -20px !important;
+                left: 15px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem;
+            }
+
+            .btn-new-admission {
+                margin-bottom: 10px !important;
+            }
+
+            .about-section {
+                padding: 40px 12px;
+            }
+
+            .who-we-are-title {
+                font-size: 22px;
+            }
+
+            .church-card {
+                margin: 0 auto 8px auto;
+            }
+
+            .who-we-are-image img {
+                width: 90%;
+                max-width: 300px;
+            }
+
+            .btn-read-more {
+                font-size: 15px;
+                padding: 9px 14px;
+            }
+
+
+            .highlight {
+                color: #22d3ee !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+
+            .highlight-green {
+                color: #08b547 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            }
+
+           
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 180px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+                overflow: visible !important;
+            }
+
+
+            /* APPLY SAME CENTER ALIGNMENT FOR ALL ELEMENTS */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                text-align: center !important;
+                margin: 0 auto !important;
+                display: block !important;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption {
+                bottom: 5% !important;
+                /* lower number = moves DOWN */
+                left: 5% !important;
+                /* push slightly right */
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                 color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(300px, 10px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 400 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(230px, -60px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                font-size: 16px !important;
+                font-weight: 400 !important;
+                color: #A78BFA !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(230px, -40px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                margin-top: 9px !important;
+                padding: 10px 25px !important;
+
+                /* Remove conflicting properties */
+                margin-left: 0 !important;
+                transform: translateX(290px) !important;
+                /* push RIGHT (increase value if needed) */
+            }
+
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(220px, -110px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: navy !important;
+                /* ← remove comma */
+                transform: translate(-160px, 40px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: #A78BFA !important;
+                transform: translate(-160px, 60px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                 line-height: 1.2 !important;
+                font-size: 16px !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-160px, 70px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, 30px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+             .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+            color: #08b547 !important;
+             }
+
+            .highlight-green,
+            .for-green,
+            .other-green {
+                color: #4ade80 !important;
+                text-shadow: none !important;
+            }
+
+            .student-image-wrapper {
+                width: 200px;
+                height: 240px;
+            }
+
+            .student-image-wrapper .frame-blue,
+            .student-image-wrapper .frame-green {
+                width: 160px;
+                height: 200px;
+            }
+
+            .student-image-wrapper .image-frame {
+                width: 160px;
+                height: 200px;
+            }
+
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -15px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .courses-section {
+                padding: 40px 15px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                padding-top: 10px;
+            }
+
+            .course-card {
+                padding: 35px 20px 25px;
+                border-radius: 30px;
+            }
+
+            .btn-join {
+                padding: 10px 30px;
+                font-size: 14px;
+            }
+
+            .scholarship-title {
+                font-size: 16px;
+                max-width: 100%;
+            }
+
+            .btn-new-admission {
+                width: 200px;
+                height: 30px;
+                font-size: 13px;
+            }
+
+            .oval-wrapper {
+                padding: 3px;
+            }
+
+            footer {
+                padding: 30px 15px;
+            }
+
+            footer h3 {
+                font-size: 1.1rem;
+            }
+
+            footer p,
+            footer a {
+                font-size: 0.85rem;
+            }
+
+            .newsletter-form input,
+            .newsletter-form button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .social-icons {
+                justify-content: center;
+                margin-top: 15px;
+            }
+
+            .logo {
+                max-width: 80px;
+                max-height: 80px;
+            }
+
+            .spinner {
+                width: 120px;
+                height: 120px;
+            }
+
+            .loading-text {
+                font-size: 18px;
+            }
+
+            .progress-bar {
+                width: 180px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 180px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
+        /************ BELOW 480px (small phones) ************/
+        @media (max-width: 480px) {
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -20px;
+            }
+
+            .stat-number {
+                font-size: 1.2rem !important;
+            }
+
+            .stat-label {
+                font-size: 0.75rem !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.9rem !important;
+            }
+
+            .stats-container {
+                gap: 10px !important;
+                /* Reduce spacing */
+                height: 80px !important;
+                width: 450px !important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 140px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            } #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+                overflow: visible !important;
+            }
+             #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 140px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(30px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(190px, -100px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845;
+                /* ← remove comma */
+                transform: translate(-140px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                 color: #A78BFA !important;
+                transform: translate(-140px, 60px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+            }
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(280px, 15px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845;
+                /* ← remove comma */
+                transform: translate(190px, -50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                 color: #A78BFA !important;
+                transform: translate(190px, -30px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-140px, 70px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(200px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px,20px) !important;
+            }
+
+        }
+
+        /************ BELOW 400px (very small phones) ************/
+        @media (max-width: 400px) {
+
+            .wrapper .circle-left {
+                width: 60px;
+                height: 60px;
+                top: -20px;
+                left: -20px;
+            }
+
+            .wrapper .circle-right {
+                width: 75px;
+                height: 75px;
+                bottom: 8px;
+                right: -15px;
+            }
+
+            .stat-number {
+                font-size: 0.75rem !important;
+                line-height: 1 !important;
+            }
+
+            .stat-label {
+                font-size: 0..45rem !important;
+                line-height: 1 !important;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 0.75rem !important;
+                margin-bottom: 1px !important;
+                /* reduce gap */
+            }
+
+            .stats-container {
+                gap: 10px !important;
+                /* Reduce spacing */
+                height: 80px !important;
+            }
+
+            .our-aim-section>.church-card,
+            .our-aim-section .church-card,
+            div .church-card {
+                order: 2 !important;
+                margin-left: 100px !important;
+                display: flex;
+                justify-content: center;
+                justify-content: flex-end !important;
+            }
+
+            .church-image img {
+                width: 220px;
+                height: 220px;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(60px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(170px, -100px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+                ;
+                /* ← remove comma */
+                transform: translate(-140px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: #1B2845 !important;
+                ;
+                transform: translate(-120px, 70px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+                /* Force MAX 2 lines */
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                /* limit to 2 lines */
+                -webkit-box-orient: vertical !important;
+
+
+                /* Optional: control width so it wraps to exactly 2 lines */
+                max-width: 330px !important;
+                /* increase width */
+                white-space: normal !important;
+                line-height: 1 !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-140px, 100px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(190px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translateY(20px) !important;
+            }
+
+
+        }
+    </style>
 </head>
 
 <body>
+
+    <div class="loader-container" id="loader">
+        <div class="logo-wrapper">
+            <div class="spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <img src="{% static 'img/Trinity_logo.png' %}" alt="Trinity Seminary Logo" class="logo" id="logoImage">
+        </div>
+        <!-- <div class="loading-text">
+            LOADING<span class="loading-dots"></span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div> -->
+    </div>
     <!-- Mobile Menu Toggle -->
     <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
         <i class="fas fa-bars"></i>
@@ -2693,6 +4751,65 @@
     '{% endfor %}'
 </script>
 {% endif %}
+<!-- loader scripts  -->
+    <script>
+        // Trinity Seminary Loader Script
+        // Add this to your base.html or include it in each page
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Show loader immediately
+            showLoader();
+
+            // Hide loader after 2 seconds
+            setTimeout(function () {
+                hideLoader();
+            }, 1000);
+        });
+
+        // Function to show the loader
+        function showLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+                // Prevent scrolling while loading
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Function to hide the loader with fade effect
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.5s ease';
+
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                    // Re-enable scrolling
+                    document.body.style.overflow = 'auto';
+                }, 500);
+            }
+        }
+
+        // Optional: Show loader on page navigation (for SPAs or internal links)
+        function showLoaderOnNavigation() {
+            const links = document.querySelectorAll('a:not([target="_blank"]):not([href^="#"])');
+
+            links.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    // Only show loader for internal navigation
+                    if (this.hostname === window.location.hostname) {
+                        showLoader();
+                    }
+                });
+            });
+        }
+
+        // Initialize navigation loader (optional)
+        // Uncomment the line below if you want loader on link clicks
+        // showLoaderOnNavigation();
+    </script>
 </body>
 
 </html>

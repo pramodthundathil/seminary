@@ -116,6 +116,8 @@ class Roles(models.Model):
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
 
     class Meta:
         managed = True
@@ -907,13 +909,14 @@ class ReferenceForm(models.Model):
         db_table = 'reference_form'
 
 class RoleHasPermissions(models.Model):
-    permission_id = models.PositiveIntegerField(primary_key=True)
-    role_id = models.PositiveIntegerField()
+    id = models.PositiveIntegerField(primary_key=True)
+    permission = models.ForeignKey(Permissions, on_delete=models.CASCADE)
+    role = models.ForeignKey(Roles, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = 'role_has_permissions'
-        unique_together = (('permission_id', 'role_id'),)
+        unique_together = (('permission', 'role'),)
 
 class SliderPhotos(models.Model):
     id = models.AutoField(primary_key=True)
