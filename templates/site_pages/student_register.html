@@ -813,10 +813,12 @@
                     <label>Course Applied For <span class="required">*</span></label>
                     <select name="course_applied" class="form-select" required>
                         <option value="">Select Course</option>
+
                         {% for course_applied in courses %}
                         <option value="{{ course_applied.id }}">{{ course_applied.course_name }}</option>
                         {% endfor %}
                          <small id="course_applied_error" class="error-message"></small>
+
                     </select>
                 </div>
             </div>

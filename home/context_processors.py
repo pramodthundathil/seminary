@@ -1,4 +1,14 @@
 
+from django.conf import settings
+
+def settings_context(request):
+    """
+    Context processor to make Django settings available in templates
+    """
+    return {
+        'settings': settings
+    }
+
 from .models import Students
 
 def student_processor(request):
@@ -7,13 +17,29 @@ def student_processor(request):
 
     try:
         # student = Students.objects.get(user_id=request.user.id)
-        student = Students.objects.get(id=166)
+        student = Students.objects.filter(user_id=request.user.id).first()
+
+        # student = Students.objects.get(id=166)
     except Students.DoesNotExist:
         student = None
 
     return {
         "student": student
     }
+
+
+def role_context(request):
+    role = ""
+    if request.user.is_authenticated:
+        user_role = request.user.user_roles.first()
+        if user_role:
+            role = user_role.role.name.lower().replace(" ", "_")  
+
+    return {
+        "role": role   
+    }
+
+
 
 # context_processors.py
 from django.urls import reverse

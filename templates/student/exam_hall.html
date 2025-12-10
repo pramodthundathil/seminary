@@ -603,6 +603,20 @@
     }
 </style>
 
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+{% else %}
+
+
 <div class="exam-page exam-container">
 
     <!-- Header -->
@@ -614,7 +628,7 @@
                 <p>You have no scheduled exams</p>
             </div>
         </div>
-        <button class="request-exam-btn" onclick="location.href='/request-exam/'">Request Exam</button>
+        <button class="request-exam-btn" onclick="location.href='request-exam/'">Request Exam</button>
     </div>
 
     <!-- Table Section -->
@@ -630,8 +644,8 @@
             </thead>
             <tbody id="examTableBody">
 
-                    {% if context.exam_list %}
-                        {% for e in context.exam_list %}
+                    {% if exam_list %}
+                        {% for e in exam_list %}
                         <tr>
                             <td data-label="Exam">
                                 <div class="exam-name">{{ e.exam_name }}</div>
@@ -668,21 +682,108 @@
                             </td>
                         </tr>
                     {% endif %}
-                <!-- <tr>
-                    <td data-label="Exam"><div class="exam-name">OT UNIT 1</div></td>
-                    <td data-label="Subject"><div class="exam-subject">Old Testament</div></td>
-                    <td data-label="Requested Date"><div class="exam-time">Jul 5, 2022 12:10 PM</div></td>
-                    <td data-label="Status"><span class="status-badge approved">Approved</span></td>
-                </tr> -->
-
-            </tbody>
+                </tbody>
         </table>
     </div>
 
+    <!-- PAGINATION -->
+    {% if paginator %}
+    <div class="pagination" style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        margin-top: 16px;
+        border-top: 1px solid #e5e7eb;
+    ">
+        <div style="
+            color: #6b7280;
+            font-size: 14px;
+        ">
+            Showing {{ exams_page.start_index }} to {{ exams_page.end_index }} of {{ paginator.count }} entries
+        </div>
+        <div class="pagination-controls" style="
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        ">
+            {% if exams_page.has_previous %}
+                <a href="?page={{ exams_page.previous_page_number }}" class="pagination-btn" style="
+                    padding: 6px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    background: white;
+                    color: #374151;
+                    text-decoration: none;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                ">Previous</a>
+            {% else %}
+                <button class="pagination-btn" disabled style="
+                    padding: 6px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    background: #f9fafb;
+                    color: #9ca3af;
+                    font-size: 14px;
+                    cursor: not-allowed;
+                ">Previous</button>
+            {% endif %}
+            
+            {% for num in exams_page.paginator.page_range %}
+                {% if exams_page.number == num %}
+                    <button class="pagination-btn active" style="
+                        padding: 6px 12px;
+                        border: 1px solid #3b82f6;
+                        border-radius: 6px;
+                        background: #3b82f6;
+                        color: white;
+                        font-size: 14px;
+                        cursor: default;
+                    ">{{ num }}</button>
+                {% elif num > exams_page.number|add:'-3' and num < exams_page.number|add:'3' %}
+                    <a href="?page={{ num }}" class="pagination-btn" style="
+                        padding: 6px 12px;
+                        border: 1px solid #d1d5db;
+                        border-radius: 6px;
+                        background: white;
+                        color: #374151;
+                        text-decoration: none;
+                        font-size: 14px;
+                        transition: all 0.2s;
+                    ">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if exams_page.has_next %}
+                <a href="?page={{ exams_page.next_page_number }}" class="pagination-btn" style="
+                    padding: 6px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    background: white;
+                    color: #374151;
+                    text-decoration: none;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                ">Next</a>
+            {% else %}
+                <button class="pagination-btn" disabled style="
+                    padding: 6px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    background: #f9fafb;
+                    color: #9ca3af;
+                    font-size: 14px;
+                    cursor: not-allowed;
+                ">Next</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
 </div>
-
+{% endif %}
 {% endblock %}
-
 {% block right %}
 
 {% endblock %}

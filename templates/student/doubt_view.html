@@ -1,0 +1,204 @@
+{% extends "student/index.html" %}
+
+{% block middle %}
+
+<style>
+    .ticket-wrapper {
+        width: 100%;
+    }
+
+    .ticket-header {
+        width: 100%;
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: 6px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .status-bar {
+        background: var(--success);
+        padding: 10px 18px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .status-badge {
+        background: white;
+        color: var(--success);
+        padding: 5px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 4px;
+    }
+
+    .ticket-info {
+        padding: 18px 22px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .user-avatar {
+        width: 52px;
+        height: 52px;
+        background: var(--gray-700);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .ticket-details { flex: 1; }
+
+    .author-name { font-weight: 600; font-size: 16px; color: var(--text-dark); }
+    .author-id { color: var(--text-light); font-size: 13px; }
+
+    .ticket-timestamp {
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ticket-message {
+        padding: 18px 22px;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .category-label { font-size: 13px; color: var(--text-light); margin-bottom: 10px; }
+    .category-value { font-weight: 500; color: var(--text-dark); }
+
+    .message-box {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-300);
+    }
+
+    .ticket-actions {
+        padding: 18px 22px;
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-submit {
+        background: var(--success);
+        padding: 10px 18px;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
+    }
+
+    .btn-back {
+        background: white;
+        border: 1px solid var(--gray-300);
+        padding: 10px 18px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+</style>
+
+<div class="ticket-wrapper">
+
+    <div class="ticket-header">
+        <div class="status-bar">
+            <span class="status-badge">OPEN</span>
+        </div>
+
+        <div class="ticket-info">
+            <div class="user-avatar">SS</div>
+
+            <div class="ticket-details">
+                <div class="author-name">Sobha Sudheesh</div>
+                <div class="author-id">(TTSMDIV053)</div>
+
+                <div class="ticket-timestamp">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    03 Dec, 2025 07:55 AM
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-message">
+            <div class="category-label">
+                Category: <span class="category-value">General</span>
+            </div>
+            <textarea class="message-box">dewd</textarea>
+        </div>
+
+        <div class="ticket-actions">
+            <button class="btn-submit">SUBMIT</button>
+            <button class="btn-back" onclick="window.history.back()">Back to list</button>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block right %}
+
+<style>
+    .new-query-section {
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: 6px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .query-input {
+        width: 100%;
+        min-height: 130px;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-300);
+    }
+
+    .form-footer {
+        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    select {
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-300);
+    }
+</style>
+
+<div class="new-query-section">
+    <textarea class="query-input" placeholder="Ask a query..."></textarea>
+
+    <div class="form-footer">
+        <select>
+            <option>General</option>
+            <option>Technical</option>
+            <option>Billing</option>
+            <option>Account</option>
+            <option>Other</option>
+        </select>
+
+        <button class="btn-submit">SUBMIT</button>
+    </div>
+</div>
+
+{% endblock %}

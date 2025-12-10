@@ -1,0 +1,299 @@
+{% extends "student/index.html" %}
+
+{% block title %}Confirm Payment{% endblock %}
+{% block body_class %}{% endblock %}
+
+{% block middle %}
+
+<style>
+    :root {
+        --primary: #00CED1;
+        --primary-dark: #1B2845;
+        --secondary: #64748B;
+        --success: #10B981;
+        --danger: #EF4444;
+        --border: #666666;
+
+        --bg-gray: #F8FAFC;
+        --text-dark: #1E293B;
+        --text-light: #64748B;
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+        --sidebar-width: 250px;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .container-confirm {
+        max-width: 720px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .header-confirm {
+        background: linear-gradient(135deg, var(--success) 0%, #0d9488 100%);
+        padding: 18px 24px;
+        color: white;
+    }
+
+    .header-confirm h1 {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .content-confirm {
+        padding: 24px;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-200);
+        gap: 20px;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-label { font-size: 14px; color: var(--text-light); font-weight: 500; }
+
+    .detail-value { font-size: 14px; color: var(--text-dark); word-break: break-word; }
+
+    .amount-row .detail-value { font-weight: 600; font-size: 15px; }
+
+    /* Make right block move BELOW middle on mobile */
+    @media (max-width: 768px) {
+        .right-column {
+            width: 100% !important;
+            order: 3;
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+    }
+</style>
+
+<div class="container-confirm">
+    <div class="header-confirm">
+        <h1>CONFIRM PAYMENT</h1>
+    </div>
+
+    <div class="content-confirm">
+
+        <div class="detail-row">
+            <div class="detail-label">Name</div>
+            <!-- <div class="detail-value">Sobha Sudheesh</div> -->
+             <div class="detail-value">{{ payment.name }}</div>
+
+        </div>
+
+<div class="detail-row">
+    <div class="detail-label">Name</div>
+    <div class="detail-value">{{ payment.name }}</div>
+</div>
+
+<div class="detail-row">
+    <div class="detail-label">Email Address</div>
+    <div class="detail-value">{{ payment.email }}</div>
+</div>
+
+<div class="detail-row">
+    <div class="detail-label">Phone Number</div>
+    <div class="detail-value">{{ payment.phone }}</div>
+</div>
+
+<div class="detail-row">
+    <div class="detail-label">Person Group</div>
+    <div class="detail-value">{{ payment.group }}</div>
+</div>
+
+<div class="detail-row amount-row">
+    <div class="detail-label">Amount</div>
+    <div class="detail-value">{{ payment.amount }} USD</div>
+</div>
+
+<div class="detail-row">
+    <div class="detail-label">Message</div>
+    <div class="detail-value">{{ payment.message }}</div>
+</div>
+
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block right %}
+
+<style>
+    .payment-card {
+        background: white;
+        padding: 20px;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+    }
+
+    .payment-info-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+    }
+
+    .payment-info-text {
+        font-size: 13px;
+        color: var(--text-light);
+        margin-bottom: 16px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 11px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-secondary {
+        background: white;
+        border: 1px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover { background: var(--gray-100); }
+
+    .btn-paypal {
+        background: #FFC439;
+        color: #003087;
+        font-weight: 600;
+        border: 1px solid #F0B429;
+    }
+
+    .btn-paypal:hover { background: #F0B429; }
+
+    .security-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--light-cyan);
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 14px;
+        font-size: 12px;
+    }
+</style>
+
+<div class="payment-card">
+
+    <div class="payment-info-title">Payment Method</div>
+    <div class="payment-info-text">
+        Complete your payment securely using PayPal or go back to edit details.
+    </div>
+
+    <div class="button-group">
+        <button class="btn btn-secondary" onclick="goBack()">
+            ⬅ Back
+        </button>
+
+    </div>
+     <div id="paypal-button-container" style="margin-top: 15px; min-height: 50px;"></div>
+
+
+    <div class="security-note">
+        🔒 Your payment is secured with 256-bit SSL encryption
+    </div>
+
+
+</div>
+<script src="https://www.paypal.com/sdk/js?client-id={{ settings.PAYPAL_CLIENT_ID }}&currency=USD"></script>
+
+<script>
+
+paypal.Buttons({
+
+    // STEP A — Ask Django backend to CREATE order
+    createOrder: function () {
+        return fetch("/create-paypal-order/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                amount: "{{ payment.amount }}"
+            })
+        })
+        .then(res => res.json())
+        .then(data => data.orderID);
+    },
+
+    // STEP B — After PayPal approves payment
+    onApprove: function (data) {
+        return fetch("/capture-paypal-order/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                orderID: data.orderID
+            })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === "success") {
+                window.location.href = "/payment-success/";
+            } else {
+                alert("Payment failed!");
+            }
+        });
+    }
+
+}).render('#paypal-button-container');
+
+
+
+    function goBack() {
+        if (confirm("Go back and edit payment details?")) {
+            window.history.back();
+        }
+    }
+
+    function proceedPayment() {
+        alert("Redirecting to PayPal...");
+    }
+</script>
+
+{% endblock %}

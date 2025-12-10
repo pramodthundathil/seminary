@@ -553,23 +553,44 @@
 
 </div>
 
+{% csrf_token %}
+
 <script>
-    (function(){
-        const submitBtn = document.getElementById('postQuerySubmit');
-        const input = document.getElementById('postQueryInput');
-        if (!submitBtn || !input) return;
+(function(){
+    const submitBtn = document.getElementById('postQuerySubmit');
+    const input = document.getElementById('postQueryInput');
+    const categorySelect = document.querySelector('.category-select');
 
-        submitBtn.addEventListener('click', function(e){
-            const val = input.value || '';
-            if (val.trim().length === 0) {
-                e.preventDefault();
-                input.focus();
-                return;
+    submitBtn.addEventListener('click', function(){
+        const doubt = input.value.trim();
+        const category = categorySelect.value;
+
+        if (!doubt) {
+            input.focus();
+            return;
+        }
+
+        fetch("{% url 'student_support_create' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                "doubt": doubt,
+                "category": category
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                input.value = "";
+                window.location.href = "{% url 'student_doubts_answers' %}";
             }
-
-            window.location.href = "{% url 'student_doubts_answers' %}";
         });
-    })();
+    });
+})();
 </script>
 
 {% endblock %}

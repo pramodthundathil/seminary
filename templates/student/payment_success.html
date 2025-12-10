@@ -1,0 +1,36 @@
+{% extends "student/index.html" %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block middle %}
+<div style="
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+">
+    <h2 style="color: #10B981; font-size: 22px; margin-bottom: 10px;">
+        ✔ Payment Successful
+    </h2>
+
+    <p style="color: #374151; font-size: 14px; margin-bottom: 20px;">
+        Thank you! Your payment has been processed successfully.
+    </p>
+
+    <a href="/home/" 
+       style="
+            display: inline-block;
+            background: #00CED1;
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        ">
+        Go to Dashboard
+    </a>
+</div>
+{% endblock %}

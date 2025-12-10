@@ -3,19 +3,57 @@ from  .import views
 
 urlpatterns = [
     path('',views.index, name='index'),
-   
-    path("home/", views.student_home, name="student_home"),
-    path("subjects/", views.student_subjects, name="student_subjects"),
-    path("view-posts/", views.student_view_post, name="student_view_post"),
-    path("exam-hall/", views.student_exam_hall, name="student_exam_hall"),
-    path("score-card/", views.student_score_card, name="student_score_card"),
-    path("class-recordings/", views.student_class_recordings, name="student_class_recordings"),
-    path("submitted-assignment/", views.student_submitted_assignment, name="student_submitted_assignment"),
 
-    path("pending-assignment/", views.student_pending_assignment, name="student_pending_assignment"),
-    path("doubts-answers/", views.student_doubts_answers, name="student_doubts_answers"),
-    path("request-exam/", views.student_request_exam, name="student_request_exam"),
-    path("student-profile/", views.student_profile_view, name="student_profile_view"),
+    #----student dashboard---#
+    path("student_index",views.student_index,name="student_index"),
+    path("student/", views.student_home, name="student_home"),
+    path("student/subjects/", views.student_subjects, name="student_subjects"),
+    path("student/pending-assignment/", views.student_pending_assignment, name="student_pending_assignment"),
+    path("student/submitted-assignment/", views.student_submitted_assignment, name="student_submitted_assignment"),
+    path("student/exam-hall/", views.student_exam_hall, name="student_exam_hall"),
+    path("student/score-card/", views.student_score_card, name="student_score_card"),
+    path("student/class-recordings/", views.student_class_recordings, name="student_class_recordings"),
+    path("student/profile/", views.student_profile_view, name="student_profile_view"),
+    path('student/support/create/', views.student_support_create, name='student_support_create'),
+    path("student/request-subject/", views.request_subject_view, name="request_subject"),
+    path("student/exam-hall/request-exam/", views.student_request_exam, name="student_request_exam"),
+    path("student/view-posts/", views.student_view_post, name="student_view_post"),
+    path("student/view-posts/", views.student_view_post, name="student_view_post"),
+    path("student/change-password/", views.student_change_password, name="student_change_password"),
+    path("student/view/<int:id>/", views.student_doubt_view, name="student_doubt_view"),
+    path("student/make-payment/", views.make_payment, name="make_payment"),
+    path("student/payment/save-temp/", views.save_payment_temp, name="save_payment_temp"),
+    path("student/create-paypal-order/", views.create_paypal_order, name="create_paypal_order"),
+    path("student/capture-paypal-order/", views.capture_paypal_order, name="capture_paypal_order"),
+    path("student/payment-success/", views.payment_success, name="payment_success"),
+    path("student/payment-failed/", views.payment_failed, name="payment_failed"),
+    path("student/doubts-answers/", views.student_doubts_answers, name="student_doubts_answers"),
+    path('student/request-exam/submit/', views.submit_request_exam, name='submit-request-exam'),
+    path("student/payment-input/", views.student_payment_input, name="student_payment_input"),
+    path("student/confirm-payment/", views.student_confirm_payment, name="student_confirm_payment"),
+
+
+    # -------------church user-----------------------
+    path("church-user/", views.student_home, name="church_user_home"),
+    path("church-user/subjects/", views.student_subjects, name="church_user_subjects"),
+    path("church-user/exam-hall/", views.student_exam_hall, name="church_user_exam_hall"),
+    path("church-user/score-card/", views.student_score_card, name="church_user_score_card"),
+    path("church-user/class-recordings/", views.student_class_recordings, name="church_user_class_recordings"),
+    path("church-user/profile/", views.student_profile_view, name="church_user_profile_view"),
+    path("church-user/change-password/", views.student_change_password, name="church_user_change_password"),
+    path("church-user/payment-input/", views.student_payment_input, name="church_user_payment_input"),
+    path("church-user/doubts-answers/", views.student_doubts_answers, name="church_user_doubts_answers"),
+    path("church-user/exam-hall/request-exam/", views.student_request_exam, name="student_request_exam"),
+
+
+
+
+
+
+
+
+    path("get-exams/<int:subject_id>/", views.get_exams, name="get_exams"),
+
 
 # Dynamic page URL (keep this last)
     path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
@@ -23,7 +61,6 @@ urlpatterns = [
    
 
 
-    path("student_index",views.student_index,name="student_index"),
     path("signin/",views.signin,name="signin"),
     path("signout",views.signout,name="signout"),
     path("register/",views.register,name="register"),

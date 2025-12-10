@@ -155,10 +155,13 @@ body {
     transform: translateY(-1px);
 }
 
+
+
+
 .user-avatar-small {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
     background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
     display: flex;
     align-items: center;
@@ -167,6 +170,8 @@ body {
     font-weight: 600;
     font-size: 0.875rem;
     box-shadow: 0 2px 8px rgba(0, 206, 209, 0.25);
+    object-fit: cover;
+    overflow: hidden;
 }
 
 .user-dropdown {

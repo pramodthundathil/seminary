@@ -1,0 +1,36 @@
+{% extends "student/index.html" %}
+
+{% block title %}Payment Failed{% endblock %}
+
+{% block middle %}
+<div style="
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+">
+    <h2 style="color: #EF4444; font-size: 22px; margin-bottom: 10px;">
+        ✖ Payment Failed
+    </h2>
+
+    <p style="color: #374151; font-size: 14px; margin-bottom: 20px;">
+        Something went wrong. Your payment could not be processed.
+    </p>
+
+    <a href="/confirm-payment/" 
+       style="
+            display: inline-block;
+            background: #374151;
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        ">
+        Try Again
+    </a>
+</div>
+{% endblock %}
