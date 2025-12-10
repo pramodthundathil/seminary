@@ -26,6 +26,8 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
@@ -52,8 +54,11 @@ from .models import (
     Subjects,StudentsInstructor,
     Exams,
     Payments,
-    Contacts
+    Contacts,
+    Qualifications,
 )
+from .forms import StudentProfileEditForm
+from .decorators import role_redirection
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -164,7 +169,7 @@ def student_subjects(request):
         if filter_option == 'requested':
             # Show subjects where is_approved is False (requested but not approved)
             subjects_queryset = subjects_queryset.filter(is_approved=False)
-        elif filter_option == 'inprogress':
+        if filter_option == 'inprogress':
             # Show subjects where is_approved is False (in progress)
             subjects_queryset = subjects_queryset.filter(is_approved=False)
         elif filter_option == 'rejected':
@@ -445,12 +450,149 @@ def student_profile_view(request):
     # ---- Log success ----
     logger.info(f"[PROFILE] Student profile loaded successfully for user {request.user.id}")
 
+    # ---- Get qualifications ----
+    try:
+        qualifications=Qualifications.objects.all()
+        qualifications_list = [{'id': q.id, 'name': q.qualification_name} for q in qualifications]
+    except:
+        qualifications = []
+        qualifications_list = []
+
+        # ---- Get countries ----
+    try:
+        countries=Countries.objects.all()
+        countries_list = [{'id': q.id, 'name': q.name} for q in countries]
+    except:
+        countries = []
+        countries_list = []    
+    # ---- Get Languages ----    
+    try:
+        languages=Languages.objects.all()
+        languages_list = [{'id': q.id, 'name': q.language_name} for q in languages]
+    except:
+        languages = []
+        languages_list = []      
+    # ---- Get courses ----    
+    try:
+        courses=Courses.objects.all()
+        courses_list = [{'id': q.id, 'name': q.course_name} for q in courses]
+    except:
+        courses = []
+        courses_list = []     
+
+    json_data = json.dumps(qualifications_list)
+    print("student phone numver=====",student.phone_number)
+
     # ---- Render ----
     return render(
         request,
         "student/student_profile.html",
-        {"student": student}
+        {"student": student,
+        "qualifications": json.dumps(qualifications_list),
+        "countries":json.dumps(countries_list),
+        "languages":json.dumps(languages_list),
+        "courses":json.dumps(courses_list),
+        }
     )
+
+
+# -----------------------------------------
+#  STUDENT PROFILE EDIT VIEW
+# -----------------------------------------
+
+@login_required
+@student_or_church_user
+def student_profile_edit(request):
+    print("edit view  started=======11",request.user)
+    
+    # ---- Fetch student safely ----
+    try:
+        student = (
+            Students.objects
+            .select_related("course_applied", "language", "citizenship", "country")
+            .get(user=request.user)
+        )
+        print("edit view  started=======222")
+
+    except Students.DoesNotExist:
+        logger.error(f"[PROFILE_EDIT] Student not found for user ID: {request.user.id}")
+        messages.error(request, "Student profile not found.")
+        return redirect("student_profile_view")
+    except Exception as ex:
+        logger.exception(f"[PROFILE_EDIT] Unexpected error loading profile for user {request.user.id}: {ex}")
+        messages.error(request, "Unable to load your profile at the moment.")
+        return redirect("student_profile_view")
+    print("edit view  started=======333")    
+
+    if request.method == 'POST':
+        print("edit view  started=======3.1")
+        form = StudentProfileEditForm(request.POST, instance=student)
+        # print("edit view  started=======3.2==",form)
+        if form.is_valid():
+            print("edit view  started=======444")
+            try:
+                updated_student = form.save(commit=False)
+                updated_student.updated_by = request.user
+                updated_student.updated_at = timezone.now()
+                updated_student.save()
+                print("edit view  started=======55")
+                
+                logger.info(f"[PROFILE_EDIT] Student profile updated successfully for user {request.user.id}")
+                
+                # Check if this is an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        "success": True, 
+                        "message": "Your profile has been updated successfully!"
+                    })
+                
+                messages.success(request, "Your profile has been updated successfully!")
+                return redirect("student_profile_view")
+                
+            except Exception as e:
+                logger.error(f"[PROFILE_EDIT] Failed to update student profile for user {request.user.id}: {e}")
+                
+                # Check if this is an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        "success": False, 
+                        "message": "Failed to update your profile. Please try again."
+                    })
+                
+                messages.error(request, "Failed to update your profile. Please try again.")
+        else:
+            logger.warning(f"[PROFILE_EDIT] Form validation failed for user {request.user.id}: {form.errors}")
+            
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "success": False, 
+                    "message": "Please correct the errors below.",
+                    "errors": form.errors
+                })
+            
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = StudentProfileEditForm(instance=student)
+    try:
+        qualifications=Qualifications.objects.all()
+        qualifications_list = [{'id': q.id, 'name': q.name} for q in qualifications]
+        print("qqqqqqqqqqq==",qualifications_list)
+    except:
+        qualifications_list = []
+    try:
+        countries=Countries.objects.all()
+        countries_list = [{'id': q.id, 'name': q.name} for q in Countries]
+    except:
+        qualifications_list = []    
+
+    context = {
+        "form": form,
+        "student": student,
+        "qualifications": json.dumps(qualifications_list)
+    }
+    
+    return render(request, "student/student_profile_edit.html", context)
 
 
 # -----------------------------------------
@@ -754,10 +896,53 @@ def student_confirm_payment(request):
         "payment":payment,
         "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID, 
     }
-    print("payment=====",payment)
     return render(request, "student/confirm_payment.html",context)
 
 def student_change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate form data
+        if not current_password or not new_password or not confirm_password:
+            messages.error(request, "All fields are required.")
+            return render(request, "student/change_password.html")
+        
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match.")
+            return render(request, "student/change_password.html")
+        
+        if len(new_password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+            return render(request, "student/change_password.html")
+        
+        user = request.user
+        
+        # Test authentication directly
+        test_user = authenticate(request, email=user.email, password=current_password)
+        
+        # Use fresh user object for password check
+        fresh_user = Users.objects.get(id=user.id)
+        
+        # Use authenticate() instead of check_password() since it works
+        if not test_user:
+            messages.error(request, "Current password is incorrect.")
+            return render(request, "student/change_password.html")
+        
+        # Use fresh user for password change
+        user = fresh_user
+        
+        # Change password
+        try:
+            user.set_password(new_password)
+            user.save()
+            messages.success(request, "Password changed successfully! Please login again.")
+            return redirect('signin')
+        except Exception as e:
+            messages.error(request, "Error changing password. Please try again.")
+            logger.error(f"Error changing password for user {user.id}: {e}")    
+    
     return render(request, "student/change_password.html")
 
 def student_doubt_view(request,id):
@@ -1616,13 +1801,20 @@ def signin(request):
         user = authenticate(request, email = username, password = password)
         if user is not None:
             login(request,user)
-            role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
+            # Handle role-based redirection directly after login
+            try:
+                role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
+            except:
+                role = None
+            
             if role == "Student":
                 return redirect('student_home')
-            elif role=="Church User":  
-                return redirect('church_user_home')  
-
-            return redirect('admin_index')
+            elif role == "Church User":  
+                return redirect('church_user_home')
+            elif role == "Admin":
+                return redirect('admin_index')
+            else:
+                return redirect("home/")
         else:
             messages.info(request,"User name or password incorrect")
             return redirect("signin")
@@ -1630,7 +1822,7 @@ def signin(request):
 
 def signout(request):
     logout(request)
-    return redirect("index")
+    return redirect("signin")
 
 def signup_student(request):
     """

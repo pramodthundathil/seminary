@@ -14,6 +14,7 @@ urlpatterns = [
     path("student/score-card/", views.student_score_card, name="student_score_card"),
     path("student/class-recordings/", views.student_class_recordings, name="student_class_recordings"),
     path("student/profile/", views.student_profile_view, name="student_profile_view"),
+    path("student/profile/edit/", views.student_profile_edit, name="student_profile_edit"),
     path('student/support/create/', views.student_support_create, name='student_support_create'),
     path("student/request-subject/", views.request_subject_view, name="request_subject"),
     path("student/exam-hall/request-exam/", views.student_request_exam, name="student_request_exam"),
@@ -31,7 +32,6 @@ urlpatterns = [
     path('student/request-exam/submit/', views.submit_request_exam, name='submit-request-exam'),
     path("student/payment-input/", views.student_payment_input, name="student_payment_input"),
     path("student/confirm-payment/", views.student_confirm_payment, name="student_confirm_payment"),
-
 
     # -------------church user-----------------------
     path("church-user/", views.student_home, name="church_user_home"),

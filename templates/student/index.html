@@ -35,7 +35,7 @@
                         <a href="{% url 'student_profile_view' %}">👤 My Profile</a>
                         <a href="#">📊 Change Password</a>
                         <div class="divider"></div>
-                        <a href="#">🚪 Logout</a>
+                        <a href="{% url 'signout' %}">🚪 Logout</a>
                     </div>
                 </li>
 
@@ -116,7 +116,7 @@
 
                 <a href="{% url role|add:'_change_password' %}">📊 Change Password</a>
                 <div class="divider"></div>
-                <a href="#">🚪 Logout</a>
+                <a href="{% url 'signout' %}">🚪 Logout</a>
             </div>
         </div>
     </div>

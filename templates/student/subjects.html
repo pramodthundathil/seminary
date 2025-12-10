@@ -916,7 +916,7 @@
             <span>Search:</span>
             <select id="filterSelect" onchange="applyFilter()">
                 <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All</option>
-                <option value="requested" {% if current_filter == 'requested' %}selected{% endif %}>Requested</option>
+                <!-- <option value="requested" {% if current_filter == 'requested' %}selected{% endif %}>Requested</option> -->
                 <option value="inprogress" {% if current_filter == 'inprogress' %}selected{% endif %}>In progress</option>
                 <option value="rejected" {% if current_filter == 'rejected' %}selected{% endif %}>Rejected</option>
                 <option value="completed" {% if current_filter == 'completed' %}selected{% endif %}>Completed</option>

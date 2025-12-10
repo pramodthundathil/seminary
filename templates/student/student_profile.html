@@ -2,6 +2,8 @@
 
   {% block middle %}
 
+  {% csrf_token %}
+
   {% if error %}
 <div style="
     background:#fee2e2;
@@ -389,6 +391,10 @@
       color: var(--text-primary);
       margin-bottom: 0.875rem;
     }
+    .not-ediable {
+      opacity: 0.7; 
+      pointer-events: none
+    }
 
     .fade-out {
       animation: fadeOut 0.3s ease forwards;
@@ -531,11 +537,12 @@
       }
     }
 
+
     
   </style>
 
   <!-- Important Summary Section -->
-  <div id="importantSection">
+  <div id="importantSection" data-qualifications="{{ qualifications|default:'[]'|safe }}">
       
         <div class="card full-span">
         <h2 class="card-title">
@@ -558,16 +565,21 @@
         <div class="info-row">
           <div class="info-label">Course Applied</div>
           <div class="info-value editable">
-            <span class="status-badge status-success">{{student.course_applied.course_name}}</span>
+            <span class="info-value editable">{{student.course_applied.course_name}}</span>
           </div>
         </div>
         <div class="info-row">
           <div class="info-label">Email</div>
           <div class="info-value editable">{{student.email}}</div>
         </div>
+
         <div class="info-row">
           <div class="info-label">Phone</div>
-          <div class="info-value editable">{{student.phone_code}} {{student.phone_number}}</div>
+            <div class="info-value not-ediable">
+                {{ student.phone_number }}
+            </div>
+
+
         </div>
         <div class="info-row">
           <div class="info-label">Date of Birth</div>
@@ -587,7 +599,7 @@
     <div class="action-buttons">
       <button id="btnViewMore" class="btn btn-primary">
         <span>📋</span>
-        View Full Profile
+        View Full Profil
       </button>
     </div>
   </div>
@@ -619,7 +631,7 @@
         </h2>
         <div class="info-row">
           <div class="info-label">Full Name</div>
-          <div class="info-value editable">
+          <div class="info-value not-ediable">
               {% if student.first_name %}{{ student.first_name }}{% endif %}
               {% if student.middle_name %} {{ student.middle_name }}{% endif %}
               {% if student.last_name %} {{ student.last_name }}{% endif %}
@@ -627,11 +639,11 @@
         </div>
         <div class="info-row">
           <div class="info-label">Date of Birth</div>
-          <div class="info-value editable">{{student.date_of_birth}}</div>
+          <div class="info-value not-ediable">{{student.date_of_birth}}</div>
         </div>
         <div class="info-row">
           <div class="info-label">Gender</div>
-          <div class="info-value editable">{{student.gender}}</div>
+          <div class="info-value not-ediable">{{student.gender}}</div>
         </div>
         <div class="info-row">
           <div class="info-label">Citizenship</div>
@@ -639,7 +651,7 @@
         </div>
         <div class="info-row">
           <div class="info-label">ID Number</div>
-          <div class="info-value editable">{{student.student_id}}</div>
+          <div class="info-value not-ediable">{{student.student_id}}</div>
         </div>
       </div>
 
@@ -651,11 +663,11 @@
         </h2>
         <div class="info-row">
           <div class="info-label">Email</div>
-          <div class="info-value editable">{{student.email}}</div>
+          <div class="info-value not-ediable">{{student.email}}</div>
         </div>
         <div class="info-row">
           <div class="info-label">Phone</div>
-          <div class="info-value editable">{{student.phone_code}} {{student.phone_number}}</div>
+          <div class="info-value not-ediable">{{student.phone_number}}</div>
         </div>
         <div class="info-row">
           <div class="info-label">Time Zone</div>
@@ -663,7 +675,7 @@
         </div>
         <div class="info-row">
           <div class="info-label">Language</div>
-          <div class="info-value editable">{{student.language.language_name}}</div>
+          <div class="info-value not-ediable">{{student.language.language_name}}</div>
         </div>
 
         <div class="address-section">
@@ -699,22 +711,16 @@
         </div>
         <div class="info-row">
           <div class="info-label">Course Applied</div>
-          <div class="info-value editable">
-            <span class="status-badge status-success">{{student.course_applied.course_name}}</span>
+          <div class="info-value not-ediable">
+            <span class="info-value not-ediable">{{student.course_applied.course_name}}</span>
           </div>
         </div>
-        <!-- <div class="info-row">
-          <div class="info-label">Year</div>
-          <div class="info-value editable">3rd Year</div>
-        </div> -->
-        <!-- <div class="info-row">
-          <div class="info-label">Enrollment Date</div>
-          <div class="info-value editable">September 2022</div>
-        </div> -->
-        <!-- <div class="info-row">
-          <div class="info-label">Expected Graduation</div>
-          <div class="info-value editable">May 2026</div>
-        </div> -->
+        <div class="info-row">
+          <div class="info-label">Starting year</div>
+          <div class="info-value not-ediable">
+            <span class="info-value not-ediable">{{student.starting_year}}</span>
+          </div>
+        </div>
       </div>
 
 
@@ -727,10 +733,6 @@
         </h2>
         <div class="enrollment-grid">
           <div>
-            <!-- <div class="info-row">
-              <div class="info-label">Starting Year</div>
-              <div class="info-value editable">2026</div>
-            </div> -->
             <div class="info-row">
               <div class="info-label">Ministerial Status</div>
               <div class="info-value editable">
@@ -743,8 +745,8 @@
             </div>
             <div class="info-row">
               <div class="info-label">Scholarship Needed</div>
-              <div class="info-value editable">
-                <span class="status-badge status-warning">{{student.scholarship_needed}}</span>
+              <div class="info-value not-ediable">
+                <span class="status-badge ">{{student.scholarship_needed}}</span>
               </div>
             </div>
           </div>
@@ -755,7 +757,7 @@
             </div>
             <div class="info-row">
               <div class="info-label">Monthly Income</div>
-                 <div class="info-value editable">
+                 <div class="info-value not-ediable">
                     {% if student.income|floatformat:"0" == student.income|stringformat:"s" %}
                         ${{ student.income }} USD
                     {% else %}
@@ -765,11 +767,11 @@
             </div>
             <div class="info-row">
               <div class="info-label">Affordable Amount</div>
-              <div class="info-value editable">{{student.affordable_amount}}</div>
+              <div class="info-value not-ediable">{{student.affordable_amount}}</div>
             </div>
             <div class="info-row">
               <div class="info-label">Message</div>
-              <div class="info-value editable">{{student.message}}</div>
+              <div class="info-value not-ediable">{{student.message}}</div>
             </div>
           </div>
         </div>
@@ -778,7 +780,73 @@
 
     </div>
   </div>
+  <script type="application/json" id="qualifications-data">
+    {{ qualifications|safe }}
+  </script>
+  <script type="application/json" id="countries-data">
+    {{ countries|safe }}
+  </script>
+  <script type="application/json" id="languages-data">
+    {{ languages|safe }}
+  </script>
+  <script type="application/json" id="courses-data">
+    {{ courses|safe }}
+  </script>
   <script>
+  // Qualifications data from backend - read from script tag
+  let qualificationsData = [];
+  try {
+    const dataElement = document.getElementById('qualifications-data');
+    if (dataElement) {
+      qualificationsData = JSON.parse(dataElement.textContent || '[]');
+    }
+  } catch (error) {
+    console.error('Error parsing qualifications data:', error);
+    qualificationsData = [];
+  }
+  
+  // Countries data from backend - read from script tag
+  let countriesData = [];
+  try {
+    const countriesElement = document.getElementById('countries-data');
+    if (countriesElement) {
+      countriesData = JSON.parse(countriesElement.textContent || '[]');
+    }
+  } catch (error) {
+    console.error('Error parsing countries data:', error);
+    countriesData = [];
+  }
+  
+  // Languages data from backend - read from script tag
+  let languagesData = [];
+  try {
+    const languagesElement = document.getElementById('languages-data');
+    if (languagesElement) {
+      languagesData = JSON.parse(languagesElement.textContent || '[]');
+    }
+  } catch (error) {
+    console.error('Error parsing languages data:', error);
+    languagesData = [];
+  }
+
+  // Courses data from backend - read from script tag
+  let coursesData = [];
+  try {
+    const coursesElement = document.getElementById('courses-data');
+    if (coursesElement) {
+      coursesData = JSON.parse(coursesElement.textContent || '[]');
+    }
+  } catch (error) {
+    console.error('Error parsing courses data:', error);
+    coursesData = [];
+  }
+
+  console.log('Qualifications data:', qualificationsData);
+  console.log('Countries data:', countriesData);
+  console.log('Languages data:', languagesData);
+  console.log('Courses data:', coursesData);
+  
+  
   document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll(".editable").forEach(el => {
     el.removeAttribute("data-original");
@@ -829,7 +897,108 @@ if (btnHide) {
         document.querySelectorAll(".editable").forEach(el => {
           const current = el.innerText;
           el.setAttribute("data-original", current);
-          el.innerHTML = `<input type="text" value="${current}" class="edit-input">`;
+          
+          // Check if this is a date field
+          const parent = el.closest('.info-row');
+          let inputType = 'text';
+          let inputValue = current;
+          
+          if (parent) {
+            const label = parent.querySelector('.info-label');
+            if (label) {
+              const labelText = label.textContent.trim().toLowerCase();
+              if (labelText === 'date of birth') {
+                inputType = 'date';
+                // Format the date for HTML date input (YYYY-MM-DD)
+                const date = new Date(current);
+                if (!isNaN(date.getTime())) {
+                  inputValue = date.toISOString().split('T')[0];
+                }
+              } else if (labelText === 'highest education') {
+                // Create dropdown for highest education using real qualifications data
+                const educationOptions = qualificationsData && qualificationsData.length > 0 
+                  ? qualificationsData.map(q => q.name || q.qualification_name || q.title)
+                  : [];
+                
+                const selectOptions = educationOptions.map(option => 
+                  `<option value="${option}" ${current.toLowerCase().includes(option.toLowerCase()) ? 'selected' : ''}>${option}</option>`
+                ).join('');
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'citizenship') {
+                // Create dropdown for citizenship using real countries data
+const selectOptions = countriesData.map(c =>
+  `<option value="${c.id}" ${c.name === current ? 'selected' : ''}>${c.name}</option>`
+).join('');
+
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'language') {
+                // Create dropdown for language using real languages data
+                const languageOptions = languagesData && languagesData.length > 0 
+                  ? languagesData.map(l => l.name)
+                  : [];
+                
+                const selectOptions = languageOptions.map(option => 
+                  `<option value="${option}" ${current.toLowerCase().includes(option.toLowerCase()) ? 'selected' : ''}>${option}</option>`
+                ).join('');
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'country') {
+                // Create dropdown for country (mailing address) using real countries data
+const selectOptions = countriesData.map(c =>
+  `<option value="${c.id}" ${c.name === current ? 'selected' : ''}>${c.name}</option>`
+).join('');
+
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'course applied') {
+                // Create dropdown for course applied using real courses data
+                const selectOptions = coursesData && coursesData.length > 0 
+                  ? coursesData.map(c => `<option value="${c.id}" ${c.name === current ? 'selected' : ''}>${c.name}</option>`).join('')
+                  : '';
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'marital status') {
+                // Create dropdown for marital status with hardcoded options
+                const maritalOptions = ['Single', 'Married', 'Widow/Widower', 'Divorced'];
+                
+                const selectOptions = maritalOptions.map(option => 
+                  `<option value="${option}" ${current.toLowerCase().includes(option.toLowerCase()) ? 'selected' : ''}>${option}</option>`
+                ).join('');
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'ministerial status') {
+                // Create dropdown for ministerial status with hardcoded options
+                const ministerialOptions = ['Exhorter', 'Evangelist', 'Pastor', 'Ordained Minister'];
+                
+                const selectOptions = ministerialOptions.map(option => 
+                  `<option value="${option}" ${current.toLowerCase().includes(option.toLowerCase()) ? 'selected' : ''}>${option}</option>`
+                ).join('');
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              } else if (labelText === 'currently employed') {
+                // Create dropdown for currently employed with hardcoded options
+                const employedOptions = ['Yes', 'No'];
+                
+                const selectOptions = employedOptions.map(option => 
+                  `<option value="${option}" ${current.toLowerCase().includes(option.toLowerCase()) ? 'selected' : ''}>${option}</option>`
+                ).join('');
+                
+                el.innerHTML = `<select class="edit-input">${selectOptions}</select>`;
+                return; // Skip the input creation for this field
+              }
+            }
+          }
+          
+          el.innerHTML = `<input type="${inputType}" value="${inputValue}" class="edit-input">`;
         });
 
         btnSave.style.display = "inline-flex";
@@ -855,6 +1024,215 @@ if (btnCancel) {
     btnCancel.style.display = "none";
   });
 }
+
+  // Save button
+  const btnSave = document.getElementById("btnSave");
+  if (btnSave) {
+    btnSave.addEventListener("click", function () {
+      console.log("Save button clicked!");
+      // Collect all edited data
+      const formData = new FormData();
+      
+      // Get all editable elements and their values
+      document.querySelectorAll(".editable").forEach(el => {
+        const input = el.querySelector('input');
+        const select = el.querySelector('select');
+        if (input || select) {
+          const fieldName = el.getAttribute('data-field') || getInputFieldName(el);
+          const value = getFieldValue(el, fieldName);
+          if (value !== null) {
+            formData.append(fieldName, value);
+          }
+        }
+      });
+
+      // Add CSRF token
+      const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (csrfToken) {
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+      }
+
+      // Disable save button and show loading
+      btnSave.disabled = true;
+      btnSave.innerHTML = ' Saving...';
+
+      // Send data to backend
+      fetch('/student/profile/edit/', {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update the display with new values
+          document.querySelectorAll(".editable").forEach(el => {
+            const input = el.querySelector('input');
+            const select = el.querySelector('select');
+            if (input) {
+              el.innerHTML = input.value;
+            } else if (select) {
+              // For foreign key dropdowns, show the text (name) instead of the ID
+              const selectedOption = select.options[select.selectedIndex];
+              const fieldName = el.getAttribute('data-field') || getInputFieldName(el);
+              
+              if (fieldName === 'citizenship' || fieldName === 'country' || fieldName === 'course_applied') {
+                el.innerHTML = selectedOption.text; // Show the country/course name
+              } else {
+                el.innerHTML = select.value; // For other dropdowns, show the value
+              }
+            }
+          });
+          
+          // Hide edit controls
+          btnSave.style.display = "none";
+          btnCancel.style.display = "none";
+          
+          // Show success message
+          showMessage('Profile updated successfully!', 'success');
+        } else {
+          showMessage(data.message || 'Failed to update profile', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('An error occurred while updating profile', 'error');
+      })
+      .finally(() => {
+        // Re-enable save button
+        btnSave.disabled = false;
+        btnSave.innerHTML = ' Save Changes';
+      });
+    });
+  }
+
+  // Helper function to map elements to form field names and handle special cases
+  function getInputFieldName(element) {
+    const parent = element.closest('.info-row');
+    if (parent) {
+      const label = parent.querySelector('.info-label');
+      if (label) {
+        const labelText = label.textContent.trim().toLowerCase();
+        const fieldMap = {
+          'full name': 'first_name',
+          'id number': 'student_id',
+          'course applied': 'course_applied',
+          'email': 'email',
+                    'date of birth': 'date_of_birth',
+          'gender': 'gender',
+          'citizenship': 'citizenship',
+          'address': 'mailing_address',
+          'city': 'city',
+          'country': 'country',
+          'zip code': 'zip_code',
+          'time zone': 'timezone',
+          'highest education': 'highest_education',
+          'ministerial status': 'ministerial_status',
+          'church affiliation': 'church_affiliation',
+          'scholarship needed': 'scholarship_needed',
+          'currently employed': 'currently_employed',
+          'monthly income': 'income',
+          'affordable amount': 'affordable_amount',
+          'message': 'message',
+          'marital status': 'marital_status',
+          'spouse name': 'spouse_name',
+          'children': 'children'
+        };
+        
+        return fieldMap[labelText] || labelText.replace(/\s+/g, '_');
+      }
+    }
+    return 'unknown_field';
+  }
+
+  // Helper function to get proper field value based on field type
+  function getFieldValue(element, fieldName) {
+    // Check for select dropdown first
+    const select = element.querySelector('select');
+    if (select) {
+      return select.value.trim();
+    }
+    
+    const input = element.querySelector('input');
+    if (!input) return null;
+    
+    const value = input.value.trim();
+    
+    // Handle special field types
+    switch(fieldName) {
+      case 'date_of_birth':
+        // Format date properly for Django
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+        }
+        return value;
+        
+      case 'citizenship':
+      case 'country':
+      case 'course_applied':
+        // For foreign key fields, the dropdown now uses IDs as values
+        // Just return the selected value directly since it's already an ID
+        const selectedValue = select ? select.value.trim() : value.trim();
+        return selectedValue;
+        
+      case 'scholarship_needed':
+      case 'currently_employed':
+        // Handle Yes/No fields
+        if (value.toLowerCase() === 'yes') return 'Yes';
+        if (value.toLowerCase() === 'no') return 'No';
+        return value;
+        
+      default:
+        return value;
+    }
+  }
+
+  // Helper function to show messages
+  function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      ${type === 'success' ? 
+        'background: #10b981; color: white; border: 1px solid #059669;' : 
+        'background: #ef4444; color: white; border: 1px solid #dc2626;'
+      }
+    `;
+    messageDiv.textContent = message;
+    document.body.appendChild(messageDiv);
+
+    // Remove message after 3 seconds
+    setTimeout(() => {
+      messageDiv.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => {
+        document.body.removeChild(messageDiv);
+      }, 300);
+    }, 3000);
+  }
+
+  // Add CSS animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
 
   </script>
 
