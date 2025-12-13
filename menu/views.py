@@ -4123,3 +4123,199 @@ def users_delete(request, id):
     messages.success(request, "User deleted successfully.")
     return redirect("users_list")
 
+
+# Church Login Codes
+
+@login_required
+def church_code_list(request):
+    """List all church login codes"""
+    codes = ChurchLoginCodeSettings.objects.filter(deleted_at__isnull=True).order_by('-id')
+    return render(request, 'admin/church_codes/church_code_list.html', {
+        'codes': codes,
+        'page_title': 'Church Login Codes'
+    })
+
+@login_required
+def church_code_create(request):
+    """Create new church login code"""
+    if request.method == 'POST':
+        form = ChurchLoginCodeSettingsForm(request.POST)
+        if form.is_valid():
+            code = form.save(commit=False)
+            code.created_at = timezone.now()
+            # code.created_by = request.user # If model has this field
+            # code.updated_by = request.user
+            code.save()
+            messages.success(request, 'Church Login Code created successfully!')
+            return redirect('church_code_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ChurchLoginCodeSettingsForm()
+    
+    return render(request, 'admin/church_codes/church_code_form.html', {
+        'form': form,
+        'page_title': 'Create Church Login Code',
+        'action': 'Create'
+    })
+
+@login_required
+def church_code_edit(request, code_id):
+    """Edit church login code"""
+    code = get_object_or_404(ChurchLoginCodeSettings, id=code_id, deleted_at__isnull=True)
+    
+    if request.method == 'POST':
+        form = ChurchLoginCodeSettingsForm(request.POST, instance=code)
+        if form.is_valid():
+            code = form.save(commit=False)
+            code.updated_at = timezone.now()
+            # code.updated_by = request.user
+            code.save()
+            messages.success(request, 'Church Login Code updated successfully!')
+            return redirect('church_code_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ChurchLoginCodeSettingsForm(instance=code)
+    
+    return render(request, 'admin/church_codes/church_code_form.html', {
+        'form': form,
+        'page_title': 'Edit Church Login Code',
+        'code': code,
+        'action': 'Update'
+    })
+
+@login_required
+def church_code_delete(request, code_id):
+    """Soft delete church login code"""
+    code = get_object_or_404(ChurchLoginCodeSettings, id=code_id, deleted_at__isnull=True)
+    code.deleted_at = timezone.now()
+    code.save()
+    messages.success(request, 'Church Login Code deleted successfully!')
+    return redirect('church_code_list')
+
+
+# Church Admins
+
+@login_required
+def church_admin_list(request):
+    """List all church admins"""
+    admins = ChurchAdmins.objects.filter(deleted_at__isnull=True).order_by('-id')
+    return render(request, 'admin/church_admins/church_admin_list.html', {
+        'admins': admins,
+        'page_title': 'Church Admins'
+    })
+
+@login_required
+def church_admin_create(request):
+    """Create new church admin"""
+    if request.method == 'POST':
+        form = ChurchAdminForm(request.POST)
+        if form.is_valid():
+            admin = form.save(commit=False)
+            admin.created_at = timezone.now()
+            
+            # Auto-generate code
+            # Format: CH-TIMESTAMP-RANDOM
+            timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+            admin.code = f"CH-{timestamp}"
+            
+            admin.save()
+            messages.success(request, 'Church Admin created successfully!')
+            return redirect('church_admin_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ChurchAdminForm()
+    
+    return render(request, 'admin/church_admins/church_admin_form.html', {
+        'form': form,
+        'page_title': 'Create Church Admin',
+        'action': 'Create'
+    })
+
+@login_required
+def church_admin_delete(request, admin_id):
+    """Soft delete church admin"""
+    admin = get_object_or_404(ChurchAdmins, id=admin_id, deleted_at__isnull=True)
+    admin.deleted_at = timezone.now()
+    admin.save()
+    messages.success(request, 'Church Admin deleted successfully!')
+    return redirect('church_admin_list')
+
+
+
+# ============= CHURCH CODES USAGE VIEWS =============
+
+
+
+@login_required
+
+def church_codes_usage_list(request):
+
+    """List of Church Admins using codes"""
+
+    per_page = int(request.GET.get('per_page', 10))
+
+    page_number = request.GET.get('page')
+
+    
+
+    # Filter for active records
+
+    admins = ChurchAdmins.objects.filter(deleted_at__isnull=True).select_related(
+
+        'church_code', 
+
+        'church_code__branches',
+
+        'student'
+
+    ).order_by('-created_at')
+
+    
+
+    paginator = Paginator(admins, per_page)
+
+    page_obj = paginator.get_page(page_number)
+
+    
+
+    context = {
+
+        'page_obj': page_obj,
+
+        'per_page': per_page,
+
+        'page_title': 'Church Admins'
+
+    }
+
+    return render(request, "admin/church_codes/list.html", context)
+
+
+
+@login_required
+
+def church_codes_usage_delete(request, admin_id):
+
+    """Soft delete church admin usage"""
+
+    try:
+
+        admin = get_object_or_404(ChurchAdmins, id=admin_id, deleted_at__isnull=True)
+
+        admin.deleted_at = timezone.now()
+
+        admin.save()
+
+        messages.success(request, "Church Admin deleted successfully.")
+
+    except Exception as e:
+
+        messages.error(request, f"Error deleting Church Admin: {str(e)}")
+
+        
+
+    return redirect('church_codes_usage_list')
+

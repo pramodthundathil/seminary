@@ -326,7 +326,7 @@ class ChurchAdmins(models.Model):
     name_of_church = models.CharField(max_length=250, blank=True, null=True)
     name_of_paster = models.CharField(max_length=250, blank=True, null=True)
     church_address = models.TextField(blank=True, null=True)
-    church_code_id = models.IntegerField()
+    church_code = models.ForeignKey('ChurchLoginCodeSettings', on_delete=models.DO_NOTHING, db_column='church_code_id', related_name='church_admins')
     code = models.CharField(max_length=250)
     amount = models.FloatField()
     max_user_no = models.IntegerField()

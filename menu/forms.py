@@ -690,3 +690,71 @@ class UploadForm(forms.ModelForm):
                 "class": "form-check-input"
             }),
         }
+
+from home.models import ChurchLoginCodeSettings, ChurchAdmins
+
+class ChurchLoginCodeSettingsForm(forms.ModelForm):
+    STATUS_CHOICES = (
+        (1, 'Active'),
+        (0, 'Inactive'),
+    )
+    
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = ChurchLoginCodeSettings
+        fields = [
+            "branches",
+            "name",
+            "max_user_no",
+            "amount",
+            "expired_in_days",
+            "status",
+        ]
+        
+        widgets = {
+            "branches": forms.Select(attrs={"class": "form-control"}),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter code name"}),
+            "max_user_no": forms.NumberInput(attrs={"class": "form-control"}),
+            "amount": forms.NumberInput(attrs={"class": "form-control"}),
+            "expired_in_days": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. 365"}),
+        }
+
+class ChurchAdminForm(forms.ModelForm):
+    church_code_id = forms.ModelChoiceField(
+        queryset=ChurchLoginCodeSettings.objects.filter(deleted_at__isnull=True),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="Select Church Code",
+        label="Church Login Code"
+    )
+
+    class Meta:
+        model = ChurchAdmins
+        fields = [
+            "name_of_church",
+            "name_of_paster",
+            "church_address",
+            "church_code_id",
+            "amount",
+            "max_user_no",
+        ]
+        
+        widgets = {
+            "name_of_church": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter church name"}),
+            "name_of_paster": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter pastor name"}),
+            "church_address": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Enter address"}),
+            "amount": forms.NumberInput(attrs={"class": "form-control"}),
+            "max_user_no": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.cleaned_data.get('church_code_id'):
+             instance.church_code_id = self.cleaned_data['church_code_id'].id
+        
+        if commit:
+            instance.save()
+        return instance

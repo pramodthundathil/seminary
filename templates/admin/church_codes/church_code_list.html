@@ -1,0 +1,182 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --purple-gradient-start: #A78BFA;
+        --purple-gradient-end: #C084FC;
+        --green-card: #90EE90;
+        --blue-button: #4169E1;
+        --text-gray: #666666;
+    }
+
+    .codes-container {
+        padding: 30px;
+        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        min-height: 100vh;
+    }
+
+    .codes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .codes-header h1 {
+        color: var(--dark-navy);
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+        color: white;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .table-responsive {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 15px;
+        color: var(--dark-navy);
+        border-bottom: 2px solid #eee;
+        font-weight: 700;
+    }
+
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        color: var(--text-gray);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: var(--green-card);
+        color: #2d6a2d;
+    }
+
+    .status-inactive {
+        background: #ffcccb;
+        color: #8b0000;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        border-radius: 6px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 5px;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+    }
+
+    .btn-edit {
+        background: var(--blue-button);
+    }
+
+    .btn-delete {
+        background: #ff6b6b;
+    }
+</style>
+
+<div class="codes-container">
+    <div class="codes-header">
+        <h1>🔐 Church Login Codes</h1>
+        <a href="{% url 'church_code_create' %}" class="btn btn-create">
+            <i class="fas fa-plus"></i> Create New Code
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        {% if codes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Branch</th>
+                    <th>Name</th>
+                    <th>Max Users</th>
+                    <th>Amount</th>
+                    <th>Expiry (Days)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for code in codes %}
+                <tr>
+                    <td>{{ code.branches.branch_name }}</td>
+                    <td>{{ code.name }}</td>
+                    <td>{{ code.max_user_no }}</td>
+                    <td>${{ code.amount }}</td>
+                    <td>{{ code.expired_in_days }}</td>
+                    <td>
+                        <span class="status-badge {% if code.status == 1 %}status-active{% else %}status-inactive{% endif %}">
+                            {% if code.status == 1 %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'church_code_edit' code.id %}" class="action-btn btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'church_code_delete' code.id %}" class="action-btn btn-delete" onclick="return confirm('Are you sure you want to delete this code?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+            <i class="fas fa-key" style="font-size: 48px; margin-bottom: 20px; color: var(--primary-cyan);"></i>
+            <h3>No Login Codes Found</h3>
+            <p>Create your first church login code to get started</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

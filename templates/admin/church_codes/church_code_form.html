@@ -1,0 +1,85 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: var(--dark-navy);">{{ action }} Login Code</h1>
+        <a href="{% url 'church_code_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="form-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong>Please correct the following errors:</strong>
+                    <ul style="margin-top: 5px; padding-left: 20px;">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label for="id_name" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Name <span style="color:red;">*</span></label>
+                        {{ form.name }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-4">
+                        <label for="id_branches" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Branch <span style="color:red;">*</span></label>
+                        {{ form.branches }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-4">
+                        <label for="id_max_user_no" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Max Users <span style="color:red;">*</span></label>
+                        {{ form.max_user_no }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group mb-4">
+                        <label for="id_amount" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Amount <span style="color:red;">*</span></label>
+                        {{ form.amount }}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group mb-4">
+                        <label for="id_expired_in_days" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Expiry (Days) <span style="color:red;">*</span></label>
+                        {{ form.expired_in_days }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="id_status" class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Status <span style="color:red;">*</span></label>
+                {{ form.status }}
+            </div>
+
+            <div class="form-actions" style="margin-top:30px;padding-top:20px;border-top:1px solid #eee; display: flex; justify-content: flex-end; gap: 15px;">
+                <button type="submit" class="btn btn-primary" style="background: #00CED1; border: none; padding: 12px 24px;">
+                    <i class="fas fa-save"></i> {{ action }}
+                </button>
+                <a href="{% url 'church_code_list' %}" class="btn btn-secondary" style="background: #64748B; border: none; padding: 12px 24px; color: white; text-decoration: none; border-radius: 8px;">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

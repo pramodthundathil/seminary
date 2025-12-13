@@ -209,4 +209,19 @@ urlpatterns = [
     path("admin/users/", views.users_list, name="users_list"),
     path("users/<int:id>/view/", views.users_view, name="users_view"),
     path("users/<int:id>/delete/", views.users_delete, name="users_delete"),
+
+    # Church Login Codes
+    path('admin/codes/', views.church_code_list, name='church_code_list'),
+    path('admin/codes/create/', views.church_code_create, name='church_code_create'),
+    path('admin/codes/<int:code_id>/edit/', views.church_code_edit, name='church_code_edit'),
+    path('admin/codes/<int:code_id>/delete/', views.church_code_delete, name='church_code_delete'),
+
+    # Church Admins
+    path('admin/church-admins/', views.church_admin_list, name='church_admin_list'),
+    path('admin/church-admins/create/', views.church_admin_create, name='church_admin_create'),
+    path('admin/church-admins/<int:admin_id>/delete/', views.church_admin_delete, name='church_admin_delete'),
+
+    # Church Code Usage (Church Admins List)
+    path('admin/church-codes', views.church_codes_usage_list, name='church_codes_usage_list'),
+    path('admin/church-codes/delete/<int:admin_id>/', views.church_codes_usage_delete, name='church_codes_usage_delete'),
 ]
