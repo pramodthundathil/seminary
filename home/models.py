@@ -412,7 +412,7 @@ class Courses(models.Model):
 
 class DescriptiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
-    assignment = models.ForeignKey('Assignments', on_delete=models.DO_NOTHING, related_name='descriptive_answers')
+    assignment = models.ForeignKey('StudentsExams', on_delete=models.DO_NOTHING, related_name='descriptive_answers')
     question = models.ForeignKey('DescriptiveQuestions', on_delete=models.DO_NOTHING, related_name='answers')
     answer = models.TextField(blank=True, null=True)
     mark = models.DecimalField(max_digits=10, decimal_places=0)
@@ -637,7 +637,7 @@ class Notifications(models.Model):
 
 class ObjectiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
-    assignment = models.ForeignKey('Assignments', on_delete=models.DO_NOTHING, related_name='objective_answers')
+    assignment = models.ForeignKey('StudentsExams', on_delete=models.DO_NOTHING, related_name='objective_answers')
     question = models.ForeignKey('ObjectiveQuestions', on_delete=models.DO_NOTHING, related_name='answers')
     answer = models.CharField(max_length=250, blank=True, null=True)
     mark = models.DecimalField(max_digits=10, decimal_places=0)
@@ -1116,7 +1116,7 @@ class StudentsAssignment(models.Model):
 class StudentsBooks(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='books')
-    book = models.ForeignKey(Books, on_delete=models.DO_NOTHING, related_name='students')
+    book = models.ForeignKey(BookReferences, on_delete=models.DO_NOTHING, related_name='students')
     updated_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="student_books_created")
@@ -1131,6 +1131,8 @@ class StudentsBooks(models.Model):
 class StudentsExams(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='exams')
+    course = models.ForeignKey('Courses', on_delete=models.SET_NULL, null=True, blank=True, related_name='student_exams')
+    subject = models.ForeignKey('Subjects', on_delete=models.SET_NULL, null=True, blank=True, related_name='student_exams')
     exam = models.ForeignKey(Exams, on_delete=models.DO_NOTHING, related_name='students')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
@@ -1156,6 +1158,7 @@ class StudentsExams(models.Model):
 class StudentsInstructor(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='instructors')
+    subject = models.ForeignKey('Subjects', on_delete=models.CASCADE, related_name='student_instructors', null=True, blank=True)
     instructor = models.ForeignKey(Staffs, on_delete=models.CASCADE, related_name='students')
     updated_at = models.DateTimeField(auto_now=True,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)

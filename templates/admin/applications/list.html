@@ -8,38 +8,27 @@
 <div class="gallery-container">
     <div class="page-header">
         <h1>
-            <i class="fas fa-user-graduate"></i>
-            Student Management
+            <i class="fas fa-file-signature"></i>
+            Application Management
         </h1>
         <div class="header-actions">
             <button class="btn btn-primary" onclick="openCreateModal()">
-                <i class="fas fa-user-plus"></i>
-                Add Student
+                <i class="fas fa-plus"></i>
+                Add Application
             </button>
         </div>
     </div>
 
-    <div class="gallery-filters">
-        <div class="filter-group">
-            <label class="filter-label" for="statusFilter">Approval:</label>
-            <select id="statusFilter" class="filter-select" onchange="filterTable()">
-                <option value="">All Applications</option>
-                <option value="1">Approved</option>
-                <option value="0">Pending</option>
-            </select>
-        </div>
-    </div>
-
     <div class="table-container">
-        <table id="studentTable" class="display" style="width:100%">
+        <table id="applicationTable" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Photo</th>
-                    <th>Student Info</th>
+                    <th>Applicant Info</th>
                     <th>Email</th>
                     <th>Status</th>
-                    <th>Joined</th>
+                    <th>Applied Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -50,12 +39,12 @@
     </div>
 </div>
 
-<!-- Application/Student Modal (Create & Edit) -->
+<!-- Application Modal (Create & Edit) -->
 <div class="modal fade" id="studentModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document"> <!-- modal-lg for wider form -->
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Add Student</h5>
+                <h5 class="modal-title" id="modalTitle">Add Application</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -157,6 +146,8 @@
                                             name="status" value="1">
                                         <label class="custom-control-label" for="statusSwitch">Approved
                                             (Status=1)</label>
+                                        <small class="form-text text-muted">Checking this moves application to Accepted
+                                            Students list.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -318,19 +309,19 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Student</button>
+                    <button type="submit" class="btn btn-primary">Save Application</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- View Student Modal -->
+<!-- View Application Modal -->
 <div class="modal fade" id="viewStudentModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Student Details</h5>
+                <h5 class="modal-title">Application Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -349,14 +340,12 @@
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<!-- Bootstrap JS (for Tabs and Modals) - assuming base template loads it, but sometimes it doesn't -->
-<!-- If admin/index.html loads bootstrap JS, we are good. -->
 
 <script>
-    let studentTable;
+    let applicationTable;
 
     $(document).ready(function () {
-        studentTable = $('#studentTable').DataTable({
+        applicationTable = $('#applicationTable').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
@@ -364,8 +353,7 @@
                 url: '{% url "student_datatable" %}',
                 type: 'GET',
                 data: function (d) {
-                    d.status = $('#statusFilter').val();
-                    d.type = 'student'; // Only show students/applicants based on filter, passed consistently
+                    d.type = 'applicant'; // Show ONLY pending applicants
                 },
                 error: function (xhr, error, code) {
                     console.error('DataTables Error:', error);
@@ -383,32 +371,27 @@
             order: [[0, 'desc']],
             pageLength: 12,
             language: {
-                search: "Search Students:",
+                search: "Search Applications:",
                 lengthMenu: "Show _MENU_ records",
-                info: "Showing _START_ to _END_ of _TOTAL_ students"
+                info: "Showing _START_ to _END_ of _TOTAL_ applications"
             }
         });
     });
-
-    function filterTable() {
-        studentTable.ajax.reload();
-    }
 
     // Open Create Modal
     function openCreateModal() {
         $('#studentForm')[0].reset();
         $('#studentId').val(''); // Clear hidden ID
-        $('#modalTitle').text('Add Student');
+        $('#modalTitle').text('Add Application');
 
-        // Reset Tabs to first one
+        // Reset Tabs
         $('#studentTab a[href="#personal"]').tab('show');
 
         $('#studentModal').modal('show');
     }
 
-    // Open Edit Modal
+    // Open Edit Modal (Reusing student endpoints)
     window.editStudent = function (id) {
-        // Fetch data
         $.ajax({
             url: '/admin/student/get/' + id + '/',
             type: 'GET',
@@ -416,26 +399,24 @@
                 if (response.success) {
                     const d = response.data;
                     $('#studentId').val(d.id);
-                    $('#modalTitle').text('Edit Student: ' + d.first_name + ' ' + (d.last_name || ''));
+                    $('#modalTitle').text('Edit Application: ' + d.first_name + ' ' + (d.last_name || ''));
 
-                    // Populate Fields
+                    // Populate Fields (Same as student list)
                     $('input[name="first_name"]').val(d.first_name);
                     $('input[name="middle_name"]').val(d.middle_name);
                     $('input[name="last_name"]').val(d.last_name);
                     $('input[name="email"]').val(d.email);
                     $('input[name="student_id"]').val(d.student_id);
                     $('select[name="gender"]').val(d.gender);
-                    $('input[name="date_of_birth"]').val(d.date_of_birth); // Expects YYYY-MM-DD
+                    $('input[name="date_of_birth"]').val(d.date_of_birth);
                     $('input[name="phone_number"]').val(d.phone_number);
 
                     $('select[name="mrital_status"]').val(d.mrital_status);
                     $('input[name="spouse_name"]').val(d.spouse_name);
 
-                    // Status Checkboxes
                     $('#statusSwitch').prop('checked', d.status == 1);
                     $('#activeSwitch').prop('checked', d.active == 1);
 
-                    // Address
                     $('textarea[name="mailing_address"]').val(d.mailing_address);
                     $('input[name="city"]').val(d.city);
                     $('input[name="state"]').val(d.state);
@@ -443,7 +424,6 @@
                     $('select[name="country"]').val(d.country);
                     $('input[name="timezone"]').val(d.timezone);
 
-                    // Academic
                     $('select[name="course_applied"]').val(d.course_applied);
                     $('select[name="language"]').val(d.language);
                     $('input[name="highest_education"]').val(d.highest_education);
@@ -451,13 +431,11 @@
                     $('input[name="ministerial_status"]').val(d.ministerial_status);
                     $('input[name="church_affiliation"]').val(d.church_affiliation);
 
-                    // Financial
                     $('select[name="currently_employed"]').val(d.currently_employed);
                     $('select[name="scholarship_needed"]').val(d.scholarship_needed);
                     $('input[name="income"]').val(d.income);
                     $('input[name="affordable_amount"]').val(d.affordable_amount);
 
-                    // References
                     $('input[name="reference_name1"]').val(d.reference_name1);
                     $('input[name="reference_email1"]').val(d.reference_email1);
                     $('input[name="reference_phone1"]').val(d.reference_phone1);
@@ -470,7 +448,6 @@
                     $('input[name="reference_email3"]').val(d.reference_email3);
                     $('input[name="reference_phone3"]').val(d.reference_phone3);
 
-                    // Reset Tabs
                     $('#studentTab a[href="#personal"]').tab('show');
 
                     $('#studentModal').modal('show');
@@ -479,7 +456,7 @@
                 }
             },
             error: function () {
-                Swal.fire('Error', 'Failed to fetch student data', 'error');
+                Swal.fire('Error', 'Failed to fetch application data', 'error');
             }
         });
     }
@@ -494,11 +471,6 @@
 
         const formData = new FormData(document.getElementById('studentForm'));
 
-        // Manually handle checkbox values for unchecked state if needed
-        // But Django handles generic POST. If checkbox not checked, it's missing.
-        // The view looks for `data.get('status', '0') == '1'`.
-        // If unchecked, it returns '0', which == '1' is False. Correct.
-
         $.ajax({
             url: url,
             type: 'POST',
@@ -508,7 +480,7 @@
             success: function (response) {
                 if (response.success) {
                     $('#studentModal').modal('hide');
-                    studentTable.ajax.reload();
+                    applicationTable.ajax.reload();
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
@@ -531,7 +503,7 @@
         const action = currentStatus ? 'deactivate' : 'activate';
         Swal.fire({
             title: `Confirm ${action}?`,
-            text: `Are you sure you want to ${action} this student?`,
+            text: `Are you sure you want to ${action} this applicant?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -545,7 +517,7 @@
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                     success: function (response) {
                         if (response.success) {
-                            studentTable.ajax.reload();
+                            applicationTable.ajax.reload();
                             Swal.fire('Success', response.message, 'success');
                         } else {
                             Swal.fire('Error', response.message, 'error');
@@ -564,7 +536,7 @@
         const action = currentStatus ? 'disapprove' : 'approve';
         Swal.fire({
             title: `Confirm ${action}?`,
-            text: `Are you sure you want to ${action} this student?`,
+            text: `Are you sure you want to ${action} this applicant? This will move them to the Students list.`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#28a745',
@@ -578,7 +550,7 @@
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                     success: function (response) {
                         if (response.success) {
-                            studentTable.ajax.reload();
+                            applicationTable.ajax.reload();
                             Swal.fire('Success', response.message, 'success');
                         } else {
                             Swal.fire('Error', response.message, 'error');
@@ -592,10 +564,10 @@
         });
     }
 
-    // Delete Student
+    // Delete
     window.deleteStudent = function (id) {
         Swal.fire({
-            title: 'Are you sure?',
+            title: 'Delete Application?',
             text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
@@ -606,32 +578,25 @@
             if (result.isConfirmed) {
                 $.ajax({
                     url: '/admin/student/delete/' + id + '/',
-                    type: 'POST', // or DELETE/GET depending on legacy implementation?
-                    // Legacy `student_delete` view usually expects POST or GET.
-                    // Let's check: view says `def student_delete`. usually accessible via url.
-                    // But if it's protected by `@require_http_methods`, we need to be careful.
-                    // Outline didn't show decorators.
-                    // Assuming POST for safety with CSRF.
+                    type: 'POST',
                     headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                     success: function (response) {
                         if (response.success) {
-                            studentTable.ajax.reload();
-                            Swal.fire('Deleted!', response.message, 'success');
+                            applicationTable.ajax.reload();
+                            Swal.fire('Deleted!', 'Application has been deleted.', 'success');
                         } else {
                             Swal.fire('Error', response.message, 'error');
                         }
                     },
                     error: function () {
-                        // Fallback try GET if POST fails (legacy support)
-                        // Actually, I should stick to one. I'll use POST.
-                        Swal.fire('Error', 'Failed to delete student', 'error');
+                        Swal.fire('Error', 'Failed to delete application', 'error');
                     }
                 });
             }
         });
     }
 
-    // View Student (Read Only)
+    // View
     window.viewStudent = function (id) {
         $('#viewStudentContent').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
         $('#viewStudentModal').modal('show');
@@ -647,7 +612,6 @@
                             <tbody>
                                 <tr><th>Full Name</th><td>${d.first_name} ${d.middle_name || ''} ${d.last_name || ''}</td></tr>
                                 <tr><th>Email</th><td>${d.email}</td></tr>
-                                <tr><th>Student ID</th><td>${d.student_id || '-'}</td></tr>
                                 <tr><th>Phone</th><td>${d.phone_number || '-'}</td></tr>
                                 <tr><th>DOB</th><td>${d.date_of_birth || '-'}</td></tr>
                                 <tr><th>Gender</th><td>${d.gender || '-'}</td></tr>
@@ -656,7 +620,6 @@
                                 <tr><th>Course Applied</th><td>${d.course_applied || '-'}</td></tr>
                                 <tr><th>Language</th><td>${d.language_name || '-'}</td></tr>
                                 <tr><th>Status</th><td>${d.status == 1 ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-warning">Pending</span>'}</td></tr>
-                                <tr><th>Active</th><td>${d.active == 1 ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>'}</td></tr>
                             </tbody>
                         </table>
                     `;

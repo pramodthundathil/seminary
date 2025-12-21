@@ -1,0 +1,383 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .gallery-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: #333;
+    }
+
+    .table-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 0 2px;
+        color: white;
+    }
+
+    .btn-view {
+        background: #2196f3;
+    }
+
+    .btn-view:hover {
+        background: #1976d2;
+    }
+
+    .btn-edit {
+        background: #ff9800;
+    }
+
+    .btn-edit:hover {
+        background: #f57c00;
+    }
+
+
+    /* Status Badges */
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    .status-approved {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-started {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-pending {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .status-ended {
+        background: #ffebee;
+        color: #c62828;
+    }
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-file-alt"></i>
+            {{ page_title }}
+        </h1>
+        <button class="btn btn-primary" onclick="openAssignModal()">
+            <i class="fas fa-plus"></i> Assign Assignment
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table id="assignmentsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Assignment Name</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Assign Assignment Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1" aria-hidden="true" style="z-index: 1052;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignForm">
+                    <div class="mb-3">
+                        <label class="form-label">Course</label>
+                        <select class="form-select" id="courseSelect" required>
+                            <option value="">Select Course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.course_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Student</label>
+                        <select class="form-select" id="studentSelect" required disabled>
+                            <option value="">Select Student</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select class="form-select" id="subjectSelect" required disabled>
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Assignment</label>
+                        <select class="form-select" id="assignmentSelect" required disabled>
+                            <option value="">Select Assignment</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Submit On or Before</label>
+                        <input type="date" class="form-control" id="submissionDate" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitAssignment()">Assign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let assignmentsTable;
+    let assignModal;
+
+    $(document).ready(function () {
+        assignmentsTable = $('#assignmentsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: '{% url "student_assignment_datatable" %}',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'student_name' },
+                { data: 'assignment_name' },
+                { data: 'subject_name' },
+                { data: 'status' },
+                { data: 'actions', orderable: false, searchable: false }
+            ],
+            order: [[0, 'asc']],
+            language: {
+                emptyTable: "No assignments found"
+            }
+        });
+
+        // Initialize modal
+        if (typeof bootstrap !== 'undefined') {
+            assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
+        }
+
+        // Cascading Dropdowns matches generic Exam workflow
+        $('#courseSelect').change(function () {
+            let courseId = $(this).val();
+            resetSelects(['studentSelect', 'subjectSelect', 'assignmentSelect']);
+
+            if (courseId) {
+                // Use verified URL from exams_list.html
+                $.get('/menu/students/books/get-students/' + courseId + '/', function (data) {
+                    if (data.students && data.students.length > 0) {
+                        let select = $('#studentSelect');
+                        select.prop('disabled', false);
+                        data.students.forEach(s => {
+                            // Format: Name (Student ID)
+                            let label = `${s.first_name} ${s.last_name || ''} (${s.student_id || '-'})`;
+                            select.append(`<option value="${s.id}">${label}</option>`);
+                        });
+                    } else {
+                        Swal.fire('Info', 'No active students found for this course.', 'info');
+                    }
+                }).fail(function (xhr) {
+                    console.error("Error fetching students:", xhr);
+                    Swal.fire('Error', 'Failed to fetch students.', 'error');
+                });
+            }
+        });
+
+        $('#studentSelect').change(function () {
+            let studentId = $(this).val();
+            resetSelects(['subjectSelect', 'assignmentSelect']);
+
+            if (studentId) {
+                // Use verified URL from exams_list.html
+                $.get('/menu/students/instructors/get-subjects/' + studentId + '/', function (data) {
+                    if (data.subjects && data.subjects.length > 0) {
+                        let select = $('#subjectSelect');
+                        select.prop('disabled', false);
+                        data.subjects.forEach(s => {
+                            select.append(`<option value="${s.id}">${s.name}</option>`);
+                        });
+                    } else {
+                        Swal.fire('Info', 'No subjects assigned to this student.', 'info');
+                    }
+                }).fail(function (xhr) {
+                    console.error("Error fetching subjects:", xhr);
+                });
+            }
+        });
+
+        $('#subjectSelect').change(function () {
+            let subjectId = $(this).val();
+            resetSelects(['assignmentSelect']);
+
+            if (subjectId) {
+                // Keep this one as it is specific to assignments
+                $.get('{% url "ajax_get_assignments_by_subject" %}', { subject_id: subjectId }, function (data) {
+                    if (data.assignments && data.assignments.length > 0) {
+                        fillSelect('assignmentSelect', data.assignments, 'id', 'assignment_name');
+                    } else {
+                        Swal.fire('Info', 'No assignments found for this subject.', 'info');
+                    }
+                });
+            }
+        });
+    });
+
+    function resetSelects(ids) {
+        ids.forEach(id => {
+            $(`#${id}`).empty().append('<option value="">Select Option</option>').prop('disabled', true);
+        });
+    }
+
+    function fillSelect(id, data, valField, labelField) {
+        let select = $(`#${id}`);
+        select.prop('disabled', false);
+        data.forEach(item => {
+            // Check if labelField is composite (e.g. for student name)
+            let label = item[labelField];
+            // The JSON returns first_name and last_name, but also constructed 'name' potentially?
+            // Wait, ajax_get_students_by_course returns 'first_name', 'last_name'.
+            // I need to construct it here.
+
+            if (id === 'studentSelect') {
+                label = item.first_name + ' ' + (item.last_name || '');
+            } else {
+                label = item[labelField];
+            }
+            select.append(`<option value="${item[valField]}">${label}</option>`);
+        });
+    }
+
+    function openAssignModal() {
+        $('#assignForm')[0].reset();
+        resetSelects(['studentSelect', 'subjectSelect', 'assignmentSelect']);
+        if (assignModal) assignModal.show();
+        else alert("Bootstrap Modal not initialized");
+    }
+
+    function submitAssignment() {
+        let form = $('#assignForm')[0];
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        let data = {
+            student_id: $('#studentSelect').val(),
+            assignment_id: $('#assignmentSelect').val(),
+            submission_date: $('#submissionDate').val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        };
+
+        $.post('{% url "student_assignments_assign" %}', data, function (response) {
+            if (response.success) {
+                assignModal.hide();
+                Swal.fire('Success', 'Assignment assigned successfully', 'success');
+                assignmentsTable.ajax.reload();
+            } else {
+                Swal.fire('Error', response.message, 'error');
+            }
+        }).fail(function () {
+            Swal.fire('Error', 'Server Error', 'error');
+        });
+    }
+
+    function viewAnswerSheet(id) {
+        window.location.href = '/menu/admin/students/assignment-answer-sheet/' + id + '/';
+    }
+
+    function editAssignment(id) {
+        window.location.href = '/menu/admin/students/student-assignment/edit/' + id + '/';
+    }
+
+    function deleteAssignment(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/menu/admin/students/student-assignment/delete/' + id + '/',
+                    type: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            );
+                            assignmentsTable.ajax.reload();
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function () {
+                        Swal.fire(
+                            'Error!',
+                            'Something went wrong.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        })
+    }
+</script>
+{% endblock %}
