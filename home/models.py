@@ -199,7 +199,7 @@ class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
     assignment = models.ForeignKey('Assignments', on_delete=models.DO_NOTHING, related_name='answers')
     student = models.ForeignKey('Students', on_delete=models.DO_NOTHING, related_name='assignment_answers')
-    answer_file = models.CharField(max_length=255, blank=True, null=True)
+    answer_file = models.FileField(upload_to="uploads/assignments/", blank=True, null=True)
     answer_text = models.TextField(blank=True, null=True)
     marks_optained = models.FloatField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)

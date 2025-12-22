@@ -123,9 +123,11 @@
         <table id="subjectsTable" class="display" style="width:100%">
             <thead>
                 <tr>
-                    <th>ID</th>
+                <tr>
+                    <th>S.No</th>
                     <th>Student Name</th>
                     <th>Subject Name</th>
+                    <th>Status</th>
                     <th>Updated By</th>
                     <th>Actions</th>
                 </tr>
@@ -215,13 +217,14 @@
                 type: 'GET'
             },
             columns: [
-                { data: 'id' },
+                { data: 'sno', orderable: false },
                 { data: 'student_name' },
                 { data: 'subject_name' },
+                { data: 'status' },
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
-            order: [[0, 'desc']],
+            order: [[1, 'asc']], // Order by Student Name by default
             pageLength: 10,
             language: {
                 search: "Search Assignments:",
@@ -330,6 +333,34 @@
             error: function (xhr) {
                 const response = xhr.responseJSON;
                 Swal.fire('Error', response ? response.message : 'An error occurred', 'error');
+            }
+        });
+    }
+
+    window.toggleApproval = function (id) {
+        $.ajax({
+            url: '/menu/students/subjects/toggle-approval/' + id + '/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function (response) {
+                if (response.success) {
+                    subjectsTable.ajax.reload(null, false); // Reload but keep pagination
+                    const toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    toast.fire({
+                        icon: 'success',
+                        title: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Failed to update status', 'error');
             }
         });
     }

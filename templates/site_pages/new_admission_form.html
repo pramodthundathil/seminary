@@ -209,6 +209,10 @@
                                 <label for="timezone">Timezone</label>
                                 <select id="timezone" name="timezone">
                                     <option value="">Select Timezone</option>
+                                    {% for tz in timezones %}
+                                    <option value="{{ tz }}" {% if request.POST.timezone == tz %}selected{% endif %}>{{ tz
+                                        }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-field">
@@ -441,21 +445,21 @@
             startYearSelect.appendChild(option);
         }
 
-        // Load Timezones Dynamically
-        function loadTimezones() {
-            const timezoneSelect = document.getElementById("timezone");
-            const timezones = Intl.supportedValuesOf('timeZone');
-            timezones.sort();
+        // Load Timezones Dynamically - REMOVED (Handled server-side)
+        // function loadTimezones() {
+        //     const timezoneSelect = document.getElementById("timezone");
+        //     const timezones = Intl.supportedValuesOf('timeZone');
+        //     timezones.sort();
 
-            timezones.forEach(tz => {
-                const option = document.createElement("option");
-                option.value = tz;
-                option.textContent = tz;
-                timezoneSelect.appendChild(option);
-            });
-        }
+        //     timezones.forEach(tz => {
+        //         const option = document.createElement("option");
+        //         option.value = tz;
+        //         option.textContent = tz;
+        //         timezoneSelect.appendChild(option);
+        //     });
+        // }
 
-        loadTimezones();
+        // loadTimezones();
 
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 

@@ -132,6 +132,7 @@
                     <th>Course</th>
                     <th>Subject</th>
                     <th>Exam Name</th>
+                    <th>Status</th>
                     <th>Updated By</th>
                     <th>Actions</th>
                 </tr>
@@ -240,6 +241,52 @@
     </div>
 </div>
 
+<!-- Edit Exam Modal -->
+<div class="modal fade" id="editExamModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1052;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Exam Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editExamForm" onsubmit="handleEditFormSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editExamId" name="id">
+                    {% csrf_token %}
+
+                    <div class="form-group mb-3">
+                        <label>Exam Date*</label>
+                        <input type="date" class="form-control" name="exam_date" id="editExamDate" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Exam Start Time*</label>
+                        <input type="time" class="form-control" name="start_time" id="editStartTime" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Exam Duration (Minutes)*</label>
+                        <input type="number" class="form-control" name="duration" id="editDuration" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Timezone*</label>
+                        <select class="form-control" name="timezone" id="editTimezone" required>
+                            {% for tz in timezones %}
+                            <option value="{{ tz }}">{{ tz }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -262,6 +309,7 @@
                 { data: 'course_name' },
                 { data: 'subject_name' },
                 { data: 'exam_name' },
+                { data: 'status' },
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
@@ -389,10 +437,62 @@
         window.location.href = '/menu/admin/students/exam-answer-sheet/' + examId + '/';
     }
 
-    function editExam(examId) {
-        // Redirect to edit exam page (you can implement this later)
-        Swal.fire('Info', 'Edit functionality will be implemented soon.', 'info');
-        // window.location.href = '/menu/admin/students/edit-exam/' + examId + '/';
+    function editExam(id) {
+        $('#editExamForm')[0].reset();
+        $('#editExamId').val(id);
+
+        $.get('/menu/students/exams/get/' + id + '/', function (response) {
+            if (response.success) {
+                const data = response.data;
+                $('#editExamDate').val(data.exam_date);
+                $('#editStartTime').val(data.start_time);
+                $('#editDuration').val(data.duration);
+                $('#editTimezone').val(data.timezone);
+                $('#editExamModal').modal('show');
+            } else {
+                Swal.fire('Error', response.message, 'error');
+            }
+        });
+    }
+
+    function handleEditFormSubmit(e) {
+        e.preventDefault();
+        const id = $('#editExamId').val();
+        const formData = new FormData(document.getElementById('editExamForm'));
+
+        $.ajax({
+            url: '/menu/students/exams/update/' + id + '/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $('#editExamModal').modal('hide');
+                    examsTable.ajax.reload();
+                    Swal.fire('Success', response.message, 'success');
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            }
+        });
+    }
+
+    function toggleApproval(id) {
+        $.ajax({
+            url: '/menu/students/exams/toggle-approval/' + id + '/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function (response) {
+                if (response.success) {
+                    examsTable.ajax.reload();
+                    const icon = response.message.includes('approved') ? 'success' : 'info';
+                    Swal.fire('Success', response.message, icon);
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            }
+        });
     }
 
     function deleteStudentExam(id) {

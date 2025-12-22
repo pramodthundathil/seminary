@@ -41,6 +41,10 @@ urlpatterns = [
     path('admin/media/<int:media_id>/get/', views.media_get, name='media_get'),
     path('admin/media/<int:media_id>/update/', views.media_update, name='media_update'),
     path('admin/media/<int:media_id>/delete/', views.media_delete, name='media_delete'),
+    
+    # Media Library JSON API
+    path('admin/media/json/', views.media_library_json, name='media_library_json'),
+    path('admin/media/upload/json/', views.media_library_upload_json, name='media_library_upload_json'),
 
 
     #photo gallery
@@ -116,6 +120,7 @@ urlpatterns = [
     path('students/subjects/datatable/', views.student_subjects_datatable, name='student_subjects_datatable'),
     path('students/subjects/get-available/<int:student_id>/', views.ajax_get_available_subjects, name='ajax_get_available_subjects'),
     path('students/subjects/bulk-assign/', views.student_subjects_bulk_assign, name='student_subjects_bulk_assign'),
+    path('students/subjects/toggle-approval/<int:id>/', views.student_subjects_toggle_approval, name='student_subjects_toggle_approval'),
     path('students/subjects/delete/<int:id>/', views.student_subjects_delete, name='student_subjects_delete'),
     
     # Student Instructors Workflow
@@ -139,6 +144,9 @@ urlpatterns = [
     path('students/exams/get-available/<int:student_id>/<int:subject_id>/', views.ajax_get_available_exams, name='ajax_get_available_exams'),
     path('students/exams/bulk-assign/', views.student_exams_bulk_assign, name='student_exams_bulk_assign'),
     path('students/exams/delete/<int:id>/', views.student_exams_delete, name='student_exams_delete'),
+    path('students/exams/toggle-approval/<int:id>/', views.student_exams_toggle_approval, name='student_exams_toggle_approval'),
+    path('students/exams/get/<int:id>/', views.student_exams_get, name='student_exams_get'),
+    path('students/exams/update/<int:id>/', views.student_exams_update, name='student_exams_update'),
     # Answer Sheet Viewing and Grading
     path('admin/students/exam-answer-sheet/<int:exam_id>/', views.view_answer_sheet, name='view_answer_sheet'),
     path('admin/students/update-answer-marks/', views.update_answer_marks, name='update_answer_marks'),
@@ -147,7 +155,7 @@ urlpatterns = [
     path('admin/students/student-submitted-exams/datatable/', views.student_submitted_exams_datatable, name='student_submitted_exams_datatable'),
 
     # Student Assignments (Admin-Facing)
-    path('admin/students/student-submitted-assignment/', views.student_assignment_list, name='student_submitted_assignment_list'), # Alias
+    path('admin/students/student-submitted-assignment/', views.student_assignment_list, {'submitted_only': True}, name='student_submitted_assignment_list'), # Alias
     path('admin/students/student-assignment/', views.student_assignment_list, name='student_assignment_list'),
     path('students/assignments/datatable/', views.student_assignment_datatable, name='student_assignment_datatable'),
     path('admin/students/assignment-answer-sheet/<int:id>/', views.view_assignment_answer_sheet, name='view_assignment_answer_sheet'),
@@ -216,6 +224,15 @@ urlpatterns = [
     path('exams/<int:exam_id>/view/', views.exam_view, name='exams_view'),
     path('exams/<int:exam_id>/edit/', views.exam_edit, name='exams_edit'),
     path('exams/<int:exam_id>/delete/', views.exam_delete, name='exams_delete'),
+    
+    # Exam Questions
+    path('exams/<int:exam_id>/question/descriptive/create/', views.question_descriptive_create, name='question_descriptive_create'),
+    path('exams/question/descriptive/<int:question_id>/edit/', views.question_descriptive_edit, name='question_descriptive_edit'),
+    path('exams/question/descriptive/<int:question_id>/delete/', views.question_descriptive_delete, name='question_descriptive_delete'),
+    
+    path('exams/<int:exam_id>/question/objective/create/', views.question_objective_create, name='question_objective_create'),
+    path('exams/question/objective/<int:question_id>/edit/', views.question_objective_edit, name='question_objective_edit'),
+    path('exams/question/objective/<int:question_id>/delete/', views.question_objective_delete, name='question_objective_delete'),
 
     #staffs
 

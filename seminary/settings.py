@@ -24,8 +24,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-PAYPAL_CLIENT_ID = "AUT5f14PL6EVvVK7hr8u2Mweloqi2CwT0bFDsqcD7bZyW_ogWbv9p8WrSjDsUzLMnUTs1qRdo4VsLEwA"
-PAYPAL_CLIENT_SECRET = "EM4MPEwnLx3SsCq9GQt4-7szLoHyKMWWk2C-DI0xKIsuiADPk1L_7ytDRr-KcvXmqMc-NDYEcBAFpwdf"
+PAYPAL_CLIENT_ID = "AbsRgTfQyeWWSpnPN-RFLSw8G0J-2xfNMGxRdKy6C41YDZ9w04KVp948kHDd27WJHT2G0jNYXSr0iW8A"
+PAYPAL_CLIENT_SECRET = "EIKuqztjf9XAIb7cfgwk9XHAfqBB1Cf04sh35HxWBjFwHosgOpKL0KIA4GQKwaii5ZBbYbgrbOjJzBJ-"
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,8 +56,7 @@ INSTALLED_APPS = [
     'home',
     "django_ckeditor_5", 
     'menu',
-   
-  
+    'student',
 ]
 
 CKEDITOR_UPLOAD_PATH = 'content/ckeditor/'

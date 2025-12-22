@@ -1,347 +1,137 @@
-{% extends "student/index.html" %}
-
-{% block title %}Class Recordings{% endblock %}
-{% block body_class %}no-right{% endblock %}
+{% extends 'student/index.html' %}
+{% load static %}
 
 {% block middle %}
-
 <style>
-/* Desktop Styles - Keep original design */
-.recordings-container {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
-
-.recordings-header {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.recordings-header h1 {
-    color: #2c3e50;
-    font-size: 28px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.recordings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.recording-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.recording-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-}
-
-.recording-thumbnail {
-    position: relative;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.recording-thumbnail svg {
-    width: 60px;
-    height: 60px;
-    opacity: 0.9;
-}
-
-.recording-duration {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.recording-info {
-    padding: 15px;
-}
-
-.recording-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-
-.recording-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    color: #64748b;
-}
-
-.recording-date {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.recording-subject {
-    background: #e0f2fe;
-    color: #0284c7;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-/* Mobile Responsive Styles */
-@media screen and (max-width: 968px) {
-    /* Move recordings below stats on tablets */
-    .recordings-container {
-        padding: 20px;
-        border-radius: 12px;
-    }
-    
-    .recordings-header h1 {
-        font-size: 24px;
-    }
-    
-    .recordings-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .recording-thumbnail {
-        height: 140px;
-    }
-    
-    .recording-thumbnail svg {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .recording-info {
-        padding: 12px;
-    }
-    
-    .recording-title {
-        font-size: 14px;
-    }
-}
-
-@media screen and (max-width: 576px) {
-    /* Stack recordings in single column on mobile */
-    .recordings-container {
-        padding: 15px;
-        border-radius: 12px;
-        margin-top: 15px;
-    }
-    
-    .recordings-header {
-        margin-bottom: 15px;
-        padding-bottom: 12px;
-    }
-    
-    .recordings-header h1 {
-        font-size: 20px;
-    }
-    
-    .recordings-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    
     .recording-card {
-        border-radius: 10px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        background: #fff;
     }
-    
-    .recording-thumbnail {
-        height: 160px;
-    }
-    
-    .recording-thumbnail svg {
-        width: 55px;
-        height: 55px;
-    }
-    
-    .recording-info {
-        padding: 12px;
-    }
-    
-    .recording-title {
-        font-size: 15px;
-        margin-bottom: 6px;
-    }
-    
-    .recording-meta {
-        font-size: 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-    
-    .recording-subject {
-        font-size: 11px;
-    }
-}
 
-/* Ensure recordings appear below stats on mobile */
-@media screen and (max-width: 968px) {
-    body.no-right .container {
-        grid-template-columns: 1fr !important;
+    .recording-card:hover {
+        transform: translateY(-5px);
     }
-    
-    /* Profile card will stack first, then recordings */
-    .container > div:first-child {
-        order: 1;
+
+    .media-container {
+        position: relative;
+        width: 100%;
+        background: #000;
     }
-    
-    .middle-column {
-        order: 2;
+
+    .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%;
+        /* 16:9 */
+        height: 0;
     }
-}
+
+    .video-wrapper iframe,
+    .video-wrapper video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .rec-title {
+        font-size: 1.1em;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .rec-meta {
+        font-size: 0.85em;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .no-content {
+        text-align: center;
+        padding: 50px;
+        color: #777;
+    }
+
+    .file-icon {
+        font-size: 3em;
+        color: #ffc107;
+        margin-bottom: 15px;
+    }
+
+    .file-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        background: #f8f9fa;
+    }
 </style>
 
-<div class="recordings-container">
-    <!-- Header -->
-    <div class="recordings-header">
-        <h1>📼 Class Recordings</h1>
-    </div>
-
-    <!-- Recordings Grid -->
-    <div class="recordings-grid">
-        <!-- Recording Card 1 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#667eea"/>
-                </svg>
-                <div class="recording-duration">1:45:30</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">Building Theology - Lecture 1</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 20, 2024</div>
-                    <div class="recording-subject">Theology</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recording Card 2 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#f5576c"/>
-                </svg>
-                <div class="recording-duration">2:15:45</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">Biblical Theology Introduction</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 19, 2024</div>
-                    <div class="recording-subject">Bible Study</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recording Card 3 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#00f2fe"/>
-                </svg>
-                <div class="recording-duration">1:30:20</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">New Testament Overview</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 18, 2024</div>
-                    <div class="recording-subject">NT Studies</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recording Card 4 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#d57eeb"/>
-                </svg>
-                <div class="recording-duration">2:00:15</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">Old Testament Foundations</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 17, 2024</div>
-                    <div class="recording-subject">OT Studies</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recording Card 5 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#fa709a"/>
-                </svg>
-                <div class="recording-duration">1:55:40</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">Advanced Biblical Studies</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 16, 2024</div>
-                    <div class="recording-subject">Advanced</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recording Card 6 -->
-        <div class="recording-card">
-            <div class="recording-thumbnail" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="3" width="20" height="18" rx="2" stroke="white" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="4" fill="white"/>
-                    <circle cx="12" cy="12" r="2" fill="#330867"/>
-                </svg>
-                <div class="recording-duration">1:40:25</div>
-            </div>
-            <div class="recording-info">
-                <div class="recording-title">Theological Perspectives</div>
-                <div class="recording-meta">
-                    <div class="recording-date">📅 Nov 15, 2024</div>
-                    <div class="recording-subject">Theology</div>
-                </div>
-            </div>
-        </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3"><i class="fas fa-video me-2"></i> {{ page_title }}</h2>
     </div>
 </div>
 
+<div class="row">
+    {% if recordings %}
+    {% for rec in recordings %}
+    <div class="col-lg-4 col-md-6">
+        <div class="recording-card">
+            <div class="media-container">
+                {% if rec.type == 'youtube' %}
+                <div class="video-wrapper">
+                    <!-- Helper logic for YouTube embed if raw URL is provided -->
+                    <iframe src="https://www.youtube.com/embed/{{ rec.url|slice:'-11:' }}" frameborder="0"
+                        allowfullscreen></iframe>
+                </div>
+                {% elif rec.type == 'video' %}
+                <div class="video-wrapper">
+                    <video controls>
+                        <source src="{{ rec.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% else %}
+                <div class="file-container">
+                    <i class="fas fa-file-alt file-icon"></i>
+                    <a href="{{ rec.url }}" class="btn btn-outline-primary btn-sm" target="_blank" download>
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="rec-title">{{ rec.title }}</div>
+                <div class="rec-meta">
+                    <i class="fas fa-book me-1"></i> {{ rec.subject }}<br>
+                    <i class="fas fa-calendar-alt me-1"></i> {{ rec.date|date:"M d, Y" }}
+                </div>
+                {% if rec.description %}
+                <p class="small text-muted mb-0">{{ rec.description|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="no-content">
+            <i class="fas fa-film fa-3x mb-3 text-muted"></i>
+            <h4>No recordings available.</h4>
+            <p>Check back later for class material.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

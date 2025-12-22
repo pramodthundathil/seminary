@@ -56,7 +56,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle">Add Student</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -317,7 +317,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save Student</button>
                 </div>
             </form>
@@ -331,7 +331,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Student Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -340,7 +340,7 @@
                 <div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -352,6 +352,23 @@
 <!-- Bootstrap JS (for Tabs and Modals) - assuming base template loads it, but sometimes it doesn't -->
 <!-- If admin/index.html loads bootstrap JS, we are good. -->
 
+<style>
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+
+    .modal {
+        z-index: 1050 !important;
+    }
+
+    /* Force smaller buttons if btn-sm isn't enough */
+    .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+</style>
 <script>
     let studentTable;
 
@@ -372,15 +389,23 @@
                 }
             },
             columns: [
-                { data: 'id', width: '50px' },
-                { data: 'preview', orderable: false, searchable: false, width: '80px' },
+                {
+                    data: null,
+                    width: '30px',
+                    searchable: false,
+                    orderable: false,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                },
+                { data: 'preview', orderable: false, searchable: false, width: '60px' },
                 { data: 'student_info', width: '250px' },
                 { data: 'email', width: '200px' },
                 { data: 'status', width: '100px' },
                 { data: 'created_at', width: '120px' },
                 { data: 'actions', orderable: false, searchable: false, width: '150px' }
             ],
-            order: [[0, 'desc']],
+            order: [[5, 'desc']], // Sort by Date Created by default
             pageLength: 12,
             language: {
                 search: "Search Students:",
@@ -410,7 +435,7 @@
     window.editStudent = function (id) {
         // Fetch data
         $.ajax({
-            url: '/admin/student/get/' + id + '/',
+            url: '/menu/students/get/' + id + '/',
             type: 'GET',
             success: function (response) {
                 if (response.success) {
@@ -489,7 +514,7 @@
         e.preventDefault();
         const studentId = $('#studentId').val();
         const url = studentId ?
-            '/admin/student/update/' + studentId + '/' :
+            '/menu/students/update/' + studentId + '/' :
             '{% url "student_create" %}';
 
         const formData = new FormData(document.getElementById('studentForm'));
@@ -605,7 +630,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '/admin/student/delete/' + id + '/',
+                    url: '/menu/admin/students/delete/' + id + '/',
                     type: 'POST', // or DELETE/GET depending on legacy implementation?
                     // Legacy `student_delete` view usually expects POST or GET.
                     // Let's check: view says `def student_delete`. usually accessible via url.
@@ -637,7 +662,7 @@
         $('#viewStudentModal').modal('show');
 
         $.ajax({
-            url: '/admin/student/get/' + id + '/',
+            url: '/menu/students/get/' + id + '/',
             type: 'GET',
             success: function (response) {
                 if (response.success) {
@@ -652,8 +677,8 @@
                                 <tr><th>DOB</th><td>${d.date_of_birth || '-'}</td></tr>
                                 <tr><th>Gender</th><td>${d.gender || '-'}</td></tr>
                                 <tr><th>Marital Status</th><td>${d.mrital_status || '-'}</td></tr>
-                                <tr><th>Address</th><td>${d.mailing_address || ''}<br>${d.city}, ${d.state} ${d.zip_code}<br>${d.country || ''}</td></tr>
-                                <tr><th>Course Applied</th><td>${d.course_applied || '-'}</td></tr>
+                                <tr><th>Address</th><td>${d.mailing_address || ''}<br>${d.city}, ${d.state} ${d.zip_code}<br>${d.country_name || ''}</td></tr>
+                                <tr><th>Course Applied</th><td>${d.course_applied_name || '-'}</td></tr>
                                 <tr><th>Language</th><td>${d.language_name || '-'}</td></tr>
                                 <tr><th>Status</th><td>${d.status == 1 ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-warning">Pending</span>'}</td></tr>
                                 <tr><th>Active</th><td>${d.active == 1 ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>'}</td></tr>
