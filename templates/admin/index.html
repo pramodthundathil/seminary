@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
         :root {
             --primary: #00CED1;
@@ -1884,6 +1885,109 @@
                 padding: 3px;
             }
         }
+
+        /* Standardized Admin Styles (Unified from Student/Category Lists) */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+            min-width: 80px;
+        }
+
+        .status-badge.approved,
+        .status-approved,
+        .status-active {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-badge.pending,
+        .status-pending {
+            background: var(--warning, #F59E0B);
+            color: white;
+        }
+
+        .status-badge.rejected,
+        .status-inactive {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Action Buttons (Small Square) */
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: white;
+            margin: 0 2px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-view {
+            background: var(--primary);
+        }
+
+        .btn-edit {
+            background: var(--success);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+        }
+
+        .btn-toggle {
+            background: var(--purple-accent, #8B5CF6);
+        }
+
+        .btn-approve {
+            background: var(--warning, #F59E0B);
+        }
+
+        /* Table Images */
+        .table-photo {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-photo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-photo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), #2563EB);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
     </style>
     <style>
         /* * {
@@ -3040,7 +3144,7 @@
 
             .carousel-item:nth-child(2) .carousel-caption h1 {
                 margin-top: -170px !important;
-                font-size: 30px !important;                
+                font-size: 30px !important;
                 transform: translateX(280px) !important;
             }
 
@@ -3104,9 +3208,10 @@
                 justify-content: center;
                 justify-content: flex-end !important;
             }
-             .carousel-item:nth-child(2) .carousel-caption h1 {
-                 color: #22d3ee !important;
-             }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                color: #22d3ee !important;
+            }
 
         }
 
@@ -3200,7 +3305,7 @@
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
             }
 
-           
+
             #trinityCarousel .carousel-indicators {
                 bottom: 30px !important;
                 left: 180px !important;
@@ -3242,7 +3347,7 @@
             .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
                 font-size: 20px !important;
                 font-weight: 400 !important;
-                 color: cyan !important;
+                color: cyan !important;
                 line-height: 1.2 !important;
                 white-space: normal !important;
                 text-align: center !important;
@@ -3323,7 +3428,7 @@
                 transform: translate(-160px, 60px) !important;
                 margin: 0 auto !important;
                 text-align: center !important;
-                 line-height: 1.2 !important;
+                line-height: 1.2 !important;
                 font-size: 16px !important;
             }
 
@@ -3359,6 +3464,7 @@
                 /* ONLY move up */
                 font-size: 20px !important;
             }
+
             /* BUTTON - move RIGHT */
             .carousel-item:nth-child(1) .learn-more-btn {
                 transform: translate(-20px, 30px) !important;
@@ -3382,9 +3488,10 @@
                 text-align: center;
                 font-size: 16px !important;
             }
-             .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
-            color: #08b547 !important;
-             }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                color: #08b547 !important;
+            }
 
             .highlight-green,
             .for-green,
@@ -3590,14 +3697,17 @@
             .church-image img {
                 width: 220px;
                 height: 220px;
-            } #trinityCarousel .carousel-indicators [data-bs-target] {
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
                 margin: 0 6px !important;
                 width: 10px !important;
                 height: 10px !important;
                 background-color: #fff !important;
                 overflow: visible !important;
             }
-             #trinityCarousel .carousel-indicators {
+
+            #trinityCarousel .carousel-indicators {
                 bottom: 30px !important;
                 left: 140px !important;
                 /* Move to the left */
@@ -3647,12 +3757,13 @@
 
             /* P TAG */
             .carousel .carousel-item:nth-child(2) .carousel-caption p {
-                 color: #A78BFA !important;
+                color: #A78BFA !important;
                 transform: translate(-140px, 60px) !important;
                 margin: 0 auto !important;
                 text-align: center !important;
                 font-size: 16px !important;
             }
+
             /* FORCE H1 - move LEFT */
             .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
                 font-size: 20px !important;
@@ -3680,7 +3791,7 @@
 
             /* P TAG */
             .carousel .carousel-item:nth-child(3) .carousel-caption p {
-                 color: #A78BFA !important;
+                color: #A78BFA !important;
                 transform: translate(190px, -30px) !important;
                 margin: 0 auto !important;
                 text-align: center !important;
@@ -3743,7 +3854,7 @@
             }
 
             .carousel-item:nth-child(1) .learn-more-btn {
-                transform: translate(-20px,20px) !important;
+                transform: translate(-20px, 20px) !important;
             }
 
         }
@@ -4575,11 +4686,11 @@
         });
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-{% if messages %}
-<script>
-    // Professional Seminary themed alerts
-    const seminaryTheme = `
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+    <script>
+        // Professional Seminary themed alerts
+        const seminaryTheme = `
     .swal2-popup {
         background: #FFFFFF !important;
         border-radius: 8px !important;
@@ -4726,32 +4837,32 @@
     }
     `;
 
-    // Inject custom styles
-    const style = document.createElement('style');
-    style.textContent = seminaryTheme;
-    document.head.appendChild(style);
+        // Inject custom styles
+        const style = document.createElement('style');
+        style.textContent = seminaryTheme;
+        document.head.appendChild(style);
 
-    '{% for message in messages %}'
-    Swal.fire({
-        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-        title: "{{ message|escapejs }}",
-        showConfirmButton: true,
-        confirmButtonText: 'Understood',
-        timer: 5000,
-        timerProgressBar: true,
-        allowEscapeKey: true,
-        allowOutsideClick: true,
-        showClass: {
-            popup: 'animate__animated animate__fadeIn animate__faster'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut animate__faster'
-        }
-    });
-    '{% endfor %}'
-</script>
-{% endif %}
-<!-- loader scripts  -->
+        '{% for message in messages %}'
+        Swal.fire({
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: true,
+            confirmButtonText: 'Understood',
+            timer: 5000,
+            timerProgressBar: true,
+            allowEscapeKey: true,
+            allowOutsideClick: true,
+            showClass: {
+                popup: 'animate__animated animate__fadeIn animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOut animate__faster'
+            }
+        });
+        '{% endfor %}'
+    </script>
+    {% endif %}
+    <!-- loader scripts  -->
     <script>
         // Trinity Seminary Loader Script
         // Add this to your base.html or include it in each page

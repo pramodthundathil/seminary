@@ -226,8 +226,7 @@ class PageForm(forms.ModelForm):
     media_lib = forms.ModelChoiceField(
         queryset=MediaLibrary.objects.filter(deleted_at__isnull=True),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        empty_label="Select Media"
+        widget=forms.HiddenInput(),
     )
     
     video = forms.ModelChoiceField(
@@ -297,6 +296,13 @@ class PageForm(forms.ModelForm):
         if existing.exists():
             raise forms.ValidationError('This code already exists. Please use a unique code.')
         return code
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.media = self.cleaned_data['media_lib']
+        if commit:
+            instance.save()
+        return instance
     
 
 #language form
@@ -758,3 +764,80 @@ class ChurchAdminForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+from home.models import DescriptiveQuestions, ObjectiveQuestions
+
+class DescriptiveQuestionsForm(forms.ModelForm):
+    class Meta:
+        model = DescriptiveQuestions
+        fields = ['question', 'mark']
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter descriptive question'
+            }),
+            'mark': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter marks'
+            }),
+        }
+
+class ObjectiveQuestionsForm(forms.ModelForm):
+    ANSWER_CHOICES = (
+        ('option1', 'Option 1'),
+        ('option2', 'Option 2'),
+        ('option3', 'Option 3'),
+        ('option4', 'Option 4'),
+    )
+    
+    answer_option = forms.ChoiceField(
+        choices=ANSWER_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = ObjectiveQuestions
+        fields = [
+            'question',
+            'option1',
+            'option2',
+            'option3',
+            'option4',
+            'answer_option',
+            'answer',
+            'marks'
+        ]
+        widgets = {
+            'question': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Enter question text'
+            }),
+            'option1': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option 1'
+            }),
+            'option2': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option 2'
+            }),
+            'option3': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option 3'
+            }),
+            'option4': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option 4'
+            }),
+            'answer': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Detailed answer / Explanation (Optional)'
+            }),
+            'marks': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Marks'
+            }),
+        }
+

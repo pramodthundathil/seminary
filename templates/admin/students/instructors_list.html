@@ -1,0 +1,417 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .gallery-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: #333;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .table-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 0 2px;
+    }
+
+    .btn-delete {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .btn-delete:hover {
+        background: #d32f2f;
+        color: #fff;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    /* Instructors Checklist Style */
+    .instructors-checklist {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 4px;
+        background: #f9f9f9;
+    }
+
+    .instructor-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .instructor-item:last-child {
+        border-bottom: none;
+    }
+
+    .instructor-item:hover {
+        background: #f0f0f0;
+    }
+
+    .instructor-item input {
+        margin-right: 15px;
+        width: 18px;
+        height: 18px;
+    }
+
+    .instructor-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .instructor-title {
+        font-size: 0.85em;
+        color: #666;
+        display: block;
+    }
+
+    .loading-spinner {
+        display: none;
+        margin-left: 10px;
+    }
+
+    .status-active {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-chalkboard-teacher"></i>
+            {{ page_title }}
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openAssignModal()">
+                <i class="fas fa-plus"></i>
+                Assign Instructors to Student
+            </button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="instructorsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Subject Name</th>
+                    <th>Instructor Name</th>
+                    <th>Updated By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Assign Instructors Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1052;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Instructors to Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignForm" onsubmit="handleFormSubmit(event)">
+                <div class="modal-body">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- Step 1: Course -->
+                        <div class="col-md-4 form-group">
+                            <label>1. Select Course*</label>
+                            <select class="form-control" id="courseSelect" onchange="loadStudents(this.value)" required>
+                                <option value="">-- Choose Course --</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Step 2: Student -->
+                        <div class="col-md-4 form-group">
+                            <label>2. Select Student* <span id="studentLoading" class="loading-spinner"><i
+                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <select class="form-control" name="student" id="studentSelect"
+                                onchange="loadSubjects(this.value)" disabled required>
+                                <option value="">-- Choose Student --</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 3: Subject -->
+                        <div class="col-md-4 form-group">
+                            <label>3. Select Subject* <span id="subjectLoading" class="loading-spinner"><i
+                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <select class="form-control" name="subject" id="subjectSelect"
+                                onchange="loadInstructors(this.value)" disabled required>
+                                <option value="">-- Choose Subject --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Instructors Checklist -->
+                    <div class="form-group mt-4" id="instructorsContainer" style="display:none;">
+                        <label>4. Select Instructors* <span id="instructorsLoading" class="loading-spinner"><i
+                                    class="fas fa-spinner fa-spin"></i></span></label>
+                        <div class="mb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="toggleAllInstructors(true)">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="toggleAllInstructors(false)">Deselect All</button>
+                            </div>
+                            <small class="text-muted" id="instructorCount"></small>
+                        </div>
+                        <div class="instructors-checklist" id="instructorsChecklist">
+                            <!-- Checkboxes populated via AJAX -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn" disabled>Save Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    let instructorsTable;
+
+    $(document).ready(function () {
+        instructorsTable = $('#instructorsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: '{% url "student_instructors_datatable" %}',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'student_name' },
+                { data: 'subject_name' },
+                { data: 'instructor_name' },
+                { data: 'updated_by' },
+                { data: 'actions', orderable: false, searchable: false }
+            ],
+            order: [[0, 'desc']],
+            pageLength: 10,
+            language: {
+                search: "Search Assignments:",
+                lengthMenu: "Show _MENU_ records"
+            }
+        });
+    });
+
+    function openAssignModal() {
+        $('#assignForm')[0].reset();
+        $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+        $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+        $('#instructorsContainer').hide();
+        $('#instructorsChecklist').html('');
+        $('#saveBtn').attr('disabled', true);
+        $('#assignModal').modal('show');
+    }
+
+    function loadStudents(courseId) {
+        if (!courseId) {
+            $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#instructorsContainer').hide();
+            return;
+        }
+
+        $('#studentLoading').show();
+        $.get('/menu/students/books/get-students/' + courseId + '/', function (data) {
+            $('#studentLoading').hide();
+            let options = '<option value="">-- Choose Student --</option>';
+            data.students.forEach(function (s) {
+                options += `<option value="${s.id}">${s.first_name} ${s.last_name || ''} (${s.student_id || '-'})</option>`;
+            });
+            $('#studentSelect').html(options).attr('disabled', false);
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#instructorsContainer').hide();
+        });
+    }
+
+    function loadSubjects(studentId) {
+        if (!studentId) {
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#instructorsContainer').hide();
+            return;
+        }
+
+        $('#subjectLoading').show();
+        $.get('/menu/students/instructors/get-subjects/' + studentId + '/', function (data) {
+            $('#subjectLoading').hide();
+            let options = '<option value="">-- Choose Subject --</option>';
+            data.subjects.forEach(function (s) {
+                options += `<option value="${s.id}">${s.name}</option>`;
+            });
+            $('#subjectSelect').html(options).attr('disabled', false);
+            $('#instructorsContainer').hide();
+        });
+    }
+
+    function loadInstructors(subjectId) {
+        let studentId = $('#studentSelect').val();
+        if (!subjectId || !studentId) {
+            $('#instructorsContainer').hide();
+            return;
+        }
+
+        $('#instructorsLoading').show();
+        $('#instructorsContainer').show();
+        $('#instructorsChecklist').html('<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading instructors...</div>');
+
+        $.get(`/menu/students/instructors/get-available/${studentId}/${subjectId}/`, function (data) {
+            $('#instructorsLoading').hide();
+            let html = '';
+            if (data.instructors.length === 0) {
+                html = '<div class="text-center p-3 text-muted">No instructors linked to this subject.</div>';
+                $('#saveBtn').attr('disabled', true);
+                $('#instructorCount').text('0 instructors');
+            } else {
+                data.instructors.forEach(function (inst) {
+                    html += `
+                        <div class="instructor-item">
+                            <input type="checkbox" name="instructors[]" value="${inst.id}" id="inst_${inst.id}">
+                            <label for="inst_${inst.id}">
+                                <strong>${inst.staff_name}</strong>
+                                <span class="instructor-title">${inst.title || ''} (${inst.staff_id || 'N/A'})</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                $('#saveBtn').attr('disabled', false);
+                $('#instructorCount').text(data.instructors.length + ' instructors found for this subject');
+            }
+            $('#instructorsChecklist').html(html);
+        });
+    }
+
+    function toggleAllInstructors(checked) {
+        $('#instructorsChecklist input[type="checkbox"]').prop('checked', checked);
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+
+        const checkedInstructors = $('#instructorsChecklist input[type="checkbox"]:checked');
+        if (checkedInstructors.length === 0) {
+            Swal.fire('Warning', 'Please select at least one instructor.', 'warning');
+            return;
+        }
+
+        const formData = new FormData(document.getElementById('assignForm'));
+
+        $.ajax({
+            url: '{% url "student_instructors_bulk_assign" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $('#assignModal').modal('hide');
+                    instructorsTable.ajax.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                Swal.fire('Error', response ? response.message : 'An error occurred', 'error');
+            }
+        });
+    }
+
+    function deleteStudentInstructor(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will remove this instructor assignment.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/menu/students/instructors/delete/' + id + '/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function (response) {
+                        if (response.success) {
+                            instructorsTable.ajax.reload();
+                            Swal.fire('Deleted!', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Failed to delete assignment', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

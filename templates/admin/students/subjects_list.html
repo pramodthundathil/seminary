@@ -1,0 +1,399 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .gallery-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: #333;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .table-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 0 2px;
+    }
+
+    .btn-delete {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .btn-delete:hover {
+        background: #d32f2f;
+        color: #fff;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    /* Subjects Checklist Style */
+    .subjects-checklist {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 4px;
+        background: #f9f9f9;
+    }
+
+    .subject-item {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .subject-item:last-child {
+        border-bottom: none;
+    }
+
+    .subject-item input {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+    }
+
+    .subject-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .subject-code {
+        font-size: 0.85em;
+        color: #666;
+        display: block;
+    }
+
+    .loading-spinner {
+        display: none;
+        margin-left: 10px;
+    }
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-book"></i>
+            {{ page_title }}
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i>
+                Assign Subjects to Student
+            </button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="subjectsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                <tr>
+                    <th>S.No</th>
+                    <th>Student Name</th>
+                    <th>Subject Name</th>
+                    <th>Status</th>
+                    <th>Updated By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Assign Subjects Modal (Cascading Workflow) -->
+<div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1052;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Subjects to Student</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="subjectForm" onsubmit="handleFormSubmit(event)">
+                <div class="modal-body">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- Step 1: Course -->
+                        <div class="col-md-6 form-group">
+                            <label>1. Select Course*</label>
+                            <select class="form-control" id="courseSelect" onchange="loadStudents(this.value)" required>
+                                <option value="">-- Choose Course --</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Step 2: Student -->
+                        <div class="col-md-6 form-group">
+                            <label>2. Select Student* <span id="studentLoading" class="loading-spinner"><i
+                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <select class="form-control" name="student" id="studentSelect"
+                                onchange="loadAvailableSubjects(this.value)" disabled required>
+                                <option value="">-- Choose Student --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Subjects Checklist -->
+                    <div class="form-group mt-3" id="subjectsContainer" style="display:none;">
+                        <label>3. Select Subjects to Assign* <span id="subjectsLoading" class="loading-spinner"><i
+                                    class="fas fa-spinner fa-spin"></i></span></label>
+                        <div class="mb-2">
+                            <button type="button" class="btn btn-sm btn-link p-0"
+                                onclick="toggleAllSubjects(true)">Select All</button> |
+                            <button type="button" class="btn btn-sm btn-link p-0"
+                                onclick="toggleAllSubjects(false)">Deselect All</button>
+                        </div>
+                        <div class="subjects-checklist" id="subjectsChecklist">
+                            <!-- Checkboxes populated via AJAX -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn" disabled>Save Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    let subjectsTable;
+
+    $(document).ready(function () {
+        subjectsTable = $('#subjectsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: '{% url "student_subjects_datatable" %}',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'sno', orderable: false },
+                { data: 'student_name' },
+                { data: 'subject_name' },
+                { data: 'status' },
+                { data: 'updated_by' },
+                { data: 'actions', orderable: false, searchable: false }
+            ],
+            order: [[1, 'asc']], // Order by Student Name by default
+            pageLength: 10,
+            language: {
+                search: "Search Assignments:",
+                lengthMenu: "Show _MENU_ records"
+            }
+        });
+    });
+
+    function openCreateModal() {
+        $('#subjectForm')[0].reset();
+        $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+        $('#subjectsContainer').hide();
+        $('#subjectsChecklist').html('');
+        $('#saveBtn').attr('disabled', true);
+        $('#subjectModal').modal('show');
+    }
+
+    // Cascading Logic
+    function loadStudents(courseId) {
+        if (!courseId) {
+            $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+            $('#subjectsContainer').hide();
+            return;
+        }
+
+        $('#studentLoading').show();
+        $.get('/menu/students/books/get-students/' + courseId + '/', function (data) {
+            $('#studentLoading').hide();
+            let options = '<option value="">-- Choose Student --</option>';
+            data.students.forEach(function (s) {
+                options += `<option value="${s.id}">${s.first_name} ${s.last_name || ''} (${s.student_id || '-'})</option>`;
+            });
+            $('#studentSelect').html(options).attr('disabled', false);
+            $('#subjectsContainer').hide();
+        });
+    }
+
+    function loadAvailableSubjects(studentId) {
+        if (!studentId) {
+            $('#subjectsContainer').hide();
+            return;
+        }
+
+        $('#subjectsLoading').show();
+        $('#subjectsContainer').show();
+        $('#subjectsChecklist').html('<div class="text-center p-3">Loading subjects...</div>');
+
+        $.get('/menu/students/subjects/get-available/' + studentId + '/', function (data) {
+            $('#subjectsLoading').hide();
+            let html = '';
+            if (data.subjects.length === 0) {
+                html = '<div class="text-center p-3">No new subjects available for this student.</div>';
+                $('#saveBtn').attr('disabled', true);
+            } else {
+                data.subjects.forEach(function (s) {
+                    html += `
+                        <div class="subject-item">
+                            <input type="checkbox" name="subjects[]" value="${s.id}" id="subject_${s.id}">
+                            <label for="subject_${s.id}">
+                                <strong>${s.subject_name}</strong>
+                                <span class="subject-code">${s.subject_code}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                $('#saveBtn').attr('disabled', false);
+            }
+            $('#subjectsChecklist').html(html);
+        });
+    }
+
+    function toggleAllSubjects(checked) {
+        $('#subjectsChecklist input[type="checkbox"]').prop('checked', checked);
+    }
+
+    window.handleFormSubmit = function (e) {
+        e.preventDefault();
+
+        const checkedSubjects = $('#subjectsChecklist input[type="checkbox"]:checked');
+        if (checkedSubjects.length === 0) {
+            Swal.fire('Warning', 'Please select at least one subject.', 'warning');
+            return;
+        }
+
+        const formData = new FormData(document.getElementById('subjectForm'));
+
+        $.ajax({
+            url: '{% url "student_subjects_bulk_assign" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $('#subjectModal').modal('hide');
+                    subjectsTable.ajax.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                Swal.fire('Error', response ? response.message : 'An error occurred', 'error');
+            }
+        });
+    }
+
+    window.toggleApproval = function (id) {
+        $.ajax({
+            url: '/menu/students/subjects/toggle-approval/' + id + '/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function (response) {
+                if (response.success) {
+                    subjectsTable.ajax.reload(null, false); // Reload but keep pagination
+                    const toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    toast.fire({
+                        icon: 'success',
+                        title: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Failed to update status', 'error');
+            }
+        });
+    }
+
+    window.deleteStudentSubject = function (id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will remove this subject assignment.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/menu/students/subjects/delete/' + id + '/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function (response) {
+                        if (response.success) {
+                            subjectsTable.ajax.reload();
+                            Swal.fire('Deleted!', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Failed to delete assignment', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

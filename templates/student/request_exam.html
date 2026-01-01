@@ -129,6 +129,7 @@
             opacity: 0;
             transform: translateY(-10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -143,7 +144,7 @@
             grid-template-columns: unset !important;
         }
 
-        body.no-right .container > div:first-child {
+        body.no-right .container>div:first-child {
             order: 1;
         }
 
@@ -203,12 +204,12 @@
 
 <div class="request-exam-card">
     <div class="exam-form-header">
-        📋 REQUEST AN EXAM
+        <i class="bi bi-clipboard-plus"></i> REQUEST AN EXAM
     </div>
 
     <div class="exam-form-body">
-{% if error %}
-<div style="
+        {% if error %}
+        <div style="
     padding:12px;
     background:#fee2e2;
     border:1px solid #fecaca;
@@ -217,12 +218,12 @@
     margin-bottom:15px;
     font-weight:600;
 ">
-    {{ error }}
-</div>
-{% endif %}
+            {{ error }}
+        </div>
+        {% endif %}
 
         {% if messages %}
-    <div id="djangoAlert" style="
+        <div id="djangoAlert" style="
         padding: 12px;
         background: #d1fae5;
         border: 1px solid #10b981;
@@ -232,86 +233,86 @@
         font-size: 14px;
         display: block;
     ">
-        {% for message in messages %}
+            {% for message in messages %}
             {{ message }}
-        {% endfor %}
-    </div>
-{% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
 
         <div class="exam-success-message" id="successMessage">
-            ✓ Exam request submitted successfully!
+            <i class="bi bi-check-circle-fill"></i> Exam request submitted successfully!
         </div>
 
-<form id="examForm" method="POST" action="{% url 'submit-request-exam' %}">
-    {% csrf_token %}
+        <form id="examForm" method="POST" action="{% url 'submit-request-exam' %}">
+            {% csrf_token %}
 
-    <!-- SUBJECT -->
-    <div class="exam-form-group">
-        <label for="subject">Subject *</label>
-        <select id="subject" name="subject" required>
-            <option value="">--- Select Subject ---</option>
-            {% for s in subjects %}
-                <option value="{{ s.id }}">{{ s.subject_name }}</option>
-            {% endfor %}
-        </select>
-    </div>
+            <!-- SUBJECT -->
+            <div class="exam-form-group">
+                <label for="subject">Subject *</label>
+                <select id="subject" name="subject" required>
+                    <option value="">--- Select Subject ---</option>
+                    {% for s in subjects %}
+                    <option value="{{ s.id }}">{{ s.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <!-- EXAM -->
-    <div class="exam-form-group">
-        <label for="exam">Exam *</label>
-        <select id="exam" name="exam" required disabled>
-            <option value="">[Select a subject first]</option>
-        </select>
-    </div>
+            <!-- EXAM -->
+            <div class="exam-form-group">
+                <label for="exam">Exam *</label>
+                <select id="exam" name="exam" required disabled>
+                    <option value="">[Select a subject first]</option>
+                </select>
+            </div>
 
-    <!-- TIMEZONE -->
-    <div class="exam-form-group">
-        <label for="timezone">Timezone *</label>
-        <select id="timezone" name="timezone" required>
-            <option value="">--- Select Timezone ---</option>
-            <option value="UTC-12:00">(UTC-12:00) International Date Line West</option>
-            <option value="UTC-11:00">(UTC-11:00) Coordinated Universal Time-11</option>
-            <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
-            <option value="UTC-09:00">(UTC-09:00) Alaska</option>
-            <option value="UTC-08:00">(UTC-08:00) Pacific Time (US & Canada)</option>
-            <option value="UTC-07:00">(UTC-07:00) Mountain Time (US & Canada)</option>
-            <option value="UTC-06:00">(UTC-06:00) Central Time (US & Canada)</option>
-            <option value="UTC-05:00">(UTC-05:00) Eastern Time (US & Canada)</option>
-            <option value="UTC-04:00">(UTC-04:00) Atlantic Time (Canada)</option>
-            <option value="UTC-03:00">(UTC-03:00) Buenos Aires</option>
-            <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
-            <option value="UTC-01:00">(UTC-01:00) Azores</option>
-            <option value="UTC+00:00">(UTC+00:00) Dublin, London</option>
-            <option value="UTC+01:00">(UTC+01:00) Amsterdam, Berlin, Paris</option>
-            <option value="UTC+02:00">(UTC+02:00) Athens, Istanbul</option>
-            <option value="UTC+03:00">(UTC+03:00) Moscow, St. Petersburg</option>
-            <option value="UTC+04:00">(UTC+04:00) Abu Dhabi, Muscat</option>
-            <option value="UTC+05:00">(UTC+05:00) Islamabad, Karachi</option>
-            <option value="UTC+05:30">(UTC+05:30) India Standard Time</option>
-            <option value="UTC+06:00">(UTC+06:00) Dhaka</option>
-            <option value="UTC+07:00">(UTC+07:00) Bangkok, Hanoi</option>
-            <option value="UTC+08:00">(UTC+08:00) Beijing, Singapore</option>
-            <option value="UTC+09:00">(UTC+09:00) Tokyo, Seoul</option>
-            <option value="UTC+10:00">(UTC+10:00) Sydney</option>
-            <option value="UTC+11:00">(UTC+11:00) Solomon Islands</option>
-            <option value="UTC+12:00">(UTC+12:00) Auckland, Wellington</option>
-        </select>
-    </div>
+            <!-- TIMEZONE -->
+            <div class="exam-form-group">
+                <label for="timezone">Timezone *</label>
+                <select id="timezone" name="timezone" required>
+                    <option value="">--- Select Timezone ---</option>
+                    <option value="UTC-12:00">(UTC-12:00) International Date Line West</option>
+                    <option value="UTC-11:00">(UTC-11:00) Coordinated Universal Time-11</option>
+                    <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
+                    <option value="UTC-09:00">(UTC-09:00) Alaska</option>
+                    <option value="UTC-08:00">(UTC-08:00) Pacific Time (US & Canada)</option>
+                    <option value="UTC-07:00">(UTC-07:00) Mountain Time (US & Canada)</option>
+                    <option value="UTC-06:00">(UTC-06:00) Central Time (US & Canada)</option>
+                    <option value="UTC-05:00">(UTC-05:00) Eastern Time (US & Canada)</option>
+                    <option value="UTC-04:00">(UTC-04:00) Atlantic Time (Canada)</option>
+                    <option value="UTC-03:00">(UTC-03:00) Buenos Aires</option>
+                    <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
+                    <option value="UTC-01:00">(UTC-01:00) Azores</option>
+                    <option value="UTC+00:00">(UTC+00:00) Dublin, London</option>
+                    <option value="UTC+01:00">(UTC+01:00) Amsterdam, Berlin, Paris</option>
+                    <option value="UTC+02:00">(UTC+02:00) Athens, Istanbul</option>
+                    <option value="UTC+03:00">(UTC+03:00) Moscow, St. Petersburg</option>
+                    <option value="UTC+04:00">(UTC+04:00) Abu Dhabi, Muscat</option>
+                    <option value="UTC+05:00">(UTC+05:00) Islamabad, Karachi</option>
+                    <option value="UTC+05:30">(UTC+05:30) India Standard Time</option>
+                    <option value="UTC+06:00">(UTC+06:00) Dhaka</option>
+                    <option value="UTC+07:00">(UTC+07:00) Bangkok, Hanoi</option>
+                    <option value="UTC+08:00">(UTC+08:00) Beijing, Singapore</option>
+                    <option value="UTC+09:00">(UTC+09:00) Tokyo, Seoul</option>
+                    <option value="UTC+10:00">(UTC+10:00) Sydney</option>
+                    <option value="UTC+11:00">(UTC+11:00) Solomon Islands</option>
+                    <option value="UTC+12:00">(UTC+12:00) Auckland, Wellington</option>
+                </select>
+            </div>
 
-    <!-- EXAM DATE -->
-    <div class="exam-form-group">
-        <label for="examDate">Exam Date *</label>
-        <input type="date" id="examDate" name="examDate" required>
-    </div>
+            <!-- EXAM DATE -->
+            <div class="exam-form-group">
+                <label for="examDate">Exam Date *</label>
+                <input type="date" id="examDate" name="examDate" required>
+            </div>
 
-    <!-- START TIME -->
-    <div class="exam-form-group">
-        <label for="startTime">Start Time *</label>
-        <input type="time" id="startTime" name="startTime" required>
-    </div>
+            <!-- START TIME -->
+            <div class="exam-form-group">
+                <label for="startTime">Start Time *</label>
+                <input type="time" id="startTime" name="startTime" required>
+            </div>
 
-    <button type="submit" class="exam-btn-submit">REQUEST</button>
-</form>
+            <button type="submit" class="exam-btn-submit">REQUEST</button>
+        </form>
 
     </div>
 </div>
@@ -366,12 +367,12 @@
     const successMessage = document.getElementById('successMessage');
 
     // Handle form submission with success message
-    examForm.addEventListener('submit', function(e) {
+    examForm.addEventListener('submit', function (e) {
         e.preventDefault(); // Prevent default form submission
-        
+
         // Create FormData object
         const formData = new FormData(examForm);
-        
+
         // Submit the form via fetch
         fetch(examForm.action, {
             method: 'POST',
@@ -380,53 +381,53 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => {
-            if (response.ok) {
-                // Show success message
-                successMessage.style.display = 'block';
-                
-                // Scroll to top to show the message
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                // After 2 seconds, redirect to exam hall
-                setTimeout(() => {
-                    window.location.href = '/student/exam-hall/';
-                }, 2000);
-            } else {
-                // If there's an error, submit the form normally to show Django error messages
+            .then(response => {
+                if (response.ok) {
+                    // Show success message
+                    successMessage.style.display = 'block';
+
+                    // Scroll to top to show the message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // After 2 seconds, redirect to exam hall
+                    setTimeout(() => {
+                        window.location.href = '/student/exam-hall/';
+                    }, 2000);
+                } else {
+                    // If there's an error, submit the form normally to show Django error messages
+                    examForm.submit();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // If there's a network error, submit the form normally
                 examForm.submit();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // If there's a network error, submit the form normally
-            examForm.submit();
-        });
+            });
     });
 
     subjectSelect.addEventListener("change", function () {
-    const subjectId = this.value;
+        const subjectId = this.value;
 
-    examSelect.innerHTML = '<option value="">[Select a subject first]</option>';
-    examSelect.disabled = true;
+        examSelect.innerHTML = '<option value="">[Select a subject first]</option>';
+        examSelect.disabled = true;
 
-    if (!subjectId) return;
+        if (!subjectId) return;
 
-    fetch(`/get-exams/${subjectId}/`)
-        .then(response => response.json())
-        .then(exams => {
-            examSelect.innerHTML = '<option value="">--- Select Exam ---</option>';
+        fetch(`/student/get-exams/${subjectId}/`)
+            .then(response => response.json())
+            .then(exams => {
+                examSelect.innerHTML = '<option value="">--- Select Exam ---</option>';
 
-            exams.forEach(exam => {
-                let option = document.createElement("option");
-                option.value = exam.id;
-                option.textContent = exam.exam_name;
-                examSelect.appendChild(option);
+                exams.forEach(exam => {
+                    let option = document.createElement("option");
+                    option.value = exam.id;
+                    option.textContent = exam.exam_name;
+                    examSelect.appendChild(option);
+                });
+
+                examSelect.disabled = false;
             });
-
-            examSelect.disabled = false;
-        });
-});
+    });
 
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('examDate').setAttribute('min', today);

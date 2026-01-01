@@ -68,29 +68,29 @@
         border-color: var(--primary);
     }
 
-.submit-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
-    color: white;
-    border: none;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
-    white-space: nowrap;
-}
+    .submit-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+        color: white;
+        border: none;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
+        white-space: nowrap;
+    }
 
-.submit-btn:hover {
-    background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
-}
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
+    }
 
-.submit-btn:active {
-    transform: translateY(0);
-}
+    .submit-btn:active {
+        transform: translateY(0);
+    }
 
     .controls-section {
         background: var(--bg-card);
@@ -106,7 +106,8 @@
         gap: 1rem;
     }
 
-    .show-entries, .search-box {
+    .show-entries,
+    .search-box {
         display: flex;
         gap: 0.5rem;
         align-items: center;
@@ -259,6 +260,7 @@
 
     /* Mobile Responsive - STACK BELOW PROFILE */
     @media screen and (max-width: 968px) {
+
         /* Force stacking order */
         body.no-right .container {
             display: flex !important;
@@ -266,12 +268,14 @@
             grid-template-columns: unset !important;
         }
 
-        body.no-right .container > div:first-child {
-            order: 1; /* Profile card first */
+        body.no-right .container>div:first-child {
+            order: 1;
+            /* Profile card first */
         }
 
         body.no-right .middle-column {
-            order: 2 !important; /* Content below profile */
+            order: 2 !important;
+            /* Content below profile */
             width: 100%;
         }
 
@@ -294,7 +298,8 @@
             padding: 1rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             justify-content: space-between;
             width: 100%;
         }
@@ -335,7 +340,7 @@
             padding: 1rem;
         }
 
-        .pagination > div:first-child {
+        .pagination>div:first-child {
             margin-bottom: 0.75rem;
         }
 
@@ -345,7 +350,10 @@
     }
 
     @media screen and (max-width: 576px) {
-        .query-form-card, .controls-section, .pagination {
+
+        .query-form-card,
+        .controls-section,
+        .pagination {
             padding: 1rem 0.75rem;
         }
 
@@ -370,7 +378,8 @@
             font-size: 0.8125rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             font-size: 0.8125rem;
         }
 
@@ -412,7 +421,10 @@
     }
 
     @media screen and (max-width: 400px) {
-        .query-form-card, .controls-section, .pagination {
+
+        .query-form-card,
+        .controls-section,
+        .pagination {
             padding: 0.875rem 0.625rem;
         }
 
@@ -421,7 +433,8 @@
             font-size: 0.75rem;
         }
 
-        .category-select, .submit-btn {
+        .category-select,
+        .submit-btn {
             padding: 0.5rem;
             font-size: 0.75rem;
         }
@@ -431,7 +444,8 @@
             font-size: 0.75rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             font-size: 0.75rem;
         }
 
@@ -534,7 +548,8 @@
                     <td colspan="4">
                         <div class="empty-state">
                             <!-- <div class="empty-state-icon">📋</div> -->
-                            <div class="empty-state-text">📋 No data available in table</div>
+                            <div class="empty-state-text"><i class="bi bi-clipboard"></i> No data available in table
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -556,41 +571,41 @@
 {% csrf_token %}
 
 <script>
-(function(){
-    const submitBtn = document.getElementById('postQuerySubmit');
-    const input = document.getElementById('postQueryInput');
-    const categorySelect = document.querySelector('.category-select');
+    (function () {
+        const submitBtn = document.getElementById('postQuerySubmit');
+        const input = document.getElementById('postQueryInput');
+        const categorySelect = document.querySelector('.category-select');
 
-    submitBtn.addEventListener('click', function(){
-        const doubt = input.value.trim();
-        const category = categorySelect.value;
+        submitBtn.addEventListener('click', function () {
+            const doubt = input.value.trim();
+            const category = categorySelect.value;
 
-        if (!doubt) {
-            input.focus();
-            return;
-        }
-
-        fetch("{% url 'student_support_create' %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
-                "X-Requested-With": "XMLHttpRequest",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-                "doubt": doubt,
-                "category": category
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                input.value = "";
-                window.location.href = "{% url 'student_doubts_answers' %}";
+            if (!doubt) {
+                input.focus();
+                return;
             }
+
+            fetch("{% url 'student_support_create' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    "doubt": doubt,
+                    "category": category
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        input.value = "";
+                        window.location.href = "{% url 'student_doubts_answers' %}";
+                    }
+                });
         });
-    });
-})();
+    })();
 </script>
 
 {% endblock %}

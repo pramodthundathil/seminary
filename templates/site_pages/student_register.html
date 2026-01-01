@@ -416,6 +416,7 @@
         font-size: 28px;
         background: linear-gradient(90deg, var(--primary-cyan), var(--purple-gradient-start));
         -webkit-background-clip: text;
+        background-clip: text;
         color: transparent;
         /* Main theme color */
         min-width: 28px;
@@ -526,6 +527,7 @@
             border-radius: 6px;
             /* optional: smaller corners */
         }
+
         .phone-group {
             grid-template-columns: 100px 1fr;
         }
@@ -555,11 +557,12 @@
             width: 100%;
         }
     }
+
     /* Progress Step Inactive State */
     .progress-step:not(.active):not(.completed) .progress-circle {
-    background: #e5e7eb !important;
-    color: #9ca3af !important;
-}
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+    }
 </style>
 
 <div class="application-container">
@@ -609,7 +612,7 @@
     </div>
 
     <form method="POST" onsubmit="return validateForm(event)" enctype="multipart/form-data" id="studentApplicationForm">
-        
+
         {% csrf_token %}
 
         <!-- Section 1: Personal Information -->
@@ -645,7 +648,7 @@
                     <label>Date of Birth <span class="required">*</span></label>
                     <input type="date" name="date_of_birth" class="form-control"
                         value="{{ request.POST.date_of_birth|default:'' }}" required>
-                        <small class="error-message" id="date_of_birth_error"></small>
+                    <small class="error-message" id="date_of_birth_error"></small>
                 </div>
             </div>
 
@@ -730,9 +733,9 @@
                     </select>
                     <input type="tel" name="phone_number" class="form-control"
                         value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
-                         <small id="phone_number_error" class="error-message"></small>
+                    <small id="phone_number_error" class="error-message"></small>
                 </div>
-               
+
             </div>
 
             <div class="form-row">
@@ -740,7 +743,7 @@
                     <label>Mailing Address <span class="required">*</span></label>
                     <input type="text" name="mailing_address" class="form-control"
                         value="{{ request.POST.mailing_address|default:'' }}" required>
-                         <small id="mailing_address_error" class="error-message"></small>
+                    <small id="mailing_address_error" class="error-message"></small>
                 </div>
             </div>
 
@@ -765,27 +768,30 @@
                         {% for country in countries %}
                         <option value="{{ country.id }}">{{ country.name }}</option>
                         {% endfor %}
-                         <small id="country_error" class="error-message"></small>
+                        <small id="country_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Zip/Postal Code <span class="required">*</span></label>
                     <input type="text" name="zip_code" class="form-control"
                         value="{{ request.POST.zip_code|default:'' }}" required>
-                        <small id="zip_code_error" class="error-message"></small>
+                    <small id="zip_code_error" class="error-message"></small>
                 </div>
             </div>
 
             <div class="form-row">
-               <div class="form-group">
-                <label>Timezone <span class="required">*</span></label>
-                <select id="timezone" name="timezone" class="form-select" required>
-                    <option value="">Select Timezone</option>
-                </select>
-                <!-- Store previously selected timezone -->
-                <input type="hidden" id="selected_timezone" value="{{ request.POST.timezone }}">
-                <small id="timezone_error" class="error-message"></small>
-            </div>
+                <div class="form-group">
+                    <label>Timezone <span class="required">*</span></label>
+                    <select id="timezone" name="timezone" class="form-select" required>
+                        <option value="">Select Timezone</option>
+                        {% for tz in timezones %}
+                        <option value="{{ tz }}" {% if request.POST.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- Store previously selected timezone -->
+                    <input type="hidden" id="selected_timezone" value="{{ request.POST.timezone }}">
+                    <small id="timezone_error" class="error-message"></small>
+                </div>
             </div>
         </div>
 
@@ -800,13 +806,18 @@
                     <select name="highest_education" class="form-select" required>
                         <option value="">Select Level</option>
                         <option value="high_school" {% if request.POST.highest_education == 'high_school' %}selected{%endif %}>High School</option>
-                        <option value="associate" {% if request.POST.highest_education == 'associate' %}selected{%endif %}>Associate Degree</option>
+                            
+                        <option value="associate" {% if request.POST.highest_education == 'associate' %}selected{%endif%}>Associate Degree</option>
+                            
+
                         <option value="bachelor" {% if request.POST.highest_education == 'bachelor' %}selected{% endif %}>
                             Bachelor's Degree</option>
+
                         <option value="master" {% if request.POST.highest_education == 'master' %}selected{% endif %}>
                             Master's Degree</option>
-                        <option value="doctorate" {% if request.POST.highest_education == 'doctorate' %}selected{%endif %}>Doctorate</option>
-                         <small id="highest_education_error" class="error-message"></small>
+                        <option value="doctorate" {% if request.POST.highest_education == 'doctorate' %}selected{%endif%}>
+                            Doctorate</option>
+                        <small id="highest_education_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
@@ -817,31 +828,31 @@
                         {% for course_applied in courses %}
                         <option value="{{ course_applied.id }}">{{ course_applied.course_name }}</option>
                         {% endfor %}
-                         <small id="course_applied_error" class="error-message"></small>
+                        <small id="course_applied_error" class="error-message"></small>
 
                     </select>
                 </div>
             </div>
 
-            <div class="form-row two-cols">                
+            <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Starting Year <span class="required">*</span></label>
                     <input type="number" name="starting_year" class="form-control"
                         value="{{ request.POST.starting_year|default:'' }}" min="2020" max="2030" required>
-                         <small id="starting_year_error" class="error-message"></small>
-                </div>            
+                    <small id="starting_year_error" class="error-message"></small>
+                </div>
                 <div class="form-group">
-                        <label>Preferred Language <span class="required">*</span></label>
-                        <select name="language" class="form-select" required>
-                            <option value="">Select Language</option>
-                            {% for language in languages %}
-                            <option value="{{ language.id }}">{{ language.language_name }}</option>
-                            {% endfor %}
-                            <small id="language_error" class="error-message"></small>
-                        </select>
-                    </div>
+                    <label>Preferred Language <span class="required">*</span></label>
+                    <select name="language" class="form-select" required>
+                        <option value="">Select Language</option>
+                        {% for language in languages %}
+                        <option value="{{ language.id }}">{{ language.language_name }}</option>
+                        {% endfor %}
+                        <small id="language_error" class="error-message"></small>
+                    </select>
+                </div>
             </div>
-            <div class="form-row two-cols">                
+            <div class="form-row two-cols">
                 <div class="form-group">
                     <label>Ministerial Status</label>
                     <select name="ministerial_status" class="form-select">
@@ -856,12 +867,12 @@
                         </option>
                     </select>
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label>Church Affiliation</label>
                     <input type="text" name="church_affiliation" class="form-control"
                         value="{{ request.POST.church_affiliation|default:'' }}" placeholder="Enter your church name">
                 </div>
-            </div>            
+            </div>
         </div>
 
         <!-- Section 4: Financial Information -->
@@ -876,7 +887,7 @@
                         <option value="yes" {% if request.POST.scholarship_needed == 'yes' %}selected{% endif %}>Yes
                         </option>
                         <option value="no" {% if request.POST.scholarship_needed == 'no' %}selected{% endif %}>No</option>
-                         <small id="scholarship_needed_error" class="error-message"></small>
+                        <small id="scholarship_needed_error" class="error-message"></small>
                     </select>
                 </div>
                 <div class="form-group">
@@ -886,7 +897,7 @@
                         <option value="yes" {% if request.POST.currently_employed == 'yes' %}selected{% endif %}>Yes
                         </option>
                         <option value="no" {% if request.POST.currently_employed == 'no' %}selected{% endif %}>No</option>
-                         <small id="currently_employed_error" class="error-message"></small>
+                        <small id="currently_employed_error" class="error-message"></small>
                     </select>
                 </div>
             </div>
@@ -928,19 +939,19 @@
                     <label>Name <span class="required">*</span></label>
                     <input type="text" name="reference_name1" class="form-control"
                         value="{{ request.POST.reference_name1|default:'' }}" required>
-                         <small id="reference_name1_error" class="error-message"></small>
+                    <small id="reference_name1_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
-                   <input type="email" name="reference_email1" class="form-control"
+                    <input type="email" name="reference_email1" class="form-control"
                         value="{{ request.POST.reference_email1|default:'' }}" required>
-                         <small id="reference_email1_error" class="error-message"></small>
+                    <small id="reference_email1_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Phone <span class="required">*</span></label>
                     <input type="tel" name="reference_phone1" class="form-control"
                         value="{{ request.POST.reference_phone1|default:'' }}" required>
-                         <small id="reference_phone1_error" class="error-message"></small>
+                    <small id="reference_phone1_error" class="error-message"></small>
                 </div>
             </div>
 
@@ -952,19 +963,19 @@
                     <label>Name <span class="required">*</span></label>
                     <input type="text" name="reference_name2" class="form-control"
                         value="{{ request.POST.reference_name2|default:'' }}" required>
-                         <small id="reference_name2_error" class="error-message"></small>
+                    <small id="reference_name2_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Email <span class="required">*</span></label>
                     <input type="email" name="reference_email2" class="form-control"
                         value="{{ request.POST.reference_email2|default:'' }}" required>
-                         <small id="reference_email2_error" class="error-message"></small>
+                    <small id="reference_email2_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Phone <span class="required">*</span></label>
                     <input type="tel" name="reference_phone2" class="form-control"
                         value="{{ request.POST.reference_phone2|default:'' }}" required>
-                         <small id="reference_phone2_error" class="error-message"></small>
+                    <small id="reference_phone2_error" class="error-message"></small>
                 </div>
             </div>
 
@@ -999,7 +1010,8 @@
                 <div class="form-group">
                     <label>Certificate 1<span class="required">*</span></label>
                     <div class="file-upload-wrapper">
-                        <input type="file" name="certificate1" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <input type="file" name="certificate1" class="file-upload-input" accept=".pdf,.jpg,.jpeg,.png"
+                            required>
                         <div class="file-upload-label">
                             <i class="bi bi-file-earmark-arrow-up"></i>
                             <span>Upload Document</span>
@@ -1079,7 +1091,29 @@
 </div>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script src="{% static 'js/timezone.js' %}"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+    // Handle Django Messages with SweetAlert2
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        title: "{% if message.tags == 'success' %}Success!{% elif message.tags == 'error' %}Error!{% else %}Notice{% endif %}",
+        text: "{{ message|escapejs }}",
+        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}",
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        {% if message.tags == 'success' %}
+        // Redirect or additional actions if successful
+        // e.g., window.location.href = "{% url 'student_application_success' student_id='PLACEHOLDER' %}"; 
+        // Note: Since redirection happens in Views for success, this might just show for warnings/errors or flash messages
+        {% endif %}
+    });
+    {% endfor %}
+    {% endif %}
+
     // File upload label update
     document.querySelectorAll('.file-upload-input').forEach(input => {
         input.addEventListener('change', function (e) {
@@ -1090,30 +1124,33 @@
         });
     });
     // Timezone population
-     document.addEventListener("DOMContentLoaded", function () {       
+    document.addEventListener("DOMContentLoaded", function () {
 
         if (!window.TIMEZONE_LIST) {
-            console.error("TIMEZONE_LIST not loaded");
-            return;
+            // console.error("TIMEZONE_LIST not loaded");
+            // Suppress error or handle gracefully
+        } else {
+            const timezoneSelect = document.getElementById("timezone");
+            const selected = document.getElementById("selected_timezone").value;
+
+            window.TIMEZONE_LIST.forEach(tz => {
+                const option = document.createElement("option");
+                option.value = tz;
+                option.textContent = tz;
+                if (selected === tz) option.selected = true;
+                timezoneSelect.appendChild(option);
+            });
         }
-        const timezoneSelect = document.getElementById("timezone");
-        const selected = document.getElementById("selected_timezone").value;
 
-        window.TIMEZONE_LIST.forEach(tz => {
-            const option = document.createElement("option");
-            option.value = tz;
-            option.textContent = tz;
-            if (selected === tz) option.selected = true;
-            timezoneSelect.appendChild(option);
-        });
-   
 
-         /* Initialize Select2 for phone code */
+
+        /* Initialize Select2 for phone code */
         $('#phone_code').select2({
-        placeholder: "Search code or country",
-        allowClear: true
+            placeholder: "Search code or country",
+            allowClear: true
         });
     });
+    // ... rest of script ...
 
     // Form submission with loading
     document.getElementById('studentApplicationForm').addEventListener('submit', function (e) {
@@ -1181,10 +1218,10 @@
         });
     });
     // Section completion tracking
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('studentApplicationForm');
         const progressSteps = document.querySelectorAll('.progress-step');
-        
+
         // Define sections and their required fields
         const sections = [
             {
@@ -1205,25 +1242,29 @@
             },
             {
                 // Section 5: Documents & Certificates
-                fields: ['certificate1']
-                // fields: ['certificate1','g-recaptcha-response']
+// <<<<<<< students_update
+//                 fields: ['certificate1']
+//                 // fields: ['certificate1','g-recaptcha-response']
+// =======
+//                 fields: ['certificate1', 'g-recaptcha-response']
+// >>>>>>> main
             }
         ];
 
         // Function to check if a section is complete
         function checkSectionCompletion(sectionIndex) {
             const sectionFields = sections[sectionIndex].fields;
-            
+
             // If no required fields (like documents section), mark as complete
             if (sectionFields.length === 0) {
                 return true;
             }
-            
+
             // Check if all required fields in this section are filled
             return sectionFields.every(fieldName => {
                 const field = form.elements[fieldName];
                 if (!field) return true; // Field doesn't exist, skip
-                
+
                 if (field.type === 'select-one') {
                     return field.value !== '';
                 }
@@ -1241,7 +1282,7 @@
                     progressSteps[index].classList.remove('completed');
                 }
             });
-            
+
             // Set the first incomplete section as active
             for (let i = 0; i < sections.length; i++) {
                 if (!checkSectionCompletion(i)) {
@@ -1283,22 +1324,22 @@
         });
     });
     function validateForm(event) {
-    const recaptcha = grecaptcha.getResponse();
+        const recaptcha = grecaptcha.getResponse();
 
-    // If reCAPTCHA not checked
-    if (!recaptcha || recaptcha.length === 0) {
-        alert("Please complete the reCAPTCHA before submitting.");
-        event.preventDefault(); // STOP submission
-        return false;
+        // If reCAPTCHA not checked
+        if (!recaptcha || recaptcha.length === 0) {
+            alert("Please complete the reCAPTCHA before submitting.");
+            event.preventDefault(); // STOP submission
+            return false;
+        }
+
+        // If valid, allow submit and then reset form
+        setTimeout(() => {
+            document.getElementById("studentApplicationForm").reset();
+        }, 300);
+
+        return true;
     }
-
-    // If valid, allow submit and then reset form
-    setTimeout(() => {
-        document.getElementById("studentApplicationForm").reset();
-    }, 300);
-
-    return true;
-}
 
 </script>
 {% endblock %}
