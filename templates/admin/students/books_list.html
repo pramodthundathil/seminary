@@ -1,0 +1,402 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .gallery-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: #333;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .table-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 0 2px;
+    }
+
+    .btn-delete {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .btn-delete:hover {
+        background: #d32f2f;
+        color: #fff;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    /* Books Checklist Style */
+    .books-checklist {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 4px;
+        background: #f9f9f9;
+    }
+
+    .book-item {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .book-item:last-child {
+        border-bottom: none;
+    }
+
+    .book-item input {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+    }
+
+    .book-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .book-author {
+        font-size: 0.85em;
+        color: #666;
+        display: block;
+    }
+
+    .loading-spinner {
+        display: none;
+        margin-left: 10px;
+    }
+</style>
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-book-reader"></i>
+            {{ page_title }}
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i>
+                Assign Books to Student
+            </button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="booksTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Book Title</th>
+                    <th>Updated By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Assign Books Modal (Cascading Workflow) -->
+<div class="modal fade" id="bookModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1052;">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Books to Student</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="bookForm" onsubmit="handleFormSubmit(event)">
+                <div class="modal-body">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- Step 1: Course -->
+                        <div class="col-md-6 form-group">
+                            <label>1. Select Course*</label>
+                            <select class="form-control" id="courseSelect" onchange="loadStudents(this.value)" required>
+                                <option value="">-- Choose Course --</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Step 2: Student -->
+                        <div class="col-md-6 form-group">
+                            <label>2. Select Student* <span id="studentLoading" class="loading-spinner"><i
+                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <select class="form-control" name="student" id="studentSelect"
+                                onchange="loadSubjects(this.value)" disabled required>
+                                <option value="">-- Choose Student --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <!-- Step 3: Subject -->
+                        <div class="col-md-12 form-group">
+                            <label>3. Select Subject* <span id="subjectLoading" class="loading-spinner"><i
+                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <select class="form-control" id="subjectSelect" onchange="loadBooks(this.value)" disabled
+                                required>
+                                <option value="">-- Choose Subject --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Books Checklist -->
+                    <div class="form-group mt-3" id="booksContainer" style="display:none;">
+                        <label>4. Select Books to Assign* <span id="booksLoading" class="loading-spinner"><i
+                                    class="fas fa-spinner fa-spin"></i></span></label>
+                        <div class="mb-2">
+                            <button type="button" class="btn btn-sm btn-link p-0" onclick="toggleAllBooks(true)">Select
+                                All</button> |
+                            <button type="button" class="btn btn-sm btn-link p-0"
+                                onclick="toggleAllBooks(false)">Deselect All</button>
+                        </div>
+                        <div class="books-checklist" id="booksChecklist">
+                            <!-- Checkboxes populated via AJAX -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn" disabled>Save Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    let booksTable;
+
+    $(document).ready(function () {
+        booksTable = $('#booksTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            ajax: {
+                url: '{% url "student_books_datatable" %}',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'student_name' },
+                { data: 'book_title' },
+                { data: 'updated_by' },
+                { data: 'actions', orderable: false, searchable: false }
+            ],
+            order: [[0, 'desc']],
+            pageLength: 10,
+            language: {
+                search: "Search Assignments:",
+                lengthMenu: "Show _MENU_ records"
+            }
+        });
+    });
+
+    function openCreateModal() {
+        $('#bookForm')[0].reset();
+        $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+        $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+        $('#booksContainer').hide();
+        $('#booksChecklist').html('');
+        $('#saveBtn').attr('disabled', true);
+        $('#bookModal').modal('show');
+    }
+
+    // Cascading Logic
+    function loadStudents(courseId) {
+        if (!courseId) {
+            $('#studentSelect').html('<option value="">-- Choose Student --</option>').attr('disabled', true);
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#booksContainer').hide();
+            return;
+        }
+
+        $('#studentLoading').show();
+        $.get('/menu/students/books/get-students/' + courseId + '/', function (data) {
+            $('#studentLoading').hide();
+            let options = '<option value="">-- Choose Student --</option>';
+            data.students.forEach(function (s) {
+                options += `<option value="${s.id}">${s.first_name} ${s.last_name || ''} (${s.student_id || '-'})</option>`;
+            });
+            $('#studentSelect').html(options).attr('disabled', false);
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#booksContainer').hide();
+        });
+    }
+
+    function loadSubjects(studentId) {
+        if (!studentId) {
+            $('#subjectSelect').html('<option value="">-- Choose Subject --</option>').attr('disabled', true);
+            $('#booksContainer').hide();
+            return;
+        }
+
+        $('#subjectLoading').show();
+        $.get('/menu/students/books/get-subjects/' + studentId + '/', function (data) {
+            $('#subjectLoading').hide();
+            let options = '<option value="">-- Choose Subject --</option>';
+            data.subjects.forEach(function (s) {
+                options += `<option value="${s.id}">${s.subject_name} (${s.subject_code})</option>`;
+            });
+            $('#subjectSelect').html(options).attr('disabled', false);
+            $('#booksContainer').hide();
+        });
+    }
+
+    function loadBooks(subjectId) {
+        if (!subjectId) {
+            $('#booksContainer').hide();
+            return;
+        }
+
+        $('#booksLoading').show();
+        $('#booksContainer').show();
+        $('#booksChecklist').html('<div class="text-center p-3">Loading books...</div>');
+
+        $.get('/menu/students/books/get-books/' + subjectId + '/', function (data) {
+            $('#booksLoading').hide();
+            let html = '';
+            if (data.books.length === 0) {
+                html = '<div class="text-center p-3">No books available for this subject.</div>';
+                $('#saveBtn').attr('disabled', true);
+            } else {
+                data.books.forEach(function (b) {
+                    html += `
+                        <div class="book-item">
+                            <input type="checkbox" name="books[]" value="${b.id}" id="book_${b.id}">
+                            <label for="book_${b.id}">
+                                <strong>${b.title}</strong>
+                                <span class="book-author">${b.auther_name || 'Unknown Author'}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                $('#saveBtn').attr('disabled', false);
+            }
+            $('#booksChecklist').html(html);
+        });
+    }
+
+    function toggleAllBooks(checked) {
+        $('#booksChecklist input[type="checkbox"]').prop('checked', checked);
+    }
+
+    window.handleFormSubmit = function (e) {
+        e.preventDefault();
+
+        const checkedBooks = $('#booksChecklist input[type="checkbox"]:checked');
+        if (checkedBooks.length === 0) {
+            Swal.fire('Warning', 'Please select at least one book.', 'warning');
+            return;
+        }
+
+        const formData = new FormData(document.getElementById('bookForm'));
+
+        $.ajax({
+            url: '{% url "student_books_bulk_assign" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    $('#bookModal').modal('hide');
+                    booksTable.ajax.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+                Swal.fire('Error', response ? response.message : 'An error occurred', 'error');
+            }
+        });
+    }
+
+    window.deleteStudentBook = function (id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will remove this book assignment.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/menu/students/books/delete/' + id + '/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function (response) {
+                        if (response.success) {
+                            booksTable.ajax.reload();
+                            Swal.fire('Deleted!', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Failed to delete assignment', 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

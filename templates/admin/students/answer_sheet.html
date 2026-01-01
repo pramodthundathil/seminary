@@ -1,0 +1,439 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .answer-sheet-container {
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: #333;
+    }
+
+    .exam-info-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .info-item {
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 4px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #333;
+        font-size: 1em;
+    }
+
+    .questions-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .question-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #fafafa;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .question-number {
+        font-weight: 700;
+        color: #2196F3;
+        font-size: 1.1em;
+    }
+
+    .question-marks {
+        background: #2196F3;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+    }
+
+    .question-text {
+        font-size: 1.05em;
+        color: #333;
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+
+    .options-list {
+        margin: 15px 0;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .option-item {
+        padding: 10px 15px;
+        margin: 8px 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .option-item.correct {
+        background: #e8f5e9;
+        border-color: #4caf50;
+    }
+
+    .option-item.student-answer {
+        background: #e3f2fd;
+        border-color: #2196F3;
+    }
+
+    .option-item.student-answer.incorrect {
+        background: #ffebee;
+        border-color: #f44336;
+    }
+
+    .answer-section {
+        margin-top: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 4px;
+        border-left: 4px solid #2196F3;
+    }
+
+    .answer-label {
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 8px;
+    }
+
+    .answer-text {
+        color: #333;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .marks-section {
+        margin-top: 15px;
+        padding: 15px;
+        background: #fff3cd;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .marks-input {
+        width: 100px;
+        padding: 8px 12px;
+        border: 2px solid #ffc107;
+        border-radius: 4px;
+        font-size: 1em;
+        font-weight: 600;
+    }
+
+    .btn-update-marks {
+        padding: 8px 20px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .btn-update-marks:hover {
+        background: #45a049;
+    }
+
+    .btn-update-marks:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .status-approved {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #f57c00;
+    }
+
+    .no-answer {
+        color: #999;
+        font-style: italic;
+    }
+
+    .section-title {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #333;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #2196F3;
+    }
+</style>
+
+<div class="answer-sheet-container">
+    <div class="page-header">
+        <h1>
+            <i class="bi bi-eye"></i>
+            Answer Sheet
+        </h1>
+        <a href="{% url 'student_exams_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- Exam Information Card -->
+    <div class="exam-info-card">
+        <h3 style="margin-top: 0;">Exam Details</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Student</div>
+                <div class="info-value">{{ student_exam.student.get_full_name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Student ID</div>
+                <div class="info-value">{{ student_exam.student.student_id|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Exam Name</div>
+                <div class="info-value">{{ student_exam.exam.exam_name }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Course</div>
+                <div class="info-value">{{ student_exam.course.course_name|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Subject</div>
+                <div class="info-value">{{ student_exam.subject.subject_name|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Exam Type</div>
+                <div class="info-value">{{ student_exam.exam.exam_type|title }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Start Time</div>
+                <div class="info-value">{{ student_exam.start_time|date:"Y-m-d H:i"|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Duration</div>
+                <div class="info-value">{{ student_exam.exam_duration }} minutes</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                    {% if student_exam.is_approved %}
+                    <span class="status-badge status-approved">Approved</span>
+                    {% else %}
+                    <span class="status-badge status-pending">Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions and Answers -->
+    <div class="questions-container">
+        {% if objective_questions %}
+        <h2 class="section-title">Objective Questions</h2>
+        {% for item in objective_questions %}
+        <div class="question-card">
+            <div class="question-header">
+                <span class="question-number">Question {{ forloop.counter }}</span>
+                <span class="question-marks">[{{ item.question.marks }} marks]</span>
+            </div>
+
+            <div class="question-text">{{ item.question.question }}</div>
+
+            <ul class="options-list">
+                {% if item.question.option1 %}
+                <li
+                    class="option-item {% if item.question.answer_option == '1' %}correct{% endif %} {% if item.answer and item.answer.answer == '1' %}student-answer {% if item.question.answer_option != '1' %}incorrect{% endif %}{% endif %}">
+                    <strong>A.</strong> {{ item.question.option1 }}
+                    {% if item.question.answer_option == '1' %}<span style="color: #4caf50; margin-left: 10px;">✓
+                        Correct</span>{% endif %}
+                    {% if item.answer and item.answer.answer == '1' %}<span style="color: #2196F3; margin-left: 10px;">←
+                        Student's Answer</span>{% endif %}
+                </li>
+                {% endif %}
+                {% if item.question.option2 %}
+                <li
+                    class="option-item {% if item.question.answer_option == '2' %}correct{% endif %} {% if item.answer and item.answer.answer == '2' %}student-answer {% if item.question.answer_option != '2' %}incorrect{% endif %}{% endif %}">
+                    <strong>B.</strong> {{ item.question.option2 }}
+                    {% if item.question.answer_option == '2' %}<span style="color: #4caf50; margin-left: 10px;">✓
+                        Correct</span>{% endif %}
+                    {% if item.answer and item.answer.answer == '2' %}<span style="color: #2196F3; margin-left: 10px;">←
+                        Student's Answer</span>{% endif %}
+                </li>
+                {% endif %}
+                {% if item.question.option3 %}
+                <li
+                    class="option-item {% if item.question.answer_option == '3' %}correct{% endif %} {% if item.answer and item.answer.answer == '3' %}student-answer {% if item.question.answer_option != '3' %}incorrect{% endif %}{% endif %}">
+                    <strong>C.</strong> {{ item.question.option3 }}
+                    {% if item.question.answer_option == '3' %}<span style="color: #4caf50; margin-left: 10px;">✓
+                        Correct</span>{% endif %}
+                    {% if item.answer and item.answer.answer == '3' %}<span style="color: #2196F3; margin-left: 10px;">←
+                        Student's Answer</span>{% endif %}
+                </li>
+                {% endif %}
+                {% if item.question.option4 %}
+                <li
+                    class="option-item {% if item.question.answer_option == '4' %}correct{% endif %} {% if item.answer and item.answer.answer == '4' %}student-answer {% if item.question.answer_option != '4' %}incorrect{% endif %}{% endif %}">
+                    <strong>D.</strong> {{ item.question.option4 }}
+                    {% if item.question.answer_option == '4' %}<span style="color: #4caf50; margin-left: 10px;">✓
+                        Correct</span>{% endif %}
+                    {% if item.answer and item.answer.answer == '4' %}<span style="color: #2196F3; margin-left: 10px;">←
+                        Student's Answer</span>{% endif %}
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="marks-section">
+                <label><strong>Marks Obtained:</strong></label>
+                <input type="number" class="marks-input" value="{{ item.answer.mark|default:0 }}"
+                    max="{{ item.question.marks }}" min="0" step="0.5" data-answer-id="{{ item.answer.id }}"
+                    data-answer-type="objective" {% if not item.answer %}disabled{% endif %}>
+                <button class="btn-update-marks" onclick="updateMarks(this, {{ item.answer.id }}, 'objective')" {% if not item.answer %}disabled{% endif %}>
+                    Update Marks
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if descriptive_questions %}
+        <h2 class="section-title">Descriptive Questions</h2>
+        {% for item in descriptive_questions %}
+        <div class="question-card">
+            <div class="question-header">
+                <span class="question-number">Question {{ forloop.counter }}</span>
+                <span class="question-marks">[{{ item.question.mark }} marks]</span>
+            </div>
+
+            <div class="question-text">{{ item.question.question }}</div>
+
+            <div class="answer-section">
+                <div class="answer-label">Student's Answer:</div>
+                <div class="answer-text">
+                    {% if item.answer and item.answer.answer %}
+                    {{ item.answer.answer }}
+                    {% else %}
+                    <span class="no-answer">No answer submitted</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="marks-section">
+                <label><strong>Marks Obtained:</strong></label>
+                <input type="number" class="marks-input" value="{{ item.answer.mark|default:0 }}"
+                    max="{{ item.question.mark }}" min="0" step="0.5" data-answer-id="{{ item.answer.id }}"
+                    data-answer-type="descriptive" {% if not item.answer %}disabled{% endif %}>
+                <button class="btn-update-marks" onclick="updateMarks(this, {{ item.answer.id }}, 'descriptive')" {% if not item.answer %}disabled{% endif %}>
+                    Update Marks
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if not objective_questions and not descriptive_questions %}
+        <div style="text-align: center; padding: 40px; color: #999;">
+            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px;"></i>
+            <p>No questions found for this exam.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    function updateMarks(button, answerId, answerType) {
+        const input = button.previousElementSibling;
+        const marks = parseFloat(input.value);
+
+        if (isNaN(marks) || marks < 0) {
+            Swal.fire('Error', 'Please enter a valid mark value.', 'error');
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Updating...';
+
+        $.ajax({
+            url: '{% url "update_answer_marks" %}',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            data: {
+                answer_id: answerId,
+                answer_type: answerType,
+                marks: marks
+            },
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire('Success', 'Marks updated successfully!', 'success');
+                } else {
+                    Swal.fire('Error', response.message || 'Failed to update marks.', 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'An error occurred while updating marks.', 'error');
+            },
+            complete: function () {
+                button.disabled = false;
+                button.textContent = 'Update Marks';
+            }
+        });
+    }
+</script>
+{% endblock %}

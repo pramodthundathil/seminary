@@ -1,0 +1,272 @@
+{% extends "student/index.html" %}
+
+{% block title %}Taking Exam - {{ exam.exam_name }}{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+{% block middle %}
+<style>
+    /* Prevent copy paste if possible via CSS (weak protection but standard request) */
+    .exam-content {
+        user-select: none;
+    }
+
+    .sticky-timer {
+        position: sticky;
+        top: 80px;
+        /* Adjust based on header height */
+        background: #fff;
+        border: 2px solid #ef4444;
+        color: #ef4444;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .question-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .question-text {
+        font-size: 1rem;
+        color: #111827;
+        margin-bottom: 16px;
+        line-height: 1.5;
+    }
+
+    .options-grid {
+        display: grid;
+        gap: 10px;
+    }
+
+    .option-label {
+        display: flex;
+        align-items: center;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .option-label:hover {
+        background: #f9fafb;
+    }
+
+    .option-radio {
+        margin-right: 10px;
+        accent-color: var(--primary);
+    }
+
+    .option-label input:checked+span {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .option-label:has(input:checked) {
+        border-color: var(--primary);
+        background: #f0f9ff;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        min-height: 120px;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .submit-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.2s;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        background: var(--primary-dark);
+    }
+</style>
+
+<div class="exam-page exam-container">
+
+    <!-- Timer -->
+    <div class="sticky-timer" id="timerDisplay">
+        Time Remaining: <span id="time" style="margin-left:8px;">00:00:00</span>
+    </div>
+
+    <form method="POST" action="{% url 'submit_exam' student_exam.id %}" id="examForm" class="exam-content">
+        {% csrf_token %}
+
+        <!-- OBJECTIVE QUESTIONS -->
+        {% if objective_questions %}
+        <h3
+            style="margin-bottom: 16px; font-size: 1.1rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
+            Multiple Choice Questions</h3>
+        {% for q in objective_questions %}
+        <div class="question-card">
+            <div class="question-header">
+                <span>Question {{ forloop.counter }}</span>
+                <span class="text-sm text-gray-500">{{ q.marks }} Marks</span>
+            </div>
+            <div class="question-text">{{ q.question }}</div>
+
+            <div class="options-grid">
+                {% if q.option1 %}
+                <label class="option-label">
+                    <input type="radio" name="obj_q_{{ q.id }}" value="{{ q.option1 }}" class="option-radio">
+                    <span>{{ q.option1 }}</span>
+                </label>
+                {% endif %}
+
+                {% if q.option2 %}
+                <label class="option-label">
+                    <input type="radio" name="obj_q_{{ q.id }}" value="{{ q.option2 }}" class="option-radio">
+                    <span>{{ q.option2 }}</span>
+                </label>
+                {% endif %}
+
+                {% if q.option3 %}
+                <label class="option-label">
+                    <input type="radio" name="obj_q_{{ q.id }}" value="{{ q.option3 }}" class="option-radio">
+                    <span>{{ q.option3 }}</span>
+                </label>
+                {% endif %}
+
+                {% if q.option4 %}
+                <label class="option-label">
+                    <input type="radio" name="obj_q_{{ q.id }}" value="{{ q.option4 }}" class="option-radio">
+                    <span>{{ q.option4 }}</span>
+                </label>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- DESCRIPTIVE QUESTIONS -->
+        {% if descriptive_questions %}
+        <h3
+            style="margin: 32px 0 16px; font-size: 1.1rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
+            Descriptive Questions</h3>
+        {% for q in descriptive_questions %}
+        <div class="question-card">
+            <div class="question-header">
+                <span>Question {{ forloop.counter }}</span>
+                <span class="text-sm text-gray-500">{{ q.mark }} Marks</span>
+            </div>
+            <div class="question-text">{{ q.question }}</div>
+
+            <textarea name="desc_q_{{ q.id }}" placeholder="Type your answer here..."></textarea>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <button type="submit" class="submit-btn"
+            onclick="return confirm('Are you sure you want to submit? You cannot undo this action.');">Submit
+            Exam</button>
+    </form>
+
+</div>
+
+<script>
+    // Total Remaining Seconds passed from backend
+    let remainingSeconds = {{ remaining_seconds }};
+    const timerDisplay = document.getElementById('time');
+    const examForm = document.getElementById('examForm');
+
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimer() {
+        if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerDisplay.innerText = "00:00:00";
+            alert("Time is up! Your exam is being submitted.");
+            examForm.submit();
+            return;
+        }
+
+        timerDisplay.innerText = formatTime(remainingSeconds);
+        remainingSeconds--;
+
+        // Visual Warning
+        if (remainingSeconds < 300) { // Less than 5 mins
+            document.getElementById('timerDisplay').style.backgroundColor = "#fee2e2";
+            document.getElementById('timerDisplay').style.animation = "pulse 1s infinite";
+        }
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // Initial call
+    updateTimer();
+
+    // Prevent accidental navigation
+    window.onbeforeunload = function () {
+        if (remainingSeconds > 0) {
+            return "Are you sure you want to leave? Your exam progress might be lost.";
+        }
+    };
+
+    // Remove warning on submit
+    examForm.addEventListener('submit', function () {
+        window.onbeforeunload = null;
+    });
+
+</script>
+
+<style>
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.8;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+</style>
+
+{% endblock %}

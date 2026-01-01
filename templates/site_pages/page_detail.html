@@ -81,8 +81,15 @@
     }
 
     @keyframes shimmer {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.8; }
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.8;
+        }
     }
 
     /* Floating geometric shapes */
@@ -136,16 +143,19 @@
     }
 
     @keyframes float {
-        0%, 100% {
+
+        0%,
+        100% {
             transform: translateY(0) translateX(0);
         }
+
         50% {
             transform: translateY(-30px) translateX(20px);
         }
     }
 
     /* Keep all page content above decorative elements */
-    .page-wrapper > * {
+    .page-wrapper>* {
         position: relative;
         z-index: 2;
     }
@@ -371,7 +381,7 @@
         gap: 0.5rem;
     }
 
-   
+
     .content-body p {
         margin-bottom: 1.5rem;
         line-height: 1.8;
@@ -402,16 +412,17 @@
     }
 
     .content-body ul li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0.6em;
-    width: 8px;
-    height: 8px;
-    background: var(--primary-cyan);
-    border-radius: 50%;
-    box-shadow: none !important;   /* REMOVE CYAN OUTLINE */
-}
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.6em;
+        width: 8px;
+        height: 8px;
+        background: var(--primary-cyan);
+        border-radius: 50%;
+        box-shadow: none !important;
+        /* REMOVE CYAN OUTLINE */
+    }
 
     .content-body ul li:hover::before {
         background: var(--success);
@@ -497,8 +508,8 @@
     }
 
     .content-body blockquote::before {
-        content: """;
-        position: absolute;
+        content: "" ";
+ position: absolute;
         top: 10px;
         left: 10px;
         font-size: 3rem;
@@ -517,13 +528,13 @@
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         border: 1px solid var(--gray-200);
-         margin-left: auto;
-    margin-right: auto;
+        margin-left: auto;
+        margin-right: auto;
     }
-  
+
     .content-body thead {
-      
-    background: linear-gradient(135deg,#ad83d7 , #6d7cbe, rgb(96, 181, 181));
+
+        background: linear-gradient(135deg, #ad83d7, #6d7cbe, rgb(96, 181, 181));
 
     }
 
@@ -864,11 +875,11 @@
             {% elif page.video %}
             <div class="video-container">
                 <video controls>
-                    <source src="{{ page.video.file.url }}" type="video/mp4">
+                    <source src="{{ page.video.file_path.url }}" type="video/mp4">
                 </video>
             </div>
             {% elif page.media %}
-            <img src="{{ page.media.file.url }}" alt="{{ page.title }}">
+            <img src="{{ page.media.file_path.url }}" alt="{{ page.title }}">
             {% endif %}
         </div>
     </div>
@@ -914,7 +925,7 @@
                 {% for child in child_pages %}
                 <article class="related-card">
                     {% if child.media %}
-                    <img src="{{ child.media.file.url }}" class="card-img" alt="{{ child.title }}">
+                    <img src="{{ child.media.file_path.url }}" class="card-img" alt="{{ child.title }}">
                     {% else %}
                     <div class="card-img-placeholder">📚</div>
                     {% endif %}

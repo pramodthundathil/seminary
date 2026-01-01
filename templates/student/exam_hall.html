@@ -63,28 +63,28 @@
 
 
     .request-exam-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
-    color: white;
-    border: none;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
-    white-space: nowrap;
-}
+        background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+        color: white;
+        border: none;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
+        white-space: nowrap;
+    }
 
-.request-exam-btn:hover {
-    background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
-}
+    .request-exam-btn:hover {
+        background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
+    }
 
-.request-exam-btn:active {
-    transform: translateY(0);
-}
+    .request-exam-btn:active {
+        transform: translateY(0);
+    }
 
 
     /* Stats Grid */
@@ -324,44 +324,55 @@
         color: #9ca3af;
         font-size: 14px;
     }
+
     .no-data {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: none !important;
-}
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border: none !important;
+    }
 
-.no-data-content {
-    padding: 3rem 1rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-}
+    .no-data-content {
+        padding: 3rem 1rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-.no-data-icon {
-    font-size: 3.5rem;
-    animation: float 3s ease-in-out infinite;
-}
+    .no-data-icon {
+        font-size: 3.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
 
-.no-data-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1e293b;   /* slate-800 */
-}
+    .no-data-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        /* slate-800 */
+    }
 
-.no-data-subtitle {
-    font-size: 0.95rem;
-    color: #64748b;   /* slate-500 */
-}
+    .no-data-subtitle {
+        font-size: 0.95rem;
+        color: #64748b;
+        /* slate-500 */
+    }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-}
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-6px);
+        }
+    }
 
 
     /* Mobile Responsive - STACK BELOW PROFILE */
     @media screen and (max-width: 968px) {
+
         /* Force stacking order */
         body.no-right .container {
             display: flex !important;
@@ -369,12 +380,14 @@
             grid-template-columns: unset !important;
         }
 
-        body.no-right .container > div:first-child {
-            order: 1; /* Profile card first */
+        body.no-right .container>div:first-child {
+            order: 1;
+            /* Profile card first */
         }
 
         body.no-right .middle-column {
-            order: 2 !important; /* Content below profile */
+            order: 2 !important;
+            /* Content below profile */
             width: 100%;
         }
 
@@ -622,7 +635,7 @@
     <!-- Header -->
     <div class="exam-header">
         <div class="exam-header-content">
-            <div class="exam-header-icon">📋</div>
+            <div class="exam-header-icon"><i class="bi bi-clipboard-check"></i></div>
             <div class="exam-header-text">
                 <h2>Exam Schedule</h2>
                 <p>You have no scheduled exams</p>
@@ -640,49 +653,66 @@
                     <th>Subject</th>
                     <th>Requested Date</th>
                     <th>Status</th>
+                    <th>Action</th>
+
                 </tr>
             </thead>
             <tbody id="examTableBody">
 
-                    {% if exam_list %}
-                        {% for e in exam_list %}
-                        <tr>
-                            <td data-label="Exam">
-                                <div class="exam-name">{{ e.exam_name }}</div>
-                            </td>
+                {% if exam_list %}
+                {% for e in exam_list %}
+                <tr>
+                    <td data-label="Exam">
+                        <div class="exam-name">{{ e.exam_name }}</div>
+                    </td>
 
-                            <td data-label="Subject">
-                                <div class="exam-subject">{{ e.subject_name }}</div>
-                            </td>
+                    <td data-label="Subject">
+                        <div class="exam-subject">{{ e.subject_name }}</div>
+                    </td>
 
-                            <td data-label="Requested Date">
-                                <div class="exam-time">{{ e.requested_time|date:"M d, Y h:i A" }}</div>
-                            </td>
+                    <td data-label="Requested Date">
+                        <div class="exam-time">{{ e.requested_time|date:"M d, Y h:i A" }}</div>
+                    </td>
 
-                            <td data-label="Status">
-                                {% if e.status == "Completed" %}
-                                    <span class="status-badge approved">Completed</span>
-                                {% elif e.status == "Ongoing" %}
-                                    <span class="status-badge ongoing">Ongoing</span>
-                                {% else %}
-                                    <span class="status-badge pending">Pending</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
+                    <td data-label="Status">
+                        {% if e.status == "Completed" %}
+                        <span class="status-badge approved">Completed</span>
+                        {% elif e.status == "Ongoing" %}
+                        <span class="status-badge ongoing">Ongoing</span>
+                        {% else %}
+                        <span class="status-badge pending">Pending</span>
+                        {% endif %}
+                    </td>
 
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="no-data">
-                                <div class="no-data-content">
-                                    <div class="no-data-icon">📭</div>
-                                    <p class="no-data-title">No exams available</p>
-                                    <span class="no-data-subtitle">No exam records found for you.</span>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
+                    <td data-label="Action">
+                        {% if e.can_start %}
+                        <a href="{% url 'take_exam' e.id %}" class="action-btn"
+                            style="background:#10b981; color:white; padding:8px 12px; text-decoration:none; display:inline-block;">Start
+                            Exam</a>
+                        {% elif e.status == "Completed" %}
+                        <a href="{% url 'student_score_card' %}" class="action-btn" style="color:#3b82f6;">View
+                            Result</a>
+                        {% else %}
+                        
+                        <span style="font-size:12px; color:#9ca3af;">{{ e.action }}</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+                {% else %}
+                <tr>
+                    <td colspan="4" class="no-data">
+                        <div class="no-data-content">
+                            <div class="no-data-icon"><i class="bi bi-inbox"></i></div>
+                            <p class="no-data-title">No exams available</p>
+                            <span class="no-data-subtitle">No exam records found for you.</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
         </table>
     </div>
 
@@ -708,7 +738,7 @@
             align-items: center;
         ">
             {% if exams_page.has_previous %}
-                <a href="?page={{ exams_page.previous_page_number }}" class="pagination-btn" style="
+            <a href="?page={{ exams_page.previous_page_number }}" class="pagination-btn" style="
                     padding: 6px 12px;
                     border: 1px solid #d1d5db;
                     border-radius: 6px;
@@ -719,7 +749,7 @@
                     transition: all 0.2s;
                 ">Previous</a>
             {% else %}
-                <button class="pagination-btn" disabled style="
+            <button class="pagination-btn" disabled style="
                     padding: 6px 12px;
                     border: 1px solid #d1d5db;
                     border-radius: 6px;
@@ -729,10 +759,10 @@
                     cursor: not-allowed;
                 ">Previous</button>
             {% endif %}
-            
+
             {% for num in exams_page.paginator.page_range %}
-                {% if exams_page.number == num %}
-                    <button class="pagination-btn active" style="
+            {% if exams_page.number == num %}
+            <button class="pagination-btn active" style="
                         padding: 6px 12px;
                         border: 1px solid #3b82f6;
                         border-radius: 6px;
@@ -741,8 +771,8 @@
                         font-size: 14px;
                         cursor: default;
                     ">{{ num }}</button>
-                {% elif num > exams_page.number|add:'-3' and num < exams_page.number|add:'3' %}
-                    <a href="?page={{ num }}" class="pagination-btn" style="
+            {% elif num > exams_page.number|add:'-3' and num < exams_page.number|add:'3' %} <a href="?page={{ num }}"
+                class="pagination-btn" style="
                         padding: 6px 12px;
                         border: 1px solid #d1d5db;
                         border-radius: 6px;
@@ -753,9 +783,9 @@
                         transition: all 0.2s;
                     ">{{ num }}</a>
                 {% endif %}
-            {% endfor %}
-            
-            {% if exams_page.has_next %}
+                {% endfor %}
+
+                {% if exams_page.has_next %}
                 <a href="?page={{ exams_page.next_page_number }}" class="pagination-btn" style="
                     padding: 6px 12px;
                     border: 1px solid #d1d5db;
@@ -766,7 +796,7 @@
                     font-size: 14px;
                     transition: all 0.2s;
                 ">Next</a>
-            {% else %}
+                {% else %}
                 <button class="pagination-btn" disabled style="
                     padding: 6px 12px;
                     border: 1px solid #d1d5db;
@@ -776,7 +806,7 @@
                     font-size: 14px;
                     cursor: not-allowed;
                 ">Next</button>
-            {% endif %}
+                {% endif %}
         </div>
     </div>
     {% endif %}
@@ -791,11 +821,11 @@
 {% block extra_js %}
 <script>
     // Filter functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const filterBtns = document.querySelectorAll('.filter-btn');
-        
+
         filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 filterBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
             });

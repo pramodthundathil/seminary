@@ -35,7 +35,11 @@
         --gray-900: #111827;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
     .container-confirm {
         max-width: 720px;
@@ -43,7 +47,7 @@
         background: white;
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .header-confirm {
@@ -70,13 +74,26 @@
         gap: 20px;
     }
 
-    .detail-row:last-child { border-bottom: none; }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
 
-    .detail-label { font-size: 14px; color: var(--text-light); font-weight: 500; }
+    .detail-label {
+        font-size: 14px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
 
-    .detail-value { font-size: 14px; color: var(--text-dark); word-break: break-word; }
+    .detail-value {
+        font-size: 14px;
+        color: var(--text-dark);
+        word-break: break-word;
+    }
 
-    .amount-row .detail-value { font-weight: 600; font-size: 15px; }
+    .amount-row .detail-value {
+        font-weight: 600;
+        font-size: 15px;
+    }
 
     /* Make right block move BELOW middle on mobile */
     @media (max-width: 768px) {
@@ -103,39 +120,39 @@
         <div class="detail-row">
             <div class="detail-label">Name</div>
             <!-- <div class="detail-value">Sobha Sudheesh</div> -->
-             <div class="detail-value">{{ payment.name }}</div>
+            <div class="detail-value">{{ payment.name }}</div>
 
         </div>
 
-<div class="detail-row">
-    <div class="detail-label">Name</div>
-    <div class="detail-value">{{ payment.name }}</div>
-</div>
+        <div class="detail-row">
+            <div class="detail-label">Name</div>
+            <div class="detail-value">{{ payment.name }}</div>
+        </div>
 
-<div class="detail-row">
-    <div class="detail-label">Email Address</div>
-    <div class="detail-value">{{ payment.email }}</div>
-</div>
+        <div class="detail-row">
+            <div class="detail-label">Email Address</div>
+            <div class="detail-value">{{ payment.email }}</div>
+        </div>
 
-<div class="detail-row">
-    <div class="detail-label">Phone Number</div>
-    <div class="detail-value">{{ payment.phone }}</div>
-</div>
+        <div class="detail-row">
+            <div class="detail-label">Phone Number</div>
+            <div class="detail-value">{{ payment.phone }}</div>
+        </div>
 
-<div class="detail-row">
-    <div class="detail-label">Person Group</div>
-    <div class="detail-value">{{ payment.group }}</div>
-</div>
+        <div class="detail-row">
+            <div class="detail-label">Person Group</div>
+            <div class="detail-value">{{ payment.group }}</div>
+        </div>
 
-<div class="detail-row amount-row">
-    <div class="detail-label">Amount</div>
-    <div class="detail-value">{{ payment.amount }} USD</div>
-</div>
+        <div class="detail-row amount-row">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value">{{ payment.amount }} USD</div>
+        </div>
 
-<div class="detail-row">
-    <div class="detail-label">Message</div>
-    <div class="detail-value">{{ payment.message }}</div>
-</div>
+        <div class="detail-row">
+            <div class="detail-label">Message</div>
+            <div class="detail-value">{{ payment.message }}</div>
+        </div>
 
 
     </div>
@@ -192,7 +209,9 @@
         border: 1px solid var(--gray-300);
     }
 
-    .btn-secondary:hover { background: var(--gray-100); }
+    .btn-secondary:hover {
+        background: var(--gray-100);
+    }
 
     .btn-paypal {
         background: #FFC439;
@@ -201,7 +220,9 @@
         border: 1px solid #F0B429;
     }
 
-    .btn-paypal:hover { background: #F0B429; }
+    .btn-paypal:hover {
+        background: #F0B429;
+    }
 
     .security-note {
         display: flex;
@@ -228,7 +249,7 @@
         </button>
 
     </div>
-     <div id="paypal-button-container" style="margin-top: 15px; min-height: 50px;"></div>
+    <div id="paypal-button-container" style="margin-top: 15px; min-height: 50px;"></div>
 
 
     <div class="security-note">
@@ -241,47 +262,47 @@
 
 <script>
 
-paypal.Buttons({
+    paypal.Buttons({
 
-    // STEP A — Ask Django backend to CREATE order
-    createOrder: function () {
-        return fetch("/create-paypal-order/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({
-                amount: "{{ payment.amount }}"
+        // STEP A — Ask Django backend to CREATE order
+        createOrder: function () {
+            return fetch("/student/create-paypal-order/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    amount: "{{ payment.amount }}"
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => data.orderID);
-    },
+                .then(res => res.json())
+                .then(data => data.orderID);
+        },
 
-    // STEP B — After PayPal approves payment
-    onApprove: function (data) {
-        return fetch("/capture-paypal-order/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({
-                orderID: data.orderID
+        // STEP B — After PayPal approves payment
+        onApprove: function (data) {
+            return fetch("/student/capture-paypal-order/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    orderID: data.orderID
+                })
             })
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.status === "success") {
-                window.location.href = "/payment-success/";
-            } else {
-                alert("Payment failed!");
-            }
-        });
-    }
+                .then(res => res.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        window.location.href = "/student/payment-success/";
+                    } else {
+                        alert("Payment failed!");
+                    }
+                });
+        }
 
-}).render('#paypal-button-container');
+    }).render('#paypal-button-container');
 
 
 

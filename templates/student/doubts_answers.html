@@ -5,7 +5,7 @@
 
 {% block middle %}
 <style>
-    :root{
+    :root {
         --primary: #2563eb;
         --primary-light: #3b82f6;
         --bg-page: #f8fafc;
@@ -13,126 +13,315 @@
         --border: #e6edf6;
         --text-primary: #0f172a;
         --text-secondary: #64748b;
-        --shadow-sm: 0 6px 18px rgba(16,24,40,0.06);
+        --shadow-sm: 0 6px 18px rgba(16, 24, 40, 0.06);
     }
 
-    .details-card { background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; }
-    .card-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-    .card-title { font-size: 18px; font-weight:700; color:var(--text-primary); margin:0; }
+    .details-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
 
-    .table-controls { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 20px; }
-    .entries-control, .search-control { display:flex; align-items:center; gap:8px; }
-    .entries-select, .search-input, select { padding:8px 12px; border:1px solid var(--border); border-radius:8px; }
+    .card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-    .table-wrapper { padding: 0 20px 20px 20px; overflow-x:auto; }
-    .data-table { width:100%; border-collapse:collapse; background:var(--bg-card); table-layout: fixed; }
-    .data-table thead { background: linear-gradient(180deg, #fbfdff, #f6fbff); }
-    .data-table th, .data-table td { padding:14px 12px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
-    .data-table th { font-size:13px; font-weight:700; color:var(--text-primary); }
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
 
-    .status-badge { display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700; font-size:13px; }
-    .status-open { background: linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1e3a8a; }
-    .status-closed { background: linear-gradient(135deg,#e6fffa,#ccfbf1); color:#065f46; }
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+    }
 
-    .action-btn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid var(--primary); color:var(--primary); cursor:pointer; }
+    .entries-control,
+    .search-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-    .pagination-wrapper { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 20px 20px; }
-    .pagination-info { color:var(--text-secondary); }
-    .pagination-controls { display:flex; gap:8px; }
-    .pagination-btn { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); cursor:pointer; }
+    .entries-select,
+    .search-input,
+    select {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+
+    .table-wrapper {
+        padding: 0 20px 20px 20px;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+        table-layout: fixed;
+    }
+
+    .data-table thead {
+        background: linear-gradient(180deg, #fbfdff, #f6fbff);
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .data-table th {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .status-open {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e3a8a;
+    }
+
+    .status-closed {
+        background: linear-gradient(135deg, #e6fffa, #ccfbf1);
+        color: #065f46;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        cursor: pointer;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px 20px 20px;
+    }
+
+    .pagination-info {
+        color: var(--text-secondary);
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 8px;
+    }
+
+    .pagination-btn {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        cursor: pointer;
+    }
 
     /* Column widths */
-    .data-table th:nth-child(1), .data-table td:nth-child(1) { width:40%; }
-    .data-table th:nth-child(2), .data-table td:nth-child(2) { width:20%; }
-    .data-table th:nth-child(3), .data-table td:nth-child(3) { width:20%; }
-    .data-table th:nth-child(4), .data-table td:nth-child(4) { width:12%; }
-    .data-table th:nth-child(5), .data-table td:nth-child(5) { width:8%; }
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 40%;
+    }
+
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+        width: 20%;
+    }
+
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+        width: 20%;
+    }
+
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+        width: 12%;
+    }
+
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+        width: 8%;
+    }
 
     /* Mobile responsive */
     @media screen and (max-width: 968px) {
-        .table-controls { flex-direction: column; align-items:flex-start; gap:10px; }
-        .data-table { display:block; min-width:640px; }
-        .table-wrapper { overflow-x:auto; }
-        .card-header { flex-direction:column; align-items:flex-start; gap:10px; }
-        .pagination-wrapper { flex-direction:column; gap:8px; align-items:flex-start; }
+        .table-controls {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .data-table {
+            display: block;
+            min-width: 640px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
     }
 
     @media screen and (max-width: 576px) {
-        .data-table { min-width:520px; }
-        .card-title { font-size:16px; }
-        .entries-select, .search-input { width:100%; }
-    }
-    /* Responsive Design */
-@media screen and (max-width: 1200px) {
-    .container { grid-template-columns: 260px 1fr 300px; gap: 1.25rem; }
-}
+        .data-table {
+            min-width: 520px;
+        }
 
-@media screen and (max-width: 968px) {
-    .top-bar-content, .nav-content { padding: 0 1rem; }
-    .contact-info { display: none; }
-    .mobile-menu-btn { display: block; }
-    .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--bg-card);
-        flex-direction: column;
-        gap: 0;
-        box-shadow: var(--shadow-md);
-        padding: 1rem;
-        border-top: 1px solid var(--border);
+        .card-title {
+            font-size: 16px;
+        }
+
+        .entries-select,
+        .search-input {
+            width: 100%;
+        }
     }
-    .nav-links.active { display: flex; }
-    .nav-item { border-bottom: 1px solid var(--border); padding: 0.75rem 0; }
-    .nav-link { padding: 0.5rem 0; }
-    .dropdown { 
-        position: static; 
-        box-shadow: none; 
-        margin-top: 0.75rem; 
-        background: var(--bg-page);
-        border: none;
+
+    /* Responsive Design */
+    @media screen and (max-width: 1200px) {
+        .container {
+            grid-template-columns: 260px 1fr 300px;
+            gap: 1.25rem;
+        }
     }
-    .nav-item.active .dropdown { display: block; }
-    
-    .right-submenu {
-        position: static;
-        margin-left: 1rem;
-        margin-top: 0.5rem;
-        box-shadow: none;
-        background: var(--bg-page);
-        border: none;
+
+    @media screen and (max-width: 968px) {
+
+        .top-bar-content,
+        .nav-content {
+            padding: 0 1rem;
+        }
+
+        .contact-info {
+            display: none;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+        }
+
+        .nav-links {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            flex-direction: column;
+            gap: 0;
+            box-shadow: var(--shadow-md);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links.active {
+            display: flex;
+        }
+
+        .nav-item {
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 0;
+        }
+
+        .nav-link {
+            padding: 0.5rem 0;
+        }
+
+        .dropdown {
+            position: static;
+            box-shadow: none;
+            margin-top: 0.75rem;
+            background: var(--bg-page);
+            border: none;
+        }
+
+        .nav-item.active .dropdown {
+            display: block;
+        }
+
+        .right-submenu {
+            position: static;
+            margin-left: 1rem;
+            margin-top: 0.5rem;
+            box-shadow: none;
+            background: var(--bg-page);
+            border: none;
+        }
+
+        /* UPDATED: Change grid to single column layout */
+        .container {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+            gap: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ensure left column (profile) appears first */
+        .container>div:first-child {
+            order: 1;
+        }
+
+        /* Middle column appears second */
+        .middle-column {
+            order: 2;
+        }
+
+        /* Right column appears last */
+        .right-column {
+            order: 3;
+        }
+
+        .detail-item {
+            grid-template-columns: 140px 1fr;
+            gap: 0.75rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .quick-actions {
+            grid-template-columns: repeat(4, 1fr);
+        }
     }
-    
-    /* UPDATED: Change grid to single column layout */
-    .container { 
-        grid-template-columns: 1fr; 
-        padding: 1rem; 
-        gap: 1rem; 
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Ensure left column (profile) appears first */
-    .container > div:first-child {
-        order: 1;
-    }
-    
-    /* Middle column appears second */
-    .middle-column {
-        order: 2;
-    }
-    
-    /* Right column appears last */
-    .right-column {
-        order: 3;
-    }
-    
-    .detail-item { grid-template-columns: 140px 1fr; gap: 0.75rem; }
-    .stats-grid { grid-template-columns: repeat(4, 1fr); }
-    .quick-actions { grid-template-columns: repeat(4, 1fr); }
-}
 </style>
 
 <div class="details-card">
@@ -143,15 +332,17 @@
 
     <div class="table-controls">
         <div class="entries-control">
-            <h2 class="card-title">❓ Doubts & Answers</h2>
+            <h2 class="card-title"><i class="bi bi-question-circle"></i> Doubts & Answers</h2>
 
         </div>
 
         <div class="search-control">
             <form method="GET" style="display: flex; align-items: center; gap: 8px;">
-                <label for="searchInput">🔍</label>
-                <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search..." value="{{ search_query|default:'' }}">
-                <button type="submit" class="pagination-btn" style="padding: 8px 12px; border: 1px solid var(--primary); background: var(--primary); color: white;">Search</button>
+                <label for="searchInput"><i class="bi bi-search"></i></label>
+                <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search..."
+                    value="{{ search_query|default:'' }}">
+                <button type="submit" class="pagination-btn"
+                    style="padding: 8px 12px; border: 1px solid var(--primary); background: var(--primary); color: white;">Search</button>
             </form>
         </div>
     </div>
@@ -167,34 +358,34 @@
                     <th></th>
                 </tr>
             </thead>
-                <tbody id="tableBody">
+            <tbody id="tableBody">
                 {% if doubt %}
-                    {% for d in doubt %}
-                        <tr>
-                            <td>{{ d.doubt_question }}</td>
-                            <td>{{ d.category }}</td>
-                            <td>{{ d.updated_at }}</td>
-                            <td>
-                                <span class="status-badge status-open">
-                                    {% if d.status == "1" %}Open{% else %}Closed{% endif %}
-                                </span>
-                            </td>
-                            <td>
-                                <a href="{% url 'student_doubt_view' d.id %}" 
-                                style="text-decoration:none; font-size:18px; cursor:pointer;">
-                                🔍
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
+                {% for d in doubt %}
+                <tr>
+                    <td>{{ d.doubt_question }}</td>
+                    <td>{{ d.category }}</td>
+                    <td>{{ d.updated_at }}</td>
+                    <td>
+                        <span class="status-badge status-open">
+                            {% if d.status == "1" %}Open{% else %}Closed{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'student_doubt_view' d.id %}"
+                            style="text-decoration:none; font-size:18px; cursor:pointer;">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
                 {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align:center; padding:15px; color:#64748b;">
-                            No doubts found.
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:15px; color:#64748b;">
+                        No doubts found.
+                    </td>
+                </tr>
                 {% endif %}
-                </tbody>
+            </tbody>
 
         </table>
     </div>
@@ -212,7 +403,7 @@
         </div>
         <div class="pagination-controls" style="display: flex; gap: 8px;">
             {% if doubts_page.has_previous %}
-                <a href="?page={{ doubts_page.previous_page_number }}" class="pagination-btn" style="
+            <a href="?page={{ doubts_page.previous_page_number }}" class="pagination-btn" style="
                     padding: 8px 12px;
                     border-radius: 8px;
                     border: 1px solid var(--border);
@@ -221,7 +412,7 @@
                     cursor: pointer;
                 ">◄ Previous</a>
             {% else %}
-                <button class="pagination-btn" disabled style="
+            <button class="pagination-btn" disabled style="
                     padding: 8px 12px;
                     border-radius: 8px;
                     border: 1px solid var(--border);
@@ -230,10 +421,10 @@
                     cursor: not-allowed;
                 ">◄ Previous</button>
             {% endif %}
-            
+
             {% for num in doubts_page.paginator.page_range %}
-                {% if doubts_page.number == num %}
-                    <button class="pagination-btn active" style="
+            {% if doubts_page.number == num %}
+            <button class="pagination-btn active" style="
                         padding: 8px 12px;
                         border-radius: 8px;
                         border: 1px solid var(--primary);
@@ -241,8 +432,8 @@
                         color: white;
                         cursor: default;
                     ">{{ num }}</button>
-                {% elif num > doubts_page.number|add:'-3' and num < doubts_page.number|add:'3' %}
-                    <a href="?page={{ num }}" class="pagination-btn" style="
+            {% elif num > doubts_page.number|add:'-3' and num < doubts_page.number|add:'3' %} <a href="?page={{ num }}"
+                class="pagination-btn" style="
                         padding: 8px 12px;
                         border-radius: 8px;
                         border: 1px solid var(--border);
@@ -251,9 +442,9 @@
                         cursor: pointer;
                     ">{{ num }}</a>
                 {% endif %}
-            {% endfor %}
-            
-            {% if doubts_page.has_next %}
+                {% endfor %}
+
+                {% if doubts_page.has_next %}
                 <a href="?page={{ doubts_page.next_page_number }}" class="pagination-btn" style="
                     padding: 8px 12px;
                     border-radius: 8px;
@@ -262,7 +453,7 @@
                     text-decoration: none;
                     cursor: pointer;
                 ">Next ►</a>
-            {% else %}
+                {% else %}
                 <button class="pagination-btn" disabled style="
                     padding: 8px 12px;
                     border-radius: 8px;
@@ -271,7 +462,7 @@
                     color: #9ca3af;
                     cursor: not-allowed;
                 ">Next ►</button>
-            {% endif %}
+                {% endif %}
         </div>
     </div>
     {% endif %}
@@ -284,11 +475,11 @@
     const queries = [];
     let currentPage = 1;
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('queryForm');
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
-            searchInput.addEventListener('input', function(e){
+            searchInput.addEventListener('input', function (e) {
                 const term = e.target.value.toLowerCase();
                 const rows = document.querySelectorAll('.data-table tbody tr');
                 rows.forEach(row => row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none');
@@ -297,7 +488,7 @@
 
         // submit handler (if you later add a form)
         if (form) {
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 // implement submit behaviour (AJAX or server-side)
             });

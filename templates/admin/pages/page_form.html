@@ -9,21 +9,22 @@
         </a>
     </div>
 
-    <div class="form-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <div class="form-container"
+        style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            
+
             {% if form.errors %}
-                <div class="alert alert-danger" role="alert">
-                    <strong>Please correct the following errors:</strong>
-                    <ul>
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ field.label }}: {{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
-                </div>
+            <div class="alert alert-danger" role="alert">
+                <strong>Please correct the following errors:</strong>
+                <ul>
+                    {% for field in form %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
 
             <div class="row">
@@ -32,7 +33,7 @@
                         <label for="id_code" class="form-label">Code <span style="color:red;">*</span></label>
                         {{ form.code }}
                         {% if form.code.help_text %}
-                            <small class="form-text text-muted">{{ form.code.help_text }}</small>
+                        <small class="form-text text-muted">{{ form.code.help_text }}</small>
                         {% endif %}
                     </div>
                 </div>
@@ -55,14 +56,33 @@
                 {{ form.description }}
             </div>
 
-            
-          
+
+
 
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group mb-3">
-                        <label for="id_media" class="form-label">Media (Image)</label>
-                        {{ form.media_lib }}
+                        <label class="form-label">Media (Image)</label>
+                        <div class="media-selector-container">
+                            {{ form.media_lib }} <!-- This is the hidden input -->
+                            <div id="pageMediaPreview" class="media-preview-box"
+                                style="margin-bottom: 10px; border: 1px dashed #ced4da; padding: 10px; text-align: center; border-radius: 4px; min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                                {% if page.media %}
+                                <img src="{{ page.media.file_path.url }}"
+                                    style="max-width: 100%; max-height: 200px; height: auto;">
+                                {% else %}
+                                <p class="text-muted mb-0">No image selected</p>
+                                {% endif %}
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-block"
+                                onclick="openMediaLibrary()">
+                                <i class="fas fa-image"></i> Select Image
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="clearMedia()"
+                                style="{% if not page.media %}display:none;{% endif %} width: 100%;">
+                                <i class="fas fa-trash"></i> Remove Image
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -144,5 +164,447 @@
         </form>
     </div>
 </div>
+
+<!-- Media Library Modal (Reused) -->
+<div id="mediaLibraryModal" class="modal">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <h2><i class="fas fa-images"></i> Media Library</h2>
+            <button class="close-modal" type="button" onclick="closeMediaLibrary()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 0;">
+            <div class="media-tabs">
+                <button type="button" class="media-tab active" onclick="switchMediaTab('library')">Media
+                    Library</button>
+                <button type="button" class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
+            </div>
+
+            <!-- Library Tab -->
+            <div id="libraryTab" class="media-tab-content active">
+                <div class="library-controls">
+                    <input type="text" id="mediaSearch" placeholder="Search media..." class="form-control"
+                        style="width: 300px;">
+                </div>
+                <div id="mediaGrid" class="media-grid">
+                    <div class="loading-spinner">Loading...</div>
+                </div>
+                <!-- Pagination -->
+                <div class="pagination-controls">
+                    <button type="button" id="prevPageBtn" class="btn btn-sm btn-secondary"
+                        onclick="changeMediaPage(-1)" disabled>Previous</button>
+                    <span id="pageIndicator">Page 1</span>
+                    <button type="button" id="nextPageBtn" class="btn btn-sm btn-secondary" onclick="changeMediaPage(1)"
+                        disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="uploadTab" class="media-tab-content">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                    <h3>Drag & Drop files here</h3>
+                    <p>or</p>
+                    <input type="file" id="mediaUploadInput" hidden accept="image/*">
+                    <button type="button" class="btn btn-primary"
+                        onclick="document.getElementById('mediaUploadInput').click()">Browse Files</button>
+                </div>
+                <div id="uploadProgress" style="display: none; margin-top: 20px;">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="uploadProgressBar" style="width: 0%"></div>
+                    </div>
+                    <p id="uploadStatusText">Uploading...</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="selected-media-info" id="selectedMediaInfo" style="margin-right: auto; display: none;">
+                Selected: <span id="selectedMediaName"></span>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="closeMediaLibrary()">Cancel</button>
+            <button type="button" class="btn btn-primary" id="useMediaBtn" onclick="useSelectedMedia()" disabled>Use
+                Selected Media</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Reusing Media Library Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 50px auto;
+        padding: 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+    }
+
+    .modal-xl {
+        max-width: 1100px;
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    /* Media Library Specific Styles */
+    .media-tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        padding: 0 20px;
+        margin-top: 10px;
+    }
+
+    .media-tab {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+    }
+
+    .media-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .media-tab-content {
+        display: none;
+        padding: 20px;
+    }
+
+    .media-tab-content.active {
+        display: block;
+    }
+
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 5px;
+    }
+
+    .media-item {
+        border: 2px solid #eee;
+        border-radius: 6px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .media-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .media-item.selected {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+    }
+
+    .media-thumb {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .media-thumb img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .media-name {
+        padding: 8px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #fff;
+    }
+
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary-color);
+        background: #f8faff;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        grid-column: 1/-1;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--primary-color);
+        transition: width 0.3s ease;
+    }
+</style>
+
+<script>
+    // Media Library Logic
+    let currentMediaPage = 1;
+    let selectedMediaId = null;
+    let selectedMediaUrl = null;
+
+    function openMediaLibrary() {
+        document.getElementById('mediaLibraryModal').style.display = 'block';
+        loadMediaLibrary(1);
+    }
+
+    function closeMediaLibrary() {
+        document.getElementById('mediaLibraryModal').style.display = 'none';
+    }
+
+    function switchMediaTab(tabName) {
+        document.querySelectorAll('.media-tab').forEach(tab => tab.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.querySelectorAll('.media-tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+
+    async function loadMediaLibrary(page) {
+        currentMediaPage = page;
+        const search = document.getElementById('mediaSearch').value;
+        const grid = document.getElementById('mediaGrid');
+        grid.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
+        try {
+            const response = await fetch(`/menu/admin/media/json/?page=${page}&search=${search}`);
+            const result = await response.json();
+
+            if (result.success) {
+                renderMediaGrid(result.data);
+                updatePagination(result.has_next, result.next_page);
+            } else {
+                grid.innerHTML = '<p class="text-center">Failed to load media.</p>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            grid.innerHTML = '<p class="text-center">Error loading media.</p>';
+        }
+    }
+
+    function renderMediaGrid(items) {
+        const grid = document.getElementById('mediaGrid');
+        grid.innerHTML = '';
+        if (items.length === 0) {
+            grid.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No media found.</p>';
+            return;
+        }
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `media-item ${selectedMediaId === item.id ? 'selected' : ''}`;
+            div.onclick = () => selectMedia(item.id, item.url, item.name);
+            div.innerHTML = `
+                <div class="media-thumb"><img src="${item.thumb}" alt="${item.name}"></div>
+                <div class="media-name">${item.name}</div>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
+    function selectMedia(id, url, name) {
+        selectedMediaId = id;
+        selectedMediaUrl = url;
+        document.querySelectorAll('.media-item').forEach(item => item.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        document.getElementById('selectedMediaInfo').style.display = 'block';
+        document.getElementById('selectedMediaName').textContent = name;
+        document.getElementById('useMediaBtn').disabled = false;
+    }
+
+    function useSelectedMedia() {
+        if (!selectedMediaId) return;
+        document.getElementById('id_media_lib').value = selectedMediaId;
+        const previewBox = document.getElementById('pageMediaPreview');
+        previewBox.innerHTML = `<img src="${selectedMediaUrl}" style="max-width: 100%; max-height: 200px; height: auto;">`;
+
+        // Show remove button
+        document.querySelector('button[onclick="clearMedia()"]').style.display = 'block';
+
+        closeMediaLibrary();
+    }
+
+    function clearMedia() {
+        document.getElementById('id_media_lib').value = '';
+        document.getElementById('pageMediaPreview').innerHTML = '<p class="text-muted mb-0">No image selected</p>';
+        event.currentTarget.style.display = 'none';
+    }
+
+    function updatePagination(hasNext, nextPage) {
+        document.getElementById('pageIndicator').textContent = `Page ${currentMediaPage}`;
+        document.getElementById('prevPageBtn').disabled = currentMediaPage === 1;
+        document.getElementById('nextPageBtn').disabled = !hasNext;
+    }
+
+    function changeMediaPage(delta) {
+        loadMediaLibrary(currentMediaPage + delta);
+    }
+
+    // File Upload Logic
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('mediaUploadInput');
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary-color)';
+        uploadArea.style.backgroundColor = '#f0f7ff';
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ddd';
+        uploadArea.style.backgroundColor = 'transparent';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ddd';
+        uploadArea.style.backgroundColor = 'transparent';
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleFileUpload(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function handleFileUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        document.getElementById('uploadProgress').style.display = 'block';
+        document.getElementById('uploadProgressBar').style.width = '0%';
+        document.getElementById('uploadStatusText').textContent = 'Uploading ' + file.name + '...';
+
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/menu/admin/media/upload/json/', true); // Corrected Path
+            xhr.setRequestHeader('X-CSRFToken', csrftoken);
+
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    document.getElementById('uploadProgressBar').style.width = percentComplete + '%';
+                }
+            };
+
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    try {
+                        const result = JSON.parse(this.responseText);
+                        if (result.success) {
+                            switchMediaTab('library');
+                            loadMediaLibrary(1);
+                            alert('Upload successful!');
+                        } else {
+                            alert('Upload failed: ' + result.message);
+                        }
+                    } catch (e) {
+                        alert('Invalid server response.');
+                    }
+                } else {
+                    alert('Upload failed. Status: ' + this.status);
+                }
+                document.getElementById('uploadProgress').style.display = 'none';
+            };
+            xhr.send(formData);
+        } catch (error) {
+            console.error('Upload handling error:', error);
+            alert('Upload failed to start.');
+        }
+    }
+</script>
 
 {% endblock %}

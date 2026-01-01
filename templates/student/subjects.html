@@ -28,29 +28,29 @@
         margin: 0;
     }
 
-.request-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
-    color: white;
-    border: none;
-    padding: 0.8rem 1rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
-    white-space: nowrap;
-}
+    .request-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 1rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
+        white-space: nowrap;
+    }
 
-.request-btn:hover {
-    background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
-}
+    .request-btn:hover {
+        background: linear-gradient(135deg, #00B8BA 0%, var(--primary-dark) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 206, 209, 0.35);
+    }
 
-.request-btn:active {
-    transform: translateY(0);
-}
+    .request-btn:active {
+        transform: translateY(0);
+    }
 
 
     .controls-section {
@@ -67,7 +67,8 @@
         gap: 1rem;
     }
 
-    .show-entries, .search-box {
+    .show-entries,
+    .search-box {
         display: flex;
         gap: 0.5rem;
         align-items: center;
@@ -207,193 +208,23 @@
         cursor: not-allowed;
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        z-index: 999;
-        animation: fadeIn 0.2s ease-in-out;
-    }
+    /* Modal Styles - Overrides/Adjustments for Bootstrap */
 
-    .modal-overlay.active {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
-    .modal-content {
-        background: var(--bg-card);
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        max-width: 500px;
-        width: 150%;
-        height: 80%;
-        /* max-height: 100vh; */
-        overflow-y: auto;
-        animation: slideUp 0.3s ease-in-out;
-        border: 1px solid var(--border);
-    }
-
-    @keyframes slideUp {
-        from {
-            transform: translateY(20px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .modal-header h2 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-        padding: 0;
-        width: 2rem;
-        height: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.375rem;
-        transition: background 0.2s, color 0.2s;
-    }
-
-    .modal-close:hover {
-        background: var(--bg-page);
-        color: var(--text-primary);
-    }
-
-    .modal-body {
-        padding: 1.5rem;
-    }
-
-    .modal-form-group {
-        margin-bottom: 1rem;
-        position: relative;
-    }
-
-    .modal-form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-
-    .modal-form-group input,
-    .modal-form-group textarea,
-    .modal-form-group select {
-        width: 100%;
-        padding: 0.625rem 0.75rem;
-        border: 1px solid var(--border);
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        background: var(--bg-page);
-        color: var(--text-primary);
-        font-family: inherit;
-        transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .modal-form-group input:focus,
-    .modal-form-group textarea:focus,
-    .modal-form-group select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .modal-form-group textarea {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-    .modal-footer {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        padding: 1.5rem;
-        border-top: 1px solid var(--border);
-    }
-
-    .modal-btn {
-        padding: 0.625rem 1.5rem;
-        border: none;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .modal-btn.primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .modal-btn.primary:hover {
-        background: var(--primary-dark);
-    }
-
-    .modal-btn.secondary {
-        background: var(--border);
-        color: var(--text-primary);
-    }
-
-    .modal-btn.secondary:hover {
-        background: var(--bg-page);
-    }
-
-    /* Searchable Dropdown Styles */
     .subject-search-input {
-        width: 100% !important;
-        padding: 0.625rem 0.75rem !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 0.375rem !important;
-        font-size: 0.875rem !important;
-        background: var(--bg-page) !important;
-        color: var(--text-primary) !important;
-        position: relative;
-        z-index: 10;
+        /* Bootstrap form-control override/enhancement */
+        transition: all 0.2s ease;
     }
 
-    .subject-search-input:focus {
-        outline: none !important;
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    /* Search icon indicator */
+    .mb-3.position-relative::after {
+        content: "🔍";
+        position: absolute;
+        right: 1rem;
+        top: 2.4rem;
+        /* Adjusted for Bootstrap form-label spacing */
+        pointer-events: none;
+        opacity: 0.5;
+        font-size: 0.875rem;
     }
 
     .subject-dropdown {
@@ -403,12 +234,13 @@
         right: 0;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-top: none;
-        border-radius: 0 0 0.375rem 0.375rem;
-        max-height: 200px;
+        border-radius: 0.5rem;
+        max-height: 280px;
         overflow-y: auto;
-        z-index: 1000;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1056;
+        /* Higher than Bootstrap Modal (1055) */
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        display: none;
     }
 
     .subject-option {
@@ -449,13 +281,14 @@
     .modal-error.show {
         display: block;
     }
-    
+
 
     @keyframes slideDown {
         from {
             opacity: 0;
             transform: translateY(-10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -464,6 +297,7 @@
 
     /* Mobile Responsive */
     @media screen and (max-width: 968px) {
+
         /* Change container to vertical layout on mobile */
         body.no-right .container {
             display: flex !important;
@@ -472,7 +306,7 @@
         }
 
         /* Profile card comes first */
-        .container > div:first-child {
+        .container>div:first-child {
             order: 1;
             width: 100%;
         }
@@ -509,7 +343,8 @@
             padding: 1rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             justify-content: space-between;
             width: 100%;
         }
@@ -542,7 +377,7 @@
             padding: 1rem;
         }
 
-        .pagination > div:first-child {
+        .pagination>div:first-child {
             margin-bottom: 0.75rem;
         }
 
@@ -552,7 +387,10 @@
     }
 
     @media screen and (max-width: 576px) {
-        .page-header, .controls-section, .pagination {
+
+        .page-header,
+        .controls-section,
+        .pagination {
             padding: 1rem 0.75rem;
         }
 
@@ -570,7 +408,8 @@
             font-size: 0.8125rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             font-size: 0.8125rem;
         }
 
@@ -602,7 +441,7 @@
         .subjects-table td:first-child {
             width: 70%;
         }
-        
+
         .subjects-table th:last-child,
         .subjects-table td:last-child {
             width: 30%;
@@ -615,7 +454,10 @@
     }
 
     @media screen and (max-width: 400px) {
-        .page-header, .controls-section, .pagination {
+
+        .page-header,
+        .controls-section,
+        .pagination {
             padding: 0.875rem 0.625rem;
         }
 
@@ -633,7 +475,8 @@
             font-size: 0.75rem;
         }
 
-        .show-entries, .search-box {
+        .show-entries,
+        .search-box {
             font-size: 0.75rem;
         }
 
@@ -657,233 +500,237 @@
             font-size: 0.75rem;
         }
     }
+
     /* Enhanced Searchable Dropdown Styles */
-.modal-form-group {
-    margin-bottom: 1rem;
-    position: relative;
-}
-
-.subject-search-input {
-    width: 100% !important;
-    padding: 0.75rem 2.5rem 0.75rem 1rem !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 0.5rem !important;
-    font-size: 0.9375rem !important;
-    background: var(--bg-page) !important;
-    color: var(--text-primary) !important;
-    position: relative;
-    z-index: 10;
-    transition: all 0.2s ease;
-}
-
-.subject-search-input:focus {
-    outline: none !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
-}
-
-.subject-search-input::placeholder {
-    color: var(--text-secondary);
-    opacity: 0.6;
-}
-
-/* Search icon indicator */
-.modal-form-group::after {
-    content: "🔍";
-    position: absolute;
-    right: 1rem;
-    top: 2.5rem;
-    pointer-events: none;
-    opacity: 0.5;
-    font-size: 0.875rem;
-}
-
-.subject-dropdown {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 0;
-    right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    max-height: 280px;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    display: none;
-}
-
-/* Custom scrollbar for dropdown */
-.subject-dropdown::-webkit-scrollbar {
-    width: 8px;
-}
-
-.subject-dropdown::-webkit-scrollbar-track {
-    background: var(--bg-page);
-    border-radius: 0 0.5rem 0.5rem 0;
-}
-
-.subject-dropdown::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-
-.subject-dropdown::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
-
-.subject-option {
-    padding: 0.875rem 1rem;
-    cursor: pointer;
-    color: var(--text-primary);
-    transition: all 0.15s ease;
-    font-size: 0.9375rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    position: relative;
-    line-height: 1.4;
-}
-
-.subject-option:last-child {
-    border-bottom: none;
-}
-
-.subject-option:hover {
-    background: var(--bg-page);
-    padding-left: 1.25rem;
-}
-
-.subject-option.selected {
-    background: linear-gradient(90deg, var(--primary) 0%, #00B8BA 100%);
-    color: white;
-    font-weight: 500;
-    padding-left: 1.25rem;
-}
-
-.subject-option.selected::before {
-    content: "✓";
-    position: absolute;
-    left: 0.5rem;
-    font-weight: bold;
-}
-
-.subject-option.hidden {
-    display: none;
-}
-
-/* Empty state for no results */
-.subject-dropdown.no-results::after {
-    content: "No subjects found";
-    display: block;
-    padding: 1.5rem 1rem;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-style: italic;
-}
-
-.subject-dropdown.no-results .subject-option {
-    display: none;
-}
-
-/* Dropdown appears animation */
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
+    .modal-form-group {
+        margin-bottom: 1rem;
+        position: relative;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-.subject-dropdown[style*="display: block"] {
-    animation: dropdownSlide 0.2s ease-out;
-}
-
-/* Selected subject display badge */
-.selected-subject-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
-    color: white;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    font-weight: 500;
-}
-
-.selected-subject-badge .clear-selection {
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-    font-weight: bold;
-}
-
-.selected-subject-badge .clear-selection:hover {
-    opacity: 1;
-}
-
-/* Mobile responsive adjustments */
-@media screen and (max-width: 576px) {
     .subject-search-input {
-        padding: 0.625rem 2.25rem 0.625rem 0.875rem !important;
-        font-size: 0.875rem !important;
+        width: 100% !important;
+        padding: 0.75rem 2.5rem 0.75rem 1rem !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 0.5rem !important;
+        font-size: 0.9375rem !important;
+        background: var(--bg-page) !important;
+        color: var(--text-primary) !important;
+        position: relative;
+        z-index: 10;
+        transition: all 0.2s ease;
     }
 
-    .subject-dropdown {
-        max-height: 220px;
+    .subject-search-input:focus {
+        outline: none !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
     }
 
-    .subject-option {
-        padding: 0.75rem 0.875rem;
+    .subject-search-input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    /* Search icon indicator */
+    .modal-form-group::after {
+        content: "🔍";
+        position: absolute;
+        right: 1rem;
+        top: 2.5rem;
+        pointer-events: none;
+        opacity: 0.5;
         font-size: 0.875rem;
     }
 
-    .subject-option:hover,
-    .subject-option.selected {
-        padding-left: 1rem;
-    }
-
-    .modal-form-group::after {
-        right: 0.875rem;
-        top: 2.25rem;
-    }
-}
-
-@media screen and (max-width: 400px) {
-    .subject-search-input {
-        padding: 0.5rem 2rem 0.5rem 0.75rem !important;
-        font-size: 0.8125rem !important;
-    }
-
     .subject-dropdown {
-        max-height: 180px;
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        max-height: 280px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        display: none;
+    }
+
+    /* Custom scrollbar for dropdown */
+    .subject-dropdown::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .subject-dropdown::-webkit-scrollbar-track {
+        background: var(--bg-page);
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .subject-dropdown::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .subject-dropdown::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
     }
 
     .subject-option {
-        padding: 0.625rem 0.75rem;
-        font-size: 0.8125rem;
+        padding: 0.875rem 1rem;
+        cursor: pointer;
+        color: var(--text-primary);
+        transition: all 0.15s ease;
+        font-size: 0.9375rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        line-height: 1.4;
     }
-}
-.subject-dropdown {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 0;
-    right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    max-height: 540px;      /* height for exactly 5 items */
-    overflow-y: auto;        /* scroll after 5 items */
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    display: none;
-}
 
+    .subject-option:last-child {
+        border-bottom: none;
+    }
+
+    .subject-option:hover {
+        background: var(--bg-page);
+        padding-left: 1.25rem;
+    }
+
+    .subject-option.selected {
+        background: linear-gradient(90deg, var(--primary) 0%, #00B8BA 100%);
+        color: white;
+        font-weight: 500;
+        padding-left: 1.25rem;
+    }
+
+    .subject-option.selected::before {
+        content: "✓";
+        position: absolute;
+        left: 0.5rem;
+        font-weight: bold;
+    }
+
+    .subject-option.hidden {
+        display: none;
+    }
+
+    /* Empty state for no results */
+    .subject-dropdown.no-results::after {
+        content: "No subjects found";
+        display: block;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+
+    .subject-dropdown.no-results .subject-option {
+        display: none;
+    }
+
+    /* Dropdown appears animation */
+    @keyframes dropdownSlide {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .subject-dropdown[style*="display: block"] {
+        animation: dropdownSlide 0.2s ease-out;
+    }
+
+    /* Selected subject display badge */
+    .selected-subject-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%);
+        color: white;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+
+    .selected-subject-badge .clear-selection {
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+        font-weight: bold;
+    }
+
+    .selected-subject-badge .clear-selection:hover {
+        opacity: 1;
+    }
+
+    /* Mobile responsive adjustments */
+    @media screen and (max-width: 576px) {
+        .subject-search-input {
+            padding: 0.625rem 2.25rem 0.625rem 0.875rem !important;
+            font-size: 0.875rem !important;
+        }
+
+        .subject-dropdown {
+            max-height: 220px;
+        }
+
+        .subject-option {
+            padding: 0.75rem 0.875rem;
+            font-size: 0.875rem;
+        }
+
+        .subject-option:hover,
+        .subject-option.selected {
+            padding-left: 1rem;
+        }
+
+        .modal-form-group::after {
+            right: 0.875rem;
+            top: 2.25rem;
+        }
+    }
+
+    @media screen and (max-width: 400px) {
+        .subject-search-input {
+            padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .subject-dropdown {
+            max-height: 180px;
+        }
+
+        .subject-option {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+    }
+
+    .subject-dropdown {
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        max-height: 540px;
+        /* height for exactly 5 items */
+        overflow-y: auto;
+        /* scroll after 5 items */
+        z-index: 1000;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        display: none;
+    }
 </style>
 
 
@@ -903,8 +750,8 @@
 <div style="padding:0; background:transparent; box-shadow:none; border:none;">
 
     <!-- PAGE HEADER -->
-    <div class="page-header" >
-        <h1>📚 My Subjects</h1>
+    <div class="page-header">
+        <h1> My Subjects</h1>
         <button id="requestSubjectBtn" class="request-btn">Request a Subject</button>
     </div>
 
@@ -964,24 +811,26 @@
         </div>
         <div class="pagination-controls">
             {% if subjects.has_previous %}
-                <a href="?page={{ subjects.previous_page_number }}&filter={{ current_filter }}" class="pagination-btn">Previous</a>
+            <a href="?page={{ subjects.previous_page_number }}&filter={{ current_filter }}"
+                class="pagination-btn">Previous</a>
             {% else %}
-                <button class="pagination-btn" disabled>Previous</button>
+            <button class="pagination-btn" disabled>Previous</button>
             {% endif %}
-            
+
             {% for num in subjects.paginator.page_range %}
-                {% if subjects.number == num %}
-                    <button class="pagination-btn active">{{ num }}</button>
-                {% elif num > subjects.number|add:'-3' and num < subjects.number|add:'3' %}
-                    <a href="?page={{ num }}&filter={{ current_filter }}" class="pagination-btn">{{ num }}</a>
+            {% if subjects.number == num %}
+            <button class="pagination-btn active">{{ num }}</button>
+            {% elif num > subjects.number|add:'-3' and num < subjects.number|add:'3' %} <a
+                href="?page={{ num }}&filter={{ current_filter }}" class="pagination-btn">{{ num }}</a>
                 {% endif %}
-            {% endfor %}
-            
-            {% if subjects.has_next %}
-                <a href="?page={{ subjects.next_page_number }}&filter={{ current_filter }}" class="pagination-btn">Next</a>
-            {% else %}
+                {% endfor %}
+
+                {% if subjects.has_next %}
+                <a href="?page={{ subjects.next_page_number }}&filter={{ current_filter }}"
+                    class="pagination-btn">Next</a>
+                {% else %}
                 <button class="pagination-btn" disabled>Next</button>
-            {% endif %}
+                {% endif %}
         </div>
     </div>
     {% else %}
@@ -997,65 +846,78 @@
 
 </div>
 
-<!-- REQUEST SUBJECT MODAL -->
-<div id="requestSubjectModal" class="modal-overlay">
-    <div class="modal-content" >
-        <div class="modal-header" >
-            <h2>Request a Subject</h2>
-            <button id="closeModalBtn" class="modal-close">&times;</button>
-        </div>
+<!-- REQUEST SUBJECT MODAL (Bootstrap 5) -->
+<div class="modal fade" id="requestSubjectModal" tabindex="-1" aria-labelledby="requestSubjectModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestSubjectModalLabel">Request a Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="closeModalBtn"></button>
+            </div>
+            <div class="modal-body">
+                <div id="errorMessage" class="alert alert-danger d-none"></div>
 
-        <div class="modal-body">
-            <div id="errorMessage" class="modal-error"></div>
-            <form id="requestSubjectForm">
-                <div class="modal-form-group">
-                    <label for="subjectSearch">Search Subject</label>
-                    <input 
-                        type="text" 
-                        id="subjectSearch" 
-                        class="subject-search-input"
-                        placeholder="Search and select a subject..."
-                    >
+                <form id="requestSubjectForm">
+                    <div class="mb-3 position-relative">
+                        <label for="subjectSearch" class="form-label">Search Subject</label>
+                        <input type="text" id="subjectSearch" class="form-control subject-search-input"
+                            placeholder="Search and select a subject...">
+
                         <div id="subjectDropdown" class="subject-dropdown">
                             {% for s in all_subject %}
-                                <div class="subject-option" 
-                                    data-value="{{ s.id }}"
-                                    data-text="{{ s.subject_name }} ({{ s.subject_code }})">
-                                    {{ s.subject_name }} ({{ s.subject_code }})
-                                </div>
+                            <div class="subject-option" data-value="{{ s.id }}"
+                                data-text="{{ s.subject_name }} ({{ s.subject_code }})">
+                                {{ s.subject_name }} ({{ s.subject_code }})
+                            </div>
                             {% endfor %}
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
+            <!-- Optional Footer if needed, currently empty/not used by logic -->
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    (function(){
-        const modal = document.getElementById('requestSubjectModal');
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("Subject Request Script Initializing (Bootstrap)...");
+
+        // Initialize Bootstrap Modal
+        const modalElement = document.getElementById('requestSubjectModal');
         const openBtn = document.getElementById('requestSubjectBtn');
         const closeBtn = document.getElementById('closeModalBtn');
         const form = document.getElementById('requestSubjectForm');
+
+        // Ensure modal exists before initializing
+        let bsModal = null;
+        if (modalElement) {
+            bsModal = new bootstrap.Modal(modalElement);
+        }
 
         // Search functionality
         const searchInput = document.getElementById('subjectSearch');
         const dropdown = document.getElementById('subjectDropdown');
         const options = document.querySelectorAll('.subject-option');
 
-        if (!modal || !openBtn) return;
+        if (!modalElement || !openBtn) {
+            console.error("Critical elements missing:", { modalElement, openBtn });
+            return;
+        }
 
         // Filter functionality
         function applyFilter() {
             const filterSelect = document.getElementById('filterSelect');
             const selectedFilter = filterSelect.value;
             const currentUrl = new URL(window.location);
-            
+
             // Reset to page 1 when changing filter
             currentUrl.searchParams.set('filter', selectedFilter);
             currentUrl.searchParams.delete('page');
-            
+
             window.location.href = currentUrl.toString();
         }
 
@@ -1063,159 +925,194 @@
         window.applyFilter = applyFilter;
 
         // Open modal
-        openBtn.addEventListener('click', function(){
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            searchInput.focus();
-        });
-
-        // Close modal
-        function closeModal(){
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-            form.reset();
-            searchInput.value = '';
-            dropdown.style.display = 'none';
-            options.forEach(opt => opt.classList.remove('hidden', 'selected'));
-        }
-
-        closeBtn.addEventListener('click', closeModal);
-
-        modal.addEventListener('click', function(e){
-            if (e.target === modal) {
-                closeModal();
+        openBtn.addEventListener('click', function () {
+            if (bsModal) {
+                bsModal.show();
+                // Focus search input after modal is shown
+                modalElement.addEventListener('shown.bs.modal', function () {
+                    if (searchInput) searchInput.focus();
+                }, { once: true });
             }
         });
 
-        // Search filter
-        searchInput.addEventListener('input', function(){
-            const searchTerm = this.value.toLowerCase();
-            let hasVisibleOptions = false;
+        // Close modal helper
+        function closeModal() {
+            if (bsModal) {
+                bsModal.hide();
+            }
+            if (form) form.reset();
+            if (searchInput) searchInput.value = '';
+            if (dropdown) dropdown.style.display = 'none';
+            if (options) options.forEach(opt => opt.classList.remove('hidden', 'selected'));
+        }
 
-            options.forEach(option => {
-                const text = option.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    option.classList.remove('hidden');
-                    hasVisibleOptions = true;
-                } else {
-                    option.classList.add('hidden');
-                }
+        // Bootstrap handles close button/backdrop automatically via data-bs-dismiss, 
+        // but we can add listener if we need custom cleanup on hidden
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            if (form) form.reset();
+            if (searchInput) searchInput.value = '';
+            if (dropdown) dropdown.style.display = 'none';
+            if (options) options.forEach(opt => opt.classList.remove('hidden', 'selected'));
+        });
+
+        // Search filter
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                let hasVisibleOptions = false;
+
+                options.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        option.classList.remove('hidden');
+                        hasVisibleOptions = true;
+                    } else {
+                        option.classList.add('hidden');
+                    }
+                });
+
+                if (dropdown) dropdown.style.display = hasVisibleOptions ? 'block' : 'none';
             });
 
-            dropdown.style.display = hasVisibleOptions ? 'block' : 'none';
+            searchInput.addEventListener('focus', function () {
+                options.forEach(opt => opt.classList.remove('hidden'));
+                if (dropdown) dropdown.style.display = 'block';
+            });
+        }
 
-        });
-
-
-        searchInput.addEventListener('focus', function () {
-            options.forEach(opt => opt.classList.remove('hidden'));
-            dropdown.style.display = 'block';
-        });
-
-
-        searchInput.addEventListener('blur', function(e){
-        });
-
-
-            // Option selection
+        // Option selection
         options.forEach(option => {
             option.addEventListener('click', function () {
 
                 const text = this.getAttribute('data-text');
+                const subjectId = this.dataset.value;
 
-                // close modal
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                // Close modal
+                closeModal();
 
-                setTimeout(() => {
-                    if (confirm(`Do you want to request this subject?\n\n${text}`)) {
-                        
+                // Use SweetAlert2 for confirmation
+                Swal.fire({
+                    title: 'Request Subject?',
+                    text: `Do you want to request: ${text}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, request it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Sending your request',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
                         fetch("/student/request-subject/", {
                             method: "POST",
                             headers: {
                                 "X-CSRFToken": "{{ csrf_token }}",
                                 "Content-Type": "application/x-www-form-urlencoded",
+                                "X-Requested-With": "XMLHttpRequest"
                             },
-                            body: "subject_id=" + this.dataset.value
+                            body: "subject_id=" + subjectId
                         })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                alert(data.message);
-                                // Refresh the subject list without page reload
-                                refreshSubjectList();
-                            } else {
-                                alert(data.message);
-                            }
-                        });
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: data.message,
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        refreshSubjectList();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Something went wrong on the server.',
+                                });
+                                console.error('Error:', error);
+                            });
                     }
-                }, 150);
+                });
             });
         });
 
         // Function to refresh subject list
         function refreshSubjectList() {
-            const currentFilter = document.getElementById('filterSelect').value;
-            const currentPage = 1; // Reset to first page to show new item
-            
+            const filterSelect = document.getElementById('filterSelect');
+            const currentFilter = filterSelect ? filterSelect.value : 'all';
+            const currentPage = 1; // Reset to first page
+
             fetch(`/student/subjects/?filter=${currentFilter}&page=${currentPage}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.text())
-            .then(html => {
-                // Parse the HTML response and update the table
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // Update the table body
-                const newTableBody = doc.querySelector('.subjects-table tbody');
-                const currentTableBody = document.querySelector('.subjects-table tbody');
-                if (newTableBody && currentTableBody) {
-                    currentTableBody.innerHTML = newTableBody.innerHTML;
-                }
-                
-                // Update pagination
-                const newPagination = doc.querySelector('.pagination');
-                const currentPagination = document.querySelector('.pagination');
-                if (newPagination && currentPagination) {
-                    currentPagination.innerHTML = newPagination.innerHTML;
-                }
-                
-                // Update the showing info
-                const newShowingInfo = doc.querySelector('.pagination > div:first-child');
-                const currentShowingInfo = document.querySelector('.pagination > div:first-child');
-                if (newShowingInfo && currentShowingInfo) {
-                    currentShowingInfo.textContent = newShowingInfo.textContent;
-                }
-            })
-            .catch(error => {
-                console.error('Error refreshing subject list:', error);
-                // Fallback: reload the page
-                window.location.reload();
-            });
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Update table body
+                    const newTableBody = doc.querySelector('.subjects-table tbody');
+                    const currentTableBody = document.querySelector('.subjects-table tbody');
+                    if (newTableBody && currentTableBody) {
+                        currentTableBody.innerHTML = newTableBody.innerHTML;
+                    }
+
+                    // Update pagination
+                    const newPagination = doc.querySelector('.pagination');
+                    const currentPagination = document.querySelector('.pagination');
+                    if (newPagination && currentPagination) {
+                        currentPagination.innerHTML = newPagination.innerHTML;
+                    }
+
+                    // Update showing info
+                    const newShowingInfo = doc.querySelector('.pagination > div:first-child');
+                    const currentShowingInfo = document.querySelector('.pagination > div:first-child');
+                    if (newShowingInfo && currentShowingInfo) {
+                        currentShowingInfo.textContent = newShowingInfo.textContent;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing subject list:', error);
+                    window.location.reload();
+                });
         }
 
         const errorMessage = document.getElementById('errorMessage');
 
         function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.add('show');
+            if (errorMessage) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('d-none');
+            }
         }
 
         function clearError() {
-            errorMessage.classList.remove('show');
-            errorMessage.textContent = '';
-        }
-        document.addEventListener('keydown', function(e){
-            if (e.key === 'Escape' && modal.classList.contains('active')) {
-                closeModal();
+            if (errorMessage) {
+                errorMessage.classList.add('d-none');
+                errorMessage.textContent = '';
             }
-        });
-    })();
-
-    
+        }
+    });
 </script>
 {% endif %}
 {% endblock %}

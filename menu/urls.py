@@ -41,6 +41,10 @@ urlpatterns = [
     path('admin/media/<int:media_id>/get/', views.media_get, name='media_get'),
     path('admin/media/<int:media_id>/update/', views.media_update, name='media_update'),
     path('admin/media/<int:media_id>/delete/', views.media_delete, name='media_delete'),
+    
+    # Media Library JSON API
+    path('admin/media/json/', views.media_library_json, name='media_library_json'),
+    path('admin/media/upload/json/', views.media_library_upload_json, name='media_library_upload_json'),
 
 
     #photo gallery
@@ -93,10 +97,77 @@ urlpatterns = [
     path('students/create/', views.student_create, name='student_create'),
     path('students/get/<int:student_id>/', views.student_get, name='student_get'),
     path('students/update/<int:student_id>/', views.student_update, name='student_update'),
-    path('students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
+    path('admin/students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
+    
+
+    # Applications
+    path('admin/applications/', views.application_list_view, name='application_list_view'),
+    
     path('students/toggle-active/<int:student_id>/', views.student_toggle_active, name='student_toggle_active'),
     path('students/toggle-approval/<int:student_id>/', views.student_toggle_approval, name='student_toggle_approval'),
 
+    # Student Books Refined Workflow
+    path('admin/students/student-books/', views.student_books_list, name='student_books_list'),
+    path('students/books/datatable/', views.student_books_datatable, name='student_books_datatable'),
+    path('students/books/bulk-assign/', views.student_books_bulk_assign, name='student_books_bulk_assign'),
+    path('students/books/get-students/<int:course_id>/', views.ajax_get_students_by_course, name='ajax_get_students_by_course'),
+    path('students/books/get-subjects/<int:student_id>/', views.ajax_get_subjects_by_student, name='ajax_get_subjects_by_student'),
+    path('students/books/get-books/<int:subject_id>/', views.ajax_get_books_by_subject, name='ajax_get_books_by_subject'),
+    path('students/books/delete/<int:id>/', views.student_books_delete, name='student_books_delete'),
+
+    # Student Subjects Workflow
+    path('admin/students/student-subjects/', views.student_subjects_list, name='student_subjects_list'),
+    path('students/subjects/datatable/', views.student_subjects_datatable, name='student_subjects_datatable'),
+    path('students/subjects/get-available/<int:student_id>/', views.ajax_get_available_subjects, name='ajax_get_available_subjects'),
+    path('students/subjects/bulk-assign/', views.student_subjects_bulk_assign, name='student_subjects_bulk_assign'),
+    path('students/subjects/toggle-approval/<int:id>/', views.student_subjects_toggle_approval, name='student_subjects_toggle_approval'),
+    path('students/subjects/delete/<int:id>/', views.student_subjects_delete, name='student_subjects_delete'),
+    
+    # Student Instructors Workflow
+    path('admin/students/student-instructor/', views.student_instructors_list, name='student_instructors_list'),
+    path('students/instructors/datatable/', views.student_instructors_datatable, name='student_instructors_datatable'),
+    path('students/instructors/get-subjects/<int:student_id>/', views.ajax_get_assigned_subjects_by_student, name='ajax_get_assigned_subjects_by_student'),
+    path('students/instructors/get-available/<int:student_id>/<int:subject_id>/', views.ajax_get_available_instructors, name='ajax_get_available_instructors'),
+    path('students/instructors/bulk-assign/', views.student_instructors_bulk_assign, name='student_instructors_bulk_assign'),
+    path('students/instructors/delete/<int:id>/', views.student_instructors_delete, name='student_instructors_delete'),
+    
+    # Student Uploads Workflow
+    path('admin/students/student-uploads/', views.student_uploads_list, name='student_uploads_list'),
+    path('students/uploads/datatable/', views.student_uploads_datatable, name='student_uploads_datatable'),
+    path('students/uploads/get-available/<int:student_id>/<int:subject_id>/', views.ajax_get_available_uploads, name='ajax_get_available_uploads'),
+    path('students/uploads/bulk-assign/', views.student_uploads_bulk_assign, name='student_uploads_bulk_assign'),
+    path('students/uploads/delete/<int:id>/', views.student_uploads_delete, name='student_uploads_delete'),
+    
+    # Student Exams Workflow
+    path('admin/students/student-exams', views.student_exams_list, name='student_exams_list'),
+    path('students/exams/datatable/', views.student_exams_datatable, name='student_exams_datatable'),
+    path('students/exams/get-available/<int:student_id>/<int:subject_id>/', views.ajax_get_available_exams, name='ajax_get_available_exams'),
+    path('students/exams/bulk-assign/', views.student_exams_bulk_assign, name='student_exams_bulk_assign'),
+    path('students/exams/delete/<int:id>/', views.student_exams_delete, name='student_exams_delete'),
+    path('students/exams/toggle-approval/<int:id>/', views.student_exams_toggle_approval, name='student_exams_toggle_approval'),
+    path('students/exams/get/<int:id>/', views.student_exams_get, name='student_exams_get'),
+    path('students/exams/update/<int:id>/', views.student_exams_update, name='student_exams_update'),
+    # Answer Sheet Viewing and Grading
+    path('admin/students/exam-answer-sheet/<int:exam_id>/', views.view_answer_sheet, name='view_answer_sheet'),
+    path('admin/students/update-answer-marks/', views.update_answer_marks, name='update_answer_marks'),
+    # Student Submitted Exams (Admin-facing)
+    path('admin/students/student-submitted-exams/', views.student_submitted_exams_list, name='student_submitted_exams_list'),
+    path('admin/students/student-submitted-exams/datatable/', views.student_submitted_exams_datatable, name='student_submitted_exams_datatable'),
+
+    # Student Assignments (Admin-Facing)
+    path('admin/students/student-submitted-assignment/', views.student_assignment_list, {'submitted_only': True}, name='student_submitted_assignment_list'), # Alias
+    path('admin/students/student-assignment/', views.student_assignment_list, name='student_assignment_list'),
+    path('students/assignments/datatable/', views.student_assignment_datatable, name='student_assignment_datatable'),
+    path('admin/students/assignment-answer-sheet/<int:id>/', views.view_assignment_answer_sheet, name='view_assignment_answer_sheet'),
+    path('admin/students/student-assignment/edit/<int:id>/', views.student_assignment_edit, name='student_assignment_edit'),
+    path('admin/students/student-assignment/delete/<int:id>/', views.student_assignment_delete, name='student_assignment_delete'),
+    path('admin/students/update-assignment-marks/', views.update_assignment_marks, name='update_assignment_marks'),
+    
+    # Assign Assignment AJAX
+    path('admin/students/assign-assignment/', views.student_assignments_assign, name='student_assignments_assign'),
+    path('ajax/get-students-by-course/', views.ajax_get_students_by_course, name='ajax_get_students_by_course'),
+    path('ajax/get-subjects-by-student/', views.ajax_get_subjects_by_student, name='ajax_get_subjects_by_student'),
+    path('ajax/get-assignments-by-subject/', views.ajax_get_assignments_by_subject, name='ajax_get_assignments_by_subject'),
 
     #videos
 
@@ -153,6 +224,15 @@ urlpatterns = [
     path('exams/<int:exam_id>/view/', views.exam_view, name='exams_view'),
     path('exams/<int:exam_id>/edit/', views.exam_edit, name='exams_edit'),
     path('exams/<int:exam_id>/delete/', views.exam_delete, name='exams_delete'),
+    
+    # Exam Questions
+    path('exams/<int:exam_id>/question/descriptive/create/', views.question_descriptive_create, name='question_descriptive_create'),
+    path('exams/question/descriptive/<int:question_id>/edit/', views.question_descriptive_edit, name='question_descriptive_edit'),
+    path('exams/question/descriptive/<int:question_id>/delete/', views.question_descriptive_delete, name='question_descriptive_delete'),
+    
+    path('exams/<int:exam_id>/question/objective/create/', views.question_objective_create, name='question_objective_create'),
+    path('exams/question/objective/<int:question_id>/edit/', views.question_objective_edit, name='question_objective_edit'),
+    path('exams/question/objective/<int:question_id>/delete/', views.question_objective_delete, name='question_objective_delete'),
 
     #staffs
 

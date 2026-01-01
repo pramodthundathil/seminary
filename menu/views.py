@@ -14,7 +14,7 @@ import os
 import json
 from pathlib import Path
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
@@ -123,7 +123,6 @@ def admin_index(request):
     
     return render(request, "admin/index.html", context)
 
-
 @login_required
 def menu_list(request):
     """Display all menus"""
@@ -169,7 +168,6 @@ def menu_engineer(request, menu_id=None):
     return render(request, 'admin/menus/menu_engineer.html', context)
 
 # pages 
-
 
 @login_required
 def pages_list(request):
@@ -249,8 +247,6 @@ def page_delete(request, pk):
     page.save()
     messages.success(request, 'Page deleted successfully!')
     return redirect('pages_list')
-
-
 
 @login_required
 @require_POST
@@ -396,9 +392,7 @@ def get_menu_items(request, menu_id):
             'message': str(e)
         }, status=400)
 
-
 # news setting 
-
 
 @login_required
 def news_list(request):
@@ -620,11 +614,7 @@ def news_toggle_status(request, news_id):
             'message': str(e)
         }, status=400)
 
-
-
 # media library 
-
-
 
 @login_required
 def media_list(request):
@@ -698,7 +688,6 @@ def media_list(request):
     }
     
     return render(request, 'admin/media/media_list.html', context)
-
 
 @login_required
 @require_POST
@@ -811,7 +800,6 @@ def media_upload(request):
             'message': f'Upload failed: {str(e)}'
         }, status=500)
 
-
 @require_http_methods(["GET"])
 def media_get(request, media_id):
     """Get media data as JSON"""
@@ -898,7 +886,6 @@ def media_update(request, media_id):
             'message': f'Update failed: {str(e)}'
         }, status=500)
 
-
 @require_http_methods(["POST"])
 def media_delete(request, media_id):
     """Soft delete media"""
@@ -928,9 +915,7 @@ def media_delete(request, media_id):
             'message': f'Delete failed: {str(e)}'
         }, status=500)
     
-    
 # Photos Functionalities
-
 
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -953,7 +938,6 @@ def photo_gallery(request):
         'categories': categories
     }
     return render(request, "admin/media/photo_gallery.html", context)
-
 
 @login_required
 def photo_datatable(request):
@@ -1062,8 +1046,6 @@ def photo_datatable(request):
         'data': data
     })
 
-
-
 @require_http_methods(["POST"])
 def photo_create(request):
     """Create a new photo with media library upload"""
@@ -1170,7 +1152,6 @@ def photo_create(request):
             'traceback': traceback.format_exc()
         }, status=500)
 
-
 @login_required
 def photo_get(request, photo_id):
     """Get photo details with full media library data"""
@@ -1222,7 +1203,6 @@ def photo_get(request, photo_id):
             'traceback': traceback.format_exc()
         }, status=500)
 
-
 @login_required
 @require_http_methods(["POST"])
 def photo_update(request, photo_id):
@@ -1252,7 +1232,6 @@ def photo_update(request, photo_id):
             'message': str(e)
         }, status=500)
 
-
 @login_required
 @require_http_methods(["POST"])
 def photo_delete(request, photo_id):
@@ -1274,7 +1253,6 @@ def photo_delete(request, photo_id):
             'success': False,
             'message': str(e)
         }, status=500)
-
 
 @login_required
 def media_library_list(request):
@@ -1313,7 +1291,6 @@ def media_library_list(request):
             'success': False,
             'message': str(e)
         }, status=500)
-
 
 # sliders and slider Photos.....
 
@@ -1767,6 +1744,13 @@ def slider_photo_update(request, photo_id):
         button_link = request.POST.get('button_link', '').strip()
         button_link_target = request.POST.get('button_link_target', '_self')
 
+        media_id = request.POST.get('media_id')  # Get media_id from form
+
+        # Update media if provided
+        if media_id:
+            media = get_object_or_404(MediaLibrary, id=media_id)
+            photo.media = media
+            
         photo.title = title if title else None
         photo.description = description if description else None
         photo.alt_text = alt_text if alt_text else None
@@ -1807,7 +1791,6 @@ def slider_photo_delete(request, photo_id):
 
 # slider photos end 
 
-
 ##@login_required
 def course_list(request):
     """Main course list view"""
@@ -1836,7 +1819,6 @@ def course_datatable(request):
         # courses = Courses.objects.select_related('media')
         courses = Courses.objects.all()
 
-        
         # Apply status filter
         if status_filter:
             courses = courses.filter(status=int(status_filter))
@@ -1945,7 +1927,6 @@ def course_create(request):
         apply_button_top = int(request.POST.get('apply_button_top', 0))
         apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
         print("*********",request.POST.get)
-
 
         # Check if course code already exists
         if Courses.objects.filter(course_code=course_code).exists():
@@ -2119,7 +2100,6 @@ def course_delete(request, course_id):
             'message': str(e)
         })
 
-
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -2130,12 +2110,15 @@ from django.utils import timezone
 from datetime import datetime
 import json
 
-
-
 #@login_required
 def student_list_view(request):
     """Render student management page"""
-    return render(request, 'admin/students/list.html')
+    context = {
+        'countries': Countries.objects.all().order_by('name'),
+        'languages': Languages.objects.filter(status=True).order_by('language_name'),
+        'courses': Courses.objects.filter(status=1).order_by('course_name'),
+    }
+    return render(request, 'admin/students/list.html', context)
 
 #@login_required
 def student_datatable(request):
@@ -2152,11 +2135,21 @@ def student_datatable(request):
         status_filter = request.GET.get('status', '')
         active_filter = request.GET.get('active', '')
         course_filter = request.GET.get('course', '')
+        list_type = request.GET.get('type', 'student') # 'student' or 'applicant'
         
         # Base queryset
-        students = Students.objects.select_related('user_id', 'language_id').all()
+        students = Students.objects.select_related('user', 'language').all()
+
+        # Filter by Type (Student vs Applicant)
+        if list_type == 'applicant':
+            # Applicants are those with NO execute approval date
+            students = students.filter(approve_date__isnull=True)
+        else:
+            # Students are those WITH an approval date
+            students = students.filter(approve_date__isnull=False)
         
         # Apply filters
+        # Note: status_filter might be redundant if using type, but keeping it for specific column filtering if needed
         if status_filter:
             students = students.filter(status=status_filter == '1')
         
@@ -2177,11 +2170,15 @@ def student_datatable(request):
             )
         
         # Ordering
-        order_columns = ['id', 'student_id', 'first_name', 'email', 'status', 'created_at']
-        order_column = order_columns[order_column_index] if order_column_index < len(order_columns) else 'id'
+        order_columns = ['id', 'student_id', 'first_name', 'email', 'status', 'created_at', 'actions']
         
-        if order_dir == 'desc':
-            order_column = f'-{order_column}'
+        # Default to created_at desc if no order received or id is defaults
+        if not request.GET.get('order[0][column]'):
+             order_column = '-created_at'
+        else:
+            order_column = order_columns[order_column_index] if order_column_index < len(order_columns) else 'created_at'
+            if order_dir == 'desc':
+                order_column = f'-{order_column}'
         
         students = students.order_by(order_column)
         
@@ -2202,9 +2199,22 @@ def student_datatable(request):
             if student.photo:
                 preview = f'<img src="{student.photo}" class="student-photo" alt="{full_name}">'
             else:
-                initials = ''.join([n[0].upper() for n in full_name.split() if n])[:2]
+                first_initial = student.first_name[0].upper() if student.first_name else ''
+                last_initial = student.last_name[0].upper() if student.last_name else ''
+                initials = f"{first_initial}{last_initial}"
                 preview = f'<div class="student-photo-placeholder">{initials or "ST"}</div>'
             
+            # Determine status based on list type (Applicant vs Student)
+            # If applicant list (no approve_date), status is effectively Pending (False)
+            # If student list (has approve_date), status is Approved (True)
+            # We enforce this visual distinction requested by user.
+            
+            is_approved = student.status # Default from DB
+            if list_type == 'applicant':
+                 is_approved = False
+            elif list_type == 'student':
+                 is_approved = True
+
             # Student info - responsive
             info_html = f'''
                 <div class="student-info">
@@ -2219,9 +2229,9 @@ def student_datatable(request):
             # Status badges - stacked for mobile
             status_html = f'''
                 <div class="status-container">
-                    <span class="status-badge status-{'approved' if student.status else 'pending'}">
-                        <i class="fas fa-{'check-circle' if student.status else 'clock'}"></i>
-                        {'Approved' if student.status else 'Pending'}
+                    <span class="status-badge status-{'approved' if is_approved else 'pending'}">
+                        <i class="fas fa-{'check-circle' if is_approved else 'clock'}"></i>
+                        {'Approved' if is_approved else 'Pending'}
                     </span>
                     <span class="status-badge status-{'active' if student.active else 'inactive'}">
                         <i class="fas fa-{'power-off' if student.active else 'ban'}"></i>
@@ -2233,28 +2243,23 @@ def student_datatable(request):
             # Actions - responsive
             actions_html = f'''
                 <div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewStudent({student.id})" title="View Details">
+                    <button class="btn btn-info btn-sm view-btn" onclick="viewStudent({student.id})" title="View Details" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         <i class="fas fa-eye"></i>
-                        <span class="btn-text">View</span>
                     </button>
-                    <button class="btn-action btn-edit" onclick="editStudent({student.id})" title="Edit Student">
+                    <button class="btn btn-primary btn-sm edit-btn" onclick="editStudent({student.id})" title="Edit Student" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         <i class="fas fa-edit"></i>
-                        <span class="btn-text">Edit</span>
                     </button>
-                    <button class="btn-action btn-toggle" onclick="toggleActive({student.id}, {str(student.active).lower()})" 
-                            title="Toggle Active Status">
+                    <button class="btn btn-warning btn-sm toggle-btn" onclick="toggleActive({student.id}, {str(student.active).lower()})" 
+                            title="Toggle Active Status" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         <i class="fas fa-{'toggle-on' if student.active else 'toggle-off'}"></i>
-                        <span class="btn-text">{'Deactivate' if student.active else 'Activate'}</span>
                     </button>
-                    <button class="btn-action btn-{'success' if not student.status else 'warning'}" 
+                    <button class="btn btn-{'success' if not student.status else 'warning'} btn-sm approval-btn" 
                             onclick="toggleApproval({student.id}, {str(student.status).lower()})" 
-                            title="Toggle Approval Status">
+                            title="Toggle Approval Status" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         <i class="fas fa-{'times-circle' if student.status else 'check-circle'}"></i>
-                        <span class="btn-text">{'Disapprove' if student.status else 'Approve'}</span>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteStudent({student.id}, '{safe_name}  ')" title="Delete Student">
+                    <button class="btn btn-danger btn-sm delete-btn" onclick="deleteStudent({student.id}, '{safe_name}')" title="Delete Student" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                         <i class="fas fa-trash"></i>
-                        <span class="btn-text">Delete</span>
                     </button>
                 </div>
             '''
@@ -2264,6 +2269,7 @@ def student_datatable(request):
                 'student_id': student.student_id or 'N/A',
                 'preview': preview,
                 'student_info': info_html,
+                'email': student.email or '',
                 'status': status_html,
                 'created_at': student.created_at.strftime('%Y-%m-%d') if student.created_at else 'N/A',
                 'actions': actions_html
@@ -2367,7 +2373,8 @@ def student_get(request, student_id):
             'last_name': student.last_name or '',
             'email': student.email or '',
             'gender': student.gender or '',
-            'citizenship': student.citizenship,
+            'citizenship': student.citizenship.id if student.citizenship else None,
+            'citizenship_name': student.citizenship.name if student.citizenship else '',
             'phone_code': student.phone_code,
             'phone_number': student.phone_number or '',
             'date_of_birth': student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else '',
@@ -2377,12 +2384,14 @@ def student_get(request, student_id):
             'mailing_address': student.mailing_address or '',
             'city': student.city or '',
             'state': student.state or '',
-            'country': student.country,
-            'photo': student.photo or '',
+            'country': student.country.id if student.country else None,
+            'country_name': student.country.name if student.country else '',
+            'photo': f'/media/{student.photo}' if student.photo else '',
             'zip_code': student.zip_code or '',
             'timezone': student.timezone,
             'highest_education': student.highest_education or '',
-            'course_applied': student.course_applied,
+            'course_applied': student.course_applied.id if student.course_applied else None,
+            'course_applied_name': student.course_applied.course_name if student.course_applied else '',
             'associate_degree': student.associate_degree,
             'language': student.language.id if student.language else None,
             'language_name': language_name,
@@ -2467,7 +2476,13 @@ def student_update(request, student_id):
             student.income = data.get('income', '')
             student.affordable_amount = data.get('affordable_amount', '')
             student.message = data.get('message', '')
-            student.status = data.get('status', '0') == '1'
+            # Handle Approval Status and Date
+            new_status = data.get('status', '0') == '1'
+            if new_status and not student.status: # transitioning to approved
+                if not student.approve_date:
+                    student.approve_date = timezone.now()
+            
+            student.status = new_status
             student.active = data.get('active', '0') == '1'
             student.updated_at = timezone.now()
             
@@ -2549,7 +2564,7 @@ def student_toggle_active(request, student_id):
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
-#@login_required
+@login_required
 def student_toggle_approval(request, student_id):
     """Toggle student approval status"""
     if request.method == 'POST':
@@ -2560,8 +2575,64 @@ def student_toggle_approval(request, student_id):
             # Set approve_date when approving
             if student.status:
                 student.approve_date = timezone.now()
+                student.active = True # Also set active status to True
+                
+                # Create User if not exists
+                user = None
+                if student.email:
+                    # Check if user exists
+                    existing_user = Users.objects.filter(email=student.email).first()
+                    if not existing_user:
+                        # Create new user
+                        user = Users()
+                        user.name = f"{student.first_name} {student.last_name if student.last_name else ''}".strip()
+                        user.email = student.email
+                        user.username = student.email
+                        user.set_password('password123')
+                        user.is_active = True
+                        user.created_at = timezone.now()
+                        user.updated_at = timezone.now()
+                        user.save()
+                        
+                        # Assign student role
+                        student_role = Roles.objects.filter(name__iexact='student').first()
+                        if student_role:
+                            RoleUsers.objects.create(
+                                user=user,
+                                role=student_role
+                            )
+                        else:
+                            print("Student role not found") # Debugging
+                        
+                        # Link user to student
+                        student.user = user
+                        
+                        # Send email
+                        try:
+                            subject = 'Welcome to Seminary - Registration Approved'
+                            message = f'''Dear {student.first_name},
+
+                                            Your registration has been approved. You can now login to the portal.
+                                            Email: {student.email}
+                                            Password: password123
+
+                                            Please change your password after your first login.
+
+                                            Best regards,
+                                            Administration'''
+                            from_email = settings.DEFAULT_FROM_EMAIL
+                            recipient_list = [student.email]
+                            send_mail(subject, message, from_email, recipient_list)
+                        except Exception as e:
+                            print(f"Email sending failed: {str(e)}")
+                    else:
+                        # User already exists, maybe link them?
+                        student.user = existing_user
+                        user = existing_user
+
             else:
                 student.approve_date = None
+                student.active = False
                 
             student.updated_at = timezone.now()
             student.save()
@@ -2586,10 +2657,7 @@ def student_toggle_approval(request, student_id):
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
-
-
 #categories update delete and edit 
-
 
 @login_required
 def category_list(request):
@@ -2738,9 +2806,7 @@ def category_delete(request, category_id):
     messages.success(request, 'Category deleted successfully!')
     return redirect('category_list')
 
-
 # videos
-
 
 @login_required
 def video_list(request):
@@ -2932,8 +2998,6 @@ def video_delete(request, video_id):
     messages.success(request, 'Video deleted successfully!')
     return redirect('video_list')
 
-
-
 # roles and permissions 
 @login_required
 def roles(request):
@@ -2945,7 +3009,6 @@ def roles(request):
         "roles":roles
     }
     return render(request,"admin/roles/roles.html",context)
-
 
 @login_required
 def roles_create(request):
@@ -3053,7 +3116,6 @@ def roles_delete(request, id):
     messages.success(request, 'Role deleted successfully!')
     return redirect('roles')
 
-
 # languages
 @login_required
 def languages(request):
@@ -3117,8 +3179,6 @@ def language_delete(request, language_id):
     language.save()
     messages.success(request, 'Language deleted successfully!')
     return redirect('languages_list')
-
-
 
 #subjects 
 
@@ -3226,7 +3286,6 @@ def branches_view(request, branch_id):
         'branch': branch
     })
 
-
 @login_required
 def branches_create(request):
     """Create new branch"""
@@ -3283,9 +3342,7 @@ def branches_delete(request, branch_id):
     messages.success(request, 'Branch deleted successfully!')
     return redirect('branches_list')
 
-
 #contact requests 
-
 
 @login_required
 def contact_list(request):
@@ -3299,7 +3356,6 @@ def contact_list(request):
     }
     
     return render(request, 'admin/contacts/contact_requests.html', context)
-
 
 @login_required
 def contact_delete(request, id):
@@ -3315,7 +3371,6 @@ def contact_delete(request, id):
     messages.success(request, 'Contact request deleted successfully!')
     return redirect('contact_list')
 
-
 @login_required
 def contact_permanent_delete(request, id):
     """
@@ -3329,7 +3384,6 @@ def contact_permanent_delete(request, id):
     messages.success(request, 'Contact request permanently deleted!')
     return redirect('contact_list')
 
-
 #exams 
 @login_required
 def exams_list(request):
@@ -3340,7 +3394,6 @@ def exams_list(request):
         'page_title': 'Exams Management'
     }
     return render(request, "admin/exams/exam_list.html", context)
-
 
 @login_required
 def exam_create(request):
@@ -3367,7 +3420,6 @@ def exam_create(request):
     }
     return render(request, 'admin/exams/exam_form.html', context)
 
-
 @login_required
 def exam_view(request, exam_id):
     """View exam details"""
@@ -3376,12 +3428,18 @@ def exam_view(request, exam_id):
         id=exam_id,
         deleted_at__isnull=True
     )
+    
+    # Fetch questions
+    descriptive_questions = exam.descriptive_questions.all().order_by('id')
+    objective_questions = exam.objective_questions.all().order_by('id')
+
     context = {
         'exam': exam,
+        'descriptive_questions': descriptive_questions,
+        'objective_questions': objective_questions,
         'page_title': 'View Exam'
     }
     return render(request, 'admin/exams/exam_view.html', context)
-
 
 @login_required
 def exam_edit(request, exam_id):
@@ -3401,14 +3459,21 @@ def exam_edit(request, exam_id):
     else:
         form = ExamsForm(instance=exam)
     
+    # Fetch questions
+    descriptive_questions = exam.descriptive_questions.all().order_by('id')
+    objective_questions = exam.objective_questions.all().order_by('id')
+
     context = {
         'form': form,
         'exam': exam,
+        'descriptive_questions': descriptive_questions,
+        'objective_questions': objective_questions,
+        'descriptive_form': DescriptiveQuestionsForm(),
+        'objective_form': ObjectiveQuestionsForm(),
         'page_title': 'Edit Exam',
         'action': 'Update'
     }
     return render(request, 'admin/exams/exam_form.html', context)
-
 
 @login_required
 def exam_delete(request, exam_id):
@@ -3418,8 +3483,6 @@ def exam_delete(request, exam_id):
     exam.save()
     messages.success(request, 'Exam deleted successfully!')
     return redirect('exams_list')
-
-
 
 #staffs 
 
@@ -3435,7 +3498,6 @@ def staffs_list(request):
     return render(request, 'admin/staffs/staffs_list.html', {
         'staffs': staffs
     })
-
 
 @login_required
 def staff_create(request):
@@ -3530,7 +3592,6 @@ def staff_create(request):
         'form': form,
         'action': 'Create'
     })
-
 
 def send_staff_credentials_email(staff_email, staff_name, staff_id, username, password):
     """Send email with staff credentials"""
@@ -3702,8 +3763,6 @@ def assignment_delete(request, assignment_id):
     messages.success(request, 'Assignment deleted successfully!')
     return redirect('assignments_list')
 
-
-
 # book references
 
 @login_required
@@ -3719,7 +3778,6 @@ def reference_list(request):
 
 from django.utils.text import slugify
 from django.http import JsonResponse
-
 
 @login_required
 def reference_create(request):
@@ -3783,7 +3841,6 @@ def reference_create(request):
         'form': form,
         'action': 'Create'
     })
-
 
 @login_required
 def reference_edit(request, reference_id):
@@ -3853,7 +3910,6 @@ def reference_edit(request, reference_id):
         'reference': reference
     })
 
-
 @login_required
 def reference_view(request, reference_id):
     """View reference details"""
@@ -3871,7 +3927,6 @@ def reference_view(request, reference_id):
     return render(request, 'admin/references/reference_view.html', {
         'reference': reference
     })
-
 
 def get_media_library_pdfs(request):
     """AJAX endpoint to get all PDFs from media library"""
@@ -3892,7 +3947,6 @@ def reference_delete(request, reference_id):
     reference.save()
     messages.success(request, 'Reference deleted successfully!')
     return redirect('reference_list')
-
 
 # supports 
 
@@ -3944,7 +3998,6 @@ def support_reply_delete(request, pk):
     
     return redirect('support_view', support_id=support_id)
 
-
 @login_required
 def support_delete(request, support_id):
     """Soft delete support ticket"""
@@ -3959,11 +4012,7 @@ def support_delete(request, support_id):
         messages.error(request, f'Error deleting support ticket: {str(e)}')
         return redirect('support_list')
     
-
-
-
 #uploads
-
 
 @login_required
 def uploads_list(request):
@@ -3973,7 +4022,6 @@ def uploads_list(request):
 
     context = {"uploads": uploads}
     return render(request, "admin/uploads/uploads_list.html", context)
-
 
 @login_required
 def uploads_create(request):
@@ -3993,7 +4041,6 @@ def uploads_create(request):
         "form": form,
         "title": "Add Upload",
     })
-
 
 @login_required
 def uploads_edit(request, id):
@@ -4016,14 +4063,12 @@ def uploads_edit(request, id):
         "upload": upload,
     })
 
-
 @login_required
 def uploads_view(request, id):
     upload = get_object_or_404(Uploads, id=id)
     return render(request, "admin/uploads/uploads_view.html", {
         "upload": upload
     })
-
 
 @login_required
 def uploads_delete(request, id):
@@ -4032,16 +4077,12 @@ def uploads_delete(request, id):
     messages.success(request, "Upload deleted successfully.")
     return redirect("uploads_list")
 
-
 # payments 
-
-
 
 @login_required
 def payments_list(request):
     payments = Payments.objects.filter(deleted_at__isnull=True).order_by("-id")
     return render(request, "admin/payments/payments_list.html", {"payments": payments})
-
 
 @login_required
 def payments_view(request, id):
@@ -4053,7 +4094,6 @@ def payments_view(request, id):
         "paid_date": paid_date
     })
 
-
 @login_required
 def payments_delete(request, id):
     payment = get_object_or_404(Payments, id=id, deleted_at__isnull=True)
@@ -4062,9 +4102,6 @@ def payments_delete(request, id):
     payment.save()
     messages.success(request, "Payment deleted successfully.")
     return redirect("payments_list")
-
-
-
 
 @login_required
 def users_list(request):
@@ -4104,7 +4141,6 @@ def users_list(request):
     }
     return render(request, "admin/users/users_list.html", context)
 
-
 @login_required
 def users_view(request, id):
     user = get_object_or_404(Users, id=id, deleted_at__isnull=True)
@@ -4112,7 +4148,6 @@ def users_view(request, id):
         "user": user,
         "now": timezone.now(),
     })
-
 
 @login_required
 def users_delete(request, id):
@@ -4122,7 +4157,6 @@ def users_delete(request, id):
     user.save()
     messages.success(request, "User deleted successfully.")
     return redirect("users_list")
-
 
 # Church Login Codes
 
@@ -4194,7 +4228,6 @@ def church_code_delete(request, code_id):
     messages.success(request, 'Church Login Code deleted successfully!')
     return redirect('church_code_list')
 
-
 # Church Admins
 
 @login_required
@@ -4243,11 +4276,7 @@ def church_admin_delete(request, admin_id):
     messages.success(request, 'Church Admin deleted successfully!')
     return redirect('church_admin_list')
 
-
-
 # ============= CHURCH CODES USAGE VIEWS =============
-
-
 
 @login_required
 
@@ -4258,8 +4287,6 @@ def church_codes_usage_list(request):
     per_page = int(request.GET.get('per_page', 10))
 
     page_number = request.GET.get('page')
-
-    
 
     # Filter for active records
 
@@ -4273,13 +4300,9 @@ def church_codes_usage_list(request):
 
     ).order_by('-created_at')
 
-    
-
     paginator = Paginator(admins, per_page)
 
     page_obj = paginator.get_page(page_number)
-
-    
 
     context = {
 
@@ -4292,8 +4315,6 @@ def church_codes_usage_list(request):
     }
 
     return render(request, "admin/church_codes/list.html", context)
-
-
 
 @login_required
 
@@ -4315,7 +4336,1968 @@ def church_codes_usage_delete(request, admin_id):
 
         messages.error(request, f"Error deleting Church Admin: {str(e)}")
 
-        
-
     return redirect('church_codes_usage_list')
 
+#@login_required
+
+def application_list_view(request):
+    """Render application management page (Applicants)"""
+    context = {
+        'countries': Countries.objects.all().order_by('name'),
+        'languages': Languages.objects.filter(status=True).order_by('language_name'),
+        'courses': Courses.objects.filter(status=1).order_by('course_name'),
+    }
+    return render(request, 'admin/applications/list.html', context)
+
+# Student Books
+
+@login_required
+def student_books_list(request):
+
+    """Render student books management page"""
+
+    students = Students.objects.filter(active=1, status=1).order_by('first_name', 'last_name')
+
+    books = BookReferences.objects.filter(deleted_at__isnull=True).order_by('title')
+
+    context = {
+
+        'page_title': 'Student Books Management',
+
+        'students': students,
+
+        'books': books,
+
+        'student_list': students, # Alias for consistency if needed by template
+
+        'book_list': books        # Alias for consistency if needed by template
+
+    }
+
+    return render(request, 'admin/students/books_list.html', context)
+
+@login_required
+
+def student_books_datatable(request):
+
+    """DataTables server-side processing for student books"""
+
+    # Get parameters
+
+    draw = int(request.GET.get('draw', 1))
+
+    start = int(request.GET.get('start', 0))
+
+    length = int(request.GET.get('length', 10))
+
+    search_value = request.GET.get('search[value]', '')
+
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+
+    # Base query
+
+    books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book', 'updated_by')
+
+    # Search
+
+    if search_value:
+
+        books_query = books_query.filter(
+
+            Q(student__first_name__icontains=search_value) |
+
+            Q(student__last_name__icontains=search_value) |
+
+            Q(book__book_name__icontains=search_value) | 
+
+            Q(student__student_id__icontains=search_value)
+
+        )
+
+    # Column mapping for sorting
+
+    # Columns: 0: ID, 1: Student Name, 2: Book Title, 3: Updated By, 4: Actions
+
+    if order_column_index == 0:
+
+        order_col = 'id'
+
+    elif order_column_index == 1:
+
+        order_col = 'student__first_name'
+
+    elif order_column_index == 2:
+
+        order_col = 'book__book_name'
+
+    elif order_column_index == 3:
+
+        order_col = 'updated_by__username'
+
+    else:
+
+        order_col = '-created_at'
+
+    if order_direction == 'desc':
+
+        if not order_col.startswith('-'):
+
+            order_col = '-' + order_col
+
+
+# Student Books Refined Workflow
+@login_required
+def student_books_list(request):
+    """Render student books management page"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    context = {
+        'page_title': 'Student Books Management',
+        'courses': courses,
+    }
+    return render(request, 'admin/students/books_list.html', context)
+
+@login_required
+def student_books_datatable(request):
+    """DataTables server-side processing for student books"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book', 'updated_by')
+
+    if search_value:
+        books_query = books_query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(book__title__icontains=search_value) | 
+            Q(student__student_id__icontains=search_value)
+        )
+    
+    if order_column_index == 0:
+        order_col = 'id'
+    elif order_column_index == 1:
+        order_col = 'student__first_name'
+    elif order_column_index == 2:
+        order_col = 'book__title'
+    elif order_column_index == 3:
+        order_col = 'updated_by__username'
+    else:
+        order_col = '-created_at'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsBooks.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = books_query.count()
+    data_list = books_query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for item in data_list:
+        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+        if item.student.student_id:
+             student_name += f" ({item.student.student_id})"
+             
+        updated_by = item.updated_by.username if item.updated_by else '-'
+        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+        
+        actions = f'''
+            <div class="action-buttons">
+                <button class="btn-action btn-delete" onclick="deleteStudentBook({item.id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'id': item.id,
+            'student_name': student_name,
+            'book_title': item.book.title if item.book else 'Unknown Book',
+            'updated_by': updated_info,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def ajax_get_students_by_course(request, course_id):
+    """Fetch students for a specific course"""
+    students = Students.objects.filter(course_applied_id=course_id, active=1, status=1).values('id', 'first_name', 'last_name', 'student_id')
+    return JsonResponse({'success': True, 'students': list(students)})
+
+@login_required
+def ajax_get_subjects_by_student(request, student_id):
+    """Fetch subjects for a student based on their assigned subjects"""
+    student = get_object_or_404(Students, id=student_id)
+    # Get subjects from StudentsSubjects model
+    # related_name='subjects' on StudentsSubjects.student returns StudentsSubjects objects
+    student_subjects = StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True).select_related('subject')
+    
+    subjects = []
+    for ss in student_subjects:
+        if ss.subject:
+            subjects.append({
+                'id': ss.subject.id,
+                'subject_name': ss.subject.subject_name,
+                'subject_code': ss.subject.subject_code
+            })
+            
+    return JsonResponse({'success': True, 'subjects': subjects})
+
+@login_required
+def ajax_get_books_by_subject(request, subject_id):
+    """Fetch books for a specific subject"""
+    books = BookReferences.objects.filter(subject_id=subject_id, deleted_at__isnull=True).values('id', 'title', 'auther_name')
+    return JsonResponse({'success': True, 'books': list(books)})
+
+@login_required
+@require_POST
+def student_books_bulk_assign(request):
+    """Bulk assign books to a student"""
+    try:
+        student_id = request.POST.get('student')
+        book_ids = request.POST.getlist('books[]')
+        
+        if not student_id or not book_ids:
+            return JsonResponse({'success': False, 'message': 'Student and Books are required'}, status=400)
+            
+        student = get_object_or_404(Students, id=student_id)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        with transaction.atomic():
+            for book_id in book_ids:
+                if StudentsBooks.objects.filter(student=student, book_id=book_id, deleted_at__isnull=True).exists():
+                    skipped_count += 1
+                    continue
+                
+                StudentsBooks.objects.create(
+                    student=student,
+                    book_id=book_id,
+                    created_by=request.user,
+                    updated_by=request.user,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+                created_count += 1
+                
+        message = f'Successfully assigned {created_count} books.'
+        if skipped_count > 0:
+            message += f' ({skipped_count} were already assigned and skipped).'
+            
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def student_books_delete(request, id):
+    """Soft delete student book assignment"""
+    try:
+        sb = get_object_or_404(StudentsBooks, id=id)
+        sb.deleted_at = timezone.now()
+        sb.updated_by = request.user
+        sb.save()
+        return JsonResponse({'success': True, 'message': 'Assignment deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+# Student Subjects Workflow
+@login_required
+def student_subjects_list(request):
+    """Render student subjects management page"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    context = {
+        'page_title': 'Student Subjects Management',
+        'courses': courses,
+    }
+    return render(request, 'admin/students/subjects_list.html', context)
+
+@login_required
+def student_subjects_datatable(request):
+    """DataTables server-side processing for student subjects"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    query = StudentsSubjects.objects.filter(deleted_at__isnull=True).select_related('student', 'subject', 'updated_by')
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(subject__subject_name__icontains=search_value) | 
+            Q(student__student_id__icontains=search_value)
+        )
+    
+    # Adjust column ordering index because of S.No column at 0
+    # 0: S.No (not sortable usually, or map to id)
+    # 1: Student Name
+    # 2: Subject Name
+    # 3: Status
+    # 4: Updated By
+    
+    if order_column_index == 1:
+        order_col = 'student__first_name'
+    elif order_column_index == 2:
+        order_col = 'subject__subject_name'
+    elif order_column_index == 3:
+        order_col = 'is_approved'
+    elif order_column_index == 4:
+        order_col = 'updated_by__username'
+    else:
+        order_col = '-created_at'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsSubjects.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for i, item in enumerate(data_list):
+        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+        if item.student.student_id:
+             student_name += f" ({item.student.student_id})"
+             
+        updated_by = item.updated_by.username if item.updated_by else '-'
+        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+        
+        # Status Badge
+        if item.is_approved:
+            status_badge = '<span class="badge bg-success">Approved</span>'
+        else:
+            status_badge = '<span class="badge bg-warning text-dark">Pending</span>'
+
+        # Actions
+        actions = '<div class="action-buttons">'
+        
+        # Approve Button (only if pending)
+        if not item.is_approved:
+            actions += f'''
+                <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
+                    <i class="fas fa-check"></i>
+                </button>
+            '''
+        else:
+             # Optionally allow un-approve? User said "if approved show approved other wise pending and an option to approve"
+             # So maybe only need button for pending. But ability to toggle back is usually good.
+             # I'll stick to toggle logic but icon might differ. For now, let's allow toggle back to pending with a different icon or just keep it simple.
+             # User specifically asked: "if approved show approved other wise pending and an option to approve".
+             # So maybe once approved, just show "Approved" status, or maybe allow Unapprove?
+             # I will implement toggle.
+             actions += f'''
+                <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
+                    <i class="fas fa-times"></i>
+                </button>
+            '''
+
+        actions += f'''
+                <button class="btn-action btn-delete" onclick="deleteStudentSubject({item.id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'sno': start + i + 1,
+            'student_name': student_name,
+            'subject_name': item.subject.subject_name if item.subject else 'Unknown Subject',
+            'status': status_badge,
+            'updated_by': updated_info,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def student_subjects_toggle_approval(request, id):
+    try:
+        subject = StudentsSubjects.objects.get(id=id)
+        subject.is_approved = not subject.is_approved
+        subject.save()
+        return JsonResponse({'success': True, 'message': 'Status updated successfully'})
+    except StudentsSubjects.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Subject assignment not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+@login_required
+def ajax_get_available_subjects(request, student_id):
+    """Fetch subjects NOT yet assigned to this student, but available in their course's branch"""
+    student = get_object_or_404(Students, id=student_id)
+    if not student.course_applied:
+        return JsonResponse({'success': True, 'subjects': []})
+    
+    assigned_subject_ids = StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True).values_list('subject_id', flat=True)
+    
+    # Get subjects from student's course branch that are not already assigned
+    available_subjects = Subjects.objects.filter(
+        deleted_at__isnull=True
+    ).exclude(id__in=assigned_subject_ids).values('id', 'subject_name', 'subject_code').distinct()
+    
+    return JsonResponse({'success': True, 'subjects': list(available_subjects)})
+
+@login_required
+@require_POST
+def student_subjects_bulk_assign(request):
+    """Bulk assign subjects to a student"""
+    try:
+        student_id = request.POST.get('student')
+        subject_ids = request.POST.getlist('subjects[]')
+        
+        if not student_id or not subject_ids:
+            return JsonResponse({'success': False, 'message': 'Student and Subjects are required'}, status=400)
+            
+        student = get_object_or_404(Students, id=student_id)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        with transaction.atomic():
+            for subject_id in subject_ids:
+                if StudentsSubjects.objects.filter(student=student, subject_id=subject_id, deleted_at__isnull=True).exists():
+                    skipped_count += 1
+                    continue
+                
+                StudentsSubjects.objects.create(
+                    student=student,
+                    subject_id=subject_id,
+                    created_by=request.user,
+                    updated_by=request.user,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+                created_count += 1
+                
+        message = f'Successfully assigned {created_count} subjects.'
+        if skipped_count > 0:
+            message += f' ({skipped_count} were already assigned and skipped).'
+            
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def student_subjects_delete(request, id):
+    """Soft delete student subject assignment"""
+    try:
+        ss = get_object_or_404(StudentsSubjects, id=id)
+        ss.deleted_at = timezone.now()
+        ss.updated_by = request.user
+        ss.save()
+        return JsonResponse({'success': True, 'message': 'Subject assignment deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+def application_list_view(request):
+    """Render application management page (Applicants)"""
+    context = {
+        'countries': Countries.objects.all().order_by('name'),
+        'languages': Languages.objects.filter(status=True).order_by('language_name'),
+        'courses': Courses.objects.filter(status=1).order_by('course_name'),
+    }
+    return render(request, 'admin/applications/list.html', context)
+
+# Student Instructors Workflow
+@login_required
+def student_instructors_list(request):
+    """Render student instructors management page"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    context = {
+        'page_title': 'Student Instructors Management',
+        'courses': courses,
+    }
+    return render(request, 'admin/students/instructors_list.html', context)
+
+@login_required
+def student_instructors_datatable(request):
+    """DataTables server-side processing for student instructors"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    query = StudentsInstructor.objects.filter(deleted_at__isnull=True).select_related('student', 'instructor', 'subject', 'updated_by')
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(instructor__staff_name__icontains=search_value) | 
+            Q(subject__subject_name__icontains=search_value) | 
+            Q(student__student_id__icontains=search_value)
+        )
+    
+    order_col = '-created_at'
+    if order_column_index == 0:
+        order_col = 'id'
+    elif order_column_index == 1:
+        order_col = 'student__first_name'
+    elif order_column_index == 2:
+        order_col = 'subject__subject_name'
+    elif order_column_index == 3:
+        order_col = 'instructor__staff_name'
+    elif order_column_index == 4:
+        order_col = 'updated_by__username'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsInstructor.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for item in data_list:
+        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+        if item.student.student_id:
+             student_name += f" ({item.student.student_id})"
+             
+        updated_by = item.updated_by.username if item.updated_by else '-'
+        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+        
+        actions = f'''
+            <div class="action-buttons">
+                <button class="btn-action btn-delete" onclick="deleteStudentInstructor({item.id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'id': item.id,
+            'student_name': student_name,
+            'subject_name': item.subject.subject_name if item.subject else 'General / No Subject',
+            'instructor_name': item.instructor.staff_name if item.instructor else 'Unknown Instructor',
+            'updated_by': updated_info,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def ajax_get_assigned_subjects_by_student(request, student_id):
+    """Fetch subjects assigned to a specific student from StudentsSubjects"""
+    student = get_object_or_404(Students, id=student_id)
+    # Get subjects from StudentsSubjects model for this student
+    subjects = StudentsSubjects.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).select_related('subject').values(
+        'subject__id', 
+        'subject__subject_name', 
+        'subject__subject_code'
+    ).distinct()
+    
+    # Format for JSON
+    subject_list = [{
+        'id': s['subject__id'],
+        'name': f"{s['subject__subject_name']} ({s['subject__subject_code']})"
+    } for s in subjects]
+    
+    return JsonResponse({'success': True, 'subjects': subject_list})
+
+@login_required
+def ajax_get_available_instructors(request, student_id, subject_id):
+    """Fetch instructors assigned to a specific subject (via StaffsSubjects) 
+    and NOT yet assigned to this student for THIS subject"""
+    student = get_object_or_404(Students, id=student_id)
+    subject = get_object_or_404(Subjects, id=subject_id)
+    
+    # Get IDs of instructors already assigned to this student for this subject
+    assigned_instructor_ids = StudentsInstructor.objects.filter(
+        student=student, 
+        subject=subject,
+        deleted_at__isnull=True
+    ).values_list('instructor_id', flat=True)
+    
+    # Get staff linked to this subject via StaffsSubjects
+    subject_staff_ids = StaffsSubjects.objects.filter(
+        subject=subject,
+        deleted_at__isnull=True
+    ).values_list('staff_id', flat=True)
+    
+    # Filter active staff who are linked to the subject and not yet assigned to the student for it
+    available_instructors = Staffs.objects.filter(
+        id__in=subject_staff_ids,
+        status=True, 
+        deleted_at__isnull=True
+    ).exclude(id__in=assigned_instructor_ids).values('id', 'staff_name', 'staff_id', 'title').distinct()
+    
+    return JsonResponse({'success': True, 'instructors': list(available_instructors)})
+
+@login_required
+@require_POST
+def student_instructors_bulk_assign(request):
+    """Bulk assign instructors to a student for a specific subject"""
+    try:
+        student_id = request.POST.get('student')
+        subject_id = request.POST.get('subject')
+        instructor_ids = request.POST.getlist('instructors[]')
+        
+        if not student_id or not subject_id or not instructor_ids:
+            return JsonResponse({'success': False, 'message': 'Student, Subject and Instructors are required'}, status=400)
+            
+        student = get_object_or_404(Students, id=student_id)
+        subject = get_object_or_404(Subjects, id=subject_id)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        with transaction.atomic():
+            for instructor_id in instructor_ids:
+                if StudentsInstructor.objects.filter(student=student, subject=subject, instructor_id=instructor_id, deleted_at__isnull=True).exists():
+                    skipped_count += 1
+                    continue
+                
+                StudentsInstructor.objects.create(
+                    student=student,
+                    subject=subject,
+                    instructor_id=instructor_id,
+                    created_by=request.user,
+                    updated_by=request.user
+                )
+                created_count += 1
+                
+        message = f'Successfully assigned {created_count} instructors for {subject.subject_name}.'
+        if skipped_count > 0:
+            message += f' ({skipped_count} were already assigned and skipped).'
+            
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def student_instructors_delete(request, id):
+    """Soft delete student instructor assignment"""
+    try:
+        si = get_object_or_404(StudentsInstructor, id=id)
+        si.deleted_at = timezone.now()
+        si.updated_by = request.user
+        si.save()
+        return JsonResponse({'success': True, 'message': 'Instructor assignment deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+# Student Uploads Workflow
+@login_required
+def student_uploads_list(request):
+    """Render student uploads management page"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    context = {
+        'page_title': 'Student Uploads Management',
+        'courses': courses,
+    }
+    return render(request, 'admin/students/uploads_list.html', context)
+
+@login_required
+def student_uploads_datatable(request):
+    """DataTables server-side processing for student uploads"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    query = StudentsUploads.objects.filter(deleted_at__isnull=True).select_related(
+        'student', 'upload', 'upload__subject', 'updated_by'
+    )
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(upload__upload_name__icontains=search_value) | 
+            Q(upload__subject__subject_name__icontains=search_value) | 
+            Q(student__student_id__icontains=search_value)
+        )
+    
+    order_col = '-created_at'
+    if order_column_index == 0:
+        order_col = 'id'
+    elif order_column_index == 1:
+        order_col = 'student__first_name'
+    elif order_column_index == 2:
+        order_col = 'upload__subject__subject_name'
+    elif order_column_index == 3:
+        order_col = 'upload__upload_name'
+    elif order_column_index == 4:
+        order_col = 'updated_by__username'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsUploads.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for item in data_list:
+        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+        if item.student.student_id:
+             student_name += f" ({item.student.student_id})"
+             
+        updated_by = item.updated_by.username if item.updated_by else '-'
+        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+        
+        actions = f'''
+            <div class="action-buttons">
+                <button class="btn-action btn-delete" onclick="deleteStudentUpload({item.id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'id': item.id,
+            'student_name': student_name,
+            'subject_name': item.upload.subject.subject_name if item.upload and item.upload.subject else 'General',
+            'upload_name': item.upload.upload_name if item.upload else 'Unknown Upload',
+            'updated_by': updated_info,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def ajax_get_available_uploads(request, student_id, subject_id):
+    """Fetch uploads linked to a subject and NOT yet assigned to this student"""
+    student = get_object_or_404(Students, id=student_id)
+    subject = get_object_or_404(Subjects, id=subject_id)
+    
+    # Get IDs of uploads already assigned to this student
+    assigned_upload_ids = StudentsUploads.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).values_list('upload_id', flat=True)
+    
+    # Get uploads linked to this subject
+    available_uploads = Uploads.objects.filter(
+        subject=subject,
+        status=True
+    ).exclude(id__in=assigned_upload_ids).values('id', 'upload_name', 'code', 'format').distinct()
+    
+    return JsonResponse({'success': True, 'uploads': list(available_uploads)})
+
+@login_required
+@require_POST
+def student_uploads_bulk_assign(request):
+    """Bulk assign uploads to a student"""
+    try:
+        student_id = request.POST.get('student')
+        upload_ids = request.POST.getlist('uploads[]')
+        
+        if not student_id or not upload_ids:
+            return JsonResponse({'success': False, 'message': 'Student and Uploads are required'}, status=400)
+            
+        student = get_object_or_404(Students, id=student_id)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        with transaction.atomic():
+            for upload_id in upload_ids:
+                if StudentsUploads.objects.filter(student=student, upload_id=upload_id, deleted_at__isnull=True).exists():
+                    skipped_count += 1
+                    continue
+                
+                StudentsUploads.objects.create(
+                    student=student,
+                    upload_id=upload_id,
+                    created_by=request.user,
+                    updated_by=request.user
+                )
+                created_count += 1
+                
+        message = f'Successfully assigned {created_count} uploads.'
+        if skipped_count > 0:
+            message += f' ({skipped_count} were already assigned and skipped).'
+            
+        return JsonResponse({'success': True, 'message': message})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def student_uploads_delete(request, id):
+    """Soft delete student upload assignment"""
+    try:
+        su = get_object_or_404(StudentsUploads, id=id)
+        su.deleted_at = timezone.now()
+        return JsonResponse({'success': True, 'message': 'Upload assignment deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+# Student Exams Workflow
+@login_required
+def student_exams_list(request):
+    """Render student exams management page"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    
+    # Get all available timezones
+    try:
+        import zoneinfo
+        common_timezones = sorted(zoneinfo.available_timezones())
+    except ImportError:
+        try:
+            import pytz
+            common_timezones = pytz.all_timezones
+        except ImportError:
+            common_timezones = ['UTC', 'America/New_York', 'Europe/London', 'Asia/Kolkata', 'Asia/Dubai', 'Asia/Singapore']
+
+    context = {
+        'page_title': 'Student Submitted Exams Management',
+        'courses': courses,
+        'timezones': common_timezones,
+    }
+    return render(request, 'admin/students/exams_list.html', context)
+
+@login_required
+def student_exams_datatable(request):
+    """DataTables server-side processing for student exams"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    query = StudentsExams.objects.filter(deleted_at__isnull=True).select_related(
+        'student', 'course', 'subject', 'exam', 'updated_by'
+    )
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(exam__exam_name__icontains=search_value) | 
+            Q(subject__subject_name__icontains=search_value) | 
+            Q(course__course_name__icontains=search_value) |
+            Q(student__student_id__icontains=search_value)
+        )
+    
+    order_col = '-created_at'
+    if order_column_index == 0:
+        order_col = 'id'
+    elif order_column_index == 1:
+        order_col = 'student__first_name'
+    elif order_column_index == 2:
+        order_col = 'course__course_name'
+    elif order_column_index == 3:
+        order_col = 'subject__subject_name'
+    elif order_column_index == 4:
+        order_col = 'exam__exam_name'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsExams.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for item in data_list:
+        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+        if item.student.student_id:
+             student_name += f" ({item.student.student_id})"
+             
+        updated_by = item.updated_by.username if item.updated_by else '-'
+        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+        
+        start_time = item.start_time.strftime('%Y-%m-%d %H:%M') if item.start_time else '-'
+        
+        # Status Badge
+        if item.is_approved:
+            status = '<span class="badge bg-success">Approved</span>'
+        else:
+            status = '<span class="badge bg-warning">Pending</span>'
+
+        # Conditional action buttons based on approval status
+        actions = '<div class="action-buttons">'
+        
+        # Approval Toggle Button
+        if item.is_approved:
+            actions += f'''
+                <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
+                    <i class="fas fa-times"></i>
+                </button>
+            '''
+        else:
+            actions += f'''
+                <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
+                    <i class="fas fa-check"></i>
+                </button>
+            '''
+
+        if item.is_approved:
+            # Show "View Answer Sheet" button for approved exams
+            actions += f'''
+                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+                    <i class="bi bi-search"></i> 
+                </button>
+            '''
+        else:
+            # Show "Edit" button for non-approved exams
+            actions += f'''
+                <button class="btn-action btn-edit" onclick="editExam({item.id})" title="Edit Exam">
+                    <i class="fas fa-edit"></i>
+                </button>
+            '''
+        
+        # Always show delete button
+        actions += f'''
+            <button class="btn-action btn-delete" onclick="deleteStudentExam({item.id})" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        '''
+        
+        # Calculate total marks if exam is approved
+        marks_display = '-'
+        if item.is_approved:
+            total_obtained = 0
+            total_possible = 0
+            
+            if item.exam.exam_type == 'objective' or item.exam.exam_type == 'both':
+                # Obtained
+                objective_answers = ObjectiveAnswers.objects.filter(assignment=item)
+                for ans in objective_answers:
+                    if ans.mark:
+                        total_obtained += ans.mark
+                # Possible
+                total_possible += item.exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
+                
+            if item.exam.exam_type == 'descriptive' or item.exam.exam_type == 'both':
+                # Obtained
+                descriptive_answers = DescriptiveAnswers.objects.filter(assignment=item)
+                for ans in descriptive_answers:
+                    if ans.mark: 
+                        total_obtained += ans.mark
+                # Possible
+                total_possible += item.exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
+                
+            marks_display = f'{total_obtained}/{total_possible}'
+
+        data.append({
+            'id': item.id,
+            'student_name': student_name,
+            'course_name': item.course.course_name if item.course else '-',
+            'subject_name': item.subject.subject_name if item.subject else '-',
+            'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
+            'start_time': start_time,
+            'duration': f'{item.exam_duration} min',
+            'status': status,
+            'marks': marks_display,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def ajax_get_available_exams(request, student_id, subject_id):
+    """Fetch exams linked to a subject and NOT yet assigned to this student"""
+    student = get_object_or_404(Students, id=student_id)
+    subject = get_object_or_404(Subjects, id=subject_id)
+    
+    # Get IDs of exams already assigned to this student
+    assigned_exam_ids = StudentsExams.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).values_list('exam_id', flat=True)
+    
+    # Get exams linked to this subject
+    available_exams = Exams.objects.filter(
+        subject=subject,
+        deleted_at__isnull=True
+    ).exclude(id__in=assigned_exam_ids).values('id', 'exam_name', 'code').distinct()
+    
+    return JsonResponse({'success': True, 'exams': list(available_exams)})
+
+@login_required
+@require_POST
+def student_exams_bulk_assign(request):
+    """Assign an exam to a student with date and time"""
+    try:
+        student_id = request.POST.get('student')
+        subject_id = request.POST.get('subject')
+        exam_id = request.POST.get('exam')
+        exam_date = request.POST.get('exam_date')
+        start_time_str = request.POST.get('start_time')
+        timezone_val = request.POST.get('timezone', 'UTC')
+        duration = int(request.POST.get('duration', 60))
+        
+        if not student_id or not exam_id or not exam_date or not start_time_str:
+            return JsonResponse({'success': False, 'message': 'All fields are required'}, status=400)
+            
+        student = get_object_or_404(Students, id=student_id)
+        subject = get_object_or_404(Subjects, id=subject_id) if subject_id else None
+        course = student.course_applied if hasattr(student, 'course_applied') else None
+        
+        # Parse start_time
+        try:
+            start_time_combined_str = f"{exam_date} {start_time_str}"
+            start_time_obj = datetime.strptime(start_time_combined_str, '%Y-%m-%d %H:%M')
+        except ValueError as ve:
+             return JsonResponse({'success': False, 'message': f'Invalid date or time format: {str(ve)}'}, status=400)
+        
+        # Calculate end_time
+        end_time_obj = start_time_obj + timedelta(minutes=duration)
+        
+        if StudentsExams.objects.filter(student=student, exam_id=exam_id, deleted_at__isnull=True).exists():
+            return JsonResponse({'success': False, 'message': 'This exam is already assigned to the student.'}, status=400)
+        
+        with transaction.atomic():
+            StudentsExams.objects.create(
+                student=student,
+                course=course,
+                subject=subject,
+                exam_id=exam_id,
+                start_time=start_time_obj,
+                end_time=end_time_obj,
+                timezone=timezone_val,
+                exam_duration=duration,
+                show_on_score=1,
+                created_by=request.user,
+                updated_by=request.user
+            )
+                
+        return JsonResponse({'success': True, 'message': 'Exam assigned successfully.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_POST
+def student_exams_delete(request, id):
+    """Soft delete student exam assignment"""
+    try:
+        se = get_object_or_404(StudentsExams, id=id)
+        se.deleted_at = timezone.now()
+        se.updated_by = request.user
+        se.save()
+        return JsonResponse({'success': True, 'message': 'Exam assignment deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+def view_answer_sheet(request, exam_id):
+
+    """Display answer sheet for a specific student exam"""
+
+    student_exam = get_object_or_404(StudentsExams, id=exam_id, deleted_at__isnull=True)
+    exam = student_exam.exam
+    # Get all questions for this exam
+    objective_questions = []
+    descriptive_questions = []
+
+    if exam.exam_type == 'objective' or exam.exam_type == 'both':
+        # Get objective questions
+        obj_questions = ObjectiveQuestions.objects.filter(exam=exam).order_by('id')
+
+        for question in obj_questions:
+            # Get student's answer for this question
+            answer = ObjectiveAnswers.objects.filter(
+
+                assignment=student_exam,
+
+                question=question
+
+            ).first()
+            
+            objective_questions.append({
+
+                'question': question,
+
+                'answer': answer
+
+            })
+
+    
+
+    if exam.exam_type == 'descriptive' or exam.exam_type == 'both':
+
+        # Get descriptive questions
+
+        desc_questions = DescriptiveQuestions.objects.filter(exam=exam).order_by('id')
+
+        for question in desc_questions:
+
+            # Get student's answer for this question
+
+            answer = DescriptiveAnswers.objects.filter(
+
+                assignment=student_exam,
+
+                question=question
+
+            ).first()
+
+            
+
+            descriptive_questions.append({
+
+                'question': question,
+
+                'answer': answer
+
+            })
+
+    
+
+    context = {
+
+        'student_exam': student_exam,
+
+        'objective_questions': objective_questions,
+
+        'descriptive_questions': descriptive_questions,
+
+    }
+
+    
+
+    return render(request, 'admin/students/answer_sheet.html', context)
+
+
+
+@login_required
+@require_POST
+def update_answer_marks(request):
+
+    """Update marks for a student's answer"""
+
+    try:
+
+        answer_id = request.POST.get('answer_id')
+
+        answer_type = request.POST.get('answer_type')  # 'objective' or 'descriptive'
+
+        marks = request.POST.get('marks')
+
+        
+
+        if not answer_id or not answer_type or marks is None:
+
+            return JsonResponse({'success': False, 'message': 'Missing required fields'}, status=400)
+
+        
+
+        marks = float(marks)
+
+        
+
+        if answer_type == 'objective':
+
+            answer = get_object_or_404(ObjectiveAnswers, id=answer_id)
+
+            # Validate marks don't exceed question marks
+
+            if marks > float(answer.question.marks):
+
+                return JsonResponse({
+
+                    'success': False, 
+
+                    'message': f'Marks cannot exceed {answer.question.marks}'
+
+                }, status=400)
+
+            answer.mark = marks
+
+            answer.save()
+
+        elif answer_type == 'descriptive':
+
+            answer = get_object_or_404(DescriptiveAnswers, id=answer_id)
+
+            # Validate marks don't exceed question marks
+
+            if marks > float(answer.question.mark):
+
+                return JsonResponse({
+
+                    'success': False, 
+
+                    'message': f'Marks cannot exceed {answer.question.mark}'
+
+                }, status=400)
+
+            answer.mark = marks
+
+            answer.save()
+
+        else:
+
+            return JsonResponse({'success': False, 'message': 'Invalid answer type'}, status=400)
+
+        
+
+        return JsonResponse({'success': True, 'message': 'Marks updated successfully'})
+
+    except Exception as e:
+
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+# Student Submitted Exams Views
+
+@login_required
+def student_submitted_exams_datatable(request):
+    """DataTables server-side processing for student's submitted exams"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    # Get current student
+    try:
+        student = Students.objects.get(user=request.user, deleted_at__isnull=True)
+    except Students.DoesNotExist:
+        return JsonResponse({'draw': draw, 'recordsTotal': 0, 'recordsFiltered': 0, 'data': []})
+    # Query exams for this student
+    query = StudentsExams.objects.filter(
+        student=student,
+        deleted_at__isnull=True
+
+    ).select_related('exam', 'course', 'subject')
+    if search_value:
+        query = query.filter(
+            Q(exam__exam_name__icontains=search_value) |
+
+            Q(subject__subject_name__icontains=search_value) |
+
+            Q(course__course_name__icontains=search_value)
+
+        )
+
+    # Ordering
+    order_col = '-created_at'
+
+    if order_column_index == 0:
+
+        order_col = 'exam__exam_name'
+
+    elif order_column_index == 1:
+
+        order_col = 'subject__subject_name'
+
+    elif order_column_index == 2:
+
+        order_col = 'course__course_name'
+
+    elif order_column_index == 3:
+
+        order_col = 'start_time'
+
+
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+
+        order_col = '-' + order_col
+
+    total_records = StudentsExams.objects.filter(student=student, deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    data = []
+    for item in data_list:
+        start_time = item.start_time.strftime('%Y-%m-%d %H:%M') if item.start_time else '-'
+        # Determine status
+        if item.is_exam_ended:
+            status = '<span class="status-badge status-ended">Ended</span>'
+        elif item.is_exam_started:
+            status = '<span class="status-badge status-started">In Progress</span>'
+        elif item.is_approved:
+            status = '<span class="status-badge status-approved">Approved</span>'
+        else:
+            status = '<span class="status-badge status-pending">Pending</span>'
+        # Calculate total marks if available
+        from django.db.models import Sum
+
+        obj_marks = ObjectiveAnswers.objects.filter(assignment=item).aggregate(total=Sum('mark'))['total'] or 0
+        desc_marks = DescriptiveAnswers.objects.filter(assignment=item).aggregate(total=Sum('mark'))['total'] or 0
+        total_marks = float(obj_marks) + float(desc_marks)
+        marks_display = f'{total_marks:.1f}' if total_marks > 0 else '-'
+        # Actions - always show view answer sheet button
+        actions = f'''
+
+            <div class="action-buttons">
+
+                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
+        '''
+        data.append({
+        
+            'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
+            'subject_name': item.subject.subject_name if item.subject else '-',
+            'course_name': item.course.course_name if item.course else '-',
+            'start_time': start_time,
+            'duration': f'{item.exam_duration} min',
+            'status': status,
+            'marks': marks_display,
+            'actions': actions
+
+        })
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+# Student Submitted Exams Views
+@login_required
+def student_submitted_exams_list(request):
+    """Render student submitted exams page for admin"""
+    context = {
+        'page_title': 'Student Submitted Exams',
+    }
+    return render(request, 'admin/students/student_submitted_exams.html', context)
+
+@login_required
+def student_submitted_exams_datatable(request):
+    """DataTables server-side processing for all students' submitted exams"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    # Query all exams
+    query = StudentsExams.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('student', 'exam', 'course', 'subject')
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(exam__exam_name__icontains=search_value) |
+            Q(subject__subject_name__icontains=search_value) |
+            Q(course__course_name__icontains=search_value)
+        )
+    
+    # Ordering
+    order_col = '-created_at'
+    if order_column_index == 0:
+        order_col = 'student__first_name'
+    elif order_column_index == 1:
+        order_col = 'exam__exam_name'
+    elif order_column_index == 2:
+        order_col = 'subject__subject_name'
+    elif order_column_index == 3:
+        order_col = 'course__course_name'
+    elif order_column_index == 4:
+        order_col = 'start_time'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsExams.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+    
+    data = []
+    for item in data_list:
+        student_name = f"{item.student.first_name} {item.student.last_name}" if item.student else "Unknown Student"
+        start_time = item.start_time.strftime('%Y-%m-%d %H:%M') if item.start_time else '-'
+        
+        # Determine status
+        if item.is_exam_ended:
+            status = '<span class="status-badge status-ended">Ended</span>'
+        elif item.is_exam_started:
+            status = '<span class="status-badge status-started">In Progress</span>'
+        elif item.is_approved:
+            status = '<span class="status-badge status-approved">Approved</span>'
+        else:
+            status = '<span class="status-badge status-pending">Pending</span>'
+        
+        # Calculate total marks if available
+        from django.db.models import Sum
+        obj_marks = ObjectiveAnswers.objects.filter(assignment=item).aggregate(total=Sum('mark'))['total'] or 0
+        desc_marks = DescriptiveAnswers.objects.filter(assignment=item).aggregate(total=Sum('mark'))['total'] or 0
+        total_marks = float(obj_marks) + float(desc_marks)
+        
+        marks_display = f'{total_marks:.1f}' if total_marks > 0 else '-'
+        
+        # Actions - view answer sheet button
+        actions = f'''
+            <div class="action-buttons">
+                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+                    <i class="bi bi-eye"></i> 
+                </button>
+            </div>
+        '''   
+        data.append({
+            'student_name': student_name,
+            'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
+            'subject_name': item.subject.subject_name if item.subject else '-',
+            'course_name': item.course.course_name if item.course else '-',
+            'start_time': start_time,
+            'duration': f'{item.exam_duration} min',
+            'status': status,
+            'marks': marks_display,
+            'actions': actions
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+
+@login_required
+def student_assignment_list(request, submitted_only=False):
+    """Render student assignment list page for Admin"""
+    courses = Courses.objects.filter(status=1).order_by('course_name')
+    page_title = 'Student Submitted Assignments' if submitted_only else 'Student Assignments'
+    context = {
+        'page_title': page_title,
+        'courses': courses,
+        'submitted_only': submitted_only,
+    }
+    return render(request, 'admin/students/student_assignment_list.html', context)
+
+@login_required
+def student_assignment_datatable(request):
+    """DataTables server-side processing for all student assignments (Admin)"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    
+    # Query ALL assignments
+    query = StudentsAssignment.objects.filter(
+        deleted_at__isnull=True
+    ).select_related('student', 'assignment', 'assignment__subject')
+
+    submitted_only = request.GET.get('submitted_only') == 'true'
+    
+    if submitted_only:
+        query = query.filter(submitted_on__isnull=False)
+
+    if search_value:
+        query = query.filter(
+            Q(student__first_name__icontains=search_value) |
+            Q(student__last_name__icontains=search_value) |
+            Q(assignment__assignment_name__icontains=search_value) |
+            Q(assignment__subject__subject_name__icontains=search_value)
+        )
+
+    # Ordering
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    order_col = '-created_at' # Default
+    if order_column_index == 0:
+        order_col = 'student__first_name'
+    elif order_column_index == 1:
+        order_col = 'assignment__assignment_name'
+    elif order_column_index == 2:
+        order_col = 'assignment__subject__subject_name'
+
+    if order_direction == 'desc' and not order_col.startswith('-'):
+        order_col = '-' + order_col
+    
+    total_records = StudentsAssignment.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = query.count()
+    data_list = query.order_by(order_col)[start:start+length]
+
+    data = []
+    data = []
+    for index, item in enumerate(data_list):
+        student_name = f"{item.student.first_name} {item.student.last_name}" if item.student else "Unknown"
+        action_btn = ''
+        delete_btn = ''
+        status = ''
+
+        # Determine status
+        if item.submitted_on:
+            status = '<span class="status-badge status-approved">Submitted</span>'
+            # View Button
+            action_btn = f'''
+                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+                    <i class="bi bi-eye"></i> 
+                </button>
+            '''
+        else:
+            status = '<span class="status-badge status-pending">Pending</span>'
+        
+        # Delete Button (Now available for ALL assignments as per request)
+        delete_btn = f'''<button class="btn-action btn-delete" onclick="deleteAssignment({item.id})" title="Delete Assignment">
+                <i class="bi bi-trash"></i>
+            </button>
+        '''
+
+        # Serial Number Calculation
+        sno = start + index + 1
+
+        data.append({
+            'sno': sno,
+            'student_name': student_name,
+            'assignment_name': item.assignment.assignment_name if item.assignment else 'Unknown',
+            'subject_name': item.assignment.subject.subject_name if (item.assignment and item.assignment.subject) else '-',
+            'status': status,
+            'actions': f'<div class="action-buttons">{action_btn} {delete_btn}</div>'
+        })
+        
+    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+
+@login_required
+def view_assignment_answer_sheet(request, id):
+    """Display answer sheet for a student assignment"""
+    student_assignment = get_object_or_404(StudentsAssignment, id=id, deleted_at__isnull=True)
+    
+    # Get answers
+    answers = AssignmentAnswers.objects.filter(
+        assignment=student_assignment.assignment, 
+        student=student_assignment.student
+    ).order_by('id')
+    
+    context = {
+        'student_assignment': student_assignment,
+        'answers': answers,
+    }
+    return render(request, 'admin/students/assignment_answer_sheet.html', context)
+
+@login_required
+def student_assignment_edit(request, id):
+    """Placeholder for editing student assignment"""
+    return HttpResponse("Edit functionality to be implemented.")
+
+@csrf_exempt
+@login_required
+def student_assignment_delete(request, id):
+    """Soft delete student assignment"""
+    if request.method == 'POST':
+        try:
+            assignment = StudentsAssignment.objects.get(id=id)
+            assignment.deleted_at = timezone.now()
+            assignment.save()
+            return JsonResponse({'success': True, 'message': 'Assignment deleted successfully.'})
+        except StudentsAssignment.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Assignment not found.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+@login_required
+def update_assignment_marks(request):
+    """Update marks for specific answer or total marks"""
+    if request.method == 'POST':
+        answer_id = request.POST.get('answer_id')
+        marks = request.POST.get('marks')
+        
+        try:
+            answer = AssignmentAnswers.objects.get(id=answer_id)
+            answer.marks_optained = float(marks)
+            answer.save()
+            
+            # Recalculate total for student assignment
+            student_assignment = StudentsAssignment.objects.filter(
+                student=answer.student, 
+                assignment=answer.assignment
+            ).first()
+            
+            if student_assignment:
+                total = AssignmentAnswers.objects.filter(
+                    assignment=answer.assignment,
+                    student=answer.student
+                ).aggregate(Sum('marks_optained'))['marks_optained__sum'] or 0
+                student_assignment.total_marks = total
+                student_assignment.save()
+                
+            return JsonResponse({'success': True, 'message': 'Marks updated successfully.'})
+        except (AssignmentAnswers.DoesNotExist, ValueError):
+            return JsonResponse({'success': False, 'message': 'Error updating marks.'})
+            
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
+@login_required
+@require_POST
+def student_assignments_assign(request):
+    """Assign an assignment to a student"""
+    try:
+        student_id = request.POST.get('student_id')
+        assignment_id = request.POST.get('assignment_id')
+        submission_date = request.POST.get('submission_date') # Due date
+        
+        if not all([student_id, assignment_id, submission_date]):
+             return JsonResponse({'success': False, 'message': 'Missing required fields.'})
+             
+        student = Students.objects.get(id=student_id)
+        assignment = Assignments.objects.get(id=assignment_id)
+        
+        # Check if already assigned (optional, but good practice)
+        # Using submitted_on to track completion, so duplicate assignment might be weird if not completed.
+        # But let's allow re-assignment or check existence.
+        
+        # Create assignment record
+        StudentsAssignment.objects.create(
+            student=student,
+            assignment=assignment,
+            submission_date=submission_date, # This is the "Submit on or before"
+            created_by=request.user,
+            updated_by=request.user # Assuming model might use these or just ignore if not in model
+        )
+        
+        return JsonResponse({'success': True, 'message': 'Assignment assigned successfully.'})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+@login_required
+def ajax_get_students_by_course(request, course_id=None):
+    """Get active students for a course"""
+    try:
+        # If course_id is passed as arg (from url), use it. Else try GET param.
+        if course_id is None:
+            course_id = request.GET.get('course_id')
+            
+        # Students model does NOT have deleted_at. Use active=True.
+        students = Students.objects.filter(course_applied_id=course_id, active=True).values('id', 'first_name', 'last_name', 'student_id')
+        return JsonResponse({'students': list(students)})
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def ajax_get_subjects_by_student(request, student_id=None):
+    """Get subjects for a student"""
+    try:
+        if student_id is None:
+            student_id = request.GET.get('student_id')
+
+        # Use StudentsSubjects to find subjects assigned to the student
+        # StudentsSubjects HAS deleted_at
+        student_subjects = StudentsSubjects.objects.filter(
+            student_id=student_id, 
+            deleted_at__isnull=True
+        ).select_related('subject')
+        
+        subjects = []
+        for ss in student_subjects:
+            if ss.subject:
+                subjects.append({'id': ss.subject.id, 'name': ss.subject.subject_name}) # Using 'name' to match exams workflow
+                
+        return JsonResponse({'subjects': subjects})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def ajax_get_assignments_by_subject(request):
+    """Get assignments for a subject"""
+    subject_id = request.GET.get('subject_id')
+    # Assignments HAS deleted_at
+    assignments = Assignments.objects.filter(subject_id=subject_id, deleted_at__isnull=True).values('id', 'assignment_name')
+    return JsonResponse({'assignments': list(assignments)})
+
+@login_required
+def media_library_json(request):
+    """
+    Returns a JSON list of media files for the media selector.
+    Supports pagination and search.
+    """
+    page_number = request.GET.get('page', 1)
+    search_query = request.GET.get('search', '')
+    
+    media_list = MediaLibrary.objects.all().order_by('-created_at')
+    
+    if search_query:
+        media_list = media_list.filter(file_name__icontains=search_query)
+        
+    per_page = 18 # 6x3 grid
+    paginator = Paginator(media_list, per_page)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, return empty list (for infinite scroll/load more)
+        page_obj = []
+
+    data = []
+    has_next = False
+    next_page_number = None
+
+    if hasattr(page_obj, 'has_next'):
+        has_next = page_obj.has_next()
+        if has_next:
+            next_page_number = page_obj.next_page_number()
+
+    if page_obj:
+        for media in page_obj:
+            # Determine thumbnail URL
+            thumb_url = ''
+            if media.media_type == 'image' and media.file_path:
+                try:
+                    thumb_url = media.file_path.url
+                except:
+                    thumb_url = ''
+            elif media.media_type == 'video':
+                 thumb_url = '/static/admin/img/video-icon.png' # Placeholder
+            else:
+                 thumb_url = '/static/admin/img/file-icon.png' # Placeholder
+
+            data.append({
+                'id': media.id,
+                'name': media.file_name,
+                'url': media.file_path.url if media.file_path else '',
+                'thumb': thumb_url,
+                'type': media.media_type,
+                'dimensions': media.dimensions,
+                'size': media.file_size
+            })
+            
+    return JsonResponse({
+        'success': True,
+        'data': data,
+        'has_next': has_next,
+        'next_page': next_page_number
+    })
+
+@login_required
+@require_POST
+def media_library_upload_json(request):
+    """
+    Handles AJAX file uploads for the media library selector.
+    """
+    if 'file' in request.FILES:
+        try:
+            uploaded_file = request.FILES['file']
+            
+            media = MediaLibrary()
+            media.file_name = uploaded_file.name
+            media.file_path = uploaded_file
+            media.file_type = uploaded_file.name.split('.')[-1].lower()
+            media.file_size = f"{uploaded_file.size / 1024:.2f} KB"
+            media.created_by = request.user
+            media.updated_by = request.user
+            media.created_at = timezone.now()
+            
+            # Dimension check for images
+            if media.file_type in ['jpg', 'jpeg', 'png', 'gif', 'webp']:
+                try:
+                    img = Image.open(uploaded_file)
+                    media.dimensions = f"{img.width}x{img.height}"
+                    media.media_type = 'image'
+                except:
+                    media.media_type = 'file'
+            elif media.file_type in ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']:
+                 media.media_type = 'video'
+            else:
+                media.media_type = 'file'
+                
+            media.save()
+            
+            # Return the new media object data
+            return JsonResponse({
+                'success': True,
+                'media': {
+                    'id': media.id,
+                    'name': media.file_name,
+                    'url': media.file_path.url,
+                    'thumb': media.file_path.url if media.media_type == 'image' else '/static/admin/img/file-icon.png'
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+            
+    return JsonResponse({'success': False, 'message': 'No file provided'})
+
+# Question Management Views
+
+@login_required
+def question_descriptive_create(request, exam_id):
+    """Create descriptive question"""
+    exam = get_object_or_404(Exams, id=exam_id)
+    
+    if request.method == 'POST':
+        form = DescriptiveQuestionsForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.exam = exam
+            question.created_by = request.user
+            question.updated_by = request.user
+            question.created_at = timezone.now()
+            question.save()
+            messages.success(request, 'Question added successfully!')
+            return redirect('exams_edit', exam_id=exam_id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            return redirect('exams_edit', exam_id=exam_id) # Redirect back to edit page with errors (ideally handle errors better but for modal simplified)
+    
+    return redirect('exams_edit', exam_id=exam_id)
+
+@login_required
+def question_descriptive_edit(request, question_id):
+    """Edit descriptive question"""
+    question = get_object_or_404(DescriptiveQuestions, id=question_id)
+    
+    if request.method == 'POST':
+        form = DescriptiveQuestionsForm(request.POST, instance=question)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.updated_by = request.user
+            question.updated_at = timezone.now()
+            question.save()
+            messages.success(request, 'Question updated successfully!')
+            return redirect('exams_edit', exam_id=question.exam.id)
+    
+    return redirect('exams_edit', exam_id=question.exam.id)
+
+@login_required
+def question_descriptive_delete(request, question_id):
+    """Delete descriptive question"""
+    question = get_object_or_404(DescriptiveQuestions, id=question_id)
+    exam_id = question.exam.id
+    question.delete() # Hard delete as per model (no deleted_at in DescriptiveQuestions model view earlier, let's check)
+    # Checking model: DescriptiveQuestions does NOT have deleted_at field in my previous read (Wait, let me double check).
+    # Model definition:
+    # class DescriptiveQuestions(models.Model):
+    #     ...
+    #     updated_at = ...
+    #     created_at = ...
+    # No deleted_at. So hard delete.
+    messages.success(request, 'Question deleted successfully!')
+    return redirect('exams_edit', exam_id=exam_id)
+
+@login_required
+def question_objective_create(request, exam_id):
+    """Create objective question"""
+    exam = get_object_or_404(Exams, id=exam_id)
+    
+    if request.method == 'POST':
+        form = ObjectiveQuestionsForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.exam = exam
+            question.created_by = request.user
+            question.updated_by = request.user
+            question.created_at = timezone.now()
+            question.save()
+            messages.success(request, 'Question added successfully!')
+            return redirect('exams_edit', exam_id=exam_id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            return redirect('exams_edit', exam_id=exam_id)
+            
+    return redirect('exams_edit', exam_id=exam_id)
+
+@login_required
+def question_objective_edit(request, question_id):
+    """Edit objective question"""
+    question = get_object_or_404(ObjectiveQuestions, id=question_id)
+    
+    if request.method == 'POST':
+        form = ObjectiveQuestionsForm(request.POST, instance=question)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.updated_by = request.user
+            question.updated_at = timezone.now()
+            question.save()
+            messages.success(request, 'Question updated successfully!')
+            return redirect('exams_edit', exam_id=question.exam.id)
+            
+    return redirect('exams_edit', exam_id=question.exam.id)
+
+@login_required
+def question_objective_delete(request, question_id):
+    """Delete objective question"""
+    question = get_object_or_404(ObjectiveQuestions, id=question_id)
+    exam_id = question.exam.id
+    question.delete() # Hard delete
+    messages.success(request, 'Question deleted successfully!')
+    return redirect('exams_edit', exam_id=exam_id)
+
+
+
+@login_required
+def student_exams_toggle_approval(request, id):
+    if request.method == 'POST':
+        try:
+            student_exam = StudentsExams.objects.get(id=id)
+            student_exam.is_approved = not student_exam.is_approved
+            student_exam.updated_by = request.user
+            student_exam.save()
+            
+            status = 'approved' if student_exam.is_approved else 'revoked'
+            return JsonResponse({'success': True, 'message': f'Exam approval {status} successfully'})
+        except StudentsExams.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Exam not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+def student_exams_get(request, id):
+    try:
+        student_exam = StudentsExams.objects.get(id=id)
+        
+        exam_date = ''
+        start_time = ''
+        if student_exam.start_time:
+            exam_date = student_exam.start_time.strftime('%Y-%m-%d')
+            start_time = student_exam.start_time.strftime('%H:%M')
+
+        data = {
+            'id': student_exam.id,
+            'exam_date': exam_date,
+            'start_time': start_time,
+            'duration': student_exam.exam_duration,
+            'timezone': student_exam.timezone
+        }
+        return JsonResponse({'success': True, 'data': data})
+    except StudentsExams.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Exam not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+@login_required
+def student_exams_update(request, id):
+    if request.method == 'POST':
+        try:
+            student_exam = StudentsExams.objects.get(id=id)
+            
+            exam_date = request.POST.get('exam_date')
+            start_time = request.POST.get('start_time')
+            duration = request.POST.get('duration')
+            timezone = request.POST.get('timezone')
+            
+            if start_time and exam_date:
+                # Combine date and time
+                combined_dt_str = f"{exam_date} {start_time}"
+                student_exam.start_time = datetime.strptime(combined_dt_str, '%Y-%m-%d %H:%M')
+            
+            if duration:
+                student_exam.exam_duration = int(duration)
+                
+            if timezone:
+                student_exam.timezone = timezone
+            
+            student_exam.updated_by = request.user
+            student_exam.save()
+            
+            return JsonResponse({'success': True, 'message': 'Exam updated successfully'})
+        except StudentsExams.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Exam not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})

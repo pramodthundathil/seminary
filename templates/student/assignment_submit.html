@@ -1,0 +1,119 @@
+{% extends "student/index.html" %}
+
+{% block title %}Submit Assignment{% endblock %}
+
+{% block middle %}
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card"
+            style="border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div class="card-header bg-white p-4"
+                style="border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0;">
+                <h4 class="mb-0 text-primary"><i class="bi bi-pencil-square me-2"></i>Submit Assignment</h4>
+            </div>
+            <div class="card-body p-4">
+
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="assignment-info mb-4 p-3 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>Subject:</strong> {{ student_assignment.assignment.subject.subject_name }}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Assignment Name:</strong> {{ student_assignment.assignment.assignment_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Type:</strong>
+                            {% if student_assignment.assignment.assignment_type == 'Paper Upload Type' %}
+                            Paper Upload (File)
+                            {% else %}
+                            Paper Submit (Text)
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Total Marks:</strong> {{ student_assignment.assignment.total_score }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions/Instructions Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 border-bottom pb-2">Instructions / Questions</h5>
+                    {% if questions %}
+                    <div class="questions-list">
+                        {% for q in questions %}
+                        <div class="question-item mb-3">
+                            <div class="fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No specific questions listed.</p>
+                    {% endif %}
+                </div>
+
+                <form method="POST" enctype="multipart/form-data"
+                    action="{% url 'submit_assignment' student_assignment.id %}">
+                    {% csrf_token %}
+
+                    {% if student_assignment.assignment.assignment_type == 'Paper Upload Type' %}
+                    <div class="mb-4">
+                        <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
+                        <input type="file" class="form-control" id="answer_file" name="answer_file" required>
+                        <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
+                    </div>
+                    {% elif student_assignment.assignment.assignment_type == 'Paper Submit Type' %}
+                    {% if questions %}
+                    <div class="mb-4">
+                        <p class="text-muted mb-2">Please answer the questions below:</p>
+                        {% for q in questions %}
+                        <div class="mb-4 p-3 border rounded bg-light">
+                            <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }}
+                                Marks)</label>
+                            <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5"
+                                placeholder="Type your answer for Question {{ forloop.counter }}..."></textarea>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
+                        <textarea class="form-control" id="answer_text" name="answer_text" rows="10"
+                            placeholder="Type your answer here..." style="width: 100%;"></textarea>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Unknown Assignment Type: "{{ student_assignment.assignment.assignment_type }}"
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'student_pending_assignment' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-1"></i> Submit
+                            Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if student_assignment.assignment.assignment_type == 'paper_submit' %}
+<!-- Include CKEditor if available or just use simple textarea styling -->
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        ClassicEditor
+            .create(document.querySelector('#answer_text'))
+            .catch(error => {
+                console.error(error);
+            });
+    });
+</script>
+{% endif %}
+
+{% endblock %}
