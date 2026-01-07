@@ -119,6 +119,17 @@
         </div>
     </div>
 
+    <div class="gallery-filters" style="margin-bottom: 20px;">
+        <div class="filter-group">
+            <label class="filter-label" for="statusFilter" style="margin-right: 10px; font-weight: 500;">Status:</label>
+            <select id="statusFilter" class="form-control d-inline-block" style="width: 200px;" onchange="booksTable.ajax.reload()">
+                <option value="">All Assignments</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+    </div>
+
     <div class="table-container">
         <table id="booksTable" class="display" style="width:100%">
             <thead>
@@ -218,18 +229,29 @@
     let booksTable;
 
     $(document).ready(function () {
+        // Init filter from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const statusParam = urlParams.get('status');
+        if (statusParam) {
+            $('#statusFilter').val(statusParam);
+        }
+
         booksTable = $('#booksTable').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             ajax: {
                 url: '{% url "student_books_datatable" %}',
-                type: 'GET'
+                type: 'GET',
+                data: function(d) {
+                    d.status = $('#statusFilter').val();
+                }
             },
             columns: [
                 { data: 'id' },
                 { data: 'student_name' },
                 { data: 'book_title' },
+                { data: 'status' },
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
@@ -395,6 +417,34 @@
                         Swal.fire('Error', 'Failed to delete assignment', 'error');
                     }
                 });
+            }
+        });
+    }
+
+    window.toggleApproval = function (id) {
+        $.ajax({
+            url: '/menu/admin/students/books/toggle-approval/' + id + '/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function (response) {
+                if (response.success) {
+                    booksTable.ajax.reload(null, false);
+                    const toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    toast.fire({
+                        icon: 'success',
+                        title: response.message
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Failed to update status', 'error');
             }
         });
     }

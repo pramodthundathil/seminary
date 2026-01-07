@@ -1,0 +1,42 @@
+{% for item in items %}
+<li class="dd-item" data-id="{{ item.id }}">
+    <div class="dd-handle">
+        {{ item.title }}
+        <span class="fw-normal text-muted ms-2" style="font-size: 0.85em;">
+            {% if item.menu_type == 'page' %}
+                (Page)
+            {% elif item.menu_type == 'custom' %}
+                (Link: {{ item.url|truncatechars:30 }})
+            {% elif item.menu_type == 'internal' %}
+                (Path: {{ item.url }})
+            {% else %}
+                ({{ item.menu_type|title }})
+            {% endif %}
+        </span>
+    </div>
+    <div class="dd-actions" style="position: absolute; right: 10px; top: 10px;">
+        <button class="btn btn-sm btn-outline-primary edit-item-btn" 
+                data-id="{{ item.id }}"
+                data-title="{{ item.title }}"
+                data-url="{{ item.url }}"
+                data-type="{{ item.menu_type }}"
+                data-page="{% if item.pages %}{{ item.pages.id }}{% endif %}"
+                data-target="{{ item.target_blank }}"
+                data-bs-toggle="modal" 
+                data-bs-target="#itemModal">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <a href="{% url 'menu_item_delete' item.id %}" 
+           class="btn btn-sm btn-outline-danger"
+           onclick="return confirm('Are you sure you want to delete this item?');">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+
+    {% if item.children %}
+    <ol class="dd-list">
+        {% include "admin/menus/menu_item_recursive.html" with items=item.children %}
+    </ol>
+    {% endif %}
+</li>
+{% endfor %}

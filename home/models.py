@@ -404,11 +404,13 @@ class Courses(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="course_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="course_updated")
-
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'courses'
+    def __str__(self):
+        return str(self.course_name)
 
 class DescriptiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1117,6 +1119,8 @@ class StudentsBooks(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='books')
     book = models.ForeignKey(BookReferences, on_delete=models.DO_NOTHING, related_name='students')
+    is_approved = models.BooleanField(default=False)
+    requested_by = models.ForeignKey(Users, on_delete=models.SET_NULL, blank=True, null=True, related_name='book_requested')
     updated_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="student_books_created")

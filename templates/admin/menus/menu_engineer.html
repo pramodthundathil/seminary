@@ -1,653 +1,326 @@
 {% extends 'admin/index.html' %}
+{% load static %}
 {% block content %}
 
+<!-- Nestable2 CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.css" />
+
 <style>
-    :root {
-        --primary-cyan: #00CED1;
-        --light-cyan: #E0F7F7;
-        --dark-navy: #1B2845;
-        --purple-gradient-start: #A78BFA;
-        --purple-gradient-end: #C084FC;
-        --green-card: #90EE90;
-        --blue-button: #4169E1;
-        --text-gray: #666666;
-    }
-
-    * {
-        font-family: 'Roboto Condensed', sans-serif;
-    }
-
-    .menu-engineer-container {
+    .engineer-container {
         padding: 30px;
-        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+        background: var(--bg-gray);
         min-height: 100vh;
     }
 
-    .engineer-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding: 25px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .dd {
+        max-width: 100%;
     }
 
-    .engineer-header h1 {
-        color: var(--dark-navy);
-        font-size: 28px;
-        font-weight: 700;
-    }
-
-    .header-actions {
-        display: flex;
-        gap: 15px;
-    }
-
-    .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 8px;
+    .dd-handle {
+        height: 50px;
+        padding: 12px 15px;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
-    }
-
-    .btn-success {
-        background: var(--green-card);
-        color: #2d6a2d;
-    }
-
-    .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(144, 238, 144, 0.4);
-    }
-
-    .engineer-content {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 30px;
-    }
-
-    .menu-settings-panel {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        height: fit-content;
-    }
-
-    .panel-title {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--dark-navy);
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid var(--light-cyan);
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-label {
-        display: block;
-        font-weight: 600;
-        color: var(--dark-navy);
-        margin-bottom: 8px;
-        font-size: 14px;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #e0e0e0;
         border-radius: 8px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary-cyan);
-        box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.1);
-    }
-
-    .pages-library {
+        border: 1px solid #e5e7eb;
         background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s;
+    }
+    
+    .dd-handle:hover {
+        background: #f9fafb;
     }
 
-    .pages-list {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .page-item {
-        padding: 12px;
-        margin-bottom: 8px;
-        background: var(--light-cyan);
-        border-radius: 8px;
-        cursor: grab;
-        transition: all 0.3s ease;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .page-item:hover {
-        background: var(--primary-cyan);
-        color: white;
-        transform: translateX(5px);
-    }
-
-    .page-item.dragging {
-        opacity: 0.5;
-        cursor: grabbing;
-    }
-
-    .menu-builder {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        min-height: 600px;
-    }
-
-    .menu-items-list {
-        min-height: 400px;
-        padding: 20px;
-        background: #f9f9f9;
-        border-radius: 8px;
-        border: 2px dashed #ddd;
-    }
-
-    .menu-items-list.drag-over {
-        background: var(--light-cyan);
-        border-color: var(--primary-cyan);
-    }
-
-    .menu-item {
-        background: white;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        border-left: 4px solid var(--blue-button);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        cursor: move;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .menu-item:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        transform: translateX(5px);
-    }
-
-    .menu-item.dragging {
-        opacity: 0.5;
-    }
-
-    .menu-item-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .menu-item-title {
-        font-weight: 600;
-        color: var(--dark-navy);
-        font-size: 16px;
-    }
-
-    .menu-item-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-icon {
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-    }
-
-    .btn-edit {
-        background: var(--blue-button);
-        color: white;
-    }
-
-    .btn-delete {
-        background: #ff6b6b;
-        color: white;
-    }
-
-    .btn-icon:hover {
-        transform: scale(1.1);
-    }
-
-    .menu-item-meta {
-        display: flex;
-        gap: 15px;
+    .dd-item > button {
         margin-top: 10px;
-        font-size: 13px;
-        color: var(--text-gray);
+        color: #6b7280;
     }
 
-    .sub-menu-item {
-        margin-left: 40px;
-        border-left-color: var(--purple-gradient-start);
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+        background: white;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--text-gray);
+    .card-body {
+        padding: 24px;
     }
 
-    .empty-state i {
-        font-size: 64px;
-        color: var(--primary-cyan);
-        margin-bottom: 20px;
+    .dropdown-area {
+        margin-top: 15px;
     }
-
-    @media (max-width: 1200px) {
-        .engineer-content {
-            grid-template-columns: 1fr;
-        }
+    
+    .btn-primary {
+        background-color: var(--blue-button);
+        border: none;
     }
 </style>
 
-<div class="menu-engineer-container">
-    <div class="engineer-header">
-        <h1>🎨 Menu Engineer</h1>
-        <div class="header-actions">
-            <a href="{% url 'menu_list' %}" class="btn btn-primary">
-                <i class="fas fa-list"></i> All Menus
-            </a>
-            <button type="button" class="btn btn-success" onclick="saveMenu()">
-                <i class="fas fa-save"></i> Save Menu
-            </button>
-        </div>
-    </div>
+<div class="engineer-container">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Menu Details Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold mb-4">Menu Details</h5>
+                    <form method="post" action="{% url 'save_menu' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="menu_id" value="{{ menu.id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ menu.name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Code</label>
+                            <input type="text" name="code" class="form-control" value="{{ menu.code }}" required>
+                        </div>
+                         
+                        <div class="mb-3">
+                            <label class="form-label">Position</label>
+                            <select name="menu_position" class="form-control">
+                                <option value="header" {% if menu.menu_position == 'header' %}selected{% endif %}>Header</option>
+                                <option value="footer" {% if menu.menu_position == 'footer' %}selected{% endif %}>Footer</option>
+                                <option value="sidebar" {% if menu.menu_position == 'sidebar' %}selected{% endif %}>Sidebar</option>
+                            </select>
+                        </div>
 
-    <div class="engineer-content">
-        <!-- Left Panel: Menu Settings -->
-        <div>
-            <div class="menu-settings-panel">
-                <h3 class="panel-title">Menu Settings</h3>
-                
-                <form id="menuForm">
-                    {% csrf_token %}
-                    <input type="hidden" id="menuId" name="menu_id" value="{% if menu %}{{ menu.id }}{% endif %}">
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="status">Status</label>
-                        <select class="form-control" id="status" name="status">
-                            <option value="1" {% if menu and menu.status == 1 %}selected{% endif %}>Enabled</option>
-                            <option value="0" {% if menu and menu.status == 0 %}selected{% endif %}>Disabled</option>
-                        </select>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-control">
+                                <option value="1" {% if menu.status == 1 %}selected{% endif %}>Enabled</option>
+                                <option value="0" {% if menu.status == 0 %}selected{% endif %}>Disabled</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="menuPosition">Menu Position</label>
-                        <select class="form-control" id="menuPosition" name="menu_position">
-                            <option value="header" {% if menu and menu.menu_position == 'header' %}selected{% endif %}>Header</option>
-                            <option value="footer" {% if menu and menu.menu_position == 'footer' %}selected{% endif %}>Footer</option>
-                            <option value="sidebar" {% if menu and menu.menu_position == 'sidebar' %}selected{% endif %}>Sidebar</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="menuName">Name</label>
-                        <input type="text" class="form-control" id="menuName" name="name" 
-                               value="{% if menu %}{{ menu.name }}{% endif %}" 
-                               placeholder="Header1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="menuCode">Code</label>
-                        <input type="text" class="form-control" id="menuCode" name="code" 
-                               value="{% if menu %}{{ menu.code }}{% endif %}" 
-                               placeholder="header-menu" required>
-                    </div>
-                </form>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Details</button>
+                            <a href="{% url 'menu_list' %}" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <!-- Pages Library -->
-            <div class="pages-library">
-                <h3 class="panel-title">Pages Library</h3>
-                <div class="pages-list">
-                    {% for page in pages %}
-                    <div class="page-item" draggable="true" 
-                         data-page-id="{{ page.id }}" 
-                         data-page-title="{{ page.title }}"
-                         data-page-code="{{ page.code }}"
-                         ondragstart="handleDragStart(event)">
-                        <span>{{ page.title }}</span>
-                        <i class="fas fa-grip-vertical"></i>
-                    </div>
-                    {% endfor %}
+            <!-- Add Item Card -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold mb-4">Add Menu Item</h5>
+                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#itemModal"
+                        id="add-item-btn">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Item
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Right Panel: Menu Builder -->
-        <div class="menu-builder">
-            <h3 class="panel-title">Menu Structure (Drag & Drop Pages)</h3>
-            
-            <div class="menu-items-list" id="menuItemsList" 
-                 ondrop="handleDrop(event)" 
-                 ondragover="handleDragOver(event)"
-                 ondragleave="handleDragLeave(event)">
-                
-                {% if menu_items %}
-                    {% for item in menu_items %}
-                    <div class="menu-item {% if item.parent_id > 0 %}sub-menu-item{% endif %}" 
-                         draggable="true"
-                         data-item-id="{{ item.id }}"
-                         data-page-id="{% if item.pages %}{{ item.pages.id }}{% endif %}"
-                         data-parent-id="{{ item.parent_id }}"
-                         ondragstart="handleMenuItemDragStart(event)">
-                        <div class="menu-item-header">
-                            <div class="menu-item-title">
-                                <i class="fas fa-bars"></i> {{ item.title }}
-                            </div>
-                            <div class="menu-item-actions">
-                                <button class="btn-icon btn-delete" onclick="removeMenuItem(this)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="menu-item-meta">
-                            <span><i class="fas fa-link"></i> {{ item.url|default:"Auto-generated" }}</span>
-                            {% if item.pages %}
-                            <span><i class="fas fa-file"></i> Page: {{ item.pages.code }}</span>
-                            {% endif %}
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title fw-semibold m-0">Menu Structure</h5>
+                        <div>
+                            <a href="{% url 'refresh_menu_urls' menu.id %}" class="btn btn-sm btn-info me-2 text-white">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh URLs
+                            </a>
+                            <button class="btn btn-sm btn-primary" id="save-order">
+                                <i class="fas fa-save me-1"></i>Save Order
+                            </button>
                         </div>
                     </div>
-                    {% endfor %}
-                {% else %}
-                <div class="empty-state" id="emptyState">
-                    <i class="fas fa-hand-pointer"></i>
-                    <h3>Start Building Your Menu</h3>
-                    <p>Drag and drop pages from the library to create your menu structure</p>
+
+                    <div class="dd" id="menu-nestable">
+                        <ol class="dd-list">
+                            {% include "admin/menus/menu_item_recursive.html" with items=menu_tree %}
+                        </ol>
+                    </div>
+
+                    {% if not menu_tree %}
+                    <div class="alert alert-light border text-center py-4 mt-3">
+                        <i class="fas fa-folder-open text-muted fa-2x mb-3"></i>
+                        <p class="mb-0 text-muted">No items yet. Click "Add New Item" to start!</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<script>
-let draggedElement = null;
-let menuItemsData = [];
-
-// Load existing menu items
-{% if menu_items %}
-menuItemsData = [
-    {% for item in menu_items %}
-    {
-        id: {{ item.id }},
-        title: "{{ item.title|escapejs }}",
-        url: "{{ item.url|escapejs }}",
-        page_id: {% if item.pages %}{{ item.pages.id }}{% else %}null{% endif %},
-        page_title: "{% if item.pages %}{{ item.pages.title|escapejs }}{% endif %}",
-        menu_type: "{{ item.menu_type }}",
-        parent_id: {{ item.parent_id }},
-        target_blank: {{ item.target_blank }},
-        menu_order: {{ item.menu_order }}
-    }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-];
-{% endif %}
-
-// Drag handlers for page items
-function handleDragStart(e) {
-    draggedElement = e.target;
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/html', e.target.innerHTML);
-    e.target.classList.add('dragging');
-}
-
-function handleMenuItemDragStart(e) {
-    draggedElement = e.target;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.target.innerHTML);
-    e.target.classList.add('dragging');
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'copy';
-    e.currentTarget.classList.add('drag-over');
-    return false;
-}
-
-function handleDragLeave(e) {
-    e.currentTarget.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-    e.preventDefault();
-    
-    const container = document.getElementById('menuItemsList');
-    container.classList.remove('drag-over');
-    
-    // Remove empty state if exists
-    const emptyState = document.getElementById('emptyState');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    if (draggedElement.classList.contains('page-item')) {
-        // Adding new page from library
-        const pageId = draggedElement.dataset.pageId;
-        const pageTitle = draggedElement.dataset.pageTitle;
-        const pageCode = draggedElement.dataset.pageCode;
-        
-        addMenuItem(pageId, pageTitle, pageCode);
-    } else if (draggedElement.classList.contains('menu-item')) {
-        // Reordering existing menu items
-        const dropTarget = e.target.closest('.menu-item');
-        if (dropTarget && dropTarget !== draggedElement) {
-            const allItems = [...container.querySelectorAll('.menu-item')];
-            const draggedIndex = allItems.indexOf(draggedElement);
-            const targetIndex = allItems.indexOf(dropTarget);
-            
-            if (draggedIndex < targetIndex) {
-                dropTarget.parentNode.insertBefore(draggedElement, dropTarget.nextSibling);
-            } else {
-                dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
-            }
-        }
-    }
-    
-    draggedElement.classList.remove('dragging');
-    draggedElement = null;
-    
-    return false;
-}
-
-function addMenuItem(pageId, pageTitle, pageCode) {
-    const container = document.getElementById('menuItemsList');
-    
-    const menuItem = document.createElement('div');
-    menuItem.className = 'menu-item';
-    menuItem.draggable = true;
-    menuItem.dataset.pageId = pageId;
-    menuItem.dataset.parentId = 0;
-    menuItem.ondragstart = handleMenuItemDragStart;
-    
-    menuItem.innerHTML = `
-        <div class="menu-item-header">
-            <div class="menu-item-title">
-                <i class="fas fa-bars"></i> ${pageTitle}
-            </div>
-            <div class="menu-item-actions">
-                <button class="btn-icon btn-delete" onclick="removeMenuItem(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="menu-item-meta">
-            <span><i class="fas fa-link"></i> Auto-generated</span>
-            <span><i class="fas fa-file"></i> Page: ${pageCode}</span>
-        </div>
-    `;
-    
-    container.appendChild(menuItem);
-}
-
-function removeMenuItem(button) {
-    if (confirm('Are you sure you want to remove this menu item?')) {
-        const menuItem = button.closest('.menu-item');
-        menuItem.remove();
-        
-        // Show empty state if no items left
-        const container = document.getElementById('menuItemsList');
-        if (container.querySelectorAll('.menu-item').length === 0) {
-            container.innerHTML = `
-                <div class="empty-state" id="emptyState">
-                    <i class="fas fa-hand-pointer"></i>
-                    <h3>Start Building Your Menu</h3>
-                    <p>Drag and drop pages from the library to create your menu structure</p>
+<!-- Add/Edit Item Modal -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true" style="z-index: 1054;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'menu_item_create' %}" id="item-form">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Add Menu Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            `;
-        }
-    }
-}
+                <div class="modal-body">
+                    <input type="hidden" name="menu_id" value="{{ menu.id }}">
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+                    <div class="mb-3">
+                        <label class="form-label">Link Type</label>
+                        <select name="menu_type" id="id_menu_type" class="form-select">
+                            <option value="page">Page Link</option>
+                            <option value="course">Course Link</option>
+                            <option value="custom">Custom Link (External)</option>
+                            <option value="internal">Internal Link (Path)</option>
+                            <option value="no_link">No Link (Parent Container)</option>
+                        </select>
+                    </div>
 
-async function saveMenu() {
-    const form = document.getElementById('menuForm');
-    const formData = new FormData(form);
-    
-    // Validate form
-    if (!formData.get('name') || !formData.get('code')) {
-        alert('Please fill in all required fields (Name and Code)');
-        return;
-    }
-    
-    const csrftoken = getCookie('csrftoken');
-    
-    try {
-        // Save menu settings first
-        const menuResponse = await fetch('{% url "save_menu" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            body: formData
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        {{ item_form.title }}
+                    </div>
+
+                    <div class="mb-3" id="div_id_pages">
+                        <label class="form-label">Select Page</label>
+                        {{ item_form.pages }}
+                    </div>
+
+                    <div class="mb-3 d-none" id="div_id_courses">
+                        <label class="form-label">Select Course</label>
+                        {{ item_form.courses }}
+                    </div>
+
+                    <div class="mb-3 d-none" id="div_id_url">
+                        <label class="form-label" id="lbl_url">URL</label>
+                        {{ item_form.url }}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ item_form.target_blank }}
+                        <label class="form-check-label" for="id_target_blank">Open in New Tab?</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Init Nestable
+        $('#menu-nestable').nestable({
+            group: 1,
+            maxDepth: 5
         });
-        
-        const menuResult = await menuResponse.json();
-        
-        if (!menuResult.success) {
-            alert('Error saving menu: ' + menuResult.message);
-            return;
-        }
-        
-        const menuId = menuResult.menu_id;
-        document.getElementById('menuId').value = menuId;
-        
-        // Collect menu items
-        const container = document.getElementById('menuItemsList');
-        const menuItems = container.querySelectorAll('.menu-item');
-        const itemsData = [];
-        
-        menuItems.forEach((item, index) => {
-            const pageId = item.dataset.pageId;
-            const title = item.querySelector('.menu-item-title').textContent.trim();
-            const parentId = item.dataset.parentId || 0;
-            
-            itemsData.push({
-                page_id: pageId,
-                title: title,
-                url: '',
-                menu_type: 'page',
-                parent_id: parentId,
-                target_blank: 0,
-                original_title: title,
-                menu_order: index + 1
+
+        // Save Order AJAX
+        $('#save-order').click(function () {
+            var menuData = $('#menu-nestable').nestable('serialize');
+            // Nestable2 uses 'id' data attribute. Our recursive template sets data-id="{{ item.id }}" properly.
+
+            $.ajax({
+                url: "{% url 'update_menu_order' %}",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ menu_data: menuData }),
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}, // Key fix: add CSRF token header
+                success: function (response) {
+                    alert('Order saved successfully!');
+                },
+                error: function (xhr) {
+                    alert('Error saving order: ' + xhr.responseText);
+                }
             });
         });
-        
-        // Save menu items
-        const itemsFormData = new FormData();
-        itemsFormData.append('menu_id', menuId);
-        itemsFormData.append('items', JSON.stringify(itemsData));
-        
-        const itemsResponse = await fetch('{% url "save_menu_items" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            body: itemsFormData
+
+        // Handle Link Type Change
+        $('#id_menu_type').change(function () {
+            var type = $(this).val();
+            // Reset visibility
+            $('#div_id_pages').addClass('d-none');
+            $('#div_id_courses').addClass('d-none');
+            $('#div_id_url').addClass('d-none');
+            
+            if (type === 'page') {
+                $('#div_id_pages').removeClass('d-none');
+            } else if (type === 'course') {
+                $('#div_id_courses').removeClass('d-none');
+            } else if (type === 'custom') {
+                $('#div_id_url').removeClass('d-none');
+                $('#lbl_url').text('External URL (e.g. https://google.com)');
+            } else if (type === 'internal') {
+                $('#div_id_url').removeClass('d-none');
+                $('#lbl_url').text('Internal Path (e.g. /about-us)');
+            }
+            // 'no_link' needs nothing
+        });
+
+        // Handle Edit Click - Delegated since items are dynamic? Not really, loaded via server.
+        // But if we add refresh logic later... currently standardized.
+        $(document).on('click', '.edit-item-btn', function () {
+            var btn = $(this);
+            var id = btn.data('id');
+            var title = btn.data('title');
+            var url = btn.data('url');
+            var page = btn.data('page');
+            var type = btn.data('type');
+            var target = btn.data('target');
+
+                    // Default legacy handling
+            if (!type) {
+                if (page) type = 'page';
+                else type = 'custom';
+            }
+            
+            // Try to infer course type if URL matches (optional, but helpful for old items if any)
+            if (url && url.startsWith('courses/')) {
+                // If we implemented robust JS parsing we could set type='course' and select logic.
+                // But simplified: existing items carry data-type attribute.
+            }
+
+            // Update Modal for Edit
+            $('#itemModalLabel').text('Edit Menu Item');
+            // Construct Update URL
+            // We need a proper URL pattern. Let's use a placeholder and replace it?
+            // Or simple simple string concat if we know the pattern structure.
+            // URL pattern: path('admin/menus/items/update/<int:pk>/', ...)
+            // We need to register this in urls.py first!
+            
+            // Assume we will register it as: /menu/admin/menus/items/update/ID/
+            // Note: In views I named it 'menu_item_update'. 
+            // I need to check `urls.py` in the next step to ensure routes match.
+            // For now I will assume a standard pattern and fix URLS next.
+            var actionUrl = "{% url 'menu_item_update' 0 %}".replace('0', id);
+            $('#item-form').attr('action', actionUrl);
+
+            // Fill fields
+            // ID fields are generated by Django Form: id_title, id_url...
+            $('#id_title').val(title);
+            $('#id_url').val(url);
+            $('#id_pages').val(page);
+            $('#id_menu_type').val(type).change(); // Trigger change to show correct fields
+
+            if (target === true || target === 'True' || target === 'true') {
+                $('#id_target_blank').prop('checked', true);
+            } else {
+                $('#id_target_blank').prop('checked', false);
+            }
+        });
+
+        // Reset Modal on Open for Add
+        $('#add-item-btn').click(function () {
+            $('#itemModalLabel').text('Add Menu Item');
+            $('#item-form').attr('action', "{% url 'menu_item_create' %}");
+            $('#item-form')[0].reset();
+            $('#id_target_blank').prop('checked', false);
+            $('#id_menu_type').val('page').change(); // Default
         });
         
-        const itemsResult = await itemsResponse.json();
-        
-        if (itemsResult.success) {
-            alert('Menu saved successfully!');
-            window.location.href = '{% url "menu_list" %}';
-        } else {
-            alert('Error saving menu items: ' + itemsResult.message);
-        }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while saving the menu');
-    }
-}
-
-// Prevent default drag behavior on document
-document.addEventListener('dragover', function(e) {
-    e.preventDefault();
-}, false);
-
-document.addEventListener('drop', function(e) {
-    e.preventDefault();
-}, false);
+        // Trigger initial state
+        $('#id_menu_type').trigger('change');
+    });
 </script>
-
 {% endblock %}

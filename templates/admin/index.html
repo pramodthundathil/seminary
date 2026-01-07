@@ -4147,8 +4147,43 @@
                 </div>
             </div>
         </div>
+{% block content %}
+        <!-- Pending Actions -->
+        <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Pending Actions</h4>
+        <div class="stats-row">
+            <a href="{% url 'student_list' %}?status=pending" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="border-left: 5px solid #FFC107;">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-value">{{ new_students_count|default:"0" }}</div>
+                    <div class="stat-label">New Applications</div>
+                </div>
+            </a>
+            
+            <a href="{% url 'student_subjects_list' %}?status=pending" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="border-left: 5px solid #FFC107;">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <div class="stat-value">{{ pending_subjects_count|default:"0" }}</div>
+                    <div class="stat-label">Subject Requests</div>
+                </div>
+            </a>
 
-        {% block content %}
+            <a href="{% url 'student_books_list' %}?status=pending" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="border-left: 5px solid #FFC107;">
+                    <div class="stat-icon yellow">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-value">{{ pending_books_count|default:"0" }}</div>
+                    <div class="stat-label">Book Requests</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- General Stats -->
+        <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Overview</h4>
         <!-- Stats Cards -->
         <div class="stats-row">
             <div class="stat-card">

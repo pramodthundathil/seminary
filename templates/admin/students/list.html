@@ -373,6 +373,15 @@
     let studentTable;
 
     $(document).ready(function () {
+        // Check URL params for status filter
+        const urlParams = new URLSearchParams(window.location.search);
+        const statusParam = urlParams.get('status');
+        if (statusParam === 'pending') {
+            $('#statusFilter').val('0');
+        } else if (statusParam === 'approved') {
+            $('#statusFilter').val('1');
+        }
+
         studentTable = $('#studentTable').DataTable({
             processing: true,
             serverSide: true,

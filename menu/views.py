@@ -31,6 +31,8 @@ from .forms import *
 from home.decorators import role_redirection
 from datetime import datetime, timedelta
 
+from django.views.decorators.csrf import csrf_exempt
+
 @role_redirection
 @login_required
 def admin_index(request):
@@ -102,6 +104,12 @@ def admin_index(request):
     attended_classes = 80  # Example
     attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
     
+    # ---------------- DASHBOARD NEW METRICS ----------------
+    new_students_count = Students.objects.filter(status=False).count()
+    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False).count()
+    pending_books_count = StudentsBooks.objects.filter(is_approved=False).count()
+    # -------------------------------------------------------
+    
     context = {
         'total_students': total_students,
         'new_students': new_students,
@@ -119,6 +127,9 @@ def admin_index(request):
         'students_start': 1,
         'students_end': min(10, len(new_students)),
         'admin_pages': admin_pages,  # Dynamic navigation pages
+        'new_students_count': new_students_count,
+        'pending_subjects_count': pending_subjects_count,
+        'pending_books_count': pending_books_count,
     }
     
     return render(request, "admin/index.html", context)
@@ -126,46 +137,296 @@ def admin_index(request):
 @login_required
 def menu_list(request):
     """Display all menus"""
-    menus = Menus.objects.filter(deleted_at__isnull=True).order_by('-created_at')
     context = {
-        'menus': menus,
         'page_title': 'Menu Management'
     }
     return render(request, 'admin/menus/menu_list.html', context)
 
 @login_required
+def menu_datatable(request):
+    """DataTables server-side processing for menus"""
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+    
+    # Column mapping
+    columns = ['id', 'name', 'code', 'menu_position', 'status', 'created_at']
+    order_column_index = int(request.GET.get('order[0][column]', 0))
+    order_direction = request.GET.get('order[0][dir]', 'desc')
+    
+    order_column = columns[order_column_index] if order_column_index < len(columns) else 'created_at'
+    if order_direction == 'desc':
+        order_column = f'-{order_column}'
+    
+    # Query
+    menus_query = Menus.objects.filter(deleted_at__isnull=True)
+    
+    # Search
+    if search_value:
+        menus_query = menus_query.filter(
+            Q(name__icontains=search_value) |
+            Q(code__icontains=search_value) |
+            Q(menu_position__icontains=search_value)
+        )
+    
+    # Total records
+    total_records = Menus.objects.filter(deleted_at__isnull=True).count()
+    filtered_records = menus_query.count()
+    
+    # Order and paginate
+    menus_query = menus_query.order_by(order_column)[start:start + length]
+    
+    # Prepare data
+    data = []
+    for menu in menus_query:
+        status_badge = f'<span class="badge-enabled">Enabled</span>' if menu.status == 1 else f'<span class="badge-disabled">Disabled</span>'
+        
+        items_count = MenuItems.objects.filter(menus=menu, deleted_at__isnull=True).count()
+        
+        actions = f'''
+            <div class="action-buttons">
+                <a href="/menu/menus/engineer/{menu.id}/" class="btn-action btn-edit" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn-action btn-delete" onclick="deleteMenu({menu.id}, '{menu.name}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        '''
+        
+        data.append({
+            'id': menu.id,
+            'name': f'<div class="menu-name">{menu.name}</div><div class="menu-code">{menu.code}</div>',
+            'position': f'<span class="badge-position">{menu.menu_position}</span>',
+            'items': items_count,
+            'status': status_badge,
+            'created_at': menu.created_at.strftime('%b %d, %Y') if menu.created_at else '',
+            'actions': actions
+        })
+    
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total_records,
+        'recordsFiltered': filtered_records,
+        'data': data
+    })
+
+@login_required
 def menu_engineer(request, menu_id=None):
-    """Menu engineering page with drag and drop"""
+    """Menu engineering page with Nestable2"""
     if menu_id:
         menu = get_object_or_404(Menus, id=menu_id, deleted_at__isnull=True)
     else:
-        menu = None
+        # Create a new menu if not exists, or redirect to list? 
+        # User flow suggests creating menu first.
+        # But for new implementation, let's assume menu exists or handle create separately.
+        return redirect('menu_list')
     
-    # Get all available pages
-    pages = Pages.objects.filter(deleted_at__isnull=True, status=1).order_by('title')
+    # Get items in hierarchical structure (recursive logic handled in template or helper)
+    # We can fetch all items and build tree in Python or let template handle simple recursion
+    items = MenuItems.objects.filter(menus_id=menu.id, deleted_at__isnull=True).order_by('menu_order')
     
-    # Get existing menu items if editing
-    menu_items = []
-    if menu:
-        menu_items = MenuItems.objects.filter(
-            # menus=menu, 
-            # menus_id = models.IntegerField(db_column='menus_id'),
-            menus_id=menu.id,
+    # Build Tree
+    def build_tree(items, parent_id=None):
+        tree = []
+        for item in items:
+            # Handle None vs 0 vs NULL for parent_id_id comparison
+            # In DB parent_id is ForeignKey.
+            item_parent_id = item.parent_id_id # access ID content directly
+            
+            # Treat None and 0 same? No. Treat None as root.
+            if item_parent_id == parent_id:
+                children = build_tree(items, item.id)
+                item.children = children
+                tree.append(item)
+        return tree
 
-            deleted_at__isnull=True
-        ).order_by('menu_order')
+    menu_tree = build_tree(items, None)
     
-    # Get all menus for selection
-    all_menus = Menus.objects.filter(deleted_at__isnull=True)
+    form = MenuForm(instance=menu)
+    item_form = MenuItemsForm()
     
     context = {
         'menu': menu,
-        'pages': pages,
-        'menu_items': menu_items,
-        'all_menus': all_menus,
-        'page_title': 'Menu Engineer' if menu else 'Create Menu'
+        'menu_tree': menu_tree,
+        'form': form,
+        'item_form': item_form,
+        'page_title': f'Edit Menu: {menu.name}'
     }
     return render(request, 'admin/menus/menu_engineer.html', context)
+
+@login_required
+@require_POST
+def menu_item_create(request):
+    menu_id = request.POST.get('menu_id')
+    
+    # We need to manually handle 'pages' and 'courses' field if empty string is sent
+    post_data = request.POST.copy()
+    if post_data.get('pages') == '':
+        post_data['pages'] = None
+    if post_data.get('courses') == '':
+        post_data['courses'] = None
+        
+    form = MenuItemsForm(post_data)
+    
+    if form.is_valid():
+        item = form.save(commit=False)
+        item.menus_id = menu_id
+        
+        # Determine URL
+        menu_type = item.menu_type
+        if menu_type == 'page' and item.pages:
+            item.url = f"/{item.pages.code.strip('/')}"
+        elif menu_type == 'course':
+            course_obj = form.cleaned_data.get('courses')
+            if course_obj:
+                item.url = f"courses/{course_obj.course_code}"
+        elif menu_type == 'custom':
+            if item.url and not (item.url.startswith('http://') or item.url.startswith('https://')):
+                 item.url = 'http://' + item.url
+        elif menu_type == 'internal':
+             if item.url and not item.url.startswith('/'):
+                 item.url = '/' + item.url
+        elif menu_type == 'no_link':
+            item.url = '#'
+        
+        # Set Order to last
+        last_item = MenuItems.objects.filter(menus_id=menu_id).order_by('-menu_order').first()
+        item.menu_order = (last_item.menu_order + 1) if last_item else 0
+        
+        item.created_by = request.user
+        item.updated_by = request.user
+        item.save()
+        messages.success(request, 'Menu item added!')
+    else:
+        messages.error(request, 'Error adding item: ' + str(form.errors))
+        
+    return redirect('menu_engineer', menu_id=menu_id) # Using new named URL for engineer? Check urls.py
+
+@login_required
+@require_POST
+def menu_item_update(request, pk):
+    item = get_object_or_404(MenuItems, pk=pk)
+    
+    post_data = request.POST.copy()
+    if post_data.get('pages') == '':
+        post_data['pages'] = None
+    if post_data.get('courses') == '':
+        post_data['courses'] = None
+        
+    form = MenuItemsForm(post_data, instance=item)
+    
+    if form.is_valid():
+        updated_item = form.save(commit=False)
+        menu_type = updated_item.menu_type
+        
+        if menu_type == 'page' and updated_item.pages:
+            updated_item.url = f"/{updated_item.pages.code.strip('/')}"
+        elif menu_type == 'course':
+             course_obj = form.cleaned_data.get('courses')
+             if course_obj:
+                 updated_item.url = f"courses/{course_obj.course_code}"
+        elif menu_type == 'custom':
+            if updated_item.url and not (updated_item.url.startswith('http://') or updated_item.url.startswith('https://')):
+                 updated_item.url = 'http://' + updated_item.url
+        elif menu_type == 'internal':
+             if updated_item.url and not updated_item.url.startswith('/'):
+                 updated_item.url = '' + updated_item.url # Logic check? User code used '' + url
+        elif menu_type == 'no_link':
+            updated_item.url = '#'
+            
+        updated_item.updated_by = request.user
+        updated_item.save()
+        messages.success(request, 'Item updated!')
+    else:
+        messages.error(request, 'Error updating item: ' + str(form.errors))
+        
+    return redirect('menu_engineer', menu_id=item.menus_id)
+
+@login_required
+def menu_item_delete(request, pk):
+    item = get_object_or_404(MenuItems, pk=pk)
+    menu_id = item.menus_id
+    item.delete() # Hard delete or soft? User code implied delete()
+    messages.success(request, 'Item removed!')
+    return redirect('menu_engineer', menu_id=menu_id)
+
+@csrf_exempt
+@login_required
+def update_menu_order(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            menu_data = data.get('menu_data')
+            
+            def update_items(items, parent_id=None):
+                for index, item_data in enumerate(items):
+                    item_id = item_data.get('id')
+                    if not item_id: continue 
+                    
+                    # Update order and parent
+                    MenuItems.objects.filter(id=item_id).update(
+                        menu_order=index,
+                        parent_id=parent_id
+                    )
+                    
+                    if 'children' in item_data:
+                        update_items(item_data['children'], parent_id=item_id)
+            
+            with transaction.atomic():
+                update_items(menu_data)
+                
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'invalid request'}, status=400)
+
+@login_required
+def refresh_menu_urls(request, pk):
+    menu = get_object_or_404(Menus, pk=pk)
+    items = MenuItems.objects.filter(menus=menu)
+    count = 0
+    
+    for item in items:
+        changed = False
+        new_url = item.url
+        
+        if item.menu_type == 'page' and item.pages:
+            new_url = f"/{item.pages.code.strip('/')}"
+        elif item.menu_type == 'course' and item.url.startswith('courses/'):
+             # Try refreshing course link if pattern matches? 
+             pass
+        elif item.menu_type == 'custom' and item.url:
+             if not (item.url.startswith('http://') or item.url.startswith('https://')):
+                 new_url = 'http://' + item.url
+        elif item.menu_type == 'internal' and item.url:
+             if not item.url.startswith('/'):
+                 new_url = '/' + item.url
+        
+        if new_url != item.url:
+            item.url = new_url
+            item.save()
+            count += 1
+            
+    messages.success(request, f'Refreshed URLs for {count} items!')
+    return redirect('menu_engineer', menu_id=pk)
+
+@login_required
+@require_POST
+def save_menu(request):
+    """Update general menu details"""
+    menu_id = request.POST.get('menu_id')
+    menu = get_object_or_404(Menus, id=menu_id)
+    
+    form = MenuForm(request.POST, instance=menu)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Menu details updated successfully')
+    else:
+        messages.error(request, 'Error updating menu: ' + str(form.errors))
+        
+    return redirect('menu_engineer', menu_id=menu.id)
 
 # pages 
 
@@ -304,33 +565,58 @@ def save_menu_items(request):
             # Delete existing items
             MenuItems.objects.filter(menus_id=menu.id).update(deleted_at=timezone.now())
             
-            # Create new items
+            # Map temp_id (from client) to new DB instance
+            id_map = {}
+            created_items = []
+            
+            # First pass: Create all items without parent
             for idx, item_data in enumerate(items_data):
                 page_id = item_data.get('page_id')
                 page = None
                 if page_id:
                     page = Pages.objects.get(id=page_id)
                 
-                MenuItems.objects.create(
+                new_item = MenuItems.objects.create(
                     menus=menu,
                     title=item_data.get('title'),
                     url=item_data.get('url', ''),
                     pages=page,
                     menu_type=item_data.get('menu_type', 'page'),
                     menu_order=idx + 1,
-                    parent_id=item_data.get('parent_id', 0),
+                    parent_id=0, # Set temporarily to 0
                     target_blank=int(item_data.get('target_blank', 0)),
-                    original_title=item_data.get('original_title', ''),
+                    original_title=item_data.get('title', ''), # Use title as original if not provided
                     created_by=request.user.id,
                     updated_by=request.user.id,
                     created_at=timezone.now()
                 )
-        
+                
+                # key is the ID sent from client (temp or old ID)
+                client_id = str(item_data.get('id', ''))  
+                if client_id:
+                    id_map[client_id] = new_item
+                
+                # Store data needed for second pass
+                created_items.append({
+                    'instance': new_item,
+                    'parent_temp_id': str(item_data.get('parent_id', '0'))
+                })
+            
+            # Second pass: Update parents
+            for item_info in created_items:
+                parent_temp_id = item_info['parent_temp_id']
+                if parent_temp_id != '0' and parent_temp_id in id_map:
+                    parent_instance = id_map[parent_temp_id]
+                    item_info['instance'].parent_id = parent_instance.id
+                    item_info['instance'].save()
+                    
         return JsonResponse({
             'success': True,
             'message': 'Menu items saved successfully'
         })
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         return JsonResponse({
             'success': False,
             'message': str(e)
@@ -1844,7 +2130,7 @@ def course_datatable(request):
             media_preview = ''
             if course.media:
                 try:
-                    media_url = course.media.file_path
+                    media_url = course.media.file_path.url
                     media_preview = f'<img src="{media_url}" class="course-thumb" alt="{course.course_name}">'
                 except:
                     media_preview = '<div class="course-thumb-placeholder"><i class="fas fa-graduation-cap"></i></div>'
@@ -1882,9 +2168,9 @@ def course_datatable(request):
                     <button class="btn-action btn-view" onclick="viewCourse({course.id})" title="View">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action btn-edit" onclick="editCourse({course.id})" title="Edit">
+                    <a href="/menu/courses/update/{course.id}/" class="btn-action btn-edit" title="Edit">
                         <i class="fas fa-edit"></i>
-                    </button>
+                    </a>
                     <button class="btn-action btn-delete" onclick="deleteCourse({course.id}, '{course.course_name}')" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -1910,75 +2196,68 @@ def course_datatable(request):
         })
 
 ##@login_required
-@require_http_methods(["POST"])
+@login_required
 def course_create(request):
     """Create new course"""
-    try:
-        course_name = request.POST.get('course_name')
-        course_code = request.POST.get('course_code')
-        highest_qualification_id = request.POST.get('highest_qualification')
-        credit_hours = float(request.POST.get('credit_hours'))
-        description = request.POST.get('description', '')
-        browser_title = request.POST.get('browser_title', '')
-        meta_description = request.POST.get('meta_description', '')
-        meta_keywords = request.POST.get('meta_keywords', '')
-        media_id = request.POST.get('media_id') or None
-        status = int(request.POST.get('status', 1))
-        apply_button_top = int(request.POST.get('apply_button_top', 0))
-        apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
-        print("*********",request.POST.get)
-
-        # Check if course code already exists
-        if Courses.objects.filter(course_code=course_code).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Course code already exists'
-            })
-        if not highest_qualification_id:
-            return JsonResponse({
-                'success': False,
-                'message': 'Please select a highest qualification'
-            })
-       
-        # Safely fetch qualification
+    if request.method == 'POST':
         try:
-            highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
-        except Qualifications.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'Selected qualification does not exist'
-            })
+            course_name = request.POST.get('course_name')
+            course_code = request.POST.get('course_code')
+            highest_qualification_id = request.POST.get('highest_qualification')
+            credit_hours = float(request.POST.get('credit_hours'))
+            description = request.POST.get('description', '')
+            browser_title = request.POST.get('browser_title', '')
+            meta_description = request.POST.get('meta_description', '')
+            meta_keywords = request.POST.get('meta_keywords', '')
+            status = int(request.POST.get('status', 1))
+            apply_button_top = int(request.POST.get('apply_button_top', 0))
+            apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
+            
+            media_id = request.POST.get('media_id')
+            if media_id == 'null' or media_id == '' or media_id is None:
+                media_id = None
 
-        course = Courses.objects.create(
-            course_name=course_name,
-            course_code=course_code,
-            highest_qualification=highest_qualification_obj,
-            credit_hours=credit_hours,
-            description=description,
-            browser_title=browser_title,
-            meta_description=meta_description,
-            meta_keywords=meta_keywords,
-            media_id=media_id,
-            status=status,
-            apply_button_top=apply_button_top,
-            apply_button_bottom=apply_button_bottom,
-            created_by=request.user,   
-            updated_by=request.user, 
-            created_at=timezone.now()
-        )
+            # Check if course code already exists
+            if Courses.objects.filter(course_code=course_code).exists():
+                messages.error(request, 'Course code already exists')
+                return redirect('course_create')
+            
+            if not highest_qualification_id:
+                messages.error(request, 'Please select a highest qualification')
+                return redirect('course_create')
+           
+            # Safely fetch qualification
+            try:
+                highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
+            except Qualifications.DoesNotExist:
+                messages.error(request, 'Selected qualification does not exist')
+                return redirect('course_create')
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Course created successfully',
-            'course_id': course.id
-        })
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
+            course = Courses.objects.create(
+                course_name=course_name,
+                course_code=course_code,
+                highest_qualification=highest_qualification_obj,
+                credit_hours=credit_hours,
+                description=description,
+                browser_title=browser_title,
+                meta_description=meta_description,
+                meta_keywords=meta_keywords,
+                media_id=media_id,
+                status=status,
+                apply_button_top=apply_button_top,
+                apply_button_bottom=apply_button_bottom,
+                created_by=request.user,   
+                updated_by=request.user, 
+                created_at=timezone.now()
+            )
+
+            messages.success(request, 'Course created successfully')
+            return redirect('course_list')
+        except:
+            messages.error(request, f'Error creating course: {str(e)}')
+            return redirect('course_create')
+    qualifications = Qualifications.objects.all()
+    return render(request, 'admin/courses/form.html', {'qualifications': qualifications})
 
 ##@login_required
 def course_get(request, course_id):
@@ -1992,7 +2271,7 @@ def course_get(request, course_id):
             try:
                 media_data = {
                     'id': course.media.id,
-                    'url': course.media.file_path,
+                    'url': course.media.file_path.url,
                     'title': course.media.title or course.media.file_name
                 }
             except:
@@ -2004,7 +2283,7 @@ def course_get(request, course_id):
                 'id': course.id,
                 'course_name': course.course_name,
                 'course_code': course.course_code,
-                'highest_qualification': course.highest_qualification,
+                'highest_qualification': course.highest_qualification_id,
                 'credit_hours': str(course.credit_hours),
                 'description': course.description or '',
                 'browser_title': course.browser_title or '',
@@ -2027,58 +2306,82 @@ def course_get(request, course_id):
         })
 
 ##@login_required
-@require_http_methods(["POST"])
+@login_required
 def course_update(request, course_id):
     """Update course"""
-    try:
-        course = get_object_or_404(Courses, id=course_id)
-        
-        course_name = request.POST.get('course_name')
-        course_code = request.POST.get('course_code')
-        highest_qualification = int(request.POST.get('highest_qualification'))
-        credit_hours = float(request.POST.get('credit_hours'))
-        description = request.POST.get('description', '')
-        browser_title = request.POST.get('browser_title', '')
-        meta_description = request.POST.get('meta_description', '')
-        meta_keywords = request.POST.get('meta_keywords', '')
-        media_id = request.POST.get('media_id') or None
-        status = int(request.POST.get('status', 1))
-        apply_button_top = int(request.POST.get('apply_button_top', 0))
-        apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
+    course = get_object_or_404(Courses, id=course_id)
+    
+    if request.method == 'POST':
+        try:
+            course_name = request.POST.get('course_name')
+            course_code = request.POST.get('course_code')
+            highest_qualification_id = request.POST.get('highest_qualification')
+            credit_hours = float(request.POST.get('credit_hours'))
+            description = request.POST.get('description', '')
+            browser_title = request.POST.get('browser_title', '')
+            meta_description = request.POST.get('meta_description', '')
+            meta_keywords = request.POST.get('meta_keywords', '')
+            status = int(request.POST.get('status', 1))
+            apply_button_top = int(request.POST.get('apply_button_top', 0))
+            apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
+            
+            media_id = request.POST.get('media_id')
+            if media_id == 'null' or media_id == '' or media_id is None:
+                media_id = None
 
-        # Check if course code exists for other courses
-        if Courses.objects.filter(course_code=course_code).exclude(id=course_id).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Course code already exists'
-            })
+            # Check if course code exists for other courses
+            if Courses.objects.filter(course_code=course_code).exclude(id=course_id).exists():
+                messages.error(request, 'Course code already exists')
+                return redirect('course_update', course_id=course_id)
 
-        course.course_name = course_name
-        course.course_code = course_code
-        course.highest_qualification = highest_qualification
-        course.credit_hours = credit_hours
-        course.description = description
-        course.browser_title = browser_title
-        course.meta_description = meta_description
-        course.meta_keywords = meta_keywords
-        course.media_id = media_id
-        course.status = status
-        course.apply_button_top = apply_button_top
-        course.apply_button_bottom = apply_button_bottom
-        course.updated_by = request.user.id
-        course.save()
+            # Safe handling of highest qualification
+            try:
+                if not highest_qualification_id:
+                     messages.error(request, 'Qualification is required')
+                     return redirect('course_update', course_id=course_id)
+                highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
+                course.highest_qualification = highest_qualification_obj
+            except Qualifications.DoesNotExist:
+                 messages.error(request, 'Selected qualification does not exist')
+                 return redirect('course_update', course_id=course_id)
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Course updated successfully'
-        })
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        })
+            course.course_name = course_name
+            course.course_code = course_code
+            course.credit_hours = credit_hours
+            course.description = description
+            course.browser_title = browser_title
+            course.meta_description = meta_description
+            course.meta_keywords = meta_keywords
+            # Safe handling of Media
+            if media_id:
+                try:
+                    media_obj = MediaLibrary.objects.get(id=media_id)
+                    course.media = media_obj
+                except MediaLibrary.DoesNotExist:
+                     # If media doesn't exist, we can either warn or just set to None. 
+                     # Safer to set None than crash with FK error.
+                     course.media = None
+            else:
+                course.media = None
+
+            course.status = status
+            course.apply_button_top = apply_button_top
+            course.apply_button_bottom = apply_button_bottom
+            course.updated_by = request.user
+            course.save()
+
+            messages.success(request, 'Course updated successfully')
+            return redirect('course_list')
+        except Exception as e:
+            messages.error(request, f'Error updating course: {str(e)}')
+            return redirect('course_update', course_id=course_id)
+            
+    qualifications = Qualifications.objects.all()
+    context = {
+        'course': course,
+        'qualifications': qualifications
+    }
+    return render(request, 'admin/courses/form.html', context)
 
 ##@login_required
 @require_http_methods(["POST"])
@@ -2195,33 +2498,30 @@ def student_datatable(request):
             # Get full name
             full_name = f"{student.first_name or ''} {student.middle_name or ''} {student.last_name or ''}".strip()
             
+            # Student info - responsive
             # Photo preview - responsive
             if student.photo:
-                preview = f'<img src="{student.photo}" class="student-photo" alt="{full_name}">'
+                preview = f'<img src="{student.photo}" class="student-photo rounded-circle" alt="{full_name}" style="width: 40px; height: 40px; object-fit: cover;">'
             else:
                 first_initial = student.first_name[0].upper() if student.first_name else ''
-                last_initial = student.last_name[0].upper() if student.last_name else ''
-                initials = f"{first_initial}{last_initial}"
-                preview = f'<div class="student-photo-placeholder">{initials or "ST"}</div>'
-            
+                # last_initial = student.last_name[0].upper() if student.last_name else ''
+                # initials = f"{first_initial}{last_initial}"
+                # User requested "first letter", sticking to just one can be cleaner for small circles, or keep two if fits.
+                # "show the first letter of the page" -> assuming Name.
+                preview = f'<div class="student-photo-placeholder rounded-circle d-flex align-items-center justify-content-center bg-primary text-white" style="width: 40px; height: 40px; font-weight: bold;">{first_initial}</div>'
+
             # Determine status based on list type (Applicant vs Student)
-            # If applicant list (no approve_date), status is effectively Pending (False)
-            # If student list (has approve_date), status is Approved (True)
-            # We enforce this visual distinction requested by user.
-            
             is_approved = student.status # Default from DB
             if list_type == 'applicant':
                  is_approved = False
             elif list_type == 'student':
                  is_approved = True
 
-            # Student info - responsive
             info_html = f'''
                 <div class="student-info">
                     <div class="student-name">{full_name}</div>
                     <div class="student-meta">
                         <span class="student-badge"><i class="fas fa-id-card"></i> {student.student_id or 'N/A'}</span>
-                        <span class="email-badge"><i class="fas fa-envelope"></i> {student.email or 'No Email'}</span>
                     </div>
                 </div>
             '''
@@ -2241,26 +2541,32 @@ def student_datatable(request):
             '''
             safe_name=full_name.replace("'", "\\'")
             # Actions - responsive
+            # Changed data-toggle to data-bs-toggle for Bootstrap 5
             actions_html = f'''
-                <div class="action-buttons">
-                    <button class="btn btn-info btn-sm view-btn" onclick="viewStudent({student.id})" title="View Details" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-info btn-sm view-btn mr-1" onclick="viewStudent({student.id})" title="View Details">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-primary btn-sm edit-btn" onclick="editStudent({student.id})" title="Edit Student" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-warning btn-sm toggle-btn" onclick="toggleActive({student.id}, {str(student.active).lower()})" 
-                            title="Toggle Active Status" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                        <i class="fas fa-{'toggle-on' if student.active else 'toggle-off'}"></i>
-                    </button>
-                    <button class="btn btn-{'success' if not student.status else 'warning'} btn-sm approval-btn" 
-                            onclick="toggleApproval({student.id}, {str(student.status).lower()})" 
-                            title="Toggle Approval Status" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                        <i class="fas fa-{'times-circle' if student.status else 'check-circle'}"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-btn" onclick="deleteStudent({student.id}, '{safe_name}')" title="Delete Student" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop{student.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Actions
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop{student.id}">
+                            <a class="dropdown-item" href="#" onclick="editStudent({student.id}); return false;">
+                                <i class="fas fa-edit mr-2 text-primary"></i> Edit
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="toggleActive({student.id}, {str(student.active).lower()}); return false;">
+                                <i class="fas fa-{'toggle-on' if student.active else 'toggle-off'} mr-2 text-warning"></i> {'Deactivate' if student.active else 'Activate'}
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="toggleApproval({student.id}, {str(student.status).lower()}); return false;">
+                                <i class="fas fa-{'times-circle' if student.status else 'check-circle'} mr-2 text-success"></i> {'Reject' if student.status else 'Approve'}
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" onclick="deleteStudent({student.id}, '{safe_name}'); return false;">
+                                <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             '''
             
@@ -4470,6 +4776,13 @@ def student_books_datatable(request):
     
     books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book', 'updated_by')
 
+    # Status Filter
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'pending':
+        books_query = books_query.filter(is_approved=False)
+    elif status_filter == 'approved':
+        books_query = books_query.filter(is_approved=True)
+
     if search_value:
         books_query = books_query.filter(
             Q(student__first_name__icontains=search_value) |
@@ -4506,8 +4819,29 @@ def student_books_datatable(request):
         updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
         updated_info = f"{updated_by}<br><small>{updated_date}</small>"
         
-        actions = f'''
-            <div class="action-buttons">
+        # Status Badge
+        if item.is_approved:
+            status_badge = '<span class="badge bg-success">Approved</span>'
+        else:
+            status_badge = '<span class="badge bg-warning text-dark">Pending</span>'
+
+        actions = '<div class="action-buttons">'
+        
+        # Approve Button (only if pending)
+        if not item.is_approved:
+            actions += f'''
+                <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
+                    <i class="fas fa-check"></i>
+                </button>
+            '''
+        else:
+            actions += f'''
+                <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
+                    <i class="fas fa-times"></i>
+                </button>
+            '''
+
+        actions += f'''
                 <button class="btn-action btn-delete" onclick="deleteStudentBook({item.id})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -4518,6 +4852,7 @@ def student_books_datatable(request):
             'id': item.id,
             'student_name': student_name,
             'book_title': item.book.title if item.book else 'Unknown Book',
+            'status': status_badge,
             'updated_by': updated_info,
             'actions': actions
         })
@@ -4608,6 +4943,18 @@ def student_books_delete(request, id):
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
 
+@login_required
+def student_books_toggle_approval(request, id):
+    try:
+        book = StudentsBooks.objects.get(id=id)
+        book.is_approved = not book.is_approved
+        book.save()
+        return JsonResponse({'success': True, 'message': 'Status updated successfully'})
+    except StudentsBooks.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Book assignment not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
 # Student Subjects Workflow
 @login_required
 def student_subjects_list(request):
@@ -4630,6 +4977,13 @@ def student_subjects_datatable(request):
     order_direction = request.GET.get('order[0][dir]', 'desc')
     
     query = StudentsSubjects.objects.filter(deleted_at__isnull=True).select_related('student', 'subject', 'updated_by')
+
+    # Status Filter
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'pending':
+        query = query.filter(is_approved=False)
+    elif status_filter == 'approved':
+        query = query.filter(is_approved=True)
 
     if search_value:
         query = query.filter(

@@ -10,12 +10,16 @@ urlpatterns = [
 
     # Menu Management
     path('admin/menus/', views.menu_list, name='menu_list'),
+    path('admin/menus/datatable/', views.menu_datatable, name='menu_datatable'),
     path('menus/engineer/', views.menu_engineer, name='menu_engineer_new'),
     path('menus/engineer/<int:menu_id>/', views.menu_engineer, name='menu_engineer'),
-    path('menus/save/', views.save_menu, name='save_menu'),
-    path('menus/save-items/', views.save_menu_items, name='save_menu_items'),
+    path('menus/save/', views.save_menu, name='save_menu'), # Updated for general details
+    path('menus/items/create/', views.menu_item_create, name='menu_item_create'),
+    path('menus/items/update/<int:pk>/', views.menu_item_update, name='menu_item_update'),
+    path('menus/items/delete/<int:pk>/', views.menu_item_delete, name='menu_item_delete'),
+    path('menus/items/reorder/', views.update_menu_order, name='update_menu_order'),
+    path('menus/refresh-urls/<int:pk>/', views.refresh_menu_urls, name='refresh_menu_urls'),
     path('menus/delete/<int:menu_id>/', views.delete_menu, name='delete_menu'),
-    path('menus/get-items/<int:menu_id>/', views.get_menu_items, name='get_menu_items'),
     
     # Pages Management
     path('admin/pages/', views.pages_list, name='pages_list'),
@@ -117,6 +121,7 @@ urlpatterns = [
 
     # Student Subjects Workflow
     path('admin/students/student-subjects/', views.student_subjects_list, name='student_subjects_list'),
+    path('admin/students/books/toggle-approval/<int:id>/', views.student_books_toggle_approval, name='student_books_toggle_approval'),
     path('students/subjects/datatable/', views.student_subjects_datatable, name='student_subjects_datatable'),
     path('students/subjects/get-available/<int:student_id>/', views.ajax_get_available_subjects, name='ajax_get_available_subjects'),
     path('students/subjects/bulk-assign/', views.student_subjects_bulk_assign, name='student_subjects_bulk_assign'),

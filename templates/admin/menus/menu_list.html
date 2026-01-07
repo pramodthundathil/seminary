@@ -1,296 +1,242 @@
 {% extends 'admin/index.html' %}
 {% block content %}
 
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <style>
-    :root {
-        --primary-cyan: #00CED1;
-        --light-cyan: #E0F7F7;
-        --dark-navy: #1B2845;
-        --purple-gradient-start: #A78BFA;
-        --purple-gradient-end: #C084FC;
-        --green-card: #90EE90;
-        --blue-button: #4169E1;
-        --text-gray: #666666;
-    }
-
-    * {
-        font-family: 'Roboto Condensed', sans-serif;
-    }
-
-    .menus-container {
-        padding: 30px;
-        background: linear-gradient(135deg, var(--light-cyan) 0%, #fff 100%);
+    .gallery-container {
+        padding: 24px;
+        background: var(--gray-50);
         min-height: 100vh;
     }
 
-    .menus-header {
+    .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
-        padding: 25px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 32px;
     }
 
-    .menus-header h1 {
-        color: var(--dark-navy);
+    .page-header h1 {
         font-size: 28px;
-        font-weight: 700;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
     }
 
     .btn {
-        padding: 12px 24px;
+        padding: 10px 20px;
         border: none;
         border-radius: 8px;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
         font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         text-decoration: none;
-        display: inline-block;
     }
 
-    .btn-create {
-        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    .btn-primary {
+        background: var(--primary);
         color: white;
     }
 
-    .btn-create:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
     }
 
-    .menus-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-        gap: 25px;
+    .gallery-filters {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
-    .menu-card {
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--gray-700);
+    }
+
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 180px;
+        background: white;
+    }
+
+    .table-container {
         background: white;
         border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        border-top: 4px solid var(--primary-cyan);
+        padding: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: auto;
     }
 
-    .menu-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-
-    .menu-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 20px;
-    }
-
-    .menu-info {
-        flex: 1;
-    }
-
-    .menu-name {
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--dark-navy);
-        margin-bottom: 8px;
-    }
-
-    .menu-code {
-        font-size: 13px;
-        color: var(--text-gray);
-        background: var(--light-cyan);
-        padding: 5px 12px;
-        border-radius: 20px;
-        display: inline-block;
-    }
-
-    .menu-status {
-        padding: 8px 18px;
+    .badge-enabled {
+        background: #dcfce7;
+        color: #166534;
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 12px;
         font-weight: 600;
     }
 
-    .status-enabled {
-        background: var(--green-card);
-        color: #2d6a2d;
-    }
-
-    .status-disabled {
-        background: #ffcccb;
-        color: #8b0000;
-    }
-
-    .menu-position {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 15px;
-        background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
-        color: white;
+    .badge-disabled {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 4px 10px;
         border-radius: 20px;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
-        margin-bottom: 15px;
+    }
+    
+    .badge-position {
+        background: var(--light-cyan);
+        color: var(--dark-navy);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: capitalize;
     }
 
-    .menu-items-count {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 15px;
-        background: #f9f9f9;
-        border-radius: 8px;
-        margin: 15px 0;
+    .menu-name {
+        font-weight: 600;
+        color: var(--dark-navy);
+        font-size: 15px;
     }
 
-    .items-count-number {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--primary-cyan);
-    }
-
-    .items-count-label {
+    .menu-code {
+        font-size: 12px;
         color: var(--text-gray);
-        font-size: 14px;
+        margin-top: 2px;
     }
 
-    .menu-actions {
+    .action-buttons {
         display: flex;
-        gap: 10px;
-        padding-top: 15px;
-        border-top: 1px solid #e0e0e0;
+        gap: 8px;
     }
 
     .btn-action {
-        flex: 1;
-        padding: 10px;
+        width: 32px;
+        height: 32px;
         border: none;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 13px;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        color: white;
         text-decoration: none;
-        display: block;
     }
 
     .btn-edit {
         background: var(--blue-button);
-        color: white;
-    }
-
-    .btn-edit:hover {
-        background: #3557c7;
-        transform: translateY(-2px);
     }
 
     .btn-delete {
         background: #ff6b6b;
-        color: white;
     }
 
-    .btn-delete:hover {
-        background: #ee5a52;
-        transform: translateY(-2px);
-    }
-
-    .no-menus {
-        text-align: center;
-        padding: 80px 20px;
-        background: white;
-        border-radius: 12px;
-        color: var(--text-gray);
-    }
-
-    .no-menus i {
-        font-size: 72px;
-        color: var(--primary-cyan);
-        margin-bottom: 25px;
-    }
-
-    .no-menus h3 {
-        font-size: 24px;
-        color: var(--dark-navy);
-        margin-bottom: 15px;
-    }
-
-    @media (max-width: 768px) {
-        .menus-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .menus-header {
-            flex-direction: column;
-            gap: 15px;
-        }
+    .btn-action:hover {
+        transform: scale(1.1);
     }
 </style>
 
-<div class="menus-container">
-    <div class="menus-header">
-        <h1>🎯 Menu Management</h1>
-        <a href="{% url 'menu_engineer_new' %}" class="btn btn-create">
-            <i class="fas fa-plus"></i> Create New Menu
-        </a>
-    </div>
-
-    {% if menus %}
-    <div class="menus-grid">
-        {% for menu in menus %}
-        <div class="menu-card">
-            <div class="menu-card-header">
-                <div class="menu-info">
-                    <div class="menu-name">{{ menu.name }}</div>
-                    <span class="menu-code">{{ menu.code }}</span>
-                </div>
-                <span class="menu-status {% if menu.status == 1 %}status-enabled{% else %}status-disabled{% endif %}">
-                    {% if menu.status == 1 %}Enabled{% else %}Disabled{% endif %}
-                </span>
-            </div>
-
-            <div class="menu-position">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>{{ menu.menu_position|title }}</span>
-            </div>
-
-            <div class="menu-items-count">
-                <div class="items-count-number">{{ menu.items.count }}</div>
-                <div class="items-count-label">
-                    Menu Item{{ menu.items.count|pluralize }}
-                </div>
-            </div>
-
-            <div class="menu-actions">
-                <a href="{% url 'menu_engineer' menu.id %}" class="btn-action btn-edit">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <button class="btn-action btn-delete" onclick="deleteMenu({{ menu.id }}, '{{ menu.name }}')">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-bars"></i>
+            Menu Management
+        </h1>
+        <div class="header-actions">
+            <a href="{% url 'menu_engineer_new' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Create New Menu
+            </a>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <div class="no-menus">
-        <i class="fas fa-bars"></i>
-        <h3>No Menus Created Yet</h3>
-        <p>Start building your navigation by creating your first menu</p>
-        <a href="{% url 'menu_engineer_new' %}" class="btn btn-create" style="margin-top: 20px;">
-            <i class="fas fa-plus"></i> Create Your First Menu
-        </a>
+
+    <div class="table-container">
+        <table id="menuTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name & Code</th>
+                    <th>Position</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data loaded via AJAX -->
+            </tbody>
+        </table>
     </div>
-    {% endif %}
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script>
+let menuTable;
+
+$(document).ready(function() {
+    menuTable = $('#menuTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{% url "menu_datatable" %}',
+            type: 'GET',
+            error: function(xhr, error, code) {
+                console.error('DataTables Error:', error);
+            }
+        },
+        columns: [
+            { data: 'id', width: '50px' },
+            { data: 'name' },
+            { data: 'position', width: '100px' },
+            { data: 'items', width: '80px', className: 'text-center' },
+            { data: 'status', width: '100px' },
+            { data: 'created_at', width: '120px' },
+            { data: 'actions', orderable: false, searchable: false, width: '100px' }
+        ],
+        order: [[0, 'desc']],
+        pageLength: 10,
+        language: {
+            search: "Search:",
+            lengthMenu: "Show _MENU_ menus",
+            info: "Showing _START_ to _END_ of _TOTAL_ menus"
+        }
+    });
+});
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -325,8 +271,7 @@ async function deleteMenu(menuId, menuName) {
         const result = await response.json();
 
         if (result.success) {
-            alert('Menu deleted successfully!');
-            location.reload();
+            menuTable.ajax.reload(null, false);
         } else {
             alert('Error deleting menu: ' + result.message);
         }

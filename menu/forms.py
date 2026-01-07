@@ -841,3 +841,47 @@ class ObjectiveQuestionsForm(forms.ModelForm):
             }),
         }
 
+
+from home.models import MenuItems, Pages, Courses
+
+class MenuItemsForm(forms.ModelForm):
+    class Meta:
+        model = MenuItems
+        fields = [
+            "title",
+            "url",
+            "pages",
+            "menu_type",
+            "target_blank",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter link title"
+            }),
+            "url": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter URL (for custom/internal links)"
+            }),
+            "pages": forms.Select(attrs={
+                "class": "form-control"
+            }),
+            "menu_type": forms.HiddenInput(),
+            "target_blank": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }
+
+    # Extra field for course selection (not directly on model, but used to populate url)
+    courses = forms.ModelChoiceField(
+        queryset=Courses.objects.filter(deleted_at__isnull=True).order_by('course_name'),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="Select Course"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['pages'].queryset = Pages.objects.filter(deleted_at__isnull=True).order_by('title')
+        # Ensure courses field is available in form
+        self.fields['courses'].queryset = Courses.objects.filter(deleted_at__isnull=True).order_by('course_name')
