@@ -86,14 +86,17 @@
                     {% endif %}
                 {% endfor %}
                 
-                <!-- Login Button -->
+                <!-- Login/Register Buttons -->
                 {% if user.is_authenticated %}
                     <li class="nav-item ms-2">
                         <a class="btn btn-login" href="{% url 'admin_index' %}">Dashboard</a>
                     </li>
                 {% else %}
                     <li class="nav-item ms-2">
-                        <a class="btn btn-login" href="{% url 'admin_index' %}">Log in</a>
+                        <a class="btn btn-login" href="{% url 'admin_index' %}">Login</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-register" href="{% url 'register' %}">Register</a>
                     </li>
                 {% endif %}
             </ul>
@@ -106,12 +109,12 @@
 .navbar {
     background: #ffffff !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-    padding: 1rem 0;
+    padding: 0.4rem 0;
 }
 
 .navbar-brand img {
-    width: 250px;
-    height: 50px; 
+    width: auto;
+    height: 40px; 
     transition: transform 0.3s ease;
 }
 
@@ -123,11 +126,11 @@
 .nav-link {
     color: #1f2937 !important;
     font-weight: 500;
-    padding: 0.75rem 1.25rem !important;
+    padding: 0.5rem 0.8rem !important;
     transition: all 0.3s ease;
     position: relative;
     border-radius: 8px;
-    margin: 0 0.25rem;
+    margin: 0 0.15rem;
 }
 
 .nav-link:hover,
@@ -260,23 +263,44 @@
 
 /* Login Button */
 .btn-login {
-    background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
-    color:black !important;
+    background: #4ade80; /* Brighter green */
+    color: #1f2937 !important; /* Dark text */
     border: none;
     
-    padding: 0.30rem 1rem;   /* MUCH SMALLER */
-    border-radius: 18px;     /* smaller curve */
-    font-size: 14px;         /* smaller text */
-    font-weight: 500;        /* lighter weight */
+    padding: 0.35rem 1.2rem;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
     
     transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(20, 184, 166, 0.25);
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
 }
 
 .btn-login:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
-    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 222, 128, 0.4);
+    background: #22c55e;
+    color: #fff !important;
+}
+
+/* Register Button */
+.btn-register {
+    background: #f3f4f6; /* Gray background */
+    color: #1f2937 !important;
+    border: none;
+    
+    padding: 0.35rem 1.2rem;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    
+    transition: all 0.3s ease;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    background: #e5e7eb;
+    color: #000 !important;
 }
 
 /* Navbar Toggler */

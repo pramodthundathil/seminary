@@ -94,6 +94,233 @@ body {
 }
 
 /* Hero Section */
+/* =========================================
+   Hero / Carousel Section
+   ========================================= */
+#trinityCarousel .carousel-item {
+    height: 600px;
+    position: relative;
+    background-color: #000; /* Fallback for image load */
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8);
+}
+
+.carousel-caption {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    text-align: left;
+    padding: 0 5%;
+}
+
+.carousel-caption h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--dark-navy);
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+}
+
+.carousel-caption h1 .highlight {
+    color: var(--primary-cyan);
+}
+
+.slide-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.left-content {
+    flex: 1;
+    padding-right: 3rem;
+}
+
+.right-content {
+    flex: 1;
+    /* background: rgba(255, 255, 255, 0.95); */
+    padding: 2.5rem;
+    /* border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
+}
+
+.right-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-navy);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    letter-spacing: 1px;
+}
+
+.right-content h2 .highlight-green {
+    color: var(--green-card);
+}
+
+.right-content p {
+    font-size: 1.1rem;
+    color: var(--dark-navy);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.learn-more-btn {
+    background-color: var(--primary-cyan);
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.learn-more-btn:hover {
+    background-color: #00B8BA;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 206, 209, 0.3);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-cyan);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+}
+
+.carousel-control-prev {
+    left: 20px;
+}
+
+.carousel-control-next {
+    right: 20px;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1;
+}
+
+.carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--primary-cyan);
+}
+
+@media (max-width: 992px) {
+    .slide-content {
+        flex-direction: column;
+        align-items: flex-start; /* Fix button alignment to start/left */
+    }
+
+    .left-content {
+        padding-right: 0;
+        margin-bottom: 2rem;
+    }
+
+    .carousel-caption h1 {
+        font-size: 2.5rem;
+    }
+
+    /* Fix background showing "inside divs" issue - ensure consistent container styling if needed, or remove erratic backgrounds */
+    .right-content {
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.95); /* Keep unified background */
+        border-radius: 15px;
+        margin-top: 20px;
+        width: 100%; /* Ensure full width availability */
+    }
+
+    .right-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .carousel-item {
+        height: auto;
+        min-height: 600px; /* Increased min-height for content */
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel-item {
+        min-height: 500px;
+    }
+    
+    .carousel-item img {
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .carousel-caption {
+        bottom: 0;
+        top: auto; /* Reset top positioning */
+        transform: none; /* Remove centering transform */
+        padding: 40px 15px; /* Increased padding */
+        /* background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); Darken bottom for readability if needed */
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+    
+    .right-content {
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        text-align: left;
+        margin: 0; /* Reset margins */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        width: 100%;
+    }
+    
+    .right-content h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.8rem;
+        font-weight: 700;
+    }
+    
+    .right-content h2 .hero-title {
+        font-size: 1.6rem; /* Adjust hero title size */
+    }
+    
+    .right-content p, .slide-description {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #333;
+        margin-bottom: 1.2rem;
+    }
+    
+    .slide-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start; /* Ensure left alignment */
+    }
+    
+    .learn-more-btn {
+        padding: 10px 24px;
+        font-size: 0.95rem;
+        width: auto;
+        display: inline-block;
+        margin-top: 10px;
+    }
+}
+
 /* Why Trinity Section */
 .why-section {
     padding-top: 80px; /* Add space at the top */
@@ -214,23 +441,21 @@ body {
 .courses-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 30px;
     justify-content: center;
     padding: 0 15px;
 }
 
 .course-card {
-    /* flex: 1 1 300px; */
+    flex: 1 1 300px;
     max-width: 400px;
     margin-bottom: 20px; /* Ensure vertical spacing on mobile */
     background: white;
     border-radius: 20px;
-    /* overflow: hidden; */
+    overflow: hidden;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     height: 100%;
     transition: transform 0.3s ease;
-    padding: 10px;
-    box-sizing: border-box;
 }
 
 .course-card:hover {
@@ -3329,6 +3554,169 @@ body {
     text-align: center;
 }
 
+/* =========================================
+   Carousel Responsiveness & Refactoring
+   ========================================= */
+
+/* Use Flexbox for cleaner alignment */
+.slide-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
+.left-content {
+    display: none; /* Hide if not used, or adjust as needed */
+}
+
+.right-content {
+    width: 100%;
+    max-width: 800px; /* Limit width for readability */
+    margin-left: auto; /* Push to right if desired, or auto for center */
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+/* Ensure caption is positioned correctly */
+/* .carousel-caption {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-end; 
+    padding: 0 5%;
+    text-align: left;
+} */
+
+/* Base Responsive Adjustments (Max Width: 1200px) */
+@media (max-width: 1200px) {
+    .carousel-caption h1 {
+        font-size: 2.8rem; /* Scale down from 3.5rem */
+    }
+
+    .right-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .right-content p {
+        font-size: 1rem;
+    }
+
+    .carousel-item {
+        height: 500px; /* Adjust height if needed */
+    }
+}
+
+/* Tablet (Max Width: 992px) */
+@media (max-width: 992px) {
+    .carousel-caption {
+        justify-content: center; /* Center align for smaller screens */
+        text-align: center;
+        /* background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); Improve contrast */
+    }
+
+    .right-content {
+        margin: 0 auto;
+        padding: 1.5rem;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.9); /* Add background for readability */
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .carousel-caption h1 {
+        font-size: 2.2rem;
+    }
+
+    .right-content h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Mobile (Max Width: 768px) */
+@media (max-width: 768px) {
+    .carousel-item {
+        height: 450px;
+    }
+
+    .carousel-caption {
+        padding: 1rem;
+    }
+
+    .right-content {
+        width: 90%;
+        padding: 1rem;
+    }
+
+    .carousel-caption h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .right-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .right-content p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Limit text lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .learn-more-btn {
+        padding: 8px 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Footer Fixes */
+    footer h3 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+    }
+}
+
+/* Small Mobile (Max Width: 480px) */
+@media (max-width: 480px) {
+    .carousel-item {
+        height: 400px;
+    }
+    
+    .right-content {
+        width: 95%;
+        padding: 1rem 0.5rem;
+    }
+
+    .carousel-caption h1 {
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.2rem !important;
+    }
+
+    .stats-container {
+        gap: 5px !important;
+    }
+
+    /* Church Card alignment fix from index.html */
+    .our-aim-section .church-card {
+        margin-left: 0 !important;
+        justify-content: center !important;
+        order: initial !important; /* Reset order if needed */
+    }
+    
+    .our-aim-section {
+        flex-direction: column;
+    }
+}
 
 
         /* ================================
@@ -3469,6 +3857,182 @@ body {
         }
 
         /* ================================
+           UNIFIED LEFT-ALIGNED CAROUSEL
+           ================================ */
+
+        /* 1. Reset & Base Layout */
+        .carousel-item {
+            position: relative;
+            height: 90vh;
+            min-height: 600px;
+            background-color: #0d1117; /* Fallback dark */
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* 2. Global Overlay (Dark Theme) */
+        .carousel-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Professional Dark Gradient: readable white text on left */
+            /* Using Brand Dark Navy: #1B2845 (27, 40, 69) */
+            background: linear-gradient(90deg, 
+                rgba(27, 40, 69, 0.95) 0%, 
+                rgba(27, 40, 69, 0.75) 40%, 
+                rgba(27, 40, 69, 0.2) 100%);
+            z-index: 1;
+        }
+
+        /* 3. Layout Container */
+        .carousel-caption {
+            position: absolute;
+            top: 50%;
+            left: 5%; /* Fixed left padding */
+            transform: translateY(-50%);
+            right: auto; /* Allow it to take natural width */
+            bottom: auto;
+            width: 90%;
+            max-width: 800px; /* Constrain width for readability */
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start; /* Hard Left Align */
+        }
+
+        /* 4. Unified Slide Content */
+        .slide-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        /* 5. Typography & Elements */
+        
+        /* Main Title (H1) */
+        .left-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+
+        .highlight { color: #00CED1; } /* Cyan */
+        .highlight-green { color: #10B981; } /* Green */
+        .for-green, .other-green { color: #10B981; }
+
+        /* Subheadings (H2) */
+        .right-content h2, 
+        .right-content h2.title-line {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            text-align: left;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Paragraphs */
+        .right-content p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1.6;
+            color: #e2e8f0; /* Light Gray */
+            margin: 0 0 25px 0;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        /* Buttons */
+        .learn-more-btn {
+            background-color: #00CED1; /* Cyan */
+            color: #1B2845 !important; /* Dark Text */
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 206, 209, 0.3);
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .learn-more-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 206, 209, 0.5);
+            background-color: #22d3ee;
+        }
+
+        /* 6. Mobile Responsiveness */
+        @media (max-width: 991px) {
+            .carousel-item {
+                height: 100svh; /* Full mobile height */
+            }
+
+            .carousel-item::after {
+                /* Darker overlay on mobile */
+                background: linear-gradient(180deg, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.85) 100%);
+            }
+
+            .carousel-caption {
+                left: 5%;
+                width: 90%;
+                max-width: none;
+                align-items: flex-start; /* Keep left alignment */
+            }
+
+            .left-content h1 {
+                font-size: 2.8rem; /* Smaller title */
+            }
+
+            .right-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .right-content p {
+                font-size: 1rem;
+            }
+
+            .learn-more-btn {
+                width: 100%; /* Full width button on mobile */
+            }
+        }
+
+
+
+
+
+
         /*2-why section*/
 
         .why-section {
@@ -3812,7 +4376,7 @@ body {
             align-items: center;
             justify-content: center;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
-            z-index: 1052 !important;
+            z-index: 10;
             overflow: visible !important;
             position: relative;
         }
@@ -3854,8 +4418,8 @@ body {
             object-fit: cover;
             align-items: center;
         }
-        .right-content-1 h2, 
-        .right-content-1 h2 p {
+        .right-content h2, 
+        .right-content h2 p {
             font-size: 2.2rem;
             font-weight: 700;
             line-height: 1.3;
@@ -3863,7 +4427,7 @@ body {
             color: #ffffff; /* White */
         }
         
-        .right-content-1 p {
+        .right-content p {
             font-size: 1.25rem;
             line-height: 1.6;
             color: #e2e8f0; /* Light Gray */
@@ -4436,7 +5000,154 @@ body {
 
 
         @media (max-width: 1200px) {
-           
+            .carousel-item {
+                height: 550px;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 30px !important;
+                transform: translateX(20px) !important;
+            }
+
+            /* Optional fine-tuning */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                margin-top: -20px !important;
+                font-size: 24px !important;
+                transform: translateX(-260px) !important;
+                /* move left */
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption p {
+                margin-top: -5px !important;
+                transform: translateX(-275px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translateX(-170px) !important;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -210px !important;
+                font-size: 30px !important;
+                color: #00CED1 !important;
+                transform: translateX(350px) !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                /* Move LEFT */
+                transform: translate(-250px, 30px) !important;
+
+                /* Optional spacing */
+                margin-top: 20px !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-400px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #00CED1 !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-370px, 30px) !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-40%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                font-size: 30px !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 24px !important;
+
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                font-size: 18px !important;
+
+            }
+
 
             .dot-connector {
                 display: none;
@@ -4472,7 +5183,25 @@ body {
                 position: relative !important;
             }
 
-            
+            .carousel-caption .slide-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+
+            .carousel-caption h2 {
+                font-size: 1.8rem;
+            }
+
+            .left-content,
+            .right-content {
+                text-align: center;
+                width: 100%;
+            }
 
             .why-cards-row {
                 gap: 20px;
@@ -4503,9 +5232,145 @@ body {
         /*************Responsive 992px*****************/
 
         @media (max-width: 992px) {
+            .carousel-item {
+                height: 500px;
+            }
 
 
-            
+            /* Move Slide 3 items slightly down & center them */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Fix h1 → 2 lines + reduce size */
+            .carousel-item:nth-child(3) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(20px) !important;
+                /* move DOWN */
+                font-size: 22px !important;
+                /* reduced size */
+            }
+
+            /* Reduce h2 size + push down slightly */
+            .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                /* reduced size */
+                transform: translateY(25px) !important;
+            }
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -180px !important;
+                font-size: 30px !important;
+                color: #00CED1 !important;
+                transform: translateX(280px) !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                /* Move LEFT */
+                transform: translate(-190px, 30px) !important;
+                color: #4ade80 !important;
+                /* Optional spacing */
+                margin-top: 20px !important;
+                text-align: center;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-420px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #A78BFA !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-330px, 30px) !important;
+            }
+
+            /* H1 – already LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 35px !important;
+                font-weight: 600 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: left !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+
+                transform: translateX(-200px) translateY(100px) !important;
+                /* ← MORE LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 20px !important;
+                font-weight: 300 !important;
+                color: navy !important;
+                text-align: center !important;
+                margin: 0 auto !important;
+                transform: translate(250px, -150px) !important;
+                /* RIGHT + UP */
+            }
+
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                color: navy !important;
+                font-size: 16px !important;
+                transform: translate(250px, -150px) !important;
+                /* move RIGHT + UP */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(250px, -130px) !important;
+                /* RIGHT + UP */
+                padding: 12px 40px !important;
+                min-width: 165px !important;
+                min-height: 30px !important;
+            }
+
             .student-image-card {
                 flex: 1 1 45%;
                 margin-bottom: 20px;
@@ -4624,8 +5489,27 @@ body {
                 display: inline-flex !important;
             }
 
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 280px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
 
             /* Maintain color scheme from desktop */
+            .carousel-caption .highlight {
+                color: #00CED1 !important;
+            }
+
+            .carousel-caption .highlight-green,
+            .carousel-caption .for-green,
+            .carousel-caption .other-green {
+                color: #4ade80 !important;
+            }
 
             .stats-container {
                 height: auto;
@@ -4661,6 +5545,11 @@ body {
                 margin-bottom: 30px;
             }
 
+            #trinityCarousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                color: #4ade80 !important;
+                /* green */
+                font-size: 20px !important;
+            }
         }
 
         /*************Responsive 768px*****************/
@@ -4811,6 +5700,24 @@ body {
                 font-size: 0.9rem;
             }
 
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 220px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+
+            }
 
             .why-section {
                 padding: 40px 15px;
@@ -4964,6 +5871,153 @@ body {
                 padding-right: 10px;
             }
 
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(3) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                transform: translate(-170px, 140px) !important;
+                /* move left more if needed */
+                font-size: 30px !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 24px !important;
+                font-weight: 200 !important;
+
+                /* Move RIGHT or LEFT here */
+                transform: translate(190px, -140px) !important;
+                text-align: center !important;
+                position: relative !important;
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                transform: translate(190px, -120px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(190px, -100px) !important;
+            }
+
+
+
+            /* CENTER EVERYTHING IN SLIDE 3 */
+            .carousel-item:nth-child(2) .carousel-caption {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+
+                width: 100%;
+                text-align: center !important;
+
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                /* horizontal center */
+                justify-content: center !important;
+                /* vertical center */
+
+                padding: 20px;
+            }
+
+            /* Center the text inside */
+            .carousel-item:nth-child(2) .carousel-caption h1,
+            .carousel-item:nth-child(2) .carousel-caption h2,
+            .carousel-item:nth-child(2) .carousel-caption p {
+                text-align: center !important;
+                width: 100%;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption h1 {
+                margin-top: -170px !important;
+                font-size: 30px !important;                
+                transform: translateX(280px) !important;
+            }
+
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 24px !important;
+                font-weight: 200 !important;
+                transform: translate(-200px, 30px) !important;
+                text-align: center !important;
+                margin: 0 auto !important;
+            }
+
+            .carousel-item:nth-child(2) .carousel-caption p {
+
+                transform: translate(-400px, 30px) !important;
+                /* move left more if needed */
+                font-size: 18px !important;
+                color: #A78BFA !important;
+            }
+
+            .carousel-item:nth-child(2) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-300px, 30px) !important;
+            }
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 24px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                align-self: center !important;
+                transform: translate(-40px, 20px) !important;
+            }
+
             .our-aim-section>.church-card,
             .our-aim-section .church-card,
             div .church-card {
@@ -4973,6 +6027,9 @@ body {
                 justify-content: center;
                 justify-content: flex-end !important;
             }
+             .carousel-item:nth-child(2) .carousel-caption h1 {
+                 color: #22d3ee !important;
+             }
 
         }
 
@@ -5070,12 +6127,170 @@ body {
             }
 
            
+            #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 180px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+                overflow: visible !important;
+            }
 
 
             /* APPLY SAME CENTER ALIGNMENT FOR ALL ELEMENTS */
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                text-align: center !important;
+                margin: 0 auto !important;
+                display: block !important;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption {
+                bottom: 5% !important;
+                /* lower number = moves DOWN */
+                left: 5% !important;
+                /* push slightly right */
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                 color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(300px, 10px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 400 !important;
+                color: dark navy !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(230px, -60px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                font-size: 16px !important;
+                font-weight: 400 !important;
+                color: #A78BFA !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(230px, -40px) !important;
+                /* ← move LEFT */
+            }
+
+            .carousel-item:nth-child(3) .learn-more-btn {
+                margin-top: 9px !important;
+                padding: 10px 25px !important;
+
+                /* Remove conflicting properties */
+                margin-left: 0 !important;
+                transform: translateX(290px) !important;
+                /* push RIGHT (increase value if needed) */
+            }
+
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(220px, -110px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: navy !important;
+                /* ← remove comma */
+                transform: translate(-160px, 40px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: #A78BFA !important;
+                transform: translate(-160px, 60px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                 line-height: 1.2 !important;
+                font-size: 16px !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-160px, 70px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
 
 
             /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(-10px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, 30px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
 
 
             /* Highlight colors - maintain desktop scheme */
@@ -5085,6 +6300,17 @@ body {
 
             }
 
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+             .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+            color: #08b547 !important;
+             }
 
             .highlight-green,
             .for-green,
@@ -5290,6 +6516,161 @@ body {
             .church-image img {
                 width: 220px;
                 height: 220px;
+            } #trinityCarousel .carousel-indicators [data-bs-target] {
+                margin: 0 6px !important;
+                width: 10px !important;
+                height: 10px !important;
+                background-color: #fff !important;
+                overflow: visible !important;
+            }
+             #trinityCarousel .carousel-indicators {
+                bottom: 30px !important;
+                left: 140px !important;
+                /* Move to the left */
+                transform: none !important;
+                width: auto !important;
+                justify-content: flex-start !important;
+                /* Align left */
+                z-index: 9999 !important;
+            }
+
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(30px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(190px, -100px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845;
+                /* ← remove comma */
+                transform: translate(-140px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                 color: #A78BFA !important;
+                transform: translate(-140px, 60px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+            }
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(280px, 15px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(3) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845;
+                /* ← remove comma */
+                transform: translate(190px, -50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(3) .carousel-caption p {
+                 color: #A78BFA !important;
+                transform: translate(190px, -30px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-140px, 70px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(200px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px,20px) !important;
+            }
 
         }
 
@@ -5349,443 +6730,126 @@ body {
                 height: 220px;
             }
 
+            .carousel-item:nth-child(3) .carousel-caption h1,
+            .carousel-item:nth-child(3) .carousel-caption h2,
+            .carousel-item:nth-child(3) .carousel-caption p,
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translateX(60px) !important;
+                /* FORCE move right */
+                transform: translateY(-40px) !important;
+                /* Move UP */
+
+                text-align: left !important;
+            }
+
+            /* FORCE H1 - move LEFT */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h1 {
+                font-size: 20px !important;
+                font-weight: 400 !important;
+                color: cyan !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                /* ← LEFT */
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                transform: translate(170px, -100px) !important;
+                /* ← move LEFT */
+            }
+
+            /* FORCE H2 */
+            .carousel .carousel-item:nth-child(2) .carousel-caption h2 {
+                font-size: 18px !important;
+                font-weight: 300 !important;
+                text-align: center !important;
+                color: #1B2845 !important;
+                ;
+                /* ← remove comma */
+                transform: translate(-140px, 50px) !important;
+            }
+
+            /* P TAG */
+            .carousel .carousel-item:nth-child(2) .carousel-caption p {
+                color: #1B2845 !important;
+                ;
+                transform: translate(-120px, 70px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                font-size: 16px !important;
+                /* Force MAX 2 lines */
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                /* limit to 2 lines */
+                -webkit-box-orient: vertical !important;
+
+
+                /* Optional: control width so it wraps to exactly 2 lines */
+                max-width: 330px !important;
+                /* increase width */
+                white-space: normal !important;
+                line-height: 1 !important;
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(2) .learn-more-btn {
+                transform: translate(-140px, 100px) !important;
+                margin: 0 auto !important;
+                /* → move RIGHT */
+            }
+
+            /* BUTTON - move RIGHT */
+            .carousel-item:nth-child(3) .learn-more-btn {
+                transform: translate(190px, 20px) !important;
+                margin: 0 auto !important;
+                text-align: center !important;
+                /* → move RIGHT */
+            }
+
+
+            /* Move items */
+            .carousel-item:nth-child(1) .carousel-caption h1,
+            .carousel-item:nth-child(1) .carousel-caption h2,
+            .carousel-item:nth-child(1) .carousel-caption p,
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translate(-20px, -10px) !important;
+                /* combine X + Y */
+                margin: 0 auto !important;
+                text-align: center !important;
+            }
+
+            /* Force H1 to break into 2 lines */
+            .carousel-item:nth-child(1) .carousel-caption h1 {
+                white-space: normal !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+                line-height: 1.2 !important;
+                display: block !important;
+                text-align: center !important;
+
+                transform: translateY(15px) !important;
+                /* ONLY move up */
+                font-size: 20px !important;
+            }
+
+            /* Highlight colors - maintain desktop scheme */
+            .highlight {
+                color: #00CED1 !important;
+                text-shadow: none !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption h2 {
+                font-size: 18px !important;
+            }
+
+            .carousel-item:nth-child(1) .carousel-caption p {
+                text-align: center;
+                font-size: 16px !important;
+            }
+
+            .carousel-item:nth-child(1) .learn-more-btn {
+                transform: translateY(20px) !important;
+            }
+
+
         }
-    }
-
-
-/* Trinity Theological Seminary Carousel Styles */
-
-#trinityCarousel {
-    position: relative;
-    width: 100%;
-    height: 600px;
-    overflow: hidden;
-}
-
-/* Carousel Inner Container */
-.carousel-inner {
-    height: 100%;
-}
-
-.carousel-item {
-    height: 100%;
-    position: relative;
-}
-
-/* Carousel Images */
-.carousel-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-}
-
-/* Dark Overlay for Better Text Readability */
-.carousel-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        to right,
-        rgba(20, 33, 61, 0.95) 0%,
-        rgba(20, 33, 61, 0.7) 50%,
-        rgba(20, 33, 61, 0.3) 100%
-    );
-    z-index: 1;
-}
-
-/* Caption Container */
-.carousel-caption {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    padding: 0;
-    z-index: 2;
-}
-
-.slide-content {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 60px;
-}
-
-.right-content {
-    max-width: 650px;
-}
-
-/* Hero Title */
-.hero-title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.2;
-    margin-bottom: 30px;
-    text-align: left;
-}
-
-/* Center alignment for mobile only */
-@media (max-width: 768px) {
-    .hero-title,
-    .slide-description,
-    .slide-description p {
-        text-align: center !important;
-    }
-    
-    .right-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-}
-
-/* Slide Description */
-.slide-description {
-    margin-bottom: 35px;
-    text-align: left !important;
-
-}
-
-.slide-description p {
-    font-size: 1.5rem;
-    /* color: #10d9c5; */
-    font-weight: 600;
-    margin-bottom: 15px;
-    line-height: 1.4;
-    text-align: left !important;
-}
-
-.slide-description p:last-child {
-    font-size: 1.25rem;
-    color: #ffffff;
-    font-weight: 400;
-    opacity: 0.95;
-    text-align: left;
-}
-
-/* Learn More Button */
-.learn-more-btn {
-    background-color: #10d9c5;
-    color: #14213d;
-    font-weight: 700;
-    font-size: 1rem;
-    text-transform: uppercase;
-    padding: 18px 45px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    letter-spacing: 0.5px;
-}
-
-.learn-more-btn:hover {
-    background-color: #0ec4b0;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 217, 197, 0.3);
-}
-
-.learn-more-btn:active {
-    transform: translateY(0);
-}
-
-/* Carousel Controls */
-.carousel-control-prev,
-.carousel-control-next {
-    width: 60px;
-    height: 60px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 1;
-    z-index: 3;
-}
-
-.carousel-control-prev {
-    left: 20px;
-}
-
-.carousel-control-next {
-    right: 20px;
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    width: 60px;
-    height: 60px;
-    background-color: #10d9c5;
-    border-radius: 50%;
-    background-size: 24px 24px;
-    transition: all 0.3s ease;
-}
-
-.carousel-control-prev:hover .carousel-control-prev-icon,
-.carousel-control-next:hover .carousel-control-next-icon {
-    background-color: #0ec4b0;
-    transform: scale(1.1);
-}
-
-/* Carousel Indicators */
-.carousel-indicators {
-    bottom: 30px;
-    margin-bottom: 0;
-    z-index: 3;
-}
-
-.carousel-indicators button {
-    width: 40px;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.4);
-    border: none;
-    border-radius: 2px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-}
-
-.carousel-indicators button.active {
-    background-color: #10d9c5;
-    width: 50px;
-}
-
-/* Responsive Design */
-
-/* Large Tablets and Small Desktops */
-@media (max-width: 1200px) {
-    #trinityCarousel {
-        height: 550px;
-    }
-
-    .slide-content {
-        padding: 0 40px;
-    }
-
-    .right-content {
-        max-width: 600px;
-    }
-
-    .hero-title {
-        font-size: 2.8rem;
-    }
-
-    .slide-description p {
-        font-size: 1.3rem;
-    }
-
-    .slide-description p:last-child {
-        font-size: 1.1rem;
-    }
-}
-
-/* Tablets */
-@media (max-width: 992px) {
-    #trinityCarousel {
-        height: 500px;
-    }
-
-    .slide-content {
-        padding: 0 30px;
-    }
-
-    .right-content {
-        max-width: 550px;
-    }
-
-    .hero-title {
-        font-size: 2.4rem;
-        margin-bottom: 25px;
-    }
-
-    .slide-description p {
-        font-size: 1.2rem;
-    }
-
-    .slide-description p:last-child {
-        font-size: 1.05rem;
-    }
-
-    .learn-more-btn {
-        padding: 16px 40px;
-        font-size: 0.95rem;
-    }
-
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 50px;
-        height: 50px;
-    }
-
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        width: 50px;
-        height: 50px;
-        background-size: 20px 20px;
-    }
-}
-
-/* Mobile Landscape and Small Tablets */
-@media (max-width: 768px) {
-    #trinityCarousel {
-        height: 450px;
-    }
-
-    .carousel-item::before {
-        background: linear-gradient(
-            to bottom,
-            rgba(20, 33, 61, 0.85) 0%,
-            rgba(20, 33, 61, 0.9) 100%
-        );
-    }
-
-    .slide-content {
-        padding: 0 25px;
-    }
-
-    .right-content {
-        max-width: 100%;
-    }
-
-    .hero-title {
-        font-size: 2rem;
-        margin-bottom: 20px;
-    }
-
-    .slide-description {
-        margin-bottom: 30px;
-        text-align: center !important;
-
-    }
-
-    .slide-description p {
-        font-size: 1.1rem;
-    }
-
-    .slide-description p:last-child {
-        font-size: 0.95rem;
-    }
-
-    .learn-more-btn {
-        padding: 14px 35px;
-        font-size: 0.9rem;
-    }
-
-    .carousel-control-prev {
-        left: 15px;
-    }
-
-    .carousel-control-next {
-        right: 15px;
-    }
-
-    .carousel-indicators {
-        bottom: 20px;
-    }
-
-    .carousel-indicators button {
-        width: 30px;
-        height: 3px;
-    }
-
-    .carousel-indicators button.active {
-        width: 40px;
-    }
-}
-
-/* Mobile Portrait */
-@media (max-width: 576px) {
-    #trinityCarousel {
-        height: 500px;
-    }
-
-    .slide-content {
-        padding: 0 20px;
-    }
-
-    .carousel-caption {
-        align-items: flex-start;
-        padding-top: 80px;
-    }
-
-    .hero-title {
-        font-size: 1.65rem;
-        margin-bottom: 18px;
-    }
-
-    .slide-description {
-        margin-bottom: 25px;
-    }
-
-    .slide-description p {
-        font-size: 1rem;
-        margin-bottom: 12px;
-    }
-
-    .slide-description p:last-child {
-        font-size: 0.9rem;
-    }
-
-    .learn-more-btn {
-        padding: 13px 30px;
-        font-size: 0.85rem;
-        width: 100%;
-        max-width: 280px;
-    }
-
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 45px;
-        height: 45px;
-    }
-
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        width: 45px;
-        height: 45px;
-        background-size: 18px 18px;
-    }
-
-    .carousel-control-prev {
-        left: 10px;
-    }
-
-    .carousel-control-next {
-        right: 10px;
-    }
-
-    .carousel-indicators button {
-        width: 25px;
-        margin: 0 3px;
-    }
-
-    .carousel-indicators button.active {
-        width: 35px;
-    }
-}
-
-/* Extra Small Devices */
-@media (max-width: 400px) {
-    #trinityCarousel {
-        height: 480px;
-    }
-
-    .hero-title {
-        font-size: 1.4rem;
-    }
-
-    .slide-description p {
-        font-size: 0.95rem;
-    }
-
-    .slide-description p:last-child {
-        font-size: 0.85rem;
-    }
-
-    .learn-more-btn {
-        padding: 12px 25px;
-        font-size: 0.8rem;
-    }
-}
+  

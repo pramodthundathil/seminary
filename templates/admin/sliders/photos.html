@@ -204,7 +204,7 @@
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/super-build/ckeditor.js"></script>
 
 <script>
     let isEditMode = false;
@@ -257,17 +257,43 @@
             }
         });
 
-        // Initialize CKEditor5
-        ClassicEditor
-            .create(document.querySelector('#photoDescription'), {
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo']
+        // Initialize CKEditor5 (Super Build)
+        // Using a try-catch block and alert for immediate feedback
+        try {
+            CKEDITOR.ClassicEditor.create(document.querySelector('#photoDescription'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', 'strikethrough', 'fontColor', 'fontBackgroundColor', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'outdent', 'indent', '|',
+                        'link', '|',
+                        'undo', 'redo',
+                        '-',
+                        'sourceEditing'
+                    ],
+                    shouldNotGroupWhenFull: true
+                },
+                removePlugins: [
+                    'AIAssistant', 'CKBox', 'CKFinder', 'EasyImage', 'RealTimeCollaborativeComments', 
+                    'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory', 'PresenceList', 
+                    'Comments', 'TrackChanges', 'TrackChangesData', 'RevisionHistory', 'Pagination', 
+                    'WProofreader', 'MathType', 'SlashCommand', 'Template', 'DocumentOutline', 
+                    'FormatPainter', 'TableOfContents', 'PasteFromOfficeEnhanced', 'CaseChange'
+                ]
             })
             .then(editor => {
                 descriptionEditor = editor;
+                console.log('CKEditor initialized successfully');
             })
             .catch(error => {
                 console.error('CKEditor initialization error:', error);
+                alert('CKEditor Failed into Initialize: ' + error.message);
             });
+        } catch (e) {
+            console.error('CKEditor Setup Error:', e);
+            alert('CKEditor Setup Error: ' + e.message);
+        }
     });
 
     function openCreatePhotoModal() {

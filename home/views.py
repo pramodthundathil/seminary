@@ -52,7 +52,9 @@ from .models import (
     Subjects,StudentsInstructor,
     Exams,
     Payments,
-    Contacts
+    Contacts,
+    Sliders,
+    SliderPhotos
 )
 
 # Set up logger
@@ -77,13 +79,13 @@ import json
 
 
 
-@login_required(login_url='signin')
-def index(request): 
-    pages = Pages.objects.all()
-    # student=Students.objects.get(id=10600)
-    student=Students.objects.get(user=request.user)
-    context = {"pages":pages,"student":student}
-    return render(request,"site_pages/index.html",context)
+# @login_required(login_url='signin')
+# def index(request): 
+#     pages = Pages.objects.all()
+#     # student=Students.objects.get(id=10600)
+#     student=Students.objects.get(user=request.user)
+#     context = {"pages":pages,"student":student}
+#     return render(request,"site_pages/index.html",context)
 
 ##################only test###################
 from django.shortcuts import render
@@ -124,10 +126,27 @@ def index(request):
         Q(code__exact="") |
         Q(code__regex=r'^\s*$')
     )  
+    logger.info(f"Page data count: {pages_data.count()}")
+
+    slider_photos = []
+    try:
+        # Fetch the slider with code 'home' or 'home-slider'
+        slider = Sliders.objects.filter(code='home').first()
+        if not slider:
+            slider = Sliders.objects.filter(code='home-slider').first()
+            
+        if slider:
+            slider_photos = slider.photos.all().select_related('media').order_by('id') # Or order by another field if available
+    except Exception as e:
+        logger.error(f"Error fetching slider: {e}")
+
     context = {
         "pages_data": pages_data,
+        "slider_photos": slider_photos,
     }
     return render(request, "site_pages/index.html", context)
+
+
 def page_detail(request, slug):
     """
     Dynamic page view for handling page URLs
