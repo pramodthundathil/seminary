@@ -15,6 +15,5 @@ def role_redirection(view_func):
             else:
                 return redirect("student_home")
         else:
-            messages.info(request,"Please login to continue")
             return redirect('signin')
     return wrapper_func

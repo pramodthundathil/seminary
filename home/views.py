@@ -433,7 +433,6 @@ def payment_options(request):
 
 def signin(request):
     users =  Users.objects.all()
-    print(users)
     if request.method == "POST":
         username = request.POST['email']
         password = request.POST['password']
@@ -446,8 +445,6 @@ def signin(request):
             #     return redirect('student_home')
             # elif role=="Church User":  
             #     return redirect('church_user_home')
-              
-
             return redirect('admin_index')
         else:
             messages.info(request,"User name or password incorrect")
