@@ -314,18 +314,20 @@ from home.models import Languages
 class LanguageForm(forms.ModelForm):
     class Meta:
         model = Languages
-        fields = [
-            'language_name',
-            
-        ]  # id, created_by, updated_by removed
+        fields = ['language_name', 'status']
+        widgets = {
+            'status': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Add form-control class
         for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control'})
-
+            # Don't use form-control for checkbox
+            if field_name != 'status':
+                field.widget.attrs.update({'class': 'form-control'})
 
 
 from home.models import Subjects

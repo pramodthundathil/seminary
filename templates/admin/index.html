@@ -4111,34 +4111,178 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <div>
-                <button class="back-btn">
+                <a href="{% url 'admin_index' %}" class="back-btn" style="text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> DASHBOARD
-                </button>
+                </a>
             </div>
             <div class="top-bar-right">
-                <button class="icon-btn" onclick="toggleNotifications()">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                <button class="icon-btn">
-                    <i class="fas fa-envelope"></i>
-                    <span class="notification-badge">5</span>
-                </button>
-                <button class="icon-btn">
-                    <i class="fas fa-cog"></i>
-                </button>
                 <div class="profile-dropdown">
-                    <img src="https://ui-avatars.com/api/?name={{ request.user }}&background=00CED1&color=fff"
+                    <button class="icon-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        {% with total_notif=new_students_count|add:pending_books_count|add:pending_subjects_count %}
+                        {% if total_notif > 0 %}
+                        <span class="notification-badge">{{ total_notif }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <style>
+                        .notification-dropdown {
+                            display: none;
+                            position: absolute;
+                            top: 50px;
+                            right: 80px;
+                            width: 350px;
+                            background: white;
+                            border: 1px solid var(--border);
+                            border-radius: 8px;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                            z-index: 1000;
+                            max-height: 400px;
+                            overflow-y: auto;
+                        }
+
+                        .notification-dropdown.show {
+                            display: block;
+                        }
+
+                        .notif-header {
+                            padding: 12px 16px;
+                            border-bottom: 1px solid #eee;
+                            font-weight: 600;
+                            color: var(--text-dark);
+                            background: #f8fafc;
+                        }
+
+                        .notif-item {
+                            padding: 12px 16px;
+                            border-bottom: 1px solid #eee;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+                            transition: background 0.2s;
+                            text-decoration: none;
+                            color: inherit;
+                        }
+
+                        .notif-item:hover {
+                            background: #f1f5f9;
+                        }
+
+                        .notif-item:last-child {
+                            border-bottom: none;
+                        }
+
+                        .notif-title {
+                            font-size: 14px;
+                            font-weight: 500;
+                            color: var(--text-dark);
+                        }
+
+                        .notif-meta {
+                            font-size: 12px;
+                            color: var(--text-light);
+                        }
+
+                        .notif-badge {
+                            display: inline-block;
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            font-size: 10px;
+                            font-weight: 600;
+                            margin-bottom: 4px;
+                            width: fit-content;
+                        }
+
+                        .badge-new {
+                            background: #e0f2fe;
+                            color: #0284c7;
+                        }
+
+                        .badge-alert {
+                            background: #fee2e2;
+                            color: #dc2626;
+                        }
+
+                        .badge-warn {
+                            background: #fef3c7;
+                            color: #d97706;
+                        }
+                    </style>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notif-header">Notifications</div>
+                        {% if new_students_list %}
+                        {% for student in new_students_list %}
+                        <a href="{% url 'student_detail' student.id %}" class="notif-item">
+                            <span class="notif-badge badge-new">New Student</span>
+                            <span class="notif-title">New registration: {{ student.first_name }} {{ student.last_name }}</span>
+                            <span class="notif-meta">{{ student.created_at|date:"M d, H:i" }}</span>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if pending_subjects %}
+                        {% for req in pending_subjects %}
+                        <a href="{% url 'student_subjects_list' %}" class="notif-item">
+                            <span class="notif-badge badge-warn">Subject Request</span>
+                            <span class="notif-title">{{ req.student.first_name }}: Request for {{ eq.subject.subject_name }}</span>
+                                
+                            <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if pending_books %}
+                        {% for req in pending_books %}
+                        <a href="{% url 'student_books_list' %}" class="notif-item">
+                            <span class="notif-badge badge-warn">Book Request</span>
+                            <span class="notif-title">{{ req.student.first_name }}: Request for {{ req.book.title}}</span>
+                            <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if pending_exams %}
+                        {% for req in pending_exams %}
+                        <a href="{% url 'student_exams_list' %}" class="notif-item">
+                            <span class="notif-badge badge-alert">Exam Request</span>
+                            <span class="notif-title">{{ req.student.first_name }}: Request for {{ req.exam.exam_name }}</span>
+
+
+                            <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
+                        </a>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not new_students_list and not pending_subjects and not pending_books and not pending_exams %}
+                        <div class="notif-item" style="text-align: center; color: var(--text-light);">No new
+                            notifications</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <a href="{% url 'contact_list' %}" class="icon-btn" style="text-decoration: none; color: inherit;">
+                    <i class="fas fa-envelope"></i>
+                    <!-- <span class="notification-badge">5</span> -->
+                </a>
+                <!-- <a href="#" class="icon-btn" style="text-decoration: none; color: inherit;">
+                    <i class="fas fa-cog"></i>
+                </a> -->
+                <div class="profile-dropdown">
+                    <!-- Profile Image safe url -->
+                    <img src="https://ui-avatars.com/api/?name=ADMIN&background=00CED1&color=fff"
                         alt="Profile" class="profile-img" onclick="toggleProfileDropdown()">
                     <div class="dropdown-menu-custom" id="profileDropdown">
-                        <a href="#" class="dropdown-item-custom">
+                        <!-- Try to link to a user profile view if available, else # -->
+                        <a href="{% url 'users_view' request.user.id %}" class="dropdown-item-custom">
                             <i class="fas fa-user"></i>
                             <span>Profile</span>
                         </a>
-                        <a href="#" class="dropdown-item-custom">
+                        <!-- Settings link -->
+                        <!-- <a href="#" class="dropdown-item-custom">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
-                        </a>
+                        </a> -->
                         <a href="#" class="dropdown-item-custom" onclick="handleLogout()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
@@ -4147,11 +4291,11 @@
                 </div>
             </div>
         </div>
-{% block content %}
+        {% block content %}
         <!-- Pending Actions -->
         <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Pending Actions</h4>
         <div class="stats-row">
-            <a href="{% url 'student_list' %}?status=pending" style="text-decoration: none; color: inherit;">
+            <a href="{% url 'application_list_view' %}" style="text-decoration: none; color: inherit;">
                 <div class="stat-card" style="border-left: 5px solid #FFC107;">
                     <div class="stat-icon yellow">
                         <i class="fas fa-user-plus"></i>
@@ -4160,7 +4304,7 @@
                     <div class="stat-label">New Applications</div>
                 </div>
             </a>
-            
+
             <a href="{% url 'student_subjects_list' %}?status=pending" style="text-decoration: none; color: inherit;">
                 <div class="stat-card" style="border-left: 5px solid #FFC107;">
                     <div class="stat-icon yellow">
@@ -4182,129 +4326,312 @@
             </a>
         </div>
 
-        <!-- General Stats -->
-        <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Overview</h4>
-        <!-- Stats Cards -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon blue">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-value">{{ attendance_percentage|default:"80" }}%</div>
-                <div class="stat-label">Attendance</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon purple">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
-                <div class="stat-value">{{ total_students|default:"258" }}+</div>
-                <div class="stat-label">Total Enrollment</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon yellow">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="stat-value">{{ tasks_in_progress|default:"64" }}%</div>
-                <div class="stat-label">Task In Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon pink">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <div class="stat-value">{{ total_exams_completed|default:"245" }}</div>
-                <div class="stat-label">Exams Completed</div>
-            </div>
-        </div>
+        <!-- Replacing old summary cards with Request Tables Grid -->
+            <style>
+                .dashboard-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 24px;
+                    margin-bottom: 30px;
+                }
+                
+                @media (max-width: 992px) {
+                    .dashboard-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+                
+                .request-card {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    overflow: hidden;
+                    border: 1px solid var(--border);
+                }
+                
+                .request-header {
+                    padding: 16px 20px;
+                    background: var(--gray-50);
+                    border-bottom: 1px solid var(--border);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .request-title {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-dark);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .request-count {
+                    background: var(--danger);
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: 700;
+                }
+                
+                .request-table {
+                    width: 100%;
+                }
+                
+                .request-table th {
+                   font-size: 12px;
+                   color: var(--text-light);
+                   padding: 12px 20px;
+                   text-align: left;
+                   border-bottom: 1px solid var(--gray-200);
+                   font-weight: 500;
+                }
+                
+                .request-table td {
+                    padding: 12px 20px;
+                    font-size: 14px;
+                    color: var(--text-dark);
+                    border-bottom: 1px solid var(--gray-100);
+                }
+                
+                .request-table tr:last-child td {
+                    border-bottom: none;
+                }
+                
+                .empty-message {
+                    padding: 30px;
+                    text-align: center;
+                    color: var(--text-light);
+                    font-size: 14px;
+                }
+                
+                .view-all-link {
+                    color: var(--primary);
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-decoration: none;
+                }
+                
+                .view-all-link:hover {
+                    text-decoration: underline;
+                }
+                
+                .status-badge-sm {
+                    font-size: 11px;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                }
+                .status-badge-sm.pending {
+                    background: #FEF3C7;
+                    color: #D97706;
+                }
+            </style>
 
-        <!-- Progress Section -->
-        <div class="progress-section">
-            <div class="card">
-                <div class="card-header-custom">
-                    <h5 class="card-title">Students</h5>
-                    <button class="icon-btn">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </button>
+            <div class="dashboard-grid">
+                <!-- 1. Student Applications -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-user-plus text-primary"></i> Pending Applications
+                            {% if pending_applications.count > 0 %} <span class="request-count">{{ pending_applications.count }}</span> {% endif %}
+                        </div>
+                        <a href="{% url 'application_list_view' %}" class="view-all-link">View All</a>
+                    </div>
+                    {% if pending_applications %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in pending_applications %}
+                            <tr>
+                                <td>{{ app.first_name }} {{ app.last_name }}</td>
+                                <td>{{ app.created_at|date:"M d, Y" }}</td>
+                                <td><span class="status-badge-sm pending">Pending</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No pending applications</div>
+                    {% endif %}
                 </div>
-                <div class="donut-container">
-                    <div>
-                        <div class="donut-chart">
-                            <svg width="120" height="120">
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#E0E0E0" stroke-width="15" />
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#A78BFA" stroke-width="15"
-                                    stroke-dasharray="314" stroke-dashoffset="{{ male_offset|default:'83' }}" />
-                            </svg>
-                            <div class="donut-center">
-                                <div class="donut-value">{{ male_percentage|default:"53" }}%</div>
-                            </div>
+
+                <!-- 2. Contact Requests -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-envelope text-info"></i> Contact Requests
                         </div>
-                        <div class="donut-legend">
-                            <div class="donut-label">{{ male_count|default:"3,178" }} | Boys</div>
-                        </div>
+                        <a href="{% url 'contact_list' %}" class="view-all-link">View All</a>
                     </div>
-                    <div>
-                        <div class="donut-chart">
-                            <svg width="120" height="120">
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#E0E0E0" stroke-width="15" />
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#FFC107" stroke-width="15"
-                                    stroke-dasharray="314" stroke-dashoffset="{{ female_offset|default:'148' }}" />
-                            </svg>
-                            <div class="donut-center">
-                                <div class="donut-value">{{ female_percentage|default:"47" }}%</div>
-                            </div>
+                    {% if contact_requests %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contact in contact_requests %}
+                            <tr>
+                                <td>{{ contact.name }}</td>
+                                <td>{{ contact.subject|truncatechars:20 }}</td>
+                                <td>{{ contact.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No contact requests</div>
+                    {% endif %}
+                </div>
+
+                <!-- 3. Book Requests -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-book text-success"></i> Book Requests
                         </div>
-                        <div class="donut-legend">
-                            <div class="donut-label">{{ female_count|default:"2,731" }} | Girls</div>
-                        </div>
+                        <a href="{% url 'student_books_list' %}" class="view-all-link">View All</a>
                     </div>
+                    {% if pending_books %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_books %}
+                            <tr>
+                                <td>{{ req.student.first_name }}</td>
+                                <td>{{ req.book.title|truncatechars:20 }}</td>
+                                <td>{{ req.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No pending book requests</div>
+                    {% endif %}
+                </div>
+
+                <!-- 4. Subject Requests -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-graduation-cap text-warning"></i> Subject Requests
+                        </div>
+                        <a href="{% url 'student_subjects_list' %}" class="view-all-link">View All</a>
+                    </div>
+                    {% if pending_subjects %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_subjects %}
+                            <tr>
+                                <td>{{ req.student.first_name }}</td>
+                                <td>{{ req.subject.subject_name|truncatechars:20 }}</td>
+                                <td>{{ req.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No pending subject requests</div>
+                    {% endif %}
+                </div>
+
+                <!-- 5. Assignment Requests -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-tasks text-danger"></i> Pending Assignments
+                        </div>
+                        <a href="{% url 'student_assignment_list' %}" class="view-all-link">View All</a>
+                    </div>
+                    {% if assignment_requests %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Assignment</th>
+                                <th>Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assign in assignment_requests %}
+                            <tr>
+                                <td>{{ assign.student.first_name }}</td>
+                                <td>{{ assign.assignment.assignment_name|truncatechars:20 }}</td>
+                                <td>{{ assign.submitted_on|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No pending assignments</div>
+                    {% endif %}
+                </div>
+
+                <!-- 6. Exam Requests -->
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="request-title">
+                            <i class="fas fa-file-alt text-secondary"></i> Exam Requests
+                        </div>
+                        <a href="{% url 'student_exams_list' %}" class="view-all-link">View All</a>
+                    </div>
+                    {% if pending_exams %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Exam</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in pending_exams %}
+                            <tr>
+                                <td>{{ req.student.first_name }}</td>
+                                <td>{{ req.exam.exam_name|truncatechars:20 }}</td>
+                                <td>{{ req.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">No pending exam requests</div>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header-custom">
-                    <h5 class="card-title">Coursewise Student count</h5>
-                    <a href="#" style="color: var(--primary-cyan); text-decoration: none; font-size: 14px;">View all</a>
-                </div>
-                <div class="course-cards">
-                    {% for course in courses|slice:":3" %}
-                    <div class="course-card {% cycle 'purple' 'green' 'blue' %}">
-                        <div class="course-title">{{ course.course_name }}</div>
-                        <div class="course-count">{{ course.student_count|default:"0" }}</div>
-                        <div style="font-size: 12px; margin-top: 5px;">Total Students</div>
-                    </div>
-                    {% empty %}
-                    <div class="course-card">
-                        <div class="course-title">M.Div</div>
-                        <div class="course-count">200</div>
-                        <div style="font-size: 12px; margin-top: 5px;">Total Students</div>
-                    </div>
-                    <div class="course-card green">
-                        <div class="course-title">INTRO TO BIBLE</div>
-                        <div class="course-count">200</div>
-                        <div style="font-size: 12px; margin-top: 5px;">Total Students</div>
-                    </div>
-                    <div class="course-card blue">
-                        <div class="course-title">B.Th</div>
-                        <div class="course-count">200</div>
-                        <div style="font-size: 12px; margin-top: 5px;">Total Students</div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- New Students Table -->
+        <!-- Recent Students Table -->
         <div class="data-table">
             <div class="table-header">
-                <h5 class="card-title">New Students</h5>
+                <h5 class="card-title">Recent Students</h5>
                 <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by Name" id="searchStudents"
-                            onkeyup="searchTable('studentsTable', 'searchStudents')">
-                    </div>
-                    <button class="add-btn">
-                        Add New <i class="fas fa-plus"></i>
-                    </button>
+                    <a href="{% url 'student_list' %}" class="btn btn-sm btn-primary" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+                        All Students <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
             <table id="studentsTable">
@@ -4337,9 +4664,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <button class="action-btn" title="View"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                            <a href="{% url 'student_detail' student.id %}" class="action-btn" title="View" style="display: inline-block; text-decoration: none; color: inherit;"><i class="fas fa-eye"></i></a>
                         </td>
                     </tr>
                     {% empty %}
@@ -4352,8 +4677,6 @@
                         <td><span class="status-badge approved">Active</span></td>
                         <td>
                             <button class="action-btn"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -4368,194 +4691,7 @@
             </div>
         </div>
 
-        <!-- Additional Tables -->
-        <div class="responsive-grid">
-            <!-- References Table -->
-            <div class="data-table">
-                <div class="table-header">
-                    <h5 class="card-title">References</h5>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by Name" id="searchReferences"
-                            onkeyup="searchTable('referencesTable', 'searchReferences')">
-                    </div>
-                </div>
-                <table id="referencesTable">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Name</th>
-                            <th>Applicant</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reference in references %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ reference.first_name }} {{ reference.last_name }}</td>
-                            <td>{{ reference.applicant_name|truncatechars:15 }}</td>
-                            <td>{{ reference.created_at|date:"d M Y" }}</td>
-                            <td>
-                                <button class="action-btn" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn" title="Copy"><i class="fas fa-copy"></i></button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td>01</td>
-                            <td>John Doe</td>
-                            <td>Olivah MOH</td>
-                            <td>12 May 2024</td>
-                            <td>
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-copy"></i></button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <div class="pagination-custom">
-                    <div class="page-info">Showing 1 to {{ references.count|default:"5" }}</div>
-                    <div class="page-nav">
-                        <button class="page-btn">See all</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Exam Request Table -->
-            <div class="data-table">
-                <div class="table-header">
-                    <h5 class="card-title">Exam request</h5>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by Name" id="searchExams"
-                            onkeyup="searchTable('examsTable', 'searchExams')">
-                    </div>
-                </div>
-                <table id="examsTable">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Student</th>
-                            <th>Exam</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for exam_request in exam_requests %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ exam_request.student.first_name }} {{ exam_request.student.last_name }}</td>
-                            <td>{{ exam_request.exam.exam_name|truncatechars:20 }}</td>
-                            <td>{{ exam_request.created_at|date:"d M Y" }}</td>
-                            <td>
-                                <button class="action-btn" title="Approve" onclick="approveExam({{ exam_request.id }})">
-                                    <i class="fas fa-check" style="color: green;"></i>
-                                </button>
-                                <button class="action-btn" title="Reject" onclick="rejectExam({{ exam_request.id }})">
-                                    <i class="fas fa-times" style="color: red;"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td>01</td>
-                            <td>Sophia Wilson</td>
-                            <td>Exam 1</td>
-                            <td>12 May 2024</td>
-                            <td>
-                                <button class="action-btn" title="Approve"><i class="fas fa-check"
-                                        style="color: green;"></i></button>
-                                <button class="action-btn" title="Reject"><i class="fas fa-times"
-                                        style="color: red;"></i></button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <div class="pagination-custom">
-                    <div class="page-info">Showing 1 to {{ exam_requests.count|default:"5" }}</div>
-                    <div class="page-nav">
-                        <button class="page-btn">See all</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Subject Requests Table -->
-        <div class="data-table" style="margin-top: 30px;">
-            <div class="table-header">
-                <h5 class="card-title">Subject Requests</h5>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by Name" id="searchSubjects"
-                            onkeyup="searchTable('subjectsTable', 'searchSubjects')">
-                    </div>
-                </div>
-            </div>
-            <table id="subjectsTable">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Student</th>
-                        <th>Subject</th>
-                        <th>Optional</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subject_request in subject_requests %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ subject_request.student.first_name }} {{ subject_request.student.last_name }}</td>
-                        <td>{{ subject_request.subject.subject_name }}</td>
-                        <td>
-                            {% if subject_request.is_optional == 1 %}
-                            <span class="status-badge" style="background: #e3f2fd; color: #1976d2;">Optional</span>
-                            {% else %}
-                            <span class="status-badge" style="background: #f3e5f5; color: #7b1fa2;">Mandatory</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if subject_request.is_approved == 1 %}
-                            <span class="status-badge approved">Approved</span>
-                            {% elif subject_request.is_approved == 0 %}
-                            <span class="status-badge pending">Pending</span>
-                            {% else %}
-                            <span class="status-badge rejected">Rejected</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ subject_request.created_at|date:"d M Y" }}</td>
-                        <td>
-                            <button class="action-btn" title="Approve"><i class="fas fa-check"></i></button>
-                            <button class="action-btn" title="Reject"><i class="fas fa-times"></i></button>
-                            <button class="action-btn" title="View"><i class="fas fa-eye"></i></button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-gray);">
-                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
-                            No subject requests found
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="pagination-custom">
-                <div class="page-info">Showing {{ subjects_start|default:"1" }} to {{ subjects_end|default:"10" }}</div>
-                <div class="page-nav">
-                    <button class="page-btn">Previous</button>
-                    <button class="page-btn">Next</button>
-                </div>
-            </div>
-        </div>
+        
         {% endblock %}
     </div>
 
@@ -4587,118 +4723,45 @@
             dropdown.classList.toggle('show');
         }
 
+        // Toggle Notifications
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+
+            // Close profile dropdown if open
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileDropdown) profileDropdown.classList.remove('show');
+        }
+
+        // Update toggleProfileDropdown to close notifications
+        const originalToggleProfile = toggleProfileDropdown;
+        toggleProfileDropdown = function () {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+
+            // Close notification dropdown if open
+            const notifDropdown = document.getElementById('notificationDropdown');
+            if (notifDropdown) notifDropdown.classList.remove('show');
+        }
+
         // Close dropdown when clicking outside
         document.addEventListener('click', function (event) {
-            const dropdown = document.getElementById('profileDropdown');
+            const profileDropdown = document.getElementById('profileDropdown');
             const profileImg = document.querySelector('.profile-img');
 
-            if (dropdown && !dropdown.contains(event.target) && profileImg && !profileImg.contains(event.target)) {
-                dropdown.classList.remove('show');
+            if (profileDropdown && !profileDropdown.contains(event.target) && profileImg && !profileImg.contains(event.target)) {
+                profileDropdown.classList.remove('show');
+            }
+
+            // Close notification dropdown
+            const notifDropdown = document.getElementById('notificationDropdown');
+            // The button triggering notification has onclick="toggleNotifications()"
+            const isNotifButton = event.target.closest('button[onclick="toggleNotifications()"]');
+
+            if (notifDropdown && !notifDropdown.contains(event.target) && !isNotifButton) {
+                notifDropdown.classList.remove('show');
             }
         });
-
-        // Handle Logout
-        function handleLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = "{% url 'signout' %}";
-            }
-        }
-
-        // Search Table Function
-        function searchTable(tableId, inputId) {
-            const input = document.getElementById(inputId);
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById(tableId);
-            const rows = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                const cells = row.getElementsByTagName('td');
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cell = cells[j];
-                    if (cell) {
-                        const textValue = cell.textContent || cell.innerText;
-                        if (textValue.toLowerCase().indexOf(filter) > -1) {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (found) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        }
-
-        // Approve Exam Request
-        function approveExam(examId) {
-            if (confirm('Approve this exam request?')) {
-                fetch(`/api/exams/${examId}/approve/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Exam approved successfully!');
-                            location.reload();
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        }
-
-        // Reject Exam Request
-        function rejectExam(examId) {
-            const reason = prompt('Enter rejection reason:');
-            if (reason) {
-                fetch(`/api/exams/${examId}/reject/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ reason: reason })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Exam rejected successfully!');
-                            location.reload();
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-        }
-
-        // Get CSRF Token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Toggle Notifications (placeholder)
-        function toggleNotifications() {
-            alert('Notifications feature - integrate with your backend');
-        }
 
         // Mobile Menu Toggle
         function toggleMobileMenu() {
@@ -4882,7 +4945,7 @@
             icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
             title: "{{ message|escapejs }}",
             showConfirmButton: true,
-            confirmButtonText: 'Understood',
+            confirmButtonText: 'Ok',
             timer: 5000,
             timerProgressBar: true,
             allowEscapeKey: true,

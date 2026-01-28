@@ -100,6 +100,13 @@ urlpatterns = [
     path('students/datatable/', views.student_datatable, name='student_datatable'),
     path('students/create/', views.student_create, name='student_create'),
     path('students/get/<int:student_id>/', views.student_get, name='student_get'),
+    
+    # Student Detail & Actions
+    path('students/view/<int:student_id>/', views.student_detail, name='student_detail'),
+    path('students/action/approve/<int:student_id>/', views.student_approve_action, name='student_approve_action'),
+    path('students/action/disapprove/<int:student_id>/', views.student_disapprove_action, name='student_disapprove_action'),
+    path('students/action/activate/<int:student_id>/', views.student_activate_action, name='student_activate_action'),
+    path('students/action/deactivate/<int:student_id>/', views.student_deactivate_action, name='student_deactivate_action'),
     path('students/update/<int:student_id>/', views.student_update, name='student_update'),
     path('admin/students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
     

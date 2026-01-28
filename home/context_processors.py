@@ -166,3 +166,31 @@ def menu_context(request):
             'pages_data': [],
         }
 
+
+from .models import Students, StudentsSubjects, StudentsBooks, StudentsExams
+
+def notifications_context(request):
+    """
+    Context processor to make notification data available in all templates
+    """
+    if not request.user.is_authenticated:
+         return {}
+
+    # notifications_context logic
+    new_students_count = Students.objects.filter(status=False).count()
+    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False).count()
+    pending_books_count = StudentsBooks.objects.filter(is_approved=False).count()
+
+    context = {
+        'new_students_count': new_students_count,
+        'pending_subjects_count': pending_subjects_count,
+        'pending_books_count': pending_books_count,
+        # Notifications Data lists
+        'new_students_list': Students.objects.filter(status=False).order_by('-created_at')[:5],
+        'pending_subjects': StudentsSubjects.objects.filter(is_approved=False).select_related('student', 'subject').order_by('-created_at')[:5],
+        'pending_books': StudentsBooks.objects.filter(is_approved=False).select_related('student', 'book').order_by('-created_at')[:5],
+        'pending_exams': StudentsExams.objects.filter(is_approved=False).select_related('student', 'exam').order_by('-created_at')[:5],
+    }
+    
+    return context
+

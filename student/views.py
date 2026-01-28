@@ -1658,7 +1658,7 @@ def student_register(request):
     return render(request, "site_pages/student_register.html", {
         "countries": Countries.objects.all(),
         "courses": Courses.objects.all(),
-        "languages": Languages.objects.all(), 
+        "languages": Languages.objects.filter(deleted_at__isnull=True),
         "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY,
         "timezones": pytz.common_timezones  
     })

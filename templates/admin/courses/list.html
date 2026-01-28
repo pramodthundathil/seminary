@@ -2,7 +2,7 @@
 {% block content %}
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 
 <div class="gallery-container">
     <div class="page-header">
@@ -55,8 +55,9 @@
         height: 60px;
         object-fit: cover;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .course-thumb-placeholder {
         width: 80px;
         height: 60px;
@@ -68,13 +69,15 @@
         color: var(--text-light, #9ca3af);
         font-size: 24px;
     }
+
     .code-badge {
-        background: var(--primary, #3b82f6); 
-        color: white; 
-        padding: 2px 8px; 
-        border-radius: 12px; 
+        background: var(--primary, #3b82f6);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
         font-size: 11px;
     }
+
     .qual-badge {
         background: var(--secondary, #10b981);
         color: white;
@@ -82,13 +85,14 @@
         border-radius: 12px;
         font-size: 11px;
     }
+
     .course-meta {
         display: flex;
         gap: 5px;
         margin-top: 5px;
         flex-wrap: wrap;
     }
-    
+
     /* View Modal Styles */
     .modal {
         display: none;
@@ -101,6 +105,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         overflow-y: auto;
     }
+
     .modal-content {
         background-color: #fefefe;
         margin: 50px auto;
@@ -111,6 +116,7 @@
         max-width: 700px;
         position: relative;
     }
+
     .modal-header {
         padding: 15px 20px;
         border-bottom: 1px solid #eee;
@@ -120,9 +126,11 @@
         background: #f8f9fa;
         border-radius: 8px 8px 0 0;
     }
+
     .modal-body {
         padding: 20px;
     }
+
     .close-modal {
         background: none;
         border: none;
@@ -130,27 +138,32 @@
         cursor: pointer;
         color: #666;
     }
+
     .detail-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 15px;
         margin-bottom: 20px;
     }
+
     .detail-item {
         background: #f8f9fa;
         padding: 10px;
         border-radius: 6px;
     }
+
     .detail-label {
         font-size: 12px;
         color: #666;
         margin-bottom: 4px;
         text-transform: uppercase;
     }
+
     .detail-value {
         font-weight: 600;
         color: #333;
     }
+
     .course-detail-preview {
         width: 100%;
         height: 250px;
@@ -159,19 +172,29 @@
         margin-bottom: 20px;
         border: 1px solid #eee;
     }
+
     .course-detail-preview img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
+
     .status-badge {
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 12px;
         font-weight: 600;
     }
-    .status-active { background: #dcfce7; color: #166534; }
-    .status-inactive { background: #fee2e2; color: #991b1b; }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 </style>
 
 <!-- View Course Modal -->
@@ -191,89 +214,82 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
-let courseTable;
+    let courseTable;
 
-$(document).ready(function() {
-    courseTable = $('#courseTable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{% url "course_datatable" %}',
-            type: 'GET',
-            data: function(d) {
-                d.status = $('#statusFilter').val();
+    $(document).ready(function () {
+        courseTable = $('#courseTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{% url "course_datatable" %}',
+                type: 'GET',
+                data: function (d) {
+                    d.status = $('#statusFilter').val();
+                },
+                error: function (xhr, error, code) {
+                    console.error('DataTables Error:', error);
+                }
             },
-            error: function(xhr, error, code) {
-                console.error('DataTables Error:', error);
+            columns: [
+                { data: 'id', width: '60px' },
+                { data: 'preview', orderable: false, searchable: false, width: '120px' },
+                { data: 'course_info' },
+                { data: 'status', width: '100px' },
+                { data: 'created_at', width: '110px' },
+                { data: 'actions', orderable: false, searchable: false, width: '140px' }
+            ],
+            order: [[0, 'desc']],
+            pageLength: 12,
+            lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ items",
+                info: "Showing _START_ to _END_ of _TOTAL_ courses"
             }
-        },
-        columns: [
-            { data: 'id', width: '60px' },
-            { data: 'preview', orderable: false, searchable: false, width: '120px' },
-            { data: 'course_info' },
-            { data: 'status', width: '100px' },
-            { data: 'created_at', width: '110px' },
-            { data: 'actions', orderable: false, searchable: false, width: '140px' }
-        ],
-        order: [[0, 'desc']],
-        pageLength: 12,
-        lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-        language: {
-            search: "Search:",
-            lengthMenu: "Show _MENU_ items",
-            info: "Showing _START_ to _END_ of _TOTAL_ courses"
-        }
+        });
     });
-});
 
-function filterByStatus() {
-    courseTable.ajax.reload();
-}
+    function filterByStatus() {
+        courseTable.ajax.reload();
+    }
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
 
-// Keeping the View Modal as it's a nice quick-view feature
-async function viewCourse(courseId) {
-    try {
-        const response = await fetch(`/menu/courses/get/${courseId}/`);
-        const result = await response.json();
+    // Keeping the View Modal as it's a nice quick-view feature
+    async function viewCourse(courseId) {
+        try {
+            const response = await fetch(`/menu/courses/get/${courseId}/`);
+            const result = await response.json();
 
-        if (result.success) {
-            const data = result.data;
-            
-            const qualLevels = {
-                1: 'Certificate',
-                2: 'Diploma',
-                3: "Bachelor's Degree",
-                4: "Master's Degree",
-                5: 'PhD / Doctorate'
-            };
-            
-            let previewHTML = '';
-            if (data.media && data.media.url) {
-                previewHTML = `<div class="course-detail-preview">
+            if (result.success) {
+                const data = result.data;
+
+                // Qualification mapping removed - using data.qualification_name from backend
+                let previewHTML = '';
+                if (data.media && data.media.url) {
+                    previewHTML = `<div class="course-detail-preview">
                     <img src="${data.media.url}" alt="${data.course_name}">
                 </div>`;
-            } else {
-                 previewHTML = `<div class="course-detail-preview d-flex align-items-center justify-content-center bg-light">
+                } else {
+                    previewHTML = `<div class="course-detail-preview d-flex align-items-center justify-content-center bg-light">
                     <i class="fas fa-image text-muted" style="font-size: 48px;"></i>
                 </div>`;
-            }
-            
-            const content = `
+                }
+
+                const content = `
                 ${previewHTML}
                 
                 <div class="detail-grid">
@@ -287,7 +303,7 @@ async function viewCourse(courseId) {
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Qualification Level</div>
-                        <div class="detail-value">${qualLevels[data.highest_qualification] || 'N/A'}</div>
+                        <div class="detail-value">${data.qualification_name || 'N/A'}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Credit Hours</div>
@@ -319,56 +335,56 @@ async function viewCourse(courseId) {
                     </div>
                 ` : ''}
             `;
-            
-            document.getElementById('viewModalContent').innerHTML = content;
-            document.getElementById('viewModal').style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to load course details');
-    }
-}
 
-function closeViewModal() {
-    document.getElementById('viewModal').style.display = 'none';
-}
-
-async function deleteCourse(courseId, courseName) {
-    if (!confirm(`Are you sure you want to delete "${courseName}"?\n\nThis action cannot be undone.`)) {
-        return;
-    }
-
-    const csrftoken = getCookie('csrftoken');
-
-    try {
-        const response = await fetch(`/menu/courses/delete/${courseId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
+                document.getElementById('viewModalContent').innerHTML = content;
+                document.getElementById('viewModal').style.display = 'block';
             }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // alert('Course deleted successfully!'); // Optional: removed alert for smoother UX
-            courseTable.ajax.reload(null, false); // Reload without resetting paging
-        } else {
-            alert('Error: ' + result.message);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to load course details');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to delete course');
     }
-}
 
-// Close modals on outside click
-window.onclick = function(event) {
-    const viewModal = document.getElementById('viewModal');
-    if (event.target === viewModal) {
-        closeViewModal();
+    function closeViewModal() {
+        document.getElementById('viewModal').style.display = 'none';
     }
-}
+
+    async function deleteCourse(courseId, courseName) {
+        if (!confirm(`Are you sure you want to delete "${courseName}"?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(`/menu/courses/delete/${courseId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // alert('Course deleted successfully!'); // Optional: removed alert for smoother UX
+                courseTable.ajax.reload(null, false); // Reload without resetting paging
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to delete course');
+        }
+    }
+
+    // Close modals on outside click
+    window.onclick = function (event) {
+        const viewModal = document.getElementById('viewModal');
+        if (event.target === viewModal) {
+            closeViewModal();
+        }
+    }
 </script>
 {% endblock %}

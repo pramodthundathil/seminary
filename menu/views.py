@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db import transaction
@@ -130,6 +131,16 @@ def admin_index(request):
         'new_students_count': new_students_count,
         'pending_subjects_count': pending_subjects_count,
         'pending_books_count': pending_books_count,
+        # Notifications Data
+        'new_students_list': Students.objects.filter(status=False).order_by('-created_at')[:5],
+        'pending_subjects': StudentsSubjects.objects.filter(is_approved=False).select_related('student', 'subject').order_by('-created_at')[:5],
+        'pending_books': StudentsBooks.objects.filter(is_approved=False).select_related('student', 'book').order_by('-created_at')[:5],
+        'pending_exams': StudentsExams.objects.filter(is_approved=False).select_related('student', 'exam').order_by('-created_at')[:5],
+        
+        # New Dashboard Tables Data
+        'pending_applications': Students.objects.filter(status=False).order_by('-created_at')[:5],
+        'contact_requests': Contacts.objects.order_by('-created_at')[:5],
+        'assignment_requests': StudentsAssignment.objects.filter(submitted_on__isnull=False, total_marks__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
     }
     
     return render(request, "admin/index.html", context)
@@ -2103,7 +2114,7 @@ def course_datatable(request):
 
         # Query courses
         # courses = Courses.objects.select_related('media')
-        courses = Courses.objects.all()
+        courses = Courses.objects.select_related('highest_qualification').all()
 
         # Apply status filter
         if status_filter:
@@ -2141,15 +2152,8 @@ def course_datatable(request):
             status_text = 'Active' if course.status == 1 else 'Inactive'
             status_class = 'status-active' if course.status == 1 else 'status-inactive'
             
-            # Qualification levels
-            qual_levels = {
-                1: 'Certificate',
-                2: 'Diploma',
-                3: 'Bachelor',
-                4: 'Master',
-                5: 'PhD'
-            }
-            qual_text = qual_levels.get(course.highest_qualification, 'Unknown')
+            # Qualification levels - Dynamic
+            qual_text = course.highest_qualification.qualification_name if course.highest_qualification else 'Unknown'
             
             data.append({
                 'id': course.id,
@@ -2294,6 +2298,7 @@ def course_get(request, course_id):
                 'status': course.status,
                 'apply_button_top': course.apply_button_top,
                 'apply_button_bottom': course.apply_button_bottom,
+                'qualification_name': course.highest_qualification.qualification_name if course.highest_qualification else 'N/A',
                 'created_at': course.created_at.strftime('%Y-%m-%d %H:%M') if course.created_at else '-'
             }
         })
@@ -2445,8 +2450,8 @@ def student_datatable(request):
 
         # Filter by Type (Student vs Applicant)
         if list_type == 'applicant':
-            # Applicants are those with NO execute approval date
-            students = students.filter(approve_date__isnull=True)
+            # Applicants are those with status=False and active=False
+            students = students.filter(status=False, active=False)
         else:
             # Students are those WITH an approval date
             students = students.filter(approve_date__isnull=False)
@@ -2542,11 +2547,14 @@ def student_datatable(request):
             safe_name=full_name.replace("'", "\\'")
             # Actions - responsive
             # Changed data-toggle to data-bs-toggle for Bootstrap 5
+            # Generate detail URL
+            detail_url = reverse('student_detail', kwargs={'student_id': student.id})
+            
             actions_html = f'''
                 <div class="btn-group" role="group">
-                    <button class="btn btn-info btn-sm view-btn mr-1" onclick="viewStudent({student.id})" title="View Details">
+                    <a href="{detail_url}" class="btn btn-info btn-sm view-btn mr-1" title="View Details">
                         <i class="fas fa-eye"></i>
-                    </button>
+                    </a>
                     <div class="btn-group" role="group">
                         <button id="btnGroupDrop{student.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Actions
@@ -2741,6 +2749,46 @@ def student_get(request, student_id):
             'success': False,
             'message': str(e)
         }, status=400)
+
+
+def student_detail(request, student_id):
+    """View to show full student details"""
+    student = get_object_or_404(Students.objects.select_related('course_applied', 'language', 'country'), id=student_id)
+    return render(request, 'admin/students/view.html', {'student': student})
+
+@require_http_methods(["POST"])
+def student_approve_action(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    student.status = True
+    student.active = True
+    student.approve_date = timezone.now()
+    student.save()
+    messages.success(request, f"Student {student.first_name} has been approved and activated.")
+    return redirect('student_detail', student_id=student.id)
+
+@require_http_methods(["POST"])
+def student_disapprove_action(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    student.status = False
+    student.save()
+    messages.warning(request, f"Student {student.first_name} approval revoked.")
+    return redirect('student_detail', student_id=student.id)
+
+@require_http_methods(["POST"])
+def student_activate_action(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    student.active = True
+    student.save()
+    messages.success(request, f"Student {student.first_name} activated.")
+    return redirect('student_detail', student_id=student.id)
+
+@require_http_methods(["POST"])
+def student_deactivate_action(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    student.active = False
+    student.save()
+    messages.warning(request, f"Student {student.first_name} deactivated.")
+    return redirect('student_detail', student_id=student.id)
 
 #@login_required
 def student_update(request, student_id):
@@ -3319,16 +3367,40 @@ def roles(request):
 @login_required
 def roles_create(request):
     """Create new role"""
+    # Fetch all permissions
+    all_permissions = Permissions.objects.all().order_by('group_name', 'name')
+    
+    # Group permissions by group_name
+    permissions_by_group = {}
+    for perm in all_permissions:
+        group = perm.group_name if perm.group_name else 'Other'
+        if group not in permissions_by_group:
+            permissions_by_group[group] = []
+        permissions_by_group[group].append(perm)
+
     if request.method == 'POST':
         form = RolesForm(request.POST)
         if form.is_valid():
-            role = form.save(commit=False)
-            role.created_by = request.user
-            role.updated_by = request.user
-            role.created_at = timezone.now()
-            role.save()
-            messages.success(request, 'Role created successfully!')
-            return redirect('roles')
+            try:
+                with transaction.atomic():
+                    role = form.save(commit=False)
+                    role.created_by = request.user
+                    role.updated_by = request.user
+                    role.created_at = timezone.now()
+                    role.save()
+                    
+                    # Save selected permissions
+                    selected_permissions = request.POST.getlist('permissions')
+                    for perm_id in selected_permissions:
+                        RoleHasPermissions.objects.create(
+                            role=role,
+                            permission_id=perm_id
+                        )
+                    
+                    messages.success(request, 'Role created successfully!')
+                    return redirect('roles')
+            except Exception as e:
+                messages.error(request, f'Error creating role: {str(e)}')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -3336,7 +3408,8 @@ def roles_create(request):
     
     return render(request, 'admin/roles/roles_form.html', {
         'form': form,
-        'action': 'Create'
+        'action': 'Create',
+        'permissions_by_group': permissions_by_group
     })
 
 @login_required
@@ -4655,104 +4728,6 @@ def application_list_view(request):
     }
     return render(request, 'admin/applications/list.html', context)
 
-# Student Books
-
-@login_required
-def student_books_list(request):
-
-    """Render student books management page"""
-
-    students = Students.objects.filter(active=1, status=1).order_by('first_name', 'last_name')
-
-    books = BookReferences.objects.filter(deleted_at__isnull=True).order_by('title')
-
-    context = {
-
-        'page_title': 'Student Books Management',
-
-        'students': students,
-
-        'books': books,
-
-        'student_list': students, # Alias for consistency if needed by template
-
-        'book_list': books        # Alias for consistency if needed by template
-
-    }
-
-    return render(request, 'admin/students/books_list.html', context)
-
-@login_required
-
-def student_books_datatable(request):
-
-    """DataTables server-side processing for student books"""
-
-    # Get parameters
-
-    draw = int(request.GET.get('draw', 1))
-
-    start = int(request.GET.get('start', 0))
-
-    length = int(request.GET.get('length', 10))
-
-    search_value = request.GET.get('search[value]', '')
-
-    order_column_index = int(request.GET.get('order[0][column]', 0))
-
-    order_direction = request.GET.get('order[0][dir]', 'desc')
-
-    # Base query
-
-    books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book', 'updated_by')
-
-    # Search
-
-    if search_value:
-
-        books_query = books_query.filter(
-
-            Q(student__first_name__icontains=search_value) |
-
-            Q(student__last_name__icontains=search_value) |
-
-            Q(book__book_name__icontains=search_value) | 
-
-            Q(student__student_id__icontains=search_value)
-
-        )
-
-    # Column mapping for sorting
-
-    # Columns: 0: ID, 1: Student Name, 2: Book Title, 3: Updated By, 4: Actions
-
-    if order_column_index == 0:
-
-        order_col = 'id'
-
-    elif order_column_index == 1:
-
-        order_col = 'student__first_name'
-
-    elif order_column_index == 2:
-
-        order_col = 'book__book_name'
-
-    elif order_column_index == 3:
-
-        order_col = 'updated_by__username'
-
-    else:
-
-        order_col = '-created_at'
-
-    if order_direction == 'desc':
-
-        if not order_col.startswith('-'):
-
-            order_col = '-' + order_col
-
-
 # Student Books Refined Workflow
 @login_required
 def student_books_list(request):
@@ -4767,97 +4742,111 @@ def student_books_list(request):
 @login_required
 def student_books_datatable(request):
     """DataTables server-side processing for student books"""
-    draw = int(request.GET.get('draw', 1))
-    start = int(request.GET.get('start', 0))
-    length = int(request.GET.get('length', 10))
-    search_value = request.GET.get('search[value]', '')
-    order_column_index = int(request.GET.get('order[0][column]', 0))
-    order_direction = request.GET.get('order[0][dir]', 'desc')
-    
-    books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book', 'updated_by')
-
-    # Status Filter
-    status_filter = request.GET.get('status', '')
-    if status_filter == 'pending':
-        books_query = books_query.filter(is_approved=False)
-    elif status_filter == 'approved':
-        books_query = books_query.filter(is_approved=True)
-
-    if search_value:
-        books_query = books_query.filter(
-            Q(student__first_name__icontains=search_value) |
-            Q(student__last_name__icontains=search_value) |
-            Q(book__title__icontains=search_value) | 
-            Q(student__student_id__icontains=search_value)
-        )
-    
-    if order_column_index == 0:
-        order_col = 'id'
-    elif order_column_index == 1:
-        order_col = 'student__first_name'
-    elif order_column_index == 2:
-        order_col = 'book__title'
-    elif order_column_index == 3:
-        order_col = 'updated_by__username'
-    else:
-        order_col = '-created_at'
-
-    if order_direction == 'desc' and not order_col.startswith('-'):
-        order_col = '-' + order_col
-    
-    total_records = StudentsBooks.objects.filter(deleted_at__isnull=True).count()
-    filtered_records = books_query.count()
-    data_list = books_query.order_by(order_col)[start:start+length]
-    
-    data = []
-    for item in data_list:
-        student_name = f"{item.student.first_name} {item.student.last_name or ''}"
-        if item.student.student_id:
-             student_name += f" ({item.student.student_id})"
-             
-        updated_by = item.updated_by.username if item.updated_by else '-'
-        updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
-        updated_info = f"{updated_by}<br><small>{updated_date}</small>"
+    try:
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
+        search_value = request.GET.get('search[value]', '')
+        order_column_index = int(request.GET.get('order[0][column]', 0))
+        order_direction = request.GET.get('order[0][dir]', 'desc')
         
-        # Status Badge
-        if item.is_approved:
-            status_badge = '<span class="badge bg-success">Approved</span>'
+        books_query = StudentsBooks.objects.filter(deleted_at__isnull=True).select_related('student', 'book') # Removed updated_by to prevent INNER JOIN exclusion
+
+        # Status Filter
+        status_filter = request.GET.get('status', '')
+        if status_filter == 'pending':
+            books_query = books_query.filter(is_approved=False)
+        elif status_filter == 'approved':
+            books_query = books_query.filter(is_approved=True)
+
+        if search_value:
+            books_query = books_query.filter(
+                Q(student__first_name__icontains=search_value) |
+                Q(student__last_name__icontains=search_value) |
+                Q(book__title__icontains=search_value) | 
+                Q(student__student_id__icontains=search_value)
+            )
+        
+        if order_column_index == 0:
+            order_col = 'id'
+        elif order_column_index == 1:
+            order_col = 'student__first_name'
+        elif order_column_index == 2:
+            order_col = 'book__title'
+        elif order_column_index == 3:
+            order_col = 'updated_by__username'
         else:
-            status_badge = '<span class="badge bg-warning text-dark">Pending</span>'
+            order_col = '-created_at'
 
-        actions = '<div class="action-buttons">'
+        if order_direction == 'desc' and not order_col.startswith('-'):
+            order_col = '-' + order_col
         
-        # Approve Button (only if pending)
-        if not item.is_approved:
-            actions += f'''
-                <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
-                    <i class="fas fa-check"></i>
-                </button>
-            '''
-        else:
-            actions += f'''
-                <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
-                    <i class="fas fa-times"></i>
-                </button>
-            '''
+        total_records = StudentsBooks.objects.filter(deleted_at__isnull=True).count()
+        filtered_records = books_query.count()
+        data_list = books_query.order_by(order_col)[start:start+length]
+        
+        data = []
+        for item in data_list:
+            student_name = f"{item.student.first_name} {item.student.last_name or ''}"
+            if item.student.student_id:
+                 student_name += f" ({item.student.student_id})"
+            
+            # Safely get updated_by
+            updated_by_name = '-'
+            if item.updated_by_id:
+                try:
+                    updated_by_name = item.updated_by.username
+                except:
+                    pass
+                 
+            updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
+            updated_info = f"{updated_by_name}<br><small>{updated_date}</small>"
+            
+            # Status Badge
+            if item.is_approved:
+                status_badge = '<span class="badge bg-success">Approved</span>'
+            else:
+                status_badge = '<span class="badge bg-warning text-dark">Pending</span>'
 
-        actions += f'''
-                <button class="btn-action btn-delete" onclick="deleteStudentBook({item.id})" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        '''
+            actions = '<div class="action-buttons">'
+            
+            # Approve Button (only if pending)
+            if not item.is_approved:
+                actions += f'''
+                    <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
+                        <i class="fas fa-check"></i>
+                    </button>
+                '''
+            else:
+                actions += f'''
+                    <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
+                        <i class="fas fa-times"></i>
+                    </button>
+                '''
+
+            actions += f'''
+                    <button class="btn-action btn-delete" onclick="deleteStudentBook({item.id})" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            '''
+            
+            data.append({
+                'id': item.id,
+                'student_name': student_name,
+                'book_title': item.book.title if item.book else 'Unknown Book',
+                'status': status_badge,
+                'updated_by': updated_info,
+                'actions': actions
+            })
+            
+        return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
         
-        data.append({
-            'id': item.id,
-            'student_name': student_name,
-            'book_title': item.book.title if item.book else 'Unknown Book',
-            'status': status_badge,
-            'updated_by': updated_info,
-            'actions': actions
-        })
-        
-    return JsonResponse({'draw': draw, 'recordsTotal': total_records, 'recordsFiltered': filtered_records, 'data': data})
+    except Exception as e:
+        with open('debug_tables_log.txt', 'a') as f:
+            f.write(f"Error: {str(e)}\n")
+        print(f"DataTables Error: {str(e)}")
+        return JsonResponse({'error': str(e), 'data': []})
 
 @login_required
 def ajax_get_students_by_course(request, course_id):

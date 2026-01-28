@@ -390,46 +390,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            {% if messages %}
-            {% for message in messages %}
-            let icon = 'info';
-            let customClass = 'swal-info';
-
-            {% if message.tags == 'success' %}
-            icon = 'success';
-            customClass = 'swal-success';
-            {% elif message.tags == 'error' or message.tags == 'danger' %}
-            icon = 'error';
-            customClass = 'swal-error';
-            {% elif message.tags == 'warning' %}
-            icon = 'warning';
-            customClass = 'swal-warning';
-            {% elif message.tags == 'info' %}
-            icon = 'info';
-            customClass = 'swal-info';
-            {% endif %}
-
-            Swal.fire({
-                icon: icon,
-                title: '{{ message.tags|title }}',
-                text: '{{ message|safe }}',
-                customClass: {
-                    popup: customClass
-                },
-                confirmButtonText: 'OK',
-                timer: 5000,
-                timerProgressBar: true,
-                showClass: {
-                    popup: 'swal2-show',
-                    backdrop: 'swal2-backdrop-show'
-                },
-                hideClass: {
-                    popup: 'swal2-hide',
-                    backdrop: 'swal2-backdrop-hide'
-                }
-            });
-            {% endfor %}
-            {% endif %}
+            // Keep empty or remove entirely if not needed.
+            // Duplicate message handling logic removed.
         });
     </script>
 

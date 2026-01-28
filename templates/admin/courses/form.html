@@ -4,7 +4,7 @@
 <div class="gallery-container">
     <div class="page-header">
         <h1>
-            <i class="fas fa-graduation-cap"></i> 
+            <i class="fas fa-graduation-cap"></i>
             {% if course %}Edit Course{% else %}Create Course{% endif %}
         </h1>
         <a href="{% url 'course_list' %}" class="btn btn-secondary">
@@ -12,10 +12,11 @@
         </a>
     </div>
 
-    <div class="form-container" style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <div class="form-container"
+        style="background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
         <form method="post" enctype="multipart/form-data" id="courseForm">
             {% csrf_token %}
-            
+
             <!-- Basic Information -->
             <div class="form-section">
                 <div class="section-title">
@@ -24,38 +25,43 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label required" for="courseName">Course Name <span style="color:red;">*</span></label>
-                    <input type="text" class="form-control" id="courseName" name="course_name" 
-                           value="{{ course.course_name|default:'' }}" required>
+                    <label class="form-label required" for="courseName">Course Name <span
+                            style="color:red;">*</span></label>
+                    <input type="text" class="form-control" id="courseName" name="course_name"
+                        value="{{ course.course_name|default:'' }}" required>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required" for="courseCode">Course Code <span style="color:red;">*</span></label>
-                        <input type="text" class="form-control" id="courseCode" name="course_code" 
-                               value="{{ course.course_code|default:'' }}" required>
+                        <label class="form-label required" for="courseCode">Course Code <span
+                                style="color:red;">*</span></label>
+                        <input type="text" class="form-control" id="courseCode" name="course_code"
+                            value="{{ course.course_code|default:'' }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                         <label class="form-label required" for="creditHours">Credit Hours <span style="color:red;">*</span></label>
-                        <input type="number" step="0.01" class="form-control" id="creditHours" name="credit_hours" 
-                               value="{{ course.credit_hours|default:'' }}" required>
+                        <label class="form-label required" for="creditHours">Credit Hours <span
+                                style="color:red;">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="creditHours" name="credit_hours"
+                            value="{{ course.credit_hours|default:'' }}" required>
                     </div>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label required" for="highestQualification">Qualification Level <span style="color:red;">*</span></label>
+                    <label class="form-label required" for="highestQualification">Qualification Level <span
+                            style="color:red;">*</span></label>
                     <select class="form-control" id="highestQualification" name="highest_qualification" required>
                         <option value="">Select Level</option>
                         {% for q in qualifications %}
-                        <option value="{{ q.id }}" {% if course.highest_qualification_id == q.id %}selected{% endif %}>{{ q.qualification_name }}</option>
+                        <option value="{{ q.id }}" {% if course.highest_qualification_id == q.id %}selected{% endif %}>{{q.qualification_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="form-group mb-3">
                     <label class="form-label" for="courseDescription">Description</label>
-                    <textarea class="form-control" id="courseDescription" name="description">{{ course.description|default:'' }}</textarea>
+                    <textarea class="form-control" id="courseDescription"
+                        name="description">{{ course.description|default:'' }}</textarea>
                 </div>
             </div>
 
@@ -65,7 +71,7 @@
                     <i class="fas fa-image"></i>
                     Featured Image
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <input type="hidden" id="id_media_lib" name="media_id" value="{{ course.media.id|default:'' }}">
                     <div id="courseMediaPreview" class="media-preview-box"
@@ -81,7 +87,8 @@
                         {% endif %}
                     </div>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-primary" style="flex: 1;" onclick="openMediaLibrary()">
+                        <button type="button" class="btn btn-outline-primary" style="flex: 1;"
+                            onclick="openMediaLibrary()">
                             <i class="fas fa-folder-open"></i> Select from Library
                         </button>
                         <button type="button" class="btn btn-outline-danger" onclick="clearMedia()"
@@ -101,20 +108,20 @@
 
                 <div class="form-group mb-3">
                     <label class="form-label" for="browserTitle">Browser Title</label>
-                    <input type="text" class="form-control" id="browserTitle" name="browser_title" 
-                           value="{{ course.browser_title|default:'' }}">
+                    <input type="text" class="form-control" id="browserTitle" name="browser_title"
+                        value="{{ course.browser_title|default:'' }}">
                 </div>
 
                 <div class="form-group mb-3">
                     <label class="form-label" for="metaDescription">Meta Description</label>
-                    <textarea class="form-control" id="metaDescription" name="meta_description" 
-                              style="min-height: 80px;">{{ course.meta_description|default:'' }}</textarea>
+                    <textarea class="form-control" id="metaDescription" name="meta_description"
+                        style="min-height: 80px;">{{ course.meta_description|default:'' }}</textarea>
                 </div>
 
                 <div class="form-group mb-3">
-                     <label class="form-label" for="metaKeywords">Meta Keywords</label>
-                    <input type="text" class="form-control" id="metaKeywords" name="meta_keywords" 
-                           value="{{ course.meta_keywords|default:'' }}" placeholder="keyword1, keyword2, keyword3">
+                    <label class="form-label" for="metaKeywords">Meta Keywords</label>
+                    <input type="text" class="form-control" id="metaKeywords" name="meta_keywords"
+                        value="{{ course.meta_keywords|default:'' }}" placeholder="keyword1, keyword2, keyword3">
                 </div>
             </div>
 
@@ -133,19 +140,19 @@
                             <option value="0" {% if course.status == 0 %}selected{% endif %}>Inactive</option>
                         </select>
                     </div>
-                    
+
                     <div class="col-md-4 mb-3 d-flex align-items-center">
-                         <div class="form-check mt-4">
-                            <input type="checkbox" class="form-check-input" id="applyButtonTop" name="apply_button_top" value="1" 
-                                   {% if course.apply_button_top %}checked{% endif %}>
+                        <div class="form-check mt-4">
+                            <input type="checkbox" class="form-check-input" id="applyButtonTop" name="apply_button_top"
+                                value="1" {% if course.apply_button_top %}checked{% endif %}>
                             <label class="form-check-label" for="applyButtonTop">Show Apply Button (Top)</label>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-4 mb-3 d-flex align-items-center">
                         <div class="form-check mt-4">
-                            <input type="checkbox" class="form-check-input" id="applyButtonBottom" name="apply_button_bottom" value="1" 
-                                   {% if course.apply_button_bottom %}checked{% endif %}>
+                            <input type="checkbox" class="form-check-input" id="applyButtonBottom"
+                                name="apply_button_bottom" value="1" {% if course.apply_button_bottom %}checked{% endif %}>
                             <label class="form-check-label" for="applyButtonBottom">Show Apply Button (Bottom)</label>
                         </div>
                     </div>
@@ -173,34 +180,40 @@
         </div>
         <div class="modal-body" style="padding: 0;">
             <div class="media-tabs">
-                <button type="button" class="media-tab active" onclick="switchMediaTab('library')">Media Library</button>
+                <button type="button" class="media-tab active" onclick="switchMediaTab('library')">Media
+                    Library</button>
                 <button type="button" class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
             </div>
 
             <!-- Library Tab -->
             <div id="libraryTab" class="media-tab-content active">
                 <div class="library-controls" style="padding: 15px; border-bottom: 1px solid #eee;">
-                    <input type="text" id="mediaSearch" placeholder="Search media..." class="form-control" style="width: 100%; max-width: 300px;" onkeyup="loadMediaLibrary(1)">
+                    <input type="text" id="mediaSearch" placeholder="Search media..." class="form-control"
+                        style="width: 100%; max-width: 300px;" onkeyup="loadMediaLibrary(1)">
                 </div>
                 <div id="mediaGrid" class="media-grid">
                     <div class="loading-spinner">Loading...</div>
                 </div>
                 <!-- Pagination -->
                 <div class="pagination-controls">
-                    <button type="button" id="prevPageBtn" class="btn btn-sm btn-secondary" onclick="changeMediaPage(-1)" disabled>Previous</button>
+                    <button type="button" id="prevPageBtn" class="btn btn-sm btn-secondary"
+                        onclick="changeMediaPage(-1)" disabled>Previous</button>
                     <span id="pageIndicator" style="margin: 0 15px;">Page 1</span>
-                    <button type="button" id="nextPageBtn" class="btn btn-sm btn-secondary" onclick="changeMediaPage(1)" disabled>Next</button>
+                    <button type="button" id="nextPageBtn" class="btn btn-sm btn-secondary" onclick="changeMediaPage(1)"
+                        disabled>Next</button>
                 </div>
             </div>
 
             <!-- Upload Tab -->
             <div id="uploadTab" class="media-tab-content">
                 <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-blue); margin-bottom: 15px;"></i>
+                    <i class="fas fa-cloud-upload-alt fa-3x"
+                        style="color: var(--primary-blue); margin-bottom: 15px;"></i>
                     <h3>Drag & Drop files here</h3>
                     <p class="text-muted">or</p>
                     <input type="file" id="mediaUploadInput" hidden accept="image/*">
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('mediaUploadInput').click()">Browse Files</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="document.getElementById('mediaUploadInput').click()">Browse Files</button>
                 </div>
                 <div id="uploadProgress" style="display: none; margin-top: 20px;">
                     <div class="progress-bar-container">
@@ -215,16 +228,24 @@
                 <strong>Selected:</strong> <span id="selectedMediaName"></span>
             </div>
             <button type="button" class="btn btn-secondary" onclick="closeMediaLibrary()">Cancel</button>
-            <button type="button" class="btn btn-primary" id="useMediaBtn" onclick="useSelectedMedia()" disabled>Use Selected Media</button>
+            <button type="button" class="btn btn-primary" id="useMediaBtn" onclick="useSelectedMedia()" disabled>Use
+                Selected Media</button>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 <script>
     // Initialize CKEditor
-    CKEDITOR.replace('courseDescription', {
-        height: 200
+    // Initialize CKEditor
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof CKEDITOR !== 'undefined') {
+            CKEDITOR.replace('courseDescription', {
+                height: 200
+            });
+        } else {
+            console.error('CKEditor not loaded');
+        }
     });
 
     // Media Library Logic
@@ -411,7 +432,7 @@
                         if (result.success) {
                             switchMediaTab('library');
                             loadMediaLibrary(1);
-                            
+
                             // Auto Select uploaded file (Optional enhancement)
                             // For now just showing success
                             alert('Upload successful! Please select your new image.');
@@ -419,7 +440,7 @@
                             alert('Upload failed: ' + result.message);
                         }
                     } catch (e) {
-                         console.error(e);
+                        console.error(e);
                         alert('Invalid server response.');
                     }
                 } else {
@@ -448,11 +469,12 @@
         align-items: center;
         gap: 10px;
     }
+
     .form-group label.required:after {
         content: " *";
         color: red;
     }
-    
+
     /* Media Library Modal Styles */
     .modal {
         display: none;
@@ -491,7 +513,7 @@
         color: white;
         border-radius: 8px 8px 0 0;
     }
-    
+
     .modal-header h2 {
         color: white;
         font-size: 1.25rem;
@@ -523,7 +545,10 @@
         color: white;
         opacity: 0.8;
     }
-    .close-modal:hover { opacity: 1; }
+
+    .close-modal:hover {
+        opacity: 1;
+    }
 
     /* Media Library Specific Styles */
     .media-tabs {
@@ -599,7 +624,7 @@
         max-height: 100%;
         object-fit: cover;
     }
-    
+
     .media-name {
         padding: 8px;
         font-size: 0.8rem;

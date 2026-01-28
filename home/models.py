@@ -733,6 +733,9 @@ class Pages(models.Model):
     class Meta:
         managed = True
         db_table = 'pages'
+    
+    def __str__(self):
+        return self.title
 
 class PasswordResets(models.Model):
     email = models.CharField(max_length=191)
@@ -1131,6 +1134,7 @@ class StudentsBooks(models.Model):
     class Meta:
         managed = True
         db_table = 'students_books'
+    
 
 class StudentsExams(models.Model):
     id = models.AutoField(primary_key=True)

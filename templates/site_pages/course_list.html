@@ -361,7 +361,7 @@
 
             <!-- Short Description -->
             <p class="course-desc">
-                {{ course.description|striptags|truncatewords:30 }}
+                {{ course.description|striptags|truncatewords:30|safe }}
             </p>
 
             <!-- View Details Button -->
