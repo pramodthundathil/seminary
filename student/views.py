@@ -9,6 +9,7 @@ import requests
 import random
 import string
 import json
+import re
 
 # -------------------------------
 # Django Core Imports
@@ -238,7 +239,11 @@ def student_class_recordings(request):
             # 1. Check direct Youtube
             if upload.youtube:
                 item['type'] = 'youtube'
-                item['url'] = upload.youtube.file_path 
+                item['url'] = upload.youtube.file_path
+                # Extract ID
+                regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+                match = re.search(regex, item['url'])
+                item['youtube_id'] = match.group(1) if match else None
                 item['thumb'] = upload.youtube.thumb_file_path if upload.youtube.thumb_file_path else ''
             
             # 2. Check direct Media
@@ -246,7 +251,8 @@ def student_class_recordings(request):
                 file_url = upload.media.file_path.url if upload.media.file_path else ''
                 ext = upload.media.file_type.lower() if upload.media.file_type else ''
                 
-                if ext in ['mp4', 'webm', 'ogg', 'mov']:
+                # Extended support for video extensions
+                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
                     item['type'] = 'video'
                     item['url'] = file_url
                 else:
@@ -259,11 +265,14 @@ def student_class_recordings(request):
                 if video.youtube:
                    item['type'] = 'youtube'
                    item['url'] = video.youtube.file_path
+                   regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+                   match = re.search(regex, item['url'])
+                   item['youtube_id'] = match.group(1) if match else None
                    item['thumb'] = video.youtube.thumb_file_path if video.youtube.thumb_file_path else ''
                 elif video.media:
                     file_url = video.media.file_path.url if video.media.file_path else ''
                     ext = video.media.file_type.lower() if video.media.file_type else ''
-                    if ext in ['mp4', 'webm', 'ogg', 'mov']:
+                    if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
                         item['type'] = 'video'
                         item['url'] = file_url
                     else:
@@ -300,7 +309,7 @@ def student_subjects(request):
     # ---------------- SUBJECTS ----------------
     try:
         subjects_queryset = StudentsSubjects.objects.select_related("subject").filter(
-            student=student
+            student=student, deleted_at=None
         ).order_by('-id')
         
         # Apply filter based on selection
@@ -327,10 +336,10 @@ def student_subjects(request):
     try:
         # Get IDs of subjects already requested by this student
         requested_subject_ids = StudentsSubjects.objects.filter(
-            student=student
+            student=student, deleted_at=None
         ).values_list('subject_id', flat=True)
 
-        all_subject = Subjects.objects.exclude(id__in=requested_subject_ids).order_by('subject_name')
+        all_subject = Subjects.objects.exclude(id__in=requested_subject_ids, deleted_at=None).order_by('subject_name')
     except Exception as e:
         logger.error(f"Failed to fetch all subjects: {e}")
         all_subject = []
@@ -470,6 +479,7 @@ def student_exam_hall(request):
             "created_at",
             "is_exam_started",
             "is_exam_ended",
+            "is_approved", # Added is_approved
         )
         .order_by('-created_at')  # Order by most recent first
     )
@@ -495,16 +505,17 @@ def student_exam_hall(request):
                 status = "Completed"
                 action = "View"
                 can_start = False
-            # 2. Ongoing (Started but not ended) OR Ready to Start (Time reached but not started)
-            elif e.start_time and e.start_time <= now:
-                # Check if duration passed? 
-                # If is_exam_started is True, we check if time remains.
-                # If is_exam_started is False, we check if we are within valid window (if any). 
-                # For now, let's assume if it's past start_time and not ended, it is "Active"
+            # 2. Approved and Ready (Time reached)
+            elif e.is_approved and e.start_time and e.start_time <= now:
                 status = "Ongoing"
                 action = "Start"
                 can_start = True
-            # 3. Pending (Future)
+            # 3. Not Approved but time reached (Pending Approval)
+            elif not e.is_approved and e.start_time and e.start_time <= now:
+                status = "Pending Approval"
+                action = "Wait"
+                can_start = False
+            # 4. Future / Other Pending
             else:
                 status = "Pending"
                 action = "Wait"
@@ -624,10 +635,64 @@ def student_score_card(request):
             "grade": grade
         })
 
+    # ---- Final Score Calculation ----
+    total_exam_max = sum(item['total_score'] for item in exam_data)
+    total_exam_obtained = sum(item['score'] for item in exam_data)
+    exam_percentage = (total_exam_obtained / total_exam_max * 100) if total_exam_max > 0 else 0
+    
+    if exam_percentage >= 90: exam_grade = "A+"
+    elif exam_percentage >= 80: exam_grade = "A"
+    elif exam_percentage >= 70: exam_grade = "B"
+    elif exam_percentage >= 60: exam_grade = "C"
+    elif exam_percentage >= 50: exam_grade = "D"
+    else: exam_grade = "F"
+
+    total_assign_max = sum(item['total_score'] for item in assignment_data)
+    total_assign_obtained = sum(item['score'] for item in assignment_data)
+    assign_percentage = (total_assign_obtained / total_assign_max * 100) if total_assign_max > 0 else 0
+
+    if assign_percentage >= 90: assign_grade = "A+"
+    elif assign_percentage >= 80: assign_grade = "A"
+    elif assign_percentage >= 70: assign_grade = "B"
+    elif assign_percentage >= 60: assign_grade = "C"
+    elif assign_percentage >= 50: assign_grade = "D"
+    else: assign_grade = "F"
+
+    grand_total_max = total_exam_max + total_assign_max
+    grand_total_obtained = total_exam_obtained + total_assign_obtained
+    grand_percentage = (grand_total_obtained / grand_total_max * 100) if grand_total_max > 0 else 0
+    
+    if grand_percentage >= 90: grand_grade = "A+"
+    elif grand_percentage >= 80: grand_grade = "A"
+    elif grand_percentage >= 70: grand_grade = "B"
+    elif grand_percentage >= 60: grand_grade = "C"
+    elif grand_percentage >= 50: grand_grade = "D"
+    else: grand_grade = "F"
+
     context = {
         "student": student,
         "student_exams": exam_data,
         "assignment_mark": assignment_data,
+        
+        # Summary Data
+        "exam_summary": {
+            "total": round(total_exam_max),
+            "score": round(total_exam_obtained),
+            "percentage": round(exam_percentage, 2),
+            "grade": exam_grade
+        },
+        "assignment_summary": {
+            "total": round(total_assign_max),
+            "score": round(total_assign_obtained),
+            "percentage": round(assign_percentage, 2),
+            "grade": assign_grade
+        },
+        "grand_summary": {
+            "total": round(grand_total_max),
+            "score": round(grand_total_obtained),
+            "percentage": round(grand_percentage, 2),
+            "grade": grand_grade
+        }
     }
     return render(request, "student/score_card.html", context)
 

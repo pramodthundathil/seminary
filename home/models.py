@@ -93,7 +93,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
         db_table = 'users'
 
     def __str__(self):
-        return f'{self.username} ({self.email})'
+        return f'{self.username or ""} ({self.email or ""})'
 
 
 
@@ -109,6 +109,9 @@ class RoleUsers(models.Model):
         db_table = 'role_users'
         unique_together = (('user', 'role'),)
 
+    def __str__(self):
+        return f"{self.user or ''} - {self.role or ''}"
+
 class Roles(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=191)
@@ -122,6 +125,9 @@ class Roles(models.Model):
     class Meta:
         managed = True
         db_table = 'roles'
+
+    def __str__(self):
+        return str(self.name or "")
 
 # class Users(models.Model):
 #     id = models.AutoField(primary_key=True)
@@ -168,7 +174,7 @@ class AdminPages(models.Model):
         managed = True
         db_table = 'admin_pages'
     def __str__(self):
-        return f'{self.title} - order {self.menu_order}'  
+        return f'{self.title or ""} - order {self.menu_order or 0}'  
 
 class Assignments(models.Model):
     id = models.AutoField(primary_key=True)
@@ -193,7 +199,7 @@ class Assignments(models.Model):
         db_table = 'assignments'
 
     def __str__(self):
-        return str(self.assignment_name)
+        return str(self.assignment_name or "")
 
 class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
@@ -210,6 +216,9 @@ class AssignmentAnswers(models.Model):
         managed = True
         db_table = 'assignment_answers'
 
+    def __str__(self):
+        return f"Answer for {self.assignment or ''}"
+
 class AssignmentQuestions(models.Model):
     id = models.AutoField(primary_key=True)
     assignment = models.ForeignKey('Assignments', on_delete=models.DO_NOTHING, related_name='questions')
@@ -223,6 +232,9 @@ class AssignmentQuestions(models.Model):
     class Meta:
         managed = True
         db_table = 'assignment_questions'
+
+    def __str__(self):
+        return str(self.question[:50] or "")
 
 class Bans(models.Model):
     id = models.AutoField(primary_key=True)
@@ -240,6 +252,9 @@ class Bans(models.Model):
         managed = False
         db_table = 'bans'
 
+    def __str__(self):
+        return f"{self.bannable_type or ''} - {self.id}"
+
 class Books(models.Model):
     id = models.AutoField(primary_key=True)
     book_name = models.CharField(max_length=250)
@@ -251,6 +266,9 @@ class Books(models.Model):
     class Meta:
         managed = True
         db_table = 'books'
+
+    def __str__(self):
+        return str(self.book_name or "")
 
 class BookReferences(models.Model):
     id = models.AutoField(primary_key=True)
@@ -280,6 +298,9 @@ class BookReferences(models.Model):
         managed = True
         db_table = 'book_references'
 
+    def __str__(self):
+        return str(self.title or "")
+
 class Branches(models.Model):
     id = models.AutoField(primary_key=True)
     branch_name = models.CharField(max_length=250)
@@ -297,7 +318,7 @@ class Branches(models.Model):
         db_table = 'branches'
 
     def __str__(self):
-        return f"{str(self.branch_name)} - {str(self.branch_code)}"
+        return f"{str(self.branch_name or '')} - {str(self.branch_code or '')}"
 
 class Categories(models.Model):
     id = models.AutoField(primary_key=True)
@@ -320,6 +341,9 @@ class Categories(models.Model):
         managed = True
         db_table = 'categories'
 
+    def __str__(self):
+        return str(self.name or "")
+
 class ChurchAdmins(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey('Students', on_delete=models.SET_NULL, null=True, blank=True, related_name='church_admins')
@@ -340,6 +364,9 @@ class ChurchAdmins(models.Model):
         managed = True
         db_table = 'church_admins'
 
+    def __str__(self):
+        return str(self.name_of_church or "")
+
 class ChurchLoginCodeSettings(models.Model):
     id = models.AutoField(primary_key=True)
     branches = models.ForeignKey('Branches', on_delete=models.DO_NOTHING, related_name='code_settings')
@@ -356,6 +383,9 @@ class ChurchLoginCodeSettings(models.Model):
         managed = True
         db_table = 'church_login_code_settings'
 
+    def __str__(self):
+        return str(self.name or "")
+
 class Contacts(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, blank=True, null=True)
@@ -369,6 +399,9 @@ class Contacts(models.Model):
     class Meta:
         managed = True
         db_table = 'contacts'
+
+    def __str__(self):
+        return str(self.name or self.email or "Contact")
 
 class Countries(models.Model):
     id = models.AutoField(primary_key=True)
@@ -384,7 +417,7 @@ class Countries(models.Model):
         db_table = 'countries'
     
     def __str__(self):
-        return str(self.name)
+        return str(self.name or "")
 
 class Courses(models.Model):
     id = models.AutoField(primary_key=True)
@@ -410,7 +443,7 @@ class Courses(models.Model):
         managed = True
         db_table = 'courses'
     def __str__(self):
-        return str(self.course_name)
+        return str(self.course_name or "")
 
 class DescriptiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
@@ -426,6 +459,9 @@ class DescriptiveAnswers(models.Model):
         managed = True
         db_table = 'descriptive_answers'
 
+    def __str__(self):
+        return f"Answer for {self.question or ''}"
+
 class DescriptiveQuestions(models.Model):
     id = models.AutoField(primary_key=True)
     exam = models.ForeignKey('Exams', on_delete=models.DO_NOTHING, related_name='descriptive_questions')
@@ -440,6 +476,9 @@ class DescriptiveQuestions(models.Model):
     class Meta:
         managed = True
         db_table = 'descriptive_questions'
+
+    def __str__(self):
+        return str(self.question[:50] or "")
 
 class Exams(models.Model):
     id = models.AutoField(primary_key=True)
@@ -465,6 +504,9 @@ class Exams(models.Model):
         managed = True
         db_table = 'exams'
 
+    def __str__(self):
+        return str(self.exam_name or "")
+
 class HomeSettings(models.Model):
     id = models.AutoField(primary_key=True)
     section_group = models.CharField(max_length=250)
@@ -481,6 +523,9 @@ class HomeSettings(models.Model):
         managed = True
         db_table = 'home_settings'
 
+    def __str__(self):
+        return str(self.section_group or "")
+
 class Languages(models.Model):
     id = models.AutoField(primary_key=True)
     language_name = models.CharField(max_length=250)
@@ -495,6 +540,9 @@ class Languages(models.Model):
     class Meta:
         managed = True
         db_table = 'languages'
+
+    def __str__(self):
+        return str(self.language_name or "")
 
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -532,7 +580,7 @@ class MediaLibrary(models.Model):
         db_table = 'media_library'
 
     def __str__(self):
-        return f"{str(self.file_name)} - file {self.file_type}"
+        return f"{str(self.file_name or '')} - file {self.file_type or ''}"
 
 class Menus(models.Model):
     id = models.AutoField(primary_key=True)
@@ -550,6 +598,9 @@ class Menus(models.Model):
     class Meta:
         managed = True
         db_table = 'menus'
+
+    def __str__(self):
+        return str(self.name or "")
 
 class MenuItems(models.Model):
     id = models.AutoField(primary_key=True)
@@ -573,6 +624,9 @@ class MenuItems(models.Model):
     class Meta:
         managed = True
         db_table = 'menu_items'
+
+    def __str__(self):
+        return str(self.title or "")
 
 class Migrations(models.Model):
     id = models.AutoField(primary_key=True)
@@ -624,6 +678,9 @@ class News(models.Model):
         managed = True
         db_table = 'news'
 
+    def __str__(self):
+        return str(self.title or "")
+
 class Notifications(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey('Students', on_delete=models.DO_NOTHING, related_name='notifications')
@@ -636,6 +693,9 @@ class Notifications(models.Model):
     class Meta:
         managed = True
         db_table = 'notifications'
+
+    def __str__(self):
+        return str(self.message[:50] or "")
 
 class ObjectiveAnswers(models.Model):
     id = models.AutoField(primary_key=True)
@@ -650,6 +710,9 @@ class ObjectiveAnswers(models.Model):
     class Meta:
         managed = True
         db_table = 'objective_answers'
+
+    def __str__(self):
+        return f"Answer for {self.question or ''}"
 
 
 # --------------------------------------------
@@ -678,6 +741,9 @@ class ObjectiveQuestions(models.Model):
         managed = True
         db_table = 'objective_questions'
 
+    def __str__(self):
+        return str(self.question[:50] or "")
+
 class PageMediaLibrary(models.Model):
     id = models.AutoField(primary_key=True)
     pages = models.ForeignKey('Pages', on_delete=models.CASCADE, related_name='media_libraries')
@@ -689,6 +755,9 @@ class PageMediaLibrary(models.Model):
     class Meta:
         managed = True
         db_table = 'page_media_library'
+
+    def __str__(self):
+        return f"Media for {self.pages or ''}"
 
 class PageSettings(models.Model):
     id = models.AutoField(primary_key=True)
@@ -707,6 +776,9 @@ class PageSettings(models.Model):
     class Meta:
         managed = True
         db_table = 'page_settings'
+
+    def __str__(self):
+        return str(self.code or "")
 
 class Pages(models.Model):
     id = models.AutoField(primary_key=True)
@@ -735,7 +807,7 @@ class Pages(models.Model):
         db_table = 'pages'
     
     def __str__(self):
-        return self.title
+        return str(self.title or "")
 
 class PasswordResets(models.Model):
     email = models.CharField(max_length=191)
@@ -745,6 +817,9 @@ class PasswordResets(models.Model):
     class Meta:
         managed = True
         db_table = 'password_resets'
+
+    def __str__(self):
+        return str(self.email or "")
 
 class Payments(models.Model):
     id = models.AutoField(primary_key=True)
@@ -767,6 +842,9 @@ class Payments(models.Model):
         managed = True
         db_table = 'payments'
 
+    def __str__(self):
+        return f"{self.code or ''} - {self.amount or 0}"
+
 class PaymentSubjects(models.Model):
     id = models.AutoField(primary_key=True)
     payment = models.ForeignKey(Payments, on_delete=models.DO_NOTHING, related_name='subjects')
@@ -779,6 +857,9 @@ class PaymentSubjects(models.Model):
         managed = True
         db_table = 'payment_subjects'
 
+    def __str__(self):
+        return f"{self.payment or ''} - {self.subject or ''}"
+
 class Permissions(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=191)
@@ -790,6 +871,9 @@ class Permissions(models.Model):
     class Meta:
         managed = True
         db_table = 'permissions'
+
+    def __str__(self):
+        return str(self.name or "")
 
 class PhotoGallery(models.Model):
     id = models.AutoField(primary_key=True)
@@ -809,6 +893,9 @@ class PhotoGallery(models.Model):
         managed = True
         db_table = 'photo_gallery'
 
+    def __str__(self):
+        return str(self.gallery_name or "")
+
 class PhotoGalleryPhotos(models.Model):
     id = models.AutoField(primary_key=True)
     photo_gallery = models.ForeignKey(PhotoGallery, on_delete=models.DO_NOTHING, related_name='photos')
@@ -827,6 +914,9 @@ class PhotoGalleryPhotos(models.Model):
         managed = True
         db_table = 'photo_gallery_photos'
 
+    def __str__(self):
+        return str(self.title or "Photo")
+
 class Photos(models.Model):
     id = models.AutoField(primary_key=True)
     media = models.ForeignKey(MediaLibrary, on_delete=models.DO_NOTHING, related_name='photos')
@@ -844,6 +934,9 @@ class Photos(models.Model):
     class Meta:
         managed = True
         db_table = 'photos'
+
+    def __str__(self):
+        return str(self.title or "Photo")
 
 class Posts(models.Model):
     id = models.AutoField(primary_key=True)
@@ -866,6 +959,9 @@ class Posts(models.Model):
         managed = True
         db_table = 'posts'
 
+    def __str__(self):
+        return str(self.title or "")
+
 class Qualifications(models.Model):
     id = models.AutoField(primary_key=True)
     qualification_name = models.CharField(max_length=250)
@@ -882,7 +978,7 @@ class Qualifications(models.Model):
         db_table = 'qualifications'
 
     def __str__(self):
-        return str(self.qualification_name)
+        return str(self.qualification_name or "")
 
 class ReferenceForm(models.Model):
     id = models.AutoField(primary_key=True)
@@ -912,6 +1008,9 @@ class ReferenceForm(models.Model):
     class Meta:
         managed = True
         db_table = 'reference_form'
+
+    def __str__(self):
+        return f"{self.first_name or ''} {self.last_name or ''}"
 
 class RoleHasPermissions(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
@@ -944,6 +1043,9 @@ class SliderPhotos(models.Model):
         managed = True
         db_table = 'slider_photos'
 
+    def __str__(self):
+        return str(self.title or "Slider Photo")
+
 class Sliders(models.Model):
     id = models.AutoField(primary_key=True)
     slider_name = models.CharField(max_length=250)
@@ -959,6 +1061,9 @@ class Sliders(models.Model):
     class Meta:
         managed = True
         db_table = 'sliders'
+
+    def __str__(self):
+        return str(self.slider_name or "")
 
 
 import random
@@ -1010,7 +1115,7 @@ class Staffs(models.Model):
                 return staff_id
 
     def __str__(self):
-        return str(self.staff_name)
+        return str(self.staff_name or "")
 
 class StaffsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1026,6 +1131,9 @@ class StaffsSubjects(models.Model):
     class Meta:
         managed = True
         db_table = 'staffs_subjects'
+
+    def __str__(self):
+        return f"{self.staff or ''} - {self.subject or ''}"
 
 class Students(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1089,7 +1197,7 @@ class Students(models.Model):
         unique_together = (('course_applied', 'user'),)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name or ''} {self.last_name or ''}"
 
     def get_full_name(self):
         """Returns the student's full name"""
@@ -1118,6 +1226,9 @@ class StudentsAssignment(models.Model):
         managed = True
         db_table = 'students_assignment'
 
+    def __str__(self):
+        return f"{self.student or ''} - {self.assignment or ''}"
+
 class StudentsBooks(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='books')
@@ -1134,7 +1245,11 @@ class StudentsBooks(models.Model):
     class Meta:
         managed = True
         db_table = 'students_books'
-    
+
+    def __str__(self):
+        return f"{self.student or ''} - {self.book or ''}"
+
+   
 
 class StudentsExams(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1163,6 +1278,9 @@ class StudentsExams(models.Model):
         managed = True
         db_table = 'students_exams'
 
+    def __str__(self):
+        return f"{self.student or ''} - {self.exam or ''}"
+
 class StudentsInstructor(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='instructors')
@@ -1178,6 +1296,9 @@ class StudentsInstructor(models.Model):
     class Meta:
         managed = True
         db_table = 'students_instructor'
+
+    def __str__(self):
+        return f"{self.student or ''} - {self.instructor or ''}"
 
 class StudentsSubjects(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1198,6 +1319,9 @@ class StudentsSubjects(models.Model):
         managed = True
         db_table = 'students_subjects'
 
+    def __str__(self):
+        return f"{self.student or ''} - {self.subject or ''}"
+
 class StudentsUploads(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='uploads')
@@ -1212,6 +1336,9 @@ class StudentsUploads(models.Model):
     class Meta:
         managed = True
         db_table = 'students_uploads'
+
+    def __str__(self):
+        return f"{self.student or ''} - {self.upload or ''}"
 
 class Subjects(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1234,7 +1361,7 @@ class Subjects(models.Model):
         db_table = 'subjects'
 
     def __str__(self):
-        return str(self.subject_name)
+        return str(self.subject_name or "")
 
 class Support(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1246,7 +1373,7 @@ class Support(models.Model):
     status = models.CharField(max_length=1)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="support_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="support_updated")
-
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -1254,6 +1381,9 @@ class Support(models.Model):
     class Meta:
         managed = True
         db_table = 'support'
+
+    def __str__(self):
+        return str(self.doubt_question[:50] or "")
 
 class SupportReplies(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1269,6 +1399,9 @@ class SupportReplies(models.Model):
     class Meta:
         managed = True
         db_table = 'support_replies'
+
+    def __str__(self):
+        return str(self.doubt_answer[:50] or "")
 
 class Tags(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1286,6 +1419,9 @@ class Tags(models.Model):
     class Meta:
         managed = True
         db_table = 'tags'
+
+    def __str__(self):
+        return str(self.name or "")
 
 class Uploads(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1309,6 +1445,9 @@ class Uploads(models.Model):
         managed = True
         db_table = 'uploads'
 
+    def __str__(self):
+        return str(self.upload_name or "")
+
 
 class Videos(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1327,6 +1466,9 @@ class Videos(models.Model):
         managed = True
         db_table = 'videos'
 
+    def __str__(self):
+        return str(self.title or "")
+
 class WpDb7Forms(models.Model):
     form_id = models.BigAutoField(primary_key=True)
     form_post_id = models.BigIntegerField()
@@ -1336,6 +1478,9 @@ class WpDb7Forms(models.Model):
     class Meta:
         managed = False
         db_table = 'wp_db7_forms'
+
+    def __str__(self):
+        return str(self.form_id)
 
 class WpPosts(models.Model):
     id = models.BigAutoField(db_column='ID', primary_key=True)
@@ -1366,6 +1511,9 @@ class WpPosts(models.Model):
         managed = False
         db_table = 'wp_posts'
 
+    def __str__(self):
+        return str(self.post_title or "")
+
 class YoutubeVideos(models.Model):
     id = models.AutoField(primary_key=True)
     file_path = models.CharField(max_length=250)
@@ -1380,3 +1528,6 @@ class YoutubeVideos(models.Model):
     class Meta:
         managed = True
         db_table = 'youtube_videos'
+
+    def __str__(self):
+        return str(self.file_path or "")

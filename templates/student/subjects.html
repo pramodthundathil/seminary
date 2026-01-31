@@ -40,6 +40,9 @@
         transition: all 0.3s;
         box-shadow: 0 4px 12px rgba(0, 206, 209, 0.25);
         white-space: nowrap;
+        position: relative;
+        z-index: 1000;
+        pointer-events: auto !important;
     }
 
     .request-btn:hover {
@@ -723,10 +726,8 @@
         background: var(--bg-card);
         border: 1px solid var(--border);
         border-radius: 0.5rem;
-        max-height: 540px;
-        /* height for exactly 5 items */
+        max-height: 400px; /* Increased from 280px or 540px */
         overflow-y: auto;
-        /* scroll after 5 items */
         z-index: 1000;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         display: none;
@@ -849,11 +850,11 @@
 <!-- REQUEST SUBJECT MODAL (Bootstrap 5) -->
 <div class="modal fade" id="requestSubjectModal" tabindex="-1" aria-labelledby="requestSubjectModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div class="modal-dialog modal-lg mt-5">
+        <div class="modal-content" style="min-height: 60vh;">
+            <div class="modal-header" style="background: var(--primary); color: white;">
                 <h5 class="modal-title" id="requestSubjectModalLabel">Request a Subject</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
                     id="closeModalBtn"></button>
             </div>
             <div class="modal-body">

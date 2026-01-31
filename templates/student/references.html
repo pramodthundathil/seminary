@@ -121,10 +121,12 @@
             </div>
             <div class="action-btn">
                 {% if ref.reference_file %}
-                <a href="{{ ref.reference_file.file_path.url }}"
-                    class="btn btn-outline-primary btn-sm rounded-pill px-3" target="_blank" download>
-                    <i class="bi bi-download me-1"></i> Download
-                </a>
+                <button type="button" 
+                        class="btn btn-outline-primary btn-sm rounded-pill px-3 view-file-btn" 
+                        data-file-url="{{ ref.reference_file.file_path.url }}"
+                        data-file-title="{{ ref.title }}">
+                    <i class="bi bi-eye-fill me-1"></i> View
+                </button>
                 {% else %}
                 <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>
                     <i class="bi bi-slash-circle me-1"></i> No File
@@ -144,5 +146,210 @@
         {% endif %}
     </div>
 </div>
+
+<!-- PDF Viewer Modal -->
+<div class="modal fade" id="fileViewerModal" tabindex="-1" aria-labelledby="fileViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none;">
+            
+            <!-- Modal Header with Site Theme -->
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #00CED1 100%); border-bottom: none;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-file-earmark-pdf-fill me-2 fs-5"></i>
+                    <h5 class="modal-title fw-bold" id="fileViewerModalLabel">View Reference</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Custom Toolbar -->
+            <div class="bg-light border-bottom p-2 d-flex justify-content-between align-items-center sticky-top shadow-sm" style="z-index: 10;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge rounded-pill bg-primary text-white px-3 py-2" style="background-color: #0d6efd !important;">
+                        <i class="bi bi-files"></i> <span id="page_count">0</span> Pages
+                    </span>
+                </div>
+                
+                <div class="btn-group" role="group" aria-label="Zoom Controls">
+                    <button type="button" class="btn btn-outline-primary" id="zoomOut">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary active" style="pointer-events: none; border-color: #0d6efd;">
+                        <span id="zoomLevel">100%</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="zoomIn">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                     <!-- Explicitly no download button here -->
+                     <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">
+                        Close
+                     </button>
+                </div>
+            </div>
+
+            <div class="modal-body p-4" id="pdfViewerContainer" style="min-height: 80vh; max-height: 85vh; overflow-y: auto; background-color: #f8f9fa;">
+                <!-- PDF Canvas placeholder -->
+                <div id="pdf-loader" class="text-center py-5">
+                    <div class="spinner-grow text-info" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted fw-bold">Loading Document...</p>
+                </div>
+                <div id="pdf-render-area" class="d-flex flex-column align-items-center gap-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+    // Set up PDF.js worker source
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalElement = document.getElementById('fileViewerModal');
+        const modalTitle = document.getElementById('fileViewerModalLabel');
+        const viewButtons = document.querySelectorAll('.view-file-btn');
+        const pdfRenderArea = document.getElementById('pdf-render-area');
+        const pdfLoader = document.getElementById('pdf-loader');
+        const pageCountSpan = document.getElementById('page_count');
+        const zoomLevelSpan = document.getElementById('zoomLevel');
+        
+        let currentPdfDoc = null;
+        let currentScale = 1.0;
+        let isRendering = false;
+
+        // --- Controls ---
+        document.getElementById('zoomIn').addEventListener('click', () => {
+             if(currentScale < 3.0) {
+                 currentScale += 0.25;
+                 updateZoom();
+             }
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', () => {
+             if(currentScale > 0.5) {
+                 currentScale -= 0.25;
+                 updateZoom();
+             }
+        });
+
+        function updateZoom() {
+            zoomLevelSpan.textContent = Math.round(currentScale * 100) + '%';
+            if (currentPdfDoc) {
+                renderAllPages();
+            }
+        }
+
+        // --- Main View Logic ---
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const url = this.getAttribute('data-file-url');
+                const title = this.getAttribute('data-file-title');
+                
+                modalTitle.textContent = title;
+                pdfRenderArea.innerHTML = ''; 
+                pdfLoader.style.display = 'block'; 
+                pageCountSpan.textContent = '0';
+                currentScale = 1.0;
+                zoomLevelSpan.textContent = '100%';
+                
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+
+                try {
+                    // Load the PDF
+                    const loadingTask = pdfjsLib.getDocument(url);
+                    currentPdfDoc = await loadingTask.promise;
+                    
+                    pdfLoader.style.display = 'none'; 
+                    pageCountSpan.textContent = currentPdfDoc.numPages;
+                    
+                    await renderAllPages();
+
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    pdfLoader.style.display = 'none';
+                    pdfRenderArea.innerHTML = `
+                        <div class="alert alert-danger shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Error loading document.</strong> 
+                            <p class="mb-0 small mt-1 text-secondary">${error.message}</p>
+                        </div>`;
+                }
+            });
+        });
+
+        async function renderAllPages() {
+            if (isRendering) return; // Prevent concurrent re-renders
+            isRendering = true;
+            pdfRenderArea.innerHTML = ''; // Clear for re-render at new zoom
+
+            try {
+                for (let pageNum = 1; pageNum <= currentPdfDoc.numPages; pageNum++) {
+                    await renderPage(pageNum);
+                }
+            } catch(e) { console.error(e); }
+            finally { isRendering = false; }
+        }
+
+        async function renderPage(num) {
+            try {
+                const page = await currentPdfDoc.getPage(num);
+                
+                // Base Layout Scale: Fit Width logic
+                // we calculate what "100%" means relative to the container for the first render
+                // But for Zoom, we want `currentScale` to be a multiplier of the "ideal" 100% view, or just distinct scale values.
+                // Let's treat currentScale as the strict global scale of the viewport.
+                
+                // However, usually "100%" implies "Actual Size" or "Fit Width"? 
+                // Let's make "1.0" = "Fit Width" roughly, or just use standard PDF points.
+                // A better UX for "Fit Width" is calculating it dynamically.
+                
+                // Helper: Get scale required to fit container width
+                const containerWidth = document.getElementById('pdfViewerContainer').clientWidth - 60; // -padding
+                const unscaledViewport = page.getViewport({ scale: 1.0 });
+                const fitScale = containerWidth / unscaledViewport.width;
+                
+                // Apply our user-selected zoom multiplier to the fit-width scale
+                const finalScale = fitScale * currentScale;
+
+                const viewport = page.getViewport({ scale: finalScale });
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.className = 'shadow rounded bg-white'; 
+                // Prevent right click context menu on canvas (basic protection)
+                canvas.addEventListener('contextmenu', event => event.preventDefault());
+
+                // Wrapper for page to maybe show number?
+                const pageWrapper = document.createElement('div');
+                pageWrapper.className = 'position-relative';
+                pageWrapper.appendChild(canvas);
+                
+                pdfRenderArea.appendChild(pageWrapper);
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                
+                await page.render(renderContext).promise;
+            } catch (err) {
+                console.error('Page render error:', err);
+            }
+        }
+
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            pdfRenderArea.innerHTML = '';
+            currentPdfDoc = null;
+        });
+    });
+</script>
 
 {% endblock %}

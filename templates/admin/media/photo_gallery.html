@@ -348,7 +348,8 @@
         document.getElementById('mediaSelectionGroup').style.display = 'none';
 
         try {
-            const response = await fetch(`/admin/photos/get/${photoId}/`);
+            const url = "{% url 'photo_get' 0 %}".replace('0', photoId);
+            const response = await fetch(url);
             const result = await response.json();
 
             if (result.success) {
@@ -370,19 +371,16 @@
         }
     }
 
-    function closePhotoModal() {
-        document.getElementById('photoModal').style.display = 'none';
-        clearFileUpload();
-        uploadedFile = null;
-        selectedMediaId = null;
-    }
+    // ...
 
     async function loadMediaLibrary(search = '') {
         try {
-            const response = await fetch(`/admin/photos/media-list/?search=${encodeURIComponent(search)}`);
+            const baseUrl = "{% url 'media_library_list' %}";
+            const response = await fetch(`${baseUrl}?search=${encodeURIComponent(search)}`);
             const result = await response.json();
 
             if (result.success) {
+                // ...
                 const grid = document.getElementById('mediaLibraryGrid');
                 grid.innerHTML = '';
 
@@ -407,24 +405,7 @@
         }
     }
 
-    function searchMedia() {
-        const search = document.getElementById('mediaSearch').value;
-        loadMediaLibrary(search);
-    }
-
-    function selectMedia(mediaId, element) {
-        selectedMediaId = mediaId;
-        document.getElementById('mediaId').value = mediaId;
-        uploadedFile = null;
-
-        // Remove selected class from all
-        document.querySelectorAll('.media-item').forEach(item => {
-            item.classList.remove('selected');
-        });
-
-        // Add to clicked
-        element.classList.add('selected');
-    }
+    // ...
 
     async function savePhoto() {
         const photoId = document.getElementById('photoId').value;
@@ -448,9 +429,12 @@
             }
         }
 
-        const url = isEditMode ?
-            `/admin/photos/update/${photoId}/` :
-            '/admin/photos/create/';
+        let url;
+        if (isEditMode) {
+            url = "{% url 'photo_update' 0 %}".replace('0', photoId);
+        } else {
+            url = "{% url 'photo_create' %}";
+        }
 
         const csrftoken = getCookie('csrftoken');
 
@@ -483,10 +467,12 @@
 
     async function viewPhoto(photoId) {
         try {
-            const response = await fetch(`/admin/photos/get/${photoId}/`);
+            const url = "{% url 'photo_get' 0 %}".replace('0', photoId);
+            const response = await fetch(url);
             const result = await response.json();
 
             if (result.success) {
+                // ...
                 const data = result.data;
                 const media = data.media;
                 let html = '';
@@ -558,9 +544,7 @@
         }
     }
 
-    function closeViewModal() {
-        document.getElementById('viewModal').style.display = 'none';
-    }
+    // ...
 
     async function deletePhoto(photoId, title) {
         if (!confirm(`Are you sure you want to delete "${title}"?\n\nThis action cannot be undone.`)) {
@@ -568,9 +552,10 @@
         }
 
         const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'photo_delete' 0 %}".replace('0', photoId);
 
         try {
-            const response = await fetch(`/admin/photos/delete/${photoId}/`, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrftoken,

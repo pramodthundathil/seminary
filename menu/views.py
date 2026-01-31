@@ -70,7 +70,7 @@ def admin_index(request):
     
     # Get courses with student count using course_applied field
     courses_list = []
-    for course in Courses.objects.filter(status=1)[:6]:
+    for course in Courses.objects.filter(status=1, deleted_at__isnull=True)[:6]:
         # Count students who applied for this course
         student_count = Students.objects.filter(
             course_applied=course.id,
@@ -82,12 +82,13 @@ def admin_index(request):
         courses_list.append(course)
     
     # Get recent references
-    references = ReferenceForm.objects.order_by('-created_at')[:10]
+    references = ReferenceForm.objects.filter(deleted_at__isnull=True).order_by('-created_at')[:10]
     
     # Calculate assignments in progress
-    total_assignments = Assignments.objects.count()
+    total_assignments = Assignments.objects.filter(deleted_at__isnull=True).count()
     completed_assignments = StudentsAssignment.objects.filter(
-        submitted_on__isnull=False
+        submitted_on__isnull=False,
+        deleted_at__isnull=True
     ).count()
     
     if total_assignments > 0:
@@ -97,7 +98,8 @@ def admin_index(request):
     
     # Calculate total exams completed
     total_exams_completed = StudentsExams.objects.filter(
-        is_exam_ended=1
+        is_exam_ended=1,
+        deleted_at__isnull=True
     ).count()
     
     # Attendance calculation (example - customize based on your logic)
@@ -107,8 +109,8 @@ def admin_index(request):
     
     # ---------------- DASHBOARD NEW METRICS ----------------
     new_students_count = Students.objects.filter(status=False).count()
-    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False).count()
-    pending_books_count = StudentsBooks.objects.filter(is_approved=False).count()
+    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False, deleted_at__isnull=True).count()
+    pending_books_count = StudentsBooks.objects.filter(is_approved=False, deleted_at__isnull=True).count()
     # -------------------------------------------------------
     
     context = {
@@ -133,14 +135,14 @@ def admin_index(request):
         'pending_books_count': pending_books_count,
         # Notifications Data
         'new_students_list': Students.objects.filter(status=False).order_by('-created_at')[:5],
-        'pending_subjects': StudentsSubjects.objects.filter(is_approved=False).select_related('student', 'subject').order_by('-created_at')[:5],
-        'pending_books': StudentsBooks.objects.filter(is_approved=False).select_related('student', 'book').order_by('-created_at')[:5],
-        'pending_exams': StudentsExams.objects.filter(is_approved=False).select_related('student', 'exam').order_by('-created_at')[:5],
+        'pending_subjects': StudentsSubjects.objects.filter(is_approved=False, deleted_at__isnull=True).select_related('student', 'subject').order_by('-created_at')[:5],
+        'pending_books': StudentsBooks.objects.filter(is_approved=False, deleted_at__isnull=True).select_related('student', 'book').order_by('-created_at')[:5],
+        'pending_exams': StudentsExams.objects.filter(is_approved=False, deleted_at__isnull=True).select_related('student', 'exam').order_by('-created_at')[:5],
         
         # New Dashboard Tables Data
         'pending_applications': Students.objects.filter(status=False).order_by('-created_at')[:5],
-        'contact_requests': Contacts.objects.order_by('-created_at')[:5],
-        'assignment_requests': StudentsAssignment.objects.filter(submitted_on__isnull=False, total_marks__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
+        'contact_requests': Contacts.objects.filter(deleted_at__isnull=True).order_by('-created_at')[:5],
+        'assignment_requests': StudentsAssignment.objects.filter(submitted_on__isnull=False, total_marks__isnull=True, deleted_at__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
     }
     
     return render(request, "admin/index.html", context)
@@ -5650,43 +5652,55 @@ def student_exams_datatable(request):
             status = '<span class="badge bg-warning">Pending</span>'
 
         # Conditional action buttons based on approval status
-        actions = '<div class="action-buttons">'
+        primary_btn = ''
+        dropdown_items = ''
         
-        # Approval Toggle Button
+        # Primary Button Logic
         if item.is_approved:
-            actions += f'''
-                <button class="btn-action btn-warning" onclick="toggleApproval({item.id})" title="Revoke Approval">
-                    <i class="fas fa-times"></i>
+            primary_btn = f'''
+                <button class="btn btn-info btn-sm view-btn mr-1" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+                    <i class="fas fa-eye"></i>
                 </button>
             '''
         else:
-            actions += f'''
-                <button class="btn-action btn-success" onclick="toggleApproval({item.id})" title="Approve">
-                    <i class="fas fa-check"></i>
-                </button>
-            '''
-
-        if item.is_approved:
-            # Show "View Answer Sheet" button for approved exams
-            actions += f'''
-                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
-                    <i class="bi bi-search"></i> 
-                </button>
-            '''
-        else:
-            # Show "Edit" button for non-approved exams
-            actions += f'''
-                <button class="btn-action btn-edit" onclick="editExam({item.id})" title="Edit Exam">
+             primary_btn = f'''
+                <button class="btn btn-info btn-sm view-btn mr-1" onclick="editExam({item.id})" title="Edit Exam">
                     <i class="fas fa-edit"></i>
                 </button>
             '''
+            
+        # Dropdown Items Logic
+        # Toggle Approval
+        approval_icon = 'times-circle' if item.is_approved else 'check-circle'
+        approval_color = 'text-warning' if item.is_approved else 'text-success'
+        approval_text = 'Revoke Approval' if item.is_approved else 'Approve'
         
-        # Always show delete button
-        actions += f'''
-            <button class="btn-action btn-delete" onclick="deleteStudentExam({item.id})" title="Delete">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
+        dropdown_items += f'''
+            <a class="dropdown-item" href="#" onclick="toggleApproval({item.id}); return false;">
+                <i class="fas fa-{approval_icon} mr-2 {approval_color}"></i> {approval_text}
+            </a>
+        '''
+        
+        # Delete Item
+        dropdown_items += f'''
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" onclick="deleteStudentExam({item.id}); return false;">
+                <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
+            </a>
+        '''
+
+        actions = f'''
+            <div class="btn-group" role="group">
+                {primary_btn}
+                <div class="btn-group" role="group">
+                    <button id="btnGroupDrop{item.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop{item.id}">
+                        {dropdown_items}
+                    </div>
+                </div>
+            </div>
         '''
         
         # Calculate total marks if exam is approved
@@ -5725,6 +5739,7 @@ def student_exams_datatable(request):
             'duration': f'{item.exam_duration} min',
             'status': status,
             'marks': marks_display,
+            'updated_by': updated_info,
             'actions': actions
         })
         
@@ -5966,8 +5981,8 @@ def update_answer_marks(request):
 
             return JsonResponse({'success': False, 'message': 'Invalid answer type'}, status=400)
 
+        # Signal will handle score calculation
         
-
         return JsonResponse({'success': True, 'message': 'Marks updated successfully'})
 
     except Exception as e:

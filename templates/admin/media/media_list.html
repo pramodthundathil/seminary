@@ -379,8 +379,9 @@
     // Edit Modal
     function openEditModal(mediaId) {
         const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'media_get' 0 %}".replace('0', mediaId);
         
-        fetch('/admin/media/' + mediaId + '/get/', {
+        fetch(url, {
             method: 'GET',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -432,6 +433,7 @@
         formData.append('alt_text', document.getElementById('editAltText').value);
         
         const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'media_update' 0 %}".replace('0', mediaId);
         
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
@@ -439,7 +441,7 @@
         submitBtn.textContent = 'Saving...';
         submitBtn.disabled = true;
         
-        fetch('/admin/media/' + mediaId + '/update/', {
+        fetch(url, {
             method: 'POST',
             body: formData,
             headers: {
@@ -476,8 +478,9 @@
         }
         
         const csrftoken = getCookie('csrftoken');
+        const url = "{% url 'media_delete' 0 %}".replace('0', mediaId);
         
-        fetch('/admin/media/' + mediaId + '/delete/', {
+        fetch(url, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,

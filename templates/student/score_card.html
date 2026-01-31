@@ -836,24 +836,35 @@
                     <tbody id="finalScoreBody">
                         <tr>
                             <td data-label="Particular">Exam</td>
-                            <td data-label="Total Score" id="examTotalScore">N/A</td>
-                            <td data-label="Score" id="examScore">N/A</td>
-                            <td data-label="Percentage" id="examPercentage">N/A</td>
-                            <td data-label="Grade"><span class="grade-badge grade-failed">N/A</span></td>
+                            <td data-label="Total Score">{{ exam_summary.total }}</td>
+                            <td data-label="Score">{{ exam_summary.score }}</td>
+                            <td data-label="Percentage">{{ exam_summary.percentage }}%</td>
+                            <td data-label="Grade">
+                                <span class="grade-badge {% if exam_summary.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">
+                                    {{ exam_summary.grade }}
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td data-label="Particular">Assignment</td>
-                            <td data-label="Total Score" id="assignmentTotalScore">N/A</td>
-                            <td data-label="Score" id="assignmentScore">N/A</td>
-                            <td data-label="Percentage" id="assignmentPercentage">N/A</td>
-                            <td data-label="Grade"><span class="grade-badge grade-failed">N/A</span></td>
+                            <td data-label="Total Score">{{ assignment_summary.total }}</td>
+                            <td data-label="Score">{{ assignment_summary.score }}</td>
+                            <td data-label="Percentage">{{ assignment_summary.percentage }}%</td>
+                            <td data-label="Grade">
+                                <span class="grade-badge {% if assignment_summary.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">
+                                    {{ assignment_summary.grade }}
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <td data-label="Particular"><strong>Total</strong></td>
-                            <td data-label="Total Score"><strong id="grandTotalScore">N/A</strong></td>
-                            <td data-label="Score"><strong id="grandScore">N/A</strong></td>
-                            <td data-label="Percentage"><strong id="grandPercentage">N/A</strong></td>
-                            <td data-label="Grade"><span id="finalGrade" class="grade-badge grade-failed">N/A</span>
+                            <td data-label="Total Score"><strong>{{ grand_summary.total }}</strong></td>
+                            <td data-label="Score"><strong>{{ grand_summary.score }}</strong></td>
+                            <td data-label="Percentage"><strong>{{ grand_summary.percentage }}%</strong></td>
+                            <td data-label="Grade">
+                                <span class="grade-badge {% if grand_summary.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">
+                                    {{ grand_summary.grade }}
+                                </span>
                             </td>
                         </tr>
                     </tbody>
