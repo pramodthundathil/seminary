@@ -2453,8 +2453,9 @@ def student_datatable(request):
             # Applicants are those with status=False and active=False
             students = students.filter(status=False, active=False)
         else:
-            # Students are those WITH an approval date
-            students = students.filter(approve_date__isnull=False)
+            # Students list should show ALL records to allow filtering by Pending/Approved
+            # Previously: students = students.filter(approve_date__isnull=False)
+            pass
         
         # Apply filters
         # Note: status_filter might be redundant if using type, but keeping it for specific column filtering if needed
@@ -2758,12 +2759,75 @@ def student_detail(request, student_id):
 
 @require_http_methods(["POST"])
 def student_approve_action(request, student_id):
-    student = get_object_or_404(Students, id=student_id)
-    student.status = True
-    student.active = True
-    student.approve_date = timezone.now()
-    student.save()
-    messages.success(request, f"Student {student.first_name} has been approved and activated.")
+    try:
+        student = get_object_or_404(Students, id=student_id)
+        student.status = True
+        student.active = True
+        student.approve_date = timezone.now()
+        
+        # ----------------START APPROVAL LOGIC----------------
+        # Check for linked User
+        user = student.user
+        password = 'password123' # Default password for new approvals
+
+        if not user:
+            # FALLBACK: Create user if it doesn't exist (Legacy compatibility)
+            if student.email:
+                existing_user = Users.objects.filter(email=student.email).first()
+                if existing_user:
+                    user = existing_user
+                    student.user = user
+                else:
+                    # Create new user
+                    user = Users()
+                    user.name = f"{student.first_name} {student.last_name if student.last_name else ''}".strip()
+                    user.email = student.email
+                    user.username = student.email
+                    user.created_at = timezone.now()
+                    user.save()
+                    
+                    student_role = Roles.objects.filter(name__iexact='Student').first()
+                    if student_role:
+                        RoleUsers.objects.create(user=user, role=student_role)
+                    student.user = user
+        
+        # Activate User and Set Password
+        if user:
+            user.is_active = True
+            user.set_password(password)
+            user.updated_at = timezone.now()
+            user.save()
+
+            # Send Approval Email with Credentials
+            try:
+                subject = 'Welcome to Trinity Seminary - Registration Approved'
+                message = f'''Dear {student.first_name},
+
+Your registration has been approved. You can now login to the portal.
+
+Login Details:
+URL: https://trinityseminary.in/login (or your login URL)
+Username: {user.email}
+Password: {password}
+
+IMPORTANT: Please change your password immediately after your first login.
+
+Best regards,
+Administration'''
+                from_email = 'contact@byteboot.in' # Request specific sender
+                recipient_list = [user.email]
+                send_mail(subject, message, from_email, recipient_list)
+            except Exception as e:
+                print(f"Email sending failed: {str(e)}")
+        else:
+            print(f"Warning: No user linked or created for student {student.id}")
+        # ----------------END APPROVAL LOGIC----------------
+
+        student.save()
+        messages.success(request, f"Student {student.first_name} has been approved and activated. Credentials sent to email.")
+    except Exception as e:
+         messages.error(request, f"Error during approval: {str(e)}")
+         
     return redirect('student_detail', student_id=student.id)
 
 @require_http_methods(["POST"])
@@ -2931,63 +2995,72 @@ def student_toggle_approval(request, student_id):
                 student.approve_date = timezone.now()
                 student.active = True # Also set active status to True
                 
-                # Create User if not exists
-                user = None
-                if student.email:
-                    # Check if user exists
-                    existing_user = Users.objects.filter(email=student.email).first()
-                    if not existing_user:
-                        # Create new user
-                        user = Users()
-                        user.name = f"{student.first_name} {student.last_name if student.last_name else ''}".strip()
-                        user.email = student.email
-                        user.username = student.email
-                        user.set_password('password123')
-                        user.is_active = True
-                        user.created_at = timezone.now()
-                        user.updated_at = timezone.now()
-                        user.save()
-                        
-                        # Assign student role
-                        student_role = Roles.objects.filter(name__iexact='student').first()
-                        if student_role:
-                            RoleUsers.objects.create(
-                                user=user,
-                                role=student_role
-                            )
+                # Check for linked User
+                user = student.user
+                password = 'password123' # Default password for new approvals
+
+                if not user:
+                    # FALLBACK: Create user if it doesn't exist (Legacy compatibility)
+                    if student.email:
+                        existing_user = Users.objects.filter(email=student.email).first()
+                        if existing_user:
+                            user = existing_user
+                            student.user = user
                         else:
-                            print("Student role not found") # Debugging
-                        
-                        # Link user to student
-                        student.user = user
-                        
-                        # Send email
-                        try:
-                            subject = 'Welcome to Seminary - Registration Approved'
-                            message = f'''Dear {student.first_name},
+                            # Create new user
+                            user = Users()
+                            user.name = f"{student.first_name} {student.last_name if student.last_name else ''}".strip()
+                            user.email = student.email
+                            user.username = student.email
+                            user.created_at = timezone.now()
+                            user.save()
+                            
+                            student_role = Roles.objects.filter(name__iexact='student').first()
+                            if student_role:
+                                RoleUsers.objects.create(user=user, role=student_role)
+                            student.user = user
+                
+                # Activate User and Set Password
+                if user:
+                    user.is_active = True
+                    user.set_password(password)
+                    user.updated_at = timezone.now()
+                    user.save()
 
-                                            Your registration has been approved. You can now login to the portal.
-                                            Email: {student.email}
-                                            Password: password123
+                    # Send Approval Email with Credentials
+                    try:
+                        subject = 'Welcome to Trinity Seminary - Registration Approved'
+                        message = f'''Dear {student.first_name},
 
-                                            Please change your password after your first login.
+Your registration has been approved. You can now login to the portal.
 
-                                            Best regards,
-                                            Administration'''
-                            from_email = settings.DEFAULT_FROM_EMAIL
-                            recipient_list = [student.email]
-                            send_mail(subject, message, from_email, recipient_list)
-                        except Exception as e:
-                            print(f"Email sending failed: {str(e)}")
-                    else:
-                        # User already exists, maybe link them?
-                        student.user = existing_user
-                        user = existing_user
+Login Details:
+URL: https://trinityseminary.in/login (or your login URL)
+Username: {user.email}
+Password: {password}
+
+IMPORTANT: Please change your password immediately after your first login.
+
+Best regards,
+Administration'''
+                        from_email = 'contact@byteboot.in' # Request specific sender
+                        recipient_list = [user.email]
+                        send_mail(subject, message, from_email, recipient_list)
+                    except Exception as e:
+                        print(f"Email sending failed: {str(e)}")
+                else:
+                    print(f"Warning: No user linked or created for student {student.id}")
 
             else:
+                # DISAPPROVE ACTION
                 student.approve_date = None
                 student.active = False
                 
+                # Deactivate User if linked
+                if student.user:
+                    student.user.is_active = False
+                    student.user.save()
+            
             student.updated_at = timezone.now()
             student.save()
             

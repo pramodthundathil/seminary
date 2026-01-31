@@ -1319,7 +1319,43 @@
             }
         });
     });
+    // Real-time Email Availability Check
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.querySelector('input[name="email"]');
+        const emailError = document.getElementById('email_error');
+
+        if (emailInput) {
+            emailInput.addEventListener('blur', function() {
+                const email = this.value.trim();
+                if (email) {
+                    fetch(`{% url 'check_email_availability' %}?email=${encodeURIComponent(email)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                emailError.textContent = 'This email is already registered.';
+                                emailError.style.color = '#ef4444';
+                                emailInput.classList.add('error');
+                            } else {
+                                emailError.textContent = '';
+                                emailInput.classList.remove('error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking email:', error);
+                        });
+                }
+            });
+            
+            // Clear error on input
+            emailInput.addEventListener('input', function() {
+                emailError.textContent = '';
+                emailInput.classList.remove('error');
+            });
+        }
+    });
+
     function validateForm(event) {
+
         const recaptcha = grecaptcha.getResponse();
 
         // If reCAPTCHA not checked

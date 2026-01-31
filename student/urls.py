@@ -40,5 +40,6 @@ urlpatterns = [
     # API
     path("get-exams/<int:subject_id>/", views.get_exams, name="get_exams"),
     
-   path('submit_assignment/<int:pk>', views.submit_assignment, name="submit_assignment" )
+    path('submit_assignment/<int:pk>', views.submit_assignment, name="submit_assignment" ),
+    path("check-email/", views.check_email_availability, name="check_email_availability"),
 ]

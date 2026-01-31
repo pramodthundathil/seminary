@@ -55,7 +55,9 @@ from home.models import (
     Assignments,
     AssignmentAnswers,
     Payments,
-    Contacts
+    Contacts,
+    Roles,
+    RoleUsers,
 )
 
 from home.permissions import student_only, student_or_church_user
@@ -1440,12 +1442,12 @@ def student_register(request):
         # FILE UPLOAD HANDLING
         # -------------------------------
         try:
-            profile_pic = request.FILES.get("profile_pic")
-            cert1 = request.FILES.get("cert1")
-            cert2 = request.FILES.get("cert2")
-            cert3 = request.FILES.get("cert3")
-            cert4 = request.FILES.get("cert4")
-            cert5 = request.FILES.get("cert5")
+            profile_pic = request.FILES.get("photo")
+            cert1 = request.FILES.get("certificate1")
+            cert2 = request.FILES.get("certificate2")
+            cert3 = request.FILES.get("certificate3")
+            cert4 = request.FILES.get("certificate4")
+            cert5 = request.FILES.get("certificate5")
             
             logger.info(f"Files received - Profile: {bool(profile_pic)}, Certs: {bool(cert1)}, {bool(cert2)}, {bool(cert3)}, {bool(cert4)}, {bool(cert5)}")
 
@@ -1527,6 +1529,45 @@ def student_register(request):
             student_id = "STD-000000"
 
         # -------------------------------
+        # USER CREATION & VALIDATION
+        # -------------------------------
+        email = request.POST.get('email')
+        
+        if Users.objects.filter(email=email).exists():
+            messages.error(request, "A user with this email already exists. Please login or use a different email.")
+            return render(request, "site_pages/student_register.html")
+            
+        if Students.objects.filter(email=email).exists():
+             messages.error(request, "A student application with this email already exists.")
+             return render(request, "site_pages/student_register.html")
+
+        # Create System User (Inactive)
+        user_obj = None
+        try:
+            with transaction.atomic():
+                user_obj = Users()
+                user_obj.name = f"{first_name} {last_name}".strip()
+                user_obj.email = email
+                user_obj.username = email
+                user_obj.set_unusable_password() # No password yet
+                user_obj.is_active = False # Inactive until approved
+                user_obj.created_at = timezone.now()
+                user_obj.updated_at = timezone.now()
+                user_obj.save()
+                
+                # Assign Student Role
+                student_role = Roles.objects.filter(name__iexact='Student').first()
+                if student_role:
+                    RoleUsers.objects.create(user=user_obj, role=student_role)
+                else:
+                    logger.error("Role 'student' not found in database.")
+
+        except Exception as e:
+            logger.error(f"Error creating user for student: {e}", exc_info=True)
+            messages.error(request, "Error creating user account. Please try again.")
+            return render(request, "site_pages/student_register.html")
+
+        # -------------------------------
         # SAVE INTO DATABASE
         # -------------------------------
         try:
@@ -1535,7 +1576,7 @@ def student_register(request):
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
-                user_id = user_obj,
+                user=user_obj, # Link created user
                 email=email,
                 gender=gender,
                 citizenship=citizenship_obj,  # Pass OBJECT not string/ID
@@ -1588,43 +1629,34 @@ def student_register(request):
             logger.info(f"Student saved successfully!")
             logger.info(f"Database ID: {student.id}")
             logger.info(f"Student ID: {student.student_id}")
-            logger.info(f"Name: {student.first_name} {student.last_name}")
-            logger.info(f"Email: {student.email}")
-            logger.info(f"Citizenship: {student.citizenship}")
-            logger.info(f"Country: {student.country}")
-            logger.info(f"Course: {student.course_applied}")       
 
-            
-            # Get reCAPTCHA response           
-            recaptcha_response = request.POST.get('g-recaptcha-response')
-
+            # Send Email to Student
             try:
-                data = {
-                    'secret': settings.RECAPTCHA_SECRET_KEY,
-                    'response': recaptcha_response
-                }
+                subject = 'Application Received - Trinity Seminary'
+                message = f'''Dear {student.first_name},
 
-                r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
-                result = r.json()
+Thank you for applying to Trinity Seminary. Your application has been received and is currently under review.
+You will receive another email once your application status changes.
 
-                # If Google says "failed"
-                if not result.get('success'):
-                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
-                    return redirect('signup_student') # Redirect to new URL name
+Best regards,
+Administration'''
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email])
+            except Exception as e:
+                logger.error(f"Failed to send student email: {e}")
 
-            except requests.exceptions.RequestException:
-                # Network or API failure
-                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
-                return redirect('signup_student')
+            # Send Email to Admin
+            try:
+                admin_subject = 'New Student Application Received'
+                admin_message = f'''A new student application has been submitted.
+Name: {student.first_name} {student.last_name}
+Course: {student.course_applied.course_name if student.course_applied else 'N/A'}
 
-            except ValueError:
-                # JSON decoding failed
-                messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
-                return redirect('signup_student')
+Please login to the admin panel to review.'''
+                send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'])
+            except Exception as e:
+                logger.error(f"Failed to send admin email: {e}")
 
-            # If everything is OK → continue
-            messages.success(request, "Application submitted successfully!")
-            return redirect('signup_student')                
+            return redirect("student_application_success", student_id=student.student_id)
 
         except IntegrityError as e:
             logger.error(f" Database integrity error: {e}", exc_info=True)
@@ -1818,3 +1850,20 @@ def submit_assignment(request, pk):
         "questions": questions
     }
     return render(request, "student/assignment_submit.html", context)
+
+def check_email_availability(request):
+    """Check if email already exists"""
+    if request.method == 'GET':
+        email = request.GET.get('email', '').strip()
+        if not email:
+            return JsonResponse({'exists': False, 'error': 'Empty email'})
+        
+        # Check Students and Users
+        student_exists = Students.objects.filter(email=email).exists()
+        user_exists = Users.objects.filter(email=email).exists()
+        
+        if student_exists or user_exists:
+            return JsonResponse({'exists': True})
+        return JsonResponse({'exists': False})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
