@@ -1,4 +1,5 @@
 from django import forms
+from django_ckeditor_5.widgets import CKEditor5Widget
 from home.models import Menus, News, MediaLibrary
 
 class MenuForm(forms.ModelForm):
@@ -224,7 +225,7 @@ class PageForm(forms.ModelForm):
     )
     
     media_lib = forms.ModelChoiceField(
-        queryset=MediaLibrary.objects.filter(deleted_at__isnull=True),
+        queryset=MediaLibrary.objects.all(),
         required=False,
         widget=forms.HiddenInput(),
     )
@@ -699,6 +700,10 @@ class UploadForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['subject'].queryset = Subjects.objects.all().order_by('subject_name')
+
 from home.models import ChurchLoginCodeSettings, ChurchAdmins
 
 class ChurchLoginCodeSettingsForm(forms.ModelForm):
@@ -844,7 +849,7 @@ class ObjectiveQuestionsForm(forms.ModelForm):
         }
 
 
-from home.models import MenuItems, Pages, Courses
+from home.models import MenuItems, Pages, Courses, Qualifications
 
 class MenuItemsForm(forms.ModelForm):
     class Meta:
@@ -887,3 +892,89 @@ class MenuItemsForm(forms.ModelForm):
         self.fields['pages'].queryset = Pages.objects.filter(deleted_at__isnull=True).order_by('title')
         # Ensure courses field is available in form
         self.fields['courses'].queryset = Courses.objects.filter(deleted_at__isnull=True).order_by('course_name')
+
+
+class CourseForm(forms.ModelForm):
+    
+    STATUS_CHOICES = (
+        (1, 'Active'),
+        (0, 'Inactive'),
+    )
+
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    featured_image = forms.ModelChoiceField(
+        queryset=MediaLibrary.objects.all(),
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+    
+    highest_qualification = forms.ModelChoiceField(
+        queryset=Qualifications.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="Select Level"
+    )
+
+    class Meta:
+        model = Courses
+        fields = [
+            'course_name',
+            'course_code',
+            'highest_qualification',
+            'credit_hours',
+            'description',
+            'browser_title',
+            'meta_description',
+            'meta_keywords',
+            'status',
+            'apply_button_top',
+            'apply_button_bottom'
+        ]
+        widgets = {
+             'course_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter course name'
+            }),
+            'course_code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter course code'
+            }),
+            'credit_hours': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01'
+            }),
+            'description': CKEditor5Widget(
+                attrs={"class": "django_ckeditor_5"}, config_name="default"
+            ),
+            'browser_title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter browser title'
+            }),
+            'meta_description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter meta description'
+            }),
+            'meta_keywords': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Enter keywords'
+            }),
+            'apply_button_top': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'apply_button_bottom': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.media = self.cleaned_data.get('featured_image')
+        if commit:
+            instance.save()
+        return instance
+

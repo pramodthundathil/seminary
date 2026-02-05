@@ -25,43 +25,50 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label required" for="courseName">Course Name <span
+                    <label class="form-label required" for="id_course_name">Course Name <span
                             style="color:red;">*</span></label>
-                    <input type="text" class="form-control" id="courseName" name="course_name"
-                        value="{{ course.course_name|default:'' }}" required>
+                    {{ form.course_name }}
+                    {% if form.course_name.errors %}
+                    <div class="text-danger">{{ form.course_name.errors }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required" for="courseCode">Course Code <span
+                        <label class="form-label required" for="id_course_code">Course Code <span
                                 style="color:red;">*</span></label>
-                        <input type="text" class="form-control" id="courseCode" name="course_code"
-                            value="{{ course.course_code|default:'' }}" required>
+                        {{ form.course_code }}
+                        {% if form.course_code.errors %}
+                        <div class="text-danger">{{ form.course_code.errors }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required" for="creditHours">Credit Hours <span
+                        <label class="form-label required" for="id_credit_hours">Credit Hours <span
                                 style="color:red;">*</span></label>
-                        <input type="number" step="0.01" class="form-control" id="creditHours" name="credit_hours"
-                            value="{{ course.credit_hours|default:'' }}" required>
+                        {{ form.credit_hours }}
+                        {% if form.credit_hours.errors %}
+                        <div class="text-danger">{{ form.credit_hours.errors }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label required" for="highestQualification">Qualification Level <span
+                    <label class="form-label required" for="id_highest_qualification">Qualification Level <span
                             style="color:red;">*</span></label>
-                    <select class="form-control" id="highestQualification" name="highest_qualification" required>
-                        <option value="">Select Level</option>
-                        {% for q in qualifications %}
-                        <option value="{{ q.id }}" {% if course.highest_qualification_id == q.id %}selected{% endif %}>{{q.qualification_name }}</option>
-                        {% endfor %}
-                    </select>
+                    {{ form.highest_qualification }}
+                    {% if form.highest_qualification.errors %}
+                    <div class="text-danger">{{ form.highest_qualification.errors }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label" for="courseDescription">Description</label>
-                    <textarea class="form-control" id="courseDescription"
-                        name="description">{{ course.description|default:'' }}</textarea>
+                    <label class="form-label" for="id_description">Description</label>
+                    {{ form.media }}
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -73,7 +80,9 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <input type="hidden" id="id_media_lib" name="media_id" value="{{ course.media.id|default:'' }}">
+                    {{ form.featured_image }}
+                    <input type="hidden" id="id_media_lib" name="featured_image"
+                        value="{{ course.media.id|default:'' }}">
                     <div id="courseMediaPreview" class="media-preview-box"
                         style="margin-bottom: 10px; border: 1px dashed #ced4da; padding: 10px; text-align: center; border-radius: 4px; min-height: 100px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                         {% if course.media %}
@@ -107,21 +116,18 @@
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label" for="browserTitle">Browser Title</label>
-                    <input type="text" class="form-control" id="browserTitle" name="browser_title"
-                        value="{{ course.browser_title|default:'' }}">
+                    <label class="form-label" for="id_browser_title">Browser Title</label>
+                    {{ form.browser_title }}
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label" for="metaDescription">Meta Description</label>
-                    <textarea class="form-control" id="metaDescription" name="meta_description"
-                        style="min-height: 80px;">{{ course.meta_description|default:'' }}</textarea>
+                    <label class="form-label" for="id_meta_description">Meta Description</label>
+                    {{ form.meta_description }}
                 </div>
 
                 <div class="form-group mb-3">
-                    <label class="form-label" for="metaKeywords">Meta Keywords</label>
-                    <input type="text" class="form-control" id="metaKeywords" name="meta_keywords"
-                        value="{{ course.meta_keywords|default:'' }}" placeholder="keyword1, keyword2, keyword3">
+                    <label class="form-label" for="id_meta_keywords">Meta Keywords</label>
+                    {{ form.meta_keywords }}
                 </div>
             </div>
 
@@ -135,25 +141,21 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Status</label>
-                        <select class="form-control" id="status" name="status">
-                            <option value="1" {% if course.status == 1 %}selected{% endif %}>Active</option>
-                            <option value="0" {% if course.status == 0 %}selected{% endif %}>Inactive</option>
-                        </select>
+                        {{ form.status }}
                     </div>
 
                     <div class="col-md-4 mb-3 d-flex align-items-center">
                         <div class="form-check mt-4">
-                            <input type="checkbox" class="form-check-input" id="applyButtonTop" name="apply_button_top"
-                                value="1" {% if course.apply_button_top %}checked{% endif %}>
-                            <label class="form-check-label" for="applyButtonTop">Show Apply Button (Top)</label>
+                            {{ form.apply_button_top }}
+                            <label class="form-check-label" for="id_apply_button_top">Show Apply Button (Top)</label>
                         </div>
                     </div>
 
                     <div class="col-md-4 mb-3 d-flex align-items-center">
                         <div class="form-check mt-4">
-                            <input type="checkbox" class="form-check-input" id="applyButtonBottom"
-                                name="apply_button_bottom" value="1" {% if course.apply_button_bottom %}checked{% endif %}>
-                            <label class="form-check-label" for="applyButtonBottom">Show Apply Button (Bottom)</label>
+                            {{ form.apply_button_bottom }}
+                            <label class="form-check-label" for="id_apply_button_bottom">Show Apply Button
+                                (Bottom)</label>
                         </div>
                     </div>
                 </div>
@@ -234,20 +236,7 @@
     </div>
 </div>
 
-<script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 <script>
-    // Initialize CKEditor
-    // Initialize CKEditor
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof CKEDITOR !== 'undefined') {
-            CKEDITOR.replace('courseDescription', {
-                height: 200
-            });
-        } else {
-            console.error('CKEditor not loaded');
-        }
-    });
-
     // Media Library Logic
     let currentMediaPage = 1;
     let selectedMediaId = null;
@@ -270,7 +259,13 @@
 
     function switchMediaTab(tabName) {
         document.querySelectorAll('.media-tab').forEach(tab => tab.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+
+        // Fix: Use ID selector instead of event.currentTarget which fails in async calls
+        const activeTabBtn = document.getElementById(tabName + 'TabBtn');
+        if (activeTabBtn) {
+            activeTabBtn.classList.add('active');
+        }
+
         document.querySelectorAll('.media-tab-content').forEach(content => content.classList.remove('active'));
         document.getElementById(tabName + 'Tab').classList.add('active');
     }
@@ -441,7 +436,7 @@
                         }
                     } catch (e) {
                         console.error(e);
-                        alert('Invalid server response.');
+                        alert('Error parsing server response: ' + e.message);
                     }
                 } else {
                     alert('Upload failed. Status: ' + this.status);
@@ -451,7 +446,7 @@
             xhr.send(formData);
         } catch (error) {
             console.error('Upload handling error:', error);
-            alert('Upload failed to start.');
+            alert('Upload failed to start: ' + error.message);
         }
     }
 </script>

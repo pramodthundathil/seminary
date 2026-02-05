@@ -49,6 +49,14 @@ urlpatterns = [
     # Media Library JSON API
     path('admin/media/json/', views.media_library_json, name='media_library_json'),
     path('admin/media/upload/json/', views.media_library_upload_json, name='media_library_upload_json'),
+    
+    # Video Library JSON API
+    path('admin/videos/json/', views.video_library_json, name='video_library_json'),
+    path('admin/videos/create/json/', views.video_library_create_json, name='video_library_create_json'),
+    
+    # YouTube Library JSON API
+    path('admin/youtube/json/', views.youtube_library_json, name='youtube_library_json'),
+    path('admin/youtube/create/json/', views.youtube_library_create_json, name='youtube_library_create_json'),
 
 
     #photo gallery

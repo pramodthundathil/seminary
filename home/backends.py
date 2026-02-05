@@ -5,7 +5,7 @@ from .models import Users
 class LaravelBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None, **kwargs):
         try:
-            user = Users.objects.get(email=email)
+            user = Users.objects.get(email__iexact=email)
         except Users.DoesNotExist:
             return None
 

@@ -15,9 +15,11 @@
         /* optional: soft rounded corners */
         padding-top: 0 !important;
         margin-top: 0 !important;
-       
-    margin-top: -120px !important;   /* ★ lift upward behind navbar */
-    padding-top: 150px !important;   /* ★ push content down again */
+
+        margin-top: -120px !important;
+        /* ★ lift upward behind navbar */
+        padding-top: 150px !important;
+        /* ★ push content down again */
     }
 
 
@@ -25,7 +27,7 @@
         font-size: 35px;
         font-weight: 700;
         color: #2c3e50;
-        margin-top:20px !important;
+        margin-top: 20px !important;
         margin-bottom: 20px !important;
         text-align: center;
         text-decoration: none !important;
@@ -350,7 +352,7 @@
             <!-- Image -->
             <div class="course-img-container">
                 {% if course.media %}
-                <img src="{{ course.media.file.url }}" alt="{{ course.course_name }}" class="course-img">
+                <img src="{{ course.media.file_path.url }}" alt="{{ course.course_name }}" class="course-img">
                 {% else %}
                 <img src="{% static 'img/bth.jpg' %}" alt="{{ course.course_name }}" class="course-img">
                 {% endif %}
@@ -373,8 +375,8 @@
 
         <!-- Dots Between Cards (Skip for every 3rd card to create proper spacing) -->
         {% if not forloop.last %}
-            {% cycle 'cyan' 'red' 'cyan' as dot_color silent %}
-            <div class="dot-connector dot-{{ dot_color }}"></div>
+        {% cycle 'cyan' 'red' 'cyan' as dot_color silent %}
+        <div class="dot-connector dot-{{ dot_color }}"></div>
         {% endif %}
 
         {% endfor %}

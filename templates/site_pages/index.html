@@ -44,7 +44,9 @@
         <!-- Indicators -->
         <div class="carousel-indicators">
             {% for photo in slider_photos %}
-            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+                class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}"
+                aria-label="Slide {{ forloop.counter }}"></button>
             {% empty %}
             <!-- Fallback Indicators -->
             <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="0" class="active"></button>
@@ -72,7 +74,8 @@
                                 {{ photo.description|safe }}
                             </div>
                             {% if photo.button_text and photo.button_link %}
-                            <button class="learn-more-btn" onclick="window.open('{{ photo.button_link|escapejs }}', '{{ photo.button_link_target|default:'_self'|escapejs }}')">
+                            <button class="learn-more-btn"
+                                onclick="window.open('{{ photo.button_link|escapejs }}', '{{ photo.button_link_target|default:'_self'|escapejs }}')">
                                 {{ photo.button_text }}
                             </button>
                             {% endif %}
@@ -489,10 +492,10 @@ messages.info(request, 'Please verify your email.')
         // showLoaderOnNavigation();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-{% if messages %}
-<script>
-    // Professional Seminary themed alerts
-    const seminaryTheme = `
+    {% if messages %}
+    <script>
+        // Professional Seminary themed alerts
+        const seminaryTheme = `
     .swal2-popup {
         background: #FFFFFF !important;
         border-radius: 8px !important;
@@ -639,31 +642,31 @@ messages.info(request, 'Please verify your email.')
     }
     `;
 
-    // Inject custom styles
-    const style = document.createElement('style');
-    style.textContent = seminaryTheme;
-    document.head.appendChild(style);
+        // Inject custom styles
+        const style = document.createElement('style');
+        style.textContent = seminaryTheme;
+        document.head.appendChild(style);
 
-    '{% for message in messages %}'
-    Swal.fire({
-        icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
-        title: "{{ message|escapejs }}",
-        showConfirmButton: true,
-        confirmButtonText: 'Understood',
-        timer: 5000,
-        timerProgressBar: true,
-        allowEscapeKey: true,
-        allowOutsideClick: true,
-        showClass: {
-            popup: 'animate__animated animate__fadeIn animate__faster'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut animate__faster'
-        }
-    });
-    '{% endfor %}'
-</script>
-{% endif %}
+        '{% for message in messages %}'
+        Swal.fire({
+            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+            title: "{{ message|escapejs }}",
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            timer: 5000,
+            timerProgressBar: true,
+            allowEscapeKey: true,
+            allowOutsideClick: true,
+            showClass: {
+                popup: 'animate__animated animate__fadeIn animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOut animate__faster'
+            }
+        });
+        '{% endfor %}'
+    </script>
+    {% endif %}
 </body>
 
 </html>

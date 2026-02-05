@@ -14,62 +14,86 @@
     </div>
 
     <div class="card" style="padding:20px;">
-        <dl class="row">
-            <dt class="col-md-3">ID</dt>
-            <dd class="col-md-9">{{ upload.id }}</dd>
+        <div class="row">
+            <div class="col-md-8">
+                <dl class="row">
+                    <dt class="col-md-3">Upload Name</dt>
+                    <dd class="col-md-9">{{ upload.upload_name }}</dd>
 
-            <dt class="col-md-3">Code</dt>
-            <dd class="col-md-9">{{ upload.code }}</dd>
+                    <dt class="col-md-3">Code</dt>
+                    <dd class="col-md-9">{{ upload.code }}</dd>
 
-            <dt class="col-md-3">Upload Name</dt>
-            <dd class="col-md-9">{{ upload.upload_name }}</dd>
+                    <dt class="col-md-3">Description</dt>
+                    <dd class="col-md-9">{{ upload.description|default:"-" }}</dd>
 
-            <dt class="col-md-3">Description</dt>
-            <dd class="col-md-9">{{ upload.description|default:"-" }}</dd>
+                    <dt class="col-md-3">Format</dt>
+                    <dd class="col-md-9">{{ upload.format|upper }}</dd>
 
-            <dt class="col-md-3">Format</dt>
-            <dd class="col-md-9">{{ upload.format|upper }}</dd>
+                    <dt class="col-md-3">Subject</dt>
+                    <dd class="col-md-9">{{ upload.subject|default:"-" }}</dd>
 
-            <dt class="col-md-3">Subject</dt>
-            <dd class="col-md-9">{{ upload.subject|default:"-" }}</dd>
+                    <dt class="col-md-3">AWS URL</dt>
+                    <dd class="col-md-9">
+                        {% if upload.aws_url %}
+                        <a href="{{ upload.aws_url }}" target="_blank">{{ upload.aws_url }}</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </dd>
 
-            <dt class="col-md-3">Video</dt>
-            <dd class="col-md-9">{{ upload.video_id|default:"-" }}</dd>
+                    <dt class="col-md-3">Status</dt>
+                    <dd class="col-md-9">
+                        {% if upload.status %}
+                        <span class="status-badge status-active">Active</span>
+                        {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </dd>
 
-            <dt class="col-md-3">YouTube</dt>
-            <dd class="col-md-9">{{ upload.youtube|default:"-" }}</dd>
+                    <dt class="col-md-3">Created By</dt>
+                    <dd class="col-md-9">{{ upload.created_by|default:"-" }}</dd>
 
-            <dt class="col-md-3">AWS URL</dt>
-            <dd class="col-md-9">
-                {% if upload.aws_url %}
-                    <a href="{{ upload.aws_url }}" target="_blank">{{ upload.aws_url }}</a>
-                {% else %}
-                    -
-                {% endif %}
-            </dd>
+                    <dt class="col-md-3">Created At</dt>
+                    <dd class="col-md-9">{{ upload.created_at|date:"Y-m-d H:i" }}</dd>
+                </dl>
+            </div>
 
-            <dt class="col-md-3">Status</dt>
-            <dd class="col-md-9">
-                {% if upload.status %}
-                    <span class="status-badge status-active">Active</span>
-                {% else %}
-                    <span class="status-badge status-inactive">Inactive</span>
-                {% endif %}
-            </dd>
-
-            <dt class="col-md-3">Created By</dt>
-            <dd class="col-md-9">{{ upload.created_by|default:"-" }}</dd>
-
-            <dt class="col-md-3">Created At</dt>
-            <dd class="col-md-9">{{ upload.created_at|date:"Y-m-d H:i" }}</dd>
-
-            <dt class="col-md-3">Updated By</dt>
-            <dd class="col-md-9">{{ upload.updated_by|default:"-" }}</dd>
-
-            <dt class="col-md-3">Updated At</dt>
-            <dd class="col-md-9">{{ upload.updated_at|date:"Y-m-d H:i" }}</dd>
-        </dl>
+            <div class="col-md-4">
+                <div class="card p-3 bg-light">
+                    <h5 class="mb-3">Preview</h5>
+                    <div
+                        style="background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden;">
+                        {% if upload.media %}
+                        {% if upload.media.media_type == 'image' %}
+                        <img src="{{ upload.media.file_path.url }}" style="max-width: 100%; max-height: 300px;">
+                        {% else %}
+                        <div class="text-center text-white">
+                            <i class="fas fa-file fa-4x mb-2"></i><br>
+                            {{ upload.media.file_name }}
+                        </div>
+                        {% endif %}
+                        {% elif upload.video_id %}
+                        {% if upload.video_id.media %}
+                        <video controls style="max-width: 100%; max-height: 300px;">
+                            <source src="{{ upload.video_id.media.file_path.url }}">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% elif upload.video_id.youtube %}
+                        <iframe width="100%" height="250"
+                            src="https://www.youtube.com/embed/{{ upload.video_id.youtube.file_path|slice:'-11:' }}"
+                            frameborder="0" allowfullscreen></iframe>
+                        {% endif %}
+                        {% elif upload.youtube %}
+                        <iframe width="100%" height="250"
+                            src="https://www.youtube.com/embed/{{ upload.youtube.file_path|slice:'-11:' }}"
+                            frameborder="0" allowfullscreen></iframe>
+                        {% else %}
+                        <p class="text-white-50 mb-0">No Preview Available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-{% endblock %}
+    {% endblock %}

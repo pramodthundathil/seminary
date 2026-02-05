@@ -131,6 +131,7 @@
                     <th>Student Name</th>
                     <th>Subject Name</th>
                     <th>Upload Name</th>
+                    <th>Type</th>
                     <th>Updated By</th>
                     <th>Actions</th>
                 </tr>
@@ -235,8 +236,18 @@
                 { data: 'student_name' },
                 { data: 'subject_name' },
                 { data: 'upload_name' },
+                { data: 'type' },
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
+            ],
+            columnDefs: [
+                { width: '40px', targets: 0 },
+                { width: '150px', targets: 1 },
+                { width: '150px', targets: 2 },
+                { width: '200px', targets: 3 },
+                { width: '80px', targets: 4 },
+                { width: '120px', targets: 5 },
+                { width: '80px', targets: 6 }
             ],
             order: [[0, 'desc']],
             pageLength: 10

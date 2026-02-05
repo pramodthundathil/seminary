@@ -4068,7 +4068,9 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="{% static 'img/Trinity_final-nobg.png' %}" alt="Trinity Logo">
+            <a href="{% url 'admin_index' %}">
+                <img src="{% static 'img/Trinity_final-nobg.png' %}" alt="Trinity Logo">
+            </a>
         </div>
 
         <div class="sidebar-nav">
@@ -4099,10 +4101,10 @@
         </div>
 
         <div class="sidebar-footer">
-            <button class="logout-btn" onclick="handleLogout()">
+            <a class="logout-btn" href="{% url 'signout' %}">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Log Out</span>
-            </button>
+            </a>
         </div>
     </div>
 
@@ -4283,7 +4285,7 @@
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
                         </a> -->
-                        <a href="#" class="dropdown-item-custom" onclick="handleLogout()">
+                        <a href="{% url 'signout' %}" class="dropdown-item-custom" >
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </a>

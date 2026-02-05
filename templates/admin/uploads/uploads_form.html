@@ -1,4 +1,3 @@
-{# templates/admin/uploads/uploads_form.html #}
 {% extends 'admin/index.html' %}
 {% block content %}
 
@@ -11,7 +10,7 @@
     </div>
 
     <div class="card" style="padding:20px;">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="row">
@@ -19,7 +18,7 @@
                     <label class="form-label">Code</label>
                     {{ form.code }}
                     {% if form.code.errors %}
-                        <div class="text-danger small">{{ form.code.errors }}</div>
+                    <div class="text-danger small">{{ form.code.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -27,7 +26,7 @@
                     <label class="form-label">Upload Name</label>
                     {{ form.upload_name }}
                     {% if form.upload_name.errors %}
-                        <div class="text-danger small">{{ form.upload_name.errors }}</div>
+                    <div class="text-danger small">{{ form.upload_name.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -35,7 +34,7 @@
                     <label class="form-label">Description</label>
                     {{ form.description }}
                     {% if form.description.errors %}
-                        <div class="text-danger small">{{ form.description.errors }}</div>
+                    <div class="text-danger small">{{ form.description.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -43,7 +42,7 @@
                     <label class="form-label">Format</label>
                     {{ form.format }}
                     {% if form.format.errors %}
-                        <div class="text-danger small">{{ form.format.errors }}</div>
+                    <div class="text-danger small">{{ form.format.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -51,31 +50,7 @@
                     <label class="form-label">Subject</label>
                     {{ form.subject }}
                     {% if form.subject.errors %}
-                        <div class="text-danger small">{{ form.subject.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Media Library</label>
-                    {{ form.media }}
-                    {% if form.media.errors %}
-                        <div class="text-danger small">{{ form.media.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Video</label>
-                    {{ form.video_id }}
-                    {% if form.video_id.errors %}
-                        <div class="text-danger small">{{ form.video_id.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">YouTube Video</label>
-                    {{ form.youtube }}
-                    {% if form.youtube.errors %}
-                        <div class="text-danger small">{{ form.youtube.errors }}</div>
+                    <div class="text-danger small">{{ form.subject.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -83,7 +58,131 @@
                     <label class="form-label">AWS URL</label>
                     {{ form.aws_url }}
                     {% if form.aws_url.errors %}
-                        <div class="text-danger small">{{ form.aws_url.errors }}</div>
+                    <div class="text-danger small">{{ form.aws_url.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Media Library Section -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Media Library</label>
+                    <div class="media-selector-container">
+                        <!-- Hidden Input for Form Submission -->
+                        <div style="display:none;">{{ form.media }}</div>
+
+                        <div id="mediaPreview" class="media-preview-box p-2 border rounded text-center mb-2"
+                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            {% if form.instance.media %}
+                            <a href="{{ form.instance.media.file_path.url }}" target="_blank"
+                                class="w-100 text-decoration-none text-dark d-block">
+                                {% if form.instance.media.media_type == 'image' %}
+                                <img src="{{ form.instance.media.thumb_file_path }}"
+                                    style="max-height: 100px; max-width: 100%;">
+                                {% elif 'pdf' in form.instance.media.file_name|lower or 'pdf' in form.instance.media.file_type|lower %}
+                                <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                {% else %}
+                                <i class="fas fa-file fa-3x text-muted"></i>
+                                {% endif %}
+                                <div class="small mt-1 text-break">{{ form.instance.media.file_name }}</div>
+                            </a>
+                            {% else %}
+                            <p class="text-muted mb-0">No media selected</p>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-outline-primary w-100" onclick="openModal('media')">
+                            <i class="fas fa-image"></i> Select Media
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 mt-1"
+                            onclick="clearSelection('media')"
+                            style="{% if not form.instance.media %}display:none;{% endif %}" id="clearMediaBtn">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                    {% if form.media.errors %}
+                    <div class="text-danger small">{{ form.media.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Video Section -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Video</label>
+                    <div class="media-selector-container">
+                        <div style="display:none;">{{ form.video_id }}</div>
+
+                        <div id="videoPreview" class="media-preview-box p-2 border rounded text-center mb-2"
+                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            {% if form.instance.video_id %}
+                            <div class="w-100">
+                                {% if form.instance.video_id.media.thumb_file_path %}
+                                <a href="{{ form.instance.video_id.media.file_path.url }}" target="_blank"
+                                    class="text-decoration-none text-dark">
+                                    <img src="{{ form.instance.video_id.media.thumb_file_path }}"
+                                        style="max-height: 100px; max-width: 100%;">
+                                    <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
+                                </a>
+                                {% elif form.instance.video_id.youtube.thumb_file_path %}
+                                <a href="{{ form.instance.video_id.youtube.file_path }}" target="_blank"
+                                    class="text-decoration-none text-dark">
+                                    <img src="{{ form.instance.video_id.youtube.thumb_file_path }}"
+                                        style="max-height: 100px; max-width: 100%;">
+                                    <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
+                                </a>
+                                {% else %}
+                                <i class="fas fa-video fa-2x text-muted"></i>
+                                <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted mb-0">No video selected</p>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-outline-primary w-100" onclick="openModal('video')">
+                            <i class="fas fa-video"></i> Select Video
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 mt-1"
+                            onclick="clearSelection('video')"
+                            style="{% if not form.instance.video_id %}display:none;{% endif %}" id="clearVideoBtn">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                    {% if form.video_id.errors %}
+                    <div class="text-danger small">{{ form.video_id.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- YouTube Section -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">YouTube Video</label>
+                    <div class="media-selector-container">
+                        <div style="display:none;">{{ form.youtube }}</div>
+
+                        <div id="youtubePreview" class="media-preview-box p-2 border rounded text-center mb-2"
+                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            {% if form.instance.youtube %}
+                            <div class="w-100">
+                                <a href="{{ form.instance.youtube.file_path }}" target="_blank"
+                                    class="text-decoration-none text-dark">
+                                    <img src="{{ form.instance.youtube.thumb_file_path }}"
+                                        style="max-height: 100px; max-width: 100%;">
+                                    <div class="small mt-1 text-break">
+                                        {{ form.instance.youtube.file_path|truncatechars:30 }}
+                                    </div>
+                                </a>
+                            </div>
+                            {% else %}
+                            <p class="text-muted mb-0">No YouTube video selected</p>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-outline-danger w-100" onclick="openModal('youtube')">
+                            <i class="fab fa-youtube"></i> Select YouTube
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 mt-1"
+                            onclick="clearSelection('youtube')"
+                            style="{% if not form.instance.youtube %}display:none;{% endif %}" id="clearYoutubeBtn">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                    {% if form.youtube.errors %}
+                    <div class="text-danger small">{{ form.youtube.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -93,7 +192,7 @@
                         <label class="form-check-label">Active</label>
                     </div>
                     {% if form.status.errors %}
-                        <div class="text-danger small">{{ form.status.errors }}</div>
+                    <div class="text-danger small">{{ form.status.errors }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -104,5 +203,624 @@
         </form>
     </div>
 </div>
+
+<!-- Unified Selector Modal -->
+<div id="selectorModal" class="modal">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <h2 id="modalTitle"><i class="fas fa-images"></i> Select Item</h2>
+            <button class="close-modal" type="button" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 0;">
+            <div class="media-tabs">
+                <button type="button" class="media-tab active" onclick="switchTab('library')">Library</button>
+                <button type="button" class="media-tab" onclick="switchTab('create')">Create New</button>
+            </div>
+
+            <!-- Library Tab -->
+            <div id="libraryTab" class="media-tab-content active">
+                <div class="library-controls p-3 border-bottom">
+                    <input type="text" id="searchInput" placeholder="Search..." class="form-control"
+                        style="width: 300px;">
+                </div>
+                <div id="itemsGrid" class="media-grid p-3">
+                    <div class="loading-spinner">Loading...</div>
+                </div>
+                <div class="pagination-controls p-3 border-top text-center">
+                    <button type="button" id="prevPageBtn" class="btn btn-sm btn-secondary" disabled>Previous</button>
+                    <span id="pageIndicator" class="mx-2">Page 1</span>
+                    <button type="button" id="nextPageBtn" class="btn btn-sm btn-secondary" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Create Tab -->
+            <div id="createTab" class="media-tab-content p-4">
+                <!-- Dynamic Create Form Content will be injected here or toggled -->
+
+                <!-- Media Upload Form -->
+                <div id="createMediaForm" class="create-form" style="display:none;">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                        <h3>Drag & Drop files here</h3>
+                        <p>or</p>
+                        <input type="file" id="mediaUploadInput" hidden>
+                        <button type="button" class="btn btn-primary"
+                            onclick="document.getElementById('mediaUploadInput').click()">Browse Files</button>
+                    </div>
+                </div>
+
+                <!-- Video Create Form -->
+                <div id="createVideoForm" class="create-form" style="display:none;">
+                    <div class="mb-3">
+                        <label class="form-label">Video Title *</label>
+                        <input type="text" class="form-control" id="newVideoTitle">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="newVideoDesc" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Source Type</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="videoSourceType" value="media" checked
+                                onchange="toggleVideoSource('media')">
+                            <label class="form-check-label">Upload File</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="videoSourceType" value="youtube"
+                                onchange="toggleVideoSource('youtube')">
+                            <label class="form-check-label">YouTube URL</label>
+                        </div>
+                    </div>
+
+                    <div id="videoSourceMedia" class="mb-3">
+                        <label class="form-label">Video File *</label>
+                        <input type="file" class="form-control" id="newVideoFile" accept="video/*">
+                    </div>
+
+                    <div id="videoSourceYoutube" class="mb-3" style="display:none;">
+                        <label class="form-label">YouTube URL *</label>
+                        <input type="text" class="form-control" id="newVideoYoutubeUrl"
+                            placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+
+                    <button type="button" class="btn btn-success" onclick="createVideo()">Create Video</button>
+                </div>
+
+                <!-- YouTube Create Form -->
+                <div id="createYoutubeForm" class="create-form" style="display:none;">
+                    <div class="mb-3">
+                        <label class="form-label">YouTube URL *</label>
+                        <input type="text" class="form-control" id="newYoutubeUrl"
+                            placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="createYoutube()">Add YouTube Video</button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="uploadProgress" style="display: none; margin-top: 20px;">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="uploadProgressBar" style="width: 0%"></div>
+                    </div>
+                    <p id="uploadStatusText">Uploading...</p>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="selected-media-info mr-auto" id="selectedInfo" style="display: none;">
+                Selected: <span id="selectedName" class="font-weight-bold"></span>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" id="useBtn" onclick="useSelection()" disabled>Use
+                Selected</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 50px auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 800px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .media-tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        padding: 0 20px;
+    }
+
+    .media-tab {
+        padding: 15px 20px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+    }
+
+    .media-tab.active {
+        color: var(--primary-color, #007bff);
+        border-bottom-color: var(--primary-color, #007bff);
+    }
+
+    .media-tab-content {
+        display: none;
+    }
+
+    .media-tab-content.active {
+        display: block;
+    }
+
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .media-item {
+        border: 2px solid #eee;
+        border-radius: 6px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .media-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .media-item.selected {
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+
+    .media-thumb {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .media-thumb img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .media-name {
+        padding: 8px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #fff;
+        text-align: center;
+    }
+
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary-color, #007bff);
+        background: #f8faff;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--primary-color, #007bff);
+        width: 0%;
+        transition: width 0.3s;
+    }
+</style>
+
+<script>
+    let currentMode = ''; // media, video, youtube
+    let currentPage = 1;
+    let selectedItem = null;
+
+    // Config for endpoints
+    const config = {
+        media: {
+            listUrl: '/menu/admin/media/json/',
+            createUrl: '/menu/admin/media/upload/json/',
+            title: 'Media Library',
+            inputId: 'id_media',
+            previewId: 'mediaPreview',
+            clearBtnId: 'clearMediaBtn',
+            formatPrefix: ''
+        },
+        video: {
+            listUrl: '/menu/admin/videos/json/',
+            createUrl: '/menu/admin/videos/create/json/',
+            title: 'Video Library',
+            inputId: 'id_video_id',
+            previewId: 'videoPreview',
+            clearBtnId: 'clearVideoBtn',
+            formatPrefix: 'video'
+        },
+        youtube: {
+            listUrl: '/menu/admin/youtube/json/',
+            createUrl: '/menu/admin/youtube/create/json/',
+            title: 'YouTube Library',
+            inputId: 'id_youtube',
+            previewId: 'youtubePreview',
+            clearBtnId: 'clearYoutubeBtn',
+            formatPrefix: 'youtube'
+        }
+    };
+
+    function openModal(mode) {
+        currentMode = mode;
+        document.getElementById('selectorModal').style.display = 'block';
+        document.getElementById('modalTitle').textContent = config[mode].title;
+        switchTab('library'); // Reset to library tab
+
+        // Setup Create Forms Visibility
+        document.querySelectorAll('.create-form').forEach(el => el.style.display = 'none');
+        if (mode === 'media') document.getElementById('createMediaForm').style.display = 'block';
+        if (mode === 'video') document.getElementById('createVideoForm').style.display = 'block';
+        if (mode === 'youtube') document.getElementById('createYoutubeForm').style.display = 'block';
+
+        loadItems(1);
+    }
+
+    function closeModal() {
+        document.getElementById('selectorModal').style.display = 'none';
+        selectedItem = null;
+        updateSelectedInfo();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.media-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.media-tab-content').forEach(c => c.classList.remove('active'));
+
+        // Find the button that triggered this (if click) or find by text? 
+        // Simplification: based on index or logic.
+        const tabs = document.querySelectorAll('.media-tab');
+        if (tab === 'library') { tabs[0].classList.add('active'); document.getElementById('libraryTab').classList.add('active'); }
+        else { tabs[1].classList.add('active'); document.getElementById('createTab').classList.add('active'); }
+    }
+
+    async function loadItems(page) {
+        currentPage = page;
+        const search = document.getElementById('searchInput').value;
+        const grid = document.getElementById('itemsGrid');
+        grid.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
+        const url = `${config[currentMode].listUrl}?page=${page}&search=${search}`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.success) {
+                renderGrid(data.data);
+                updatePagination(data.has_next, data.next_page);
+            } else {
+                grid.innerHTML = '<p class="text-center">Error loading items.</p>';
+            }
+        } catch (e) {
+            console.error(e);
+            grid.innerHTML = '<p class="text-center">Error loading items.</p>';
+        }
+    }
+
+    function renderGrid(items) {
+        const grid = document.getElementById('itemsGrid');
+        grid.innerHTML = '';
+        if (items.length === 0) {
+            grid.innerHTML = '<p class="text-center w-100">No items found.</p>';
+            return;
+        }
+
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = `media-item ${selectedItem && selectedItem.id === item.id ? 'selected' : ''}`;
+            el.innerHTML = `
+                <div class="media-thumb"><img src="${item.thumb}" alt="thumb"></div>
+                <div class="media-name">${item.title || item.name}</div>
+            `;
+            el.onclick = () => selectItem(item);
+            grid.appendChild(el);
+        });
+    }
+
+    function selectItem(item) {
+        selectedItem = item;
+        document.querySelectorAll('.media-item').forEach(el => el.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        updateSelectedInfo();
+    }
+
+    function updateSelectedInfo() {
+        const info = document.getElementById('selectedInfo');
+        const btn = document.getElementById('useBtn');
+        if (selectedItem) {
+            info.style.display = 'block';
+            document.getElementById('selectedName').textContent = selectedItem.title || selectedItem.name;
+            btn.disabled = false;
+        } else {
+            info.style.display = 'none';
+            btn.disabled = true;
+        }
+    }
+
+    function useSelection() {
+        if (!selectedItem) return;
+
+        const input = document.getElementById(config[currentMode].inputId);
+        // Set the value. For Django forms using ModelChoiceField, it expects ID.
+        input.value = selectedItem.id;
+
+        // Update Preview
+        const preview = document.getElementById(config[currentMode].previewId);
+        let previewHtml = '';
+        const titleOrName = selectedItem.title || selectedItem.name;
+        const itemUrl = selectedItem.url || '#';
+
+        if (currentMode === 'media') {
+            let innerContent = '';
+            // Check for image type or extension
+            const isImage = selectedItem.type === 'image' || (selectedItem.name && /\.(jpeg|jpg|gif|png|webp)$/i.test(selectedItem.name));
+            const isPdf = selectedItem.name && /\.pdf$/i.test(selectedItem.name);
+
+            if (isImage) {
+                innerContent = `<img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">`;
+            } else if (isPdf) {
+                innerContent = `<i class="fas fa-file-pdf fa-3x text-danger"></i>`;
+            } else {
+                innerContent = `<i class="fas fa-file fa-3x text-muted"></i>`;
+            }
+
+            previewHtml = `
+            <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                ${innerContent}
+                <div class="small mt-1 text-break">${titleOrName}</div>
+            </a>`;
+
+        } else if (currentMode === 'youtube') {
+            previewHtml = `
+            <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                <img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">
+                <div class="small mt-1 text-break">${titleOrName}</div>
+            </a>`;
+
+        } else {
+            // Video
+            previewHtml = `
+            <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                <img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">
+                <div class="small mt-1 text-break">${titleOrName}</div>
+            </a>`;
+        }
+        preview.innerHTML = previewHtml;
+
+        // Show Remove Button
+        document.getElementById(config[currentMode].clearBtnId).style.display = 'block';
+
+        // Auto-detect format
+        autoDetectFormat(selectedItem);
+
+        closeModal();
+    }
+
+    function autoDetectFormat(item) {
+        const formatInput = document.getElementById('id_format');
+        let ext = '';
+
+        if (currentMode === 'media') {
+            // Try to get extension from name or url
+            const name = item.name || item.title || '';
+            const parts = name.split('.');
+            if (parts.length > 1) {
+                ext = parts.pop().toLowerCase();
+            }
+        } else if (currentMode === 'video') {
+            ext = 'mp4'; // Default to mp4 for created videos, or try to detect
+            if (item.url && item.url.includes('youtube')) ext = 'youtube';
+        } else if (currentMode === 'youtube') {
+            ext = 'youtube';
+        }
+
+        if (ext) {
+            formatInput.value = ext;
+        }
+    }
+
+    function clearSelection(mode) {
+        document.getElementById(config[mode].inputId).value = '';
+        document.getElementById(config[mode].previewId).innerHTML = '<p class="text-muted mb-0">No selection</p>';
+        document.getElementById(config[mode].clearBtnId).style.display = 'none';
+        // Optional: clear format? No, better keep it.
+    }
+
+    function updatePagination(hasNext, nextPage) {
+        document.getElementById('pageIndicator').textContent = `Page ${currentPage}`;
+        document.getElementById('prevPageBtn').disabled = currentPage === 1;
+        document.getElementById('prevPageBtn').onclick = () => loadItems(currentPage - 1);
+        document.getElementById('nextPageBtn').disabled = !hasNext;
+        document.getElementById('nextPageBtn').onclick = () => loadItems(nextPage);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => loadItems(1));
+
+    // --- Creation Handling ---
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Media Upload
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('mediaUploadInput');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleMediaUpload(e.target.files[0]); });
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#007bff'; uploadArea.style.backgroundColor = '#f0f7ff'; });
+    uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#ddd'; uploadArea.style.backgroundColor = 'transparent'; });
+    uploadArea.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer.files.length) handleMediaUpload(e.dataTransfer.files[0]); });
+
+    async function handleMediaUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        performUpload(config.media.createUrl, formData);
+    }
+
+    async function createYoutube() {
+        const url = document.getElementById('newYoutubeUrl').value;
+        if (!url) { alert('URL is required'); return; }
+        const formData = new FormData();
+        formData.append('url', url);
+        performUpload(config.youtube.createUrl, formData);
+    }
+
+    function toggleVideoSource(type) {
+        if (type === 'media') {
+            document.getElementById('videoSourceMedia').style.display = 'block';
+            document.getElementById('videoSourceYoutube').style.display = 'none';
+        } else {
+            document.getElementById('videoSourceMedia').style.display = 'none';
+            document.getElementById('videoSourceYoutube').style.display = 'block';
+        }
+    }
+
+    async function createVideo() {
+        const title = document.getElementById('newVideoTitle').value;
+        const sourceType = document.querySelector('input[name="videoSourceType"]:checked').value;
+
+        if (!title) { alert('Title is required'); return; }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', document.getElementById('newVideoDesc').value);
+        formData.append('upload_type', sourceType); // 'media' or 'youtube'
+
+        if (sourceType === 'media') {
+            const file = document.getElementById('newVideoFile').files[0];
+            if (!file) { alert('File is required'); return; }
+            formData.append('video_file', file);
+        } else {
+            const url = document.getElementById('newVideoYoutubeUrl').value;
+            if (!url) { alert('URL is required'); return; }
+            formData.append('youtube_url', url);
+        }
+
+        performUpload(config.video.createUrl, formData);
+    }
+
+    function performUpload(url, formData) {
+        document.getElementById('uploadProgress').style.display = 'block';
+        document.getElementById('uploadProgressBar').style.width = '0%';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const p = (e.loaded / e.total) * 100;
+                document.getElementById('uploadProgressBar').style.width = p + '%';
+            }
+        };
+
+        xhr.onload = () => {
+            document.getElementById('uploadProgress').style.display = 'none';
+            if (xhr.status === 200) {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.success) {
+                        alert('Created successfully!');
+                        // Switch to library and select the new item
+                        switchTab('library');
+                        // Reload items
+                        loadItems(1).then(() => {
+                            // Try to select if returned
+                            if (res.media) selectItem(res.media);
+                            else if (res.video) selectItem(res.video);
+                            else if (res.youtube) selectItem(res.youtube);
+                        });
+
+                        // Reset forms
+                        document.getElementById('newVideoTitle').value = '';
+                        document.getElementById('newYoutubeUrl').value = '';
+                    } else {
+                        alert('Error: ' + res.message);
+                    }
+                } catch (e) { alert('Invalid response'); }
+            } else {
+                alert('Upload failed');
+            }
+        };
+
+        xhr.send(formData);
+    }
+</script>
 
 {% endblock %}

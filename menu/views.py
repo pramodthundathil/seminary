@@ -140,7 +140,7 @@ def admin_index(request):
         'pending_exams': StudentsExams.objects.filter(is_approved=False, deleted_at__isnull=True).select_related('student', 'exam').order_by('-created_at')[:5],
         
         # New Dashboard Tables Data
-        'pending_applications': Students.objects.filter(status=False).order_by('-created_at')[:5],
+        'pending_applications': Students.objects.filter(status=False, active = False).order_by('-created_at')[:5],
         'contact_requests': Contacts.objects.filter(deleted_at__isnull=True).order_by('-created_at')[:5],
         'assignment_requests': StudentsAssignment.objects.filter(submitted_on__isnull=False, total_marks__isnull=True, deleted_at__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
     }
@@ -2206,64 +2206,30 @@ def course_datatable(request):
 def course_create(request):
     """Create new course"""
     if request.method == 'POST':
-        try:
-            course_name = request.POST.get('course_name')
-            course_code = request.POST.get('course_code')
-            highest_qualification_id = request.POST.get('highest_qualification')
-            credit_hours = float(request.POST.get('credit_hours'))
-            description = request.POST.get('description', '')
-            browser_title = request.POST.get('browser_title', '')
-            meta_description = request.POST.get('meta_description', '')
-            meta_keywords = request.POST.get('meta_keywords', '')
-            status = int(request.POST.get('status', 1))
-            apply_button_top = int(request.POST.get('apply_button_top', 0))
-            apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
-            
-            media_id = request.POST.get('media_id')
-            if media_id == 'null' or media_id == '' or media_id is None:
-                media_id = None
-
-            # Check if course code already exists
-            if Courses.objects.filter(course_code=course_code).exists():
-                messages.error(request, 'Course code already exists')
-                return redirect('course_create')
-            
-            if not highest_qualification_id:
-                messages.error(request, 'Please select a highest qualification')
-                return redirect('course_create')
-           
-            # Safely fetch qualification
+        form = CourseForm(request.POST)
+        if form.is_valid():
             try:
-                highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
-            except Qualifications.DoesNotExist:
-                messages.error(request, 'Selected qualification does not exist')
-                return redirect('course_create')
-
-            course = Courses.objects.create(
-                course_name=course_name,
-                course_code=course_code,
-                highest_qualification=highest_qualification_obj,
-                credit_hours=credit_hours,
-                description=description,
-                browser_title=browser_title,
-                meta_description=meta_description,
-                meta_keywords=meta_keywords,
-                media_id=media_id,
-                status=status,
-                apply_button_top=apply_button_top,
-                apply_button_bottom=apply_button_bottom,
-                created_by=request.user,   
-                updated_by=request.user, 
-                created_at=timezone.now()
-            )
-
-            messages.success(request, 'Course created successfully')
-            return redirect('course_list')
-        except:
-            messages.error(request, f'Error creating course: {str(e)}')
-            return redirect('course_create')
-    qualifications = Qualifications.objects.all()
-    return render(request, 'admin/courses/form.html', {'qualifications': qualifications})
+                course = form.save(commit=False)
+                course.created_by = request.user
+                course.updated_by = request.user
+                course.created_at = timezone.now()
+                
+                # Check for existing course code
+                if Courses.objects.filter(course_code=course.course_code).exists():
+                    messages.error(request, 'Course code already exists')
+                    return render(request, 'admin/courses/form.html', {'form': form})
+                
+                course.save()
+                messages.success(request, 'Course created successfully')
+                return redirect('course_list')
+            except Exception as e:
+                messages.error(request, f'Error creating course: {str(e)}')
+        else:
+             messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CourseForm()
+    
+    return render(request, 'admin/courses/form.html', {'form': form})
 
 ##@login_required
 def course_get(request, course_id):
@@ -2312,86 +2278,41 @@ def course_get(request, course_id):
             'message': str(e)
         })
 
-##@login_required
 @login_required
 def course_update(request, course_id):
     """Update course"""
     course = get_object_or_404(Courses, id=course_id)
     
     if request.method == 'POST':
-        try:
-            course_name = request.POST.get('course_name')
-            course_code = request.POST.get('course_code')
-            highest_qualification_id = request.POST.get('highest_qualification')
-            credit_hours = float(request.POST.get('credit_hours'))
-            description = request.POST.get('description', '')
-            browser_title = request.POST.get('browser_title', '')
-            meta_description = request.POST.get('meta_description', '')
-            meta_keywords = request.POST.get('meta_keywords', '')
-            status = int(request.POST.get('status', 1))
-            apply_button_top = int(request.POST.get('apply_button_top', 0))
-            apply_button_bottom = int(request.POST.get('apply_button_bottom', 0))
-            
-            media_id = request.POST.get('media_id')
-            if media_id == 'null' or media_id == '' or media_id is None:
-                media_id = None
-
-            # Check if course code exists for other courses
-            if Courses.objects.filter(course_code=course_code).exclude(id=course_id).exists():
-                messages.error(request, 'Course code already exists')
-                return redirect('course_update', course_id=course_id)
-
-            # Safe handling of highest qualification
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
             try:
-                if not highest_qualification_id:
-                     messages.error(request, 'Qualification is required')
-                     return redirect('course_update', course_id=course_id)
-                highest_qualification_obj = Qualifications.objects.get(id=highest_qualification_id)
-                course.highest_qualification = highest_qualification_obj
-            except Qualifications.DoesNotExist:
-                 messages.error(request, 'Selected qualification does not exist')
-                 return redirect('course_update', course_id=course_id)
-
-            course.course_name = course_name
-            course.course_code = course_code
-            course.credit_hours = credit_hours
-            course.description = description
-            course.browser_title = browser_title
-            course.meta_description = meta_description
-            course.meta_keywords = meta_keywords
-            # Safe handling of Media
-            if media_id:
-                try:
-                    media_obj = MediaLibrary.objects.get(id=media_id)
-                    course.media = media_obj
-                except MediaLibrary.DoesNotExist:
-                     # If media doesn't exist, we can either warn or just set to None. 
-                     # Safer to set None than crash with FK error.
-                     course.media = None
-            else:
-                course.media = None
-
-            course.status = status
-            course.apply_button_top = apply_button_top
-            course.apply_button_bottom = apply_button_bottom
-            course.updated_by = request.user
-            course.save()
-
-            messages.success(request, 'Course updated successfully')
-            return redirect('course_list')
-        except Exception as e:
-            messages.error(request, f'Error updating course: {str(e)}')
-            return redirect('course_update', course_id=course_id)
+                course = form.save(commit=False)
+                course.updated_by = request.user
+                
+                # Check for existing course code (excluding current)
+                if Courses.objects.filter(course_code=course.course_code).exclude(id=course_id).exists():
+                    messages.error(request, 'Course code already exists')
+                    return render(request, 'admin/courses/form.html', {'form': form, 'course': course})
+                
+                course.save()
+                messages.success(request, 'Course updated successfully')
+                return redirect('course_list')
+            except Exception as e:
+                messages.error(request, f'Error updating course: {str(e)}')
+        else:
+             messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CourseForm(instance=course)
             
-    qualifications = Qualifications.objects.all()
     context = {
-        'course': course,
-        'qualifications': qualifications
+        'form': form,
+        'course': course
     }
     return render(request, 'admin/courses/form.html', context)
 
 ##@login_required
-@require_http_methods(["POST"])
+@login_required
 def course_delete(request, course_id):
     """Delete course"""
     try:
@@ -2871,7 +2792,7 @@ def student_update(request, student_id):
             student.last_name = data.get('last_name', '')
             student.email = data.get('email', '')
             student.gender = data.get('gender', '')
-            student.citizenship = data.get('citizenship') or None
+            student.citizenship_id = data.get('citizenship') or None
             student.phone_code = data.get('phone_code') or None
             student.phone_number = data.get('phone_number', '')
             student.date_of_birth = data.get('date_of_birth') or None
@@ -2881,11 +2802,11 @@ def student_update(request, student_id):
             student.mailing_address = data.get('mailing_address', '')
             student.city = data.get('city', '')
             student.state = data.get('state', '')
-            student.country = data.get('country') or None
+            student.country_id = data.get('country') or None
             student.zip_code = data.get('zip_code', '')
             student.timezone = data.get('timezone', 'UTC')
             student.highest_education = data.get('highest_education', '')
-            student.course_applied = data.get('course_applied') or None
+            student.course_applied_id = data.get('course_applied') or None
             student.associate_degree = data.get('associate_degree') or None
             student.language_id = data.get('language') or student.language_id
             student.starting_year = data.get('starting_year') or None
@@ -3803,7 +3724,7 @@ def contact_list(request):
     """
     Display all contact requests
     """
-    contacts = Contacts.objects.all().order_by('-created_at')
+    contacts = Contacts.objects.filter(deleted_at__isnull=True).order_by('-created_at')
     
     context = {
         'contacts': contacts,
@@ -4488,6 +4409,8 @@ def uploads_create(request):
             upload.save()
             messages.success(request, "Upload created successfully.")
             return redirect("uploads_list")
+        else:
+             messages.error(request, "Please correct the errors below.")
     else:
         form = UploadForm()
 
@@ -5478,6 +5401,15 @@ def student_uploads_datatable(request):
         updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
         updated_info = f"{updated_by}<br><small>{updated_date}</small>"
         
+        upload_type = 'Other'
+        if item.upload:
+            if item.upload.media:
+                upload_type = 'Media'
+            elif item.upload.video_id:
+                upload_type = 'Video'
+            elif item.upload.youtube:
+                upload_type = 'YouTube'
+
         actions = f'''
             <div class="action-buttons">
                 <button class="btn-action btn-delete" onclick="deleteStudentUpload({item.id})" title="Delete">
@@ -5490,7 +5422,8 @@ def student_uploads_datatable(request):
             'id': item.id,
             'student_name': student_name,
             'subject_name': item.upload.subject.subject_name if item.upload and item.upload.subject else 'General',
-            'upload_name': item.upload.upload_name if item.upload else 'Unknown Upload',
+            'upload_name': f'<div><strong>{item.upload.upload_name if item.upload else "Unknown"}</strong><div class="small text-muted">{item.upload.code if item.upload else ""}</div></div>',
+            'type': upload_type,
             'updated_by': updated_info,
             'actions': actions
         })
@@ -6552,6 +6485,243 @@ def media_library_upload_json(request):
             return JsonResponse({'success': False, 'message': str(e)})
             
     return JsonResponse({'success': False, 'message': 'No file provided'})
+
+# --- Video Library JSON API ---
+
+@login_required
+def video_library_json(request):
+    """
+    Returns a JSON list of videos for the selector.
+    """
+    page_number = request.GET.get('page', 1)
+    search_query = request.GET.get('search', '')
+    
+    videos_list = Videos.objects.filter(deleted_at__isnull=True).order_by('-created_at')
+    
+    if search_query:
+        videos_list = videos_list.filter(title__icontains=search_query)
+        
+    per_page = 12
+    paginator = Paginator(videos_list, per_page)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = []
+
+    data = []
+    has_next = False
+    next_page_number = None
+
+    if hasattr(page_obj, 'has_next'):
+        has_next = page_obj.has_next()
+        if has_next:
+            next_page_number = page_obj.next_page_number()
+
+    if page_obj:
+        for video in page_obj:
+            thumb_url = '/static/admin/img/video-icon.png'
+            video_url = '#'
+            
+            if video.media:
+                 if video.media.thumb_file_path:
+                    thumb_url = video.media.thumb_file_path
+                 if video.media.file_path:
+                    try:
+                        video_url = video.media.file_path.url
+                    except:
+                        pass
+            elif video.youtube:
+                 thumb_url = video.youtube.thumb_file_path or '/static/admin/img/youtube-icon.png'
+                 video_url = video.youtube.file_path
+
+            data.append({
+                'id': video.id,
+                'title': video.title,
+                'thumb': thumb_url,
+                'url': video_url,
+                'description': video.description or ''
+            })
+            
+    return JsonResponse({
+        'success': True,
+        'data': data,
+        'has_next': has_next,
+        'next_page': next_page_number
+    })
+
+@login_required
+@require_POST
+def video_library_create_json(request):
+    """
+    Handles AJAX creation of a new Video.
+    """
+    try:
+        title = request.POST.get('title')
+        description = request.POST.get('description', '')
+        upload_type = request.POST.get('upload_type', 'media')
+        
+        if not title:
+            return JsonResponse({'success': False, 'message': 'Title is required'})
+
+        video = Videos(
+            title=title,
+            description=description,
+            created_by=request.user,
+            updated_by=request.user,
+            created_at=timezone.now()
+        )
+        
+        with transaction.atomic():
+            if upload_type == 'media':
+                if 'video_file' in request.FILES:
+                    uploaded_file = request.FILES['video_file']
+                    media = MediaLibrary(
+                        file_name=uploaded_file.name,
+                        file_path=uploaded_file,
+                        file_type=uploaded_file.name.split('.')[-1].lower(),
+                        file_size=f"{uploaded_file.size / 1024:.2f} KB",
+                        created_by=request.user,
+                        updated_by=request.user,
+                        created_at=timezone.now(),
+                        media_type='video'
+                    )
+                    media.thumb_file_path = media.file_path.url if hasattr(media.file_path, 'url') else ''
+                    media.save()
+                    video.media = media
+                else:
+                    return JsonResponse({'success': False, 'message': 'Video file is required'})
+            
+            elif upload_type == 'youtube':
+                youtube_url = request.POST.get('youtube_url')
+                if youtube_url:
+                    yt = YoutubeVideos(
+                        file_path=youtube_url,
+                        created_by=request.user,
+                        updated_by=request.user,
+                        created_at=timezone.now()
+                    )
+                    # Extract ID and Thumb
+                    import re
+                    video_id_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11}).*', youtube_url)
+                    if video_id_match:
+                        vid_id = video_id_match.group(1)
+                        yt.thumb_file_path = f"https://img.youtube.com/vi/{vid_id}/mqdefault.jpg"
+                    else:
+                        yt.thumb_file_path = '/static/admin/img/youtube-icon.png'
+                    
+                    yt.save()
+                    video.youtube = yt
+                else:
+                     return JsonResponse({'success': False, 'message': 'YouTube URL is required'})
+
+            video.save()
+        
+        thumb_url = '/static/admin/img/video-icon.png'
+        if video.media: thumb_url = video.media.thumb_file_path
+        elif video.youtube: thumb_url = video.youtube.thumb_file_path
+
+        return JsonResponse({
+            'success': True,
+            'video': {
+                'id': video.id,
+                'title': video.title,
+                'thumb': thumb_url
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+# --- YouTube Library JSON API ---
+
+@login_required
+def youtube_library_json(request):
+    """
+    Returns a JSON list of YouTube videos.
+    """
+    page_number = request.GET.get('page', 1)
+    search_query = request.GET.get('search', '')
+    
+    yt_list = YoutubeVideos.objects.filter(deleted_at__isnull=True).order_by('-created_at')
+    
+    if search_query:
+        yt_list = yt_list.filter(file_path__icontains=search_query)
+        
+    per_page = 12
+    paginator = Paginator(yt_list, per_page)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = []
+
+    data = []
+    has_next = False
+    next_page_number = None
+
+    if hasattr(page_obj, 'has_next'):
+        has_next = page_obj.has_next()
+        if has_next:
+            next_page_number = page_obj.next_page_number()
+
+    if page_obj:
+        for yt in page_obj:
+            data.append({
+                'id': yt.id,
+                'url': yt.file_path,
+                'thumb': yt.thumb_file_path or '/static/admin/img/youtube-icon.png',
+                'name': yt.file_path
+            })
+            
+    return JsonResponse({
+        'success': True,
+        'data': data,
+        'has_next': has_next,
+        'next_page': next_page_number
+    })
+
+@login_required
+@require_POST
+def youtube_library_create_json(request):
+    """
+    Handles AJAX creation of a new YouTube video.
+    """
+    try:
+        url = request.POST.get('url')
+        if not url:
+            return JsonResponse({'success': False, 'message': 'URL is required'})
+            
+        yt = YoutubeVideos(
+            file_path=url,
+            created_by=request.user,
+            updated_by=request.user,
+            created_at=timezone.now()
+        )
+        
+        # Extract ID and Thumb
+        import re
+        video_id_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11}).*', url)
+        if video_id_match:
+            vid_id = video_id_match.group(1)
+            yt.thumb_file_path = f"https://img.youtube.com/vi/{vid_id}/mqdefault.jpg"
+        else:
+             yt.thumb_file_path = '/static/admin/img/youtube-icon.png'
+            
+        yt.save()
+        
+        return JsonResponse({
+            'success': True,
+            'youtube': {
+                'id': yt.id,
+                'url': yt.file_path,
+                'thumb': yt.thumb_file_path,
+                'name': yt.file_path
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 # Question Management Views
 

@@ -19,8 +19,8 @@
                     <th>ID</th>
                     <th>Upload Name</th>
                     <th>Code</th>
-                    <th>Subject</th>
-                    <th>Format</th>
+                    <th>Type</th>
+                    <th>Linked Content</th>
                     <th>Status</th>
                     <th>Created At</th>
                     <th>Actions</th>
@@ -33,15 +33,9 @@
                     <td>{{ upload.id }}</td>
 
                     <td>
-                        <div style="line-height:1.5;">
-                            <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
+                        <div style="line-height:1.3;">
+                            <div style="font-weight:600;font-size:14px;color:var(--text-dark);">
                                 {{ upload.upload_name }}
-                            </div>
-                            <div style="font-size:13px;color:var(--text-light);">
-                                Code: {{ upload.code }}<br>
-                                {% if upload.created_by %}
-                                    By: {{ upload.created_by }}
-                                {% endif %}
                             </div>
                         </div>
                     </td>
@@ -49,20 +43,36 @@
                     <td>{{ upload.code }}</td>
 
                     <td>
-                        {% if upload.subject %}
-                            {{ upload.subject }}
+                        {% if upload.media %}
+                        <span class="badge badge-info">Media</span>
+                        {% elif upload.video_id %}
+                        <span class="badge badge-primary">Video</span>
+                        {% elif upload.youtube %}
+                        <span class="badge badge-danger">YouTube</span>
                         {% else %}
-                            -
+                        <span class="badge badge-secondary">Other</span>
+                        {% endif %}
+                        <div style="font-size: 11px; margin-top: 2px;" class="text-uppercase text-muted">
+                            {{ upload.format }}</div>
+                    </td>
+
+                    <td style="font-size: 13px;">
+                        {% if upload.media %}
+                        <i class="fas fa-image text-muted mr-1"></i> {{ upload.media.file_name|truncatechars:20 }}
+                        {% elif upload.video_id %}
+                        <i class="fas fa-video text-muted mr-1"></i> {{ upload.video_id.title|truncatechars:20 }}
+                        {% elif upload.youtube %}
+                        <i class="fab fa-youtube text-muted mr-1"></i> YouTube
+                        {% else %}
+                        -
                         {% endif %}
                     </td>
 
-                    <td>{{ upload.format|upper }}</td>
-
                     <td>
                         {% if upload.status %}
-                            <span class="status-badge status-active">Active</span>
+                        <span class="status-badge status-active">Active</span>
                         {% else %}
-                            <span class="status-badge status-inactive">Inactive</span>
+                        <span class="status-badge status-inactive">Inactive</span>
                         {% endif %}
                     </td>
 
@@ -76,7 +86,7 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <a href="{% url 'uploads_delete' upload.id %}" class="action-btn delete"
-                           onclick="return confirm('Are you sure you want to delete this upload?')">
+                            onclick="return confirm('Are you sure you want to delete this upload?')">
                             <i class="fas fa-trash"></i>
                         </a>
                     </td>
@@ -92,7 +102,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#uploadsTable').DataTable({
             pageLength: 12,
             lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
@@ -107,15 +117,15 @@
                 emptyTable: "No uploads available"
             },
             columnDefs: [
-                { orderable: false, targets: [1, 7] }, // Upload Name + Actions
-                { width: '60px', targets: 0 },   // ID
-                { width: '220px', targets: 1 },  // Upload Name
-                { width: '130px', targets: 2 },  // Code
-                { width: '160px', targets: 3 },  // Subject
-                { width: '80px',  targets: 4 },  // Format
-                { width: '90px',  targets: 5 },  // Status
-                { width: '150px', targets: 6 },  // Created At
-                { width: '150px', targets: 7 }   // Actions
+                { orderable: false, targets: [7] }, // Actions
+                { width: '50px', targets: 0 },   // ID
+                { width: '200px', targets: 1 },  // Upload Name
+                { width: '100px', targets: 2 },  // Code
+                { width: '100px', targets: 3 },  // Type
+                { width: '150px', targets: 4 },  // Linked
+                { width: '80px', targets: 5 },  // Status
+                { width: '120px', targets: 6 },  // Created At
+                { width: '120px', targets: 7 }   // Actions
             ]
         });
     });
