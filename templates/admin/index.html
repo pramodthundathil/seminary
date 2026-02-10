@@ -4631,7 +4631,7 @@
                         <tr>
                             <th>Student</th>
                             <th>Exam</th>
-                            <th>Date</th>
+                            <th>Date & Time</th>
                             <th style="width: 140px;">Action</th>
                         </tr>
                     </thead>
@@ -4640,7 +4640,7 @@
                         <tr id="exam-row-{{ req.id }}">
                             <td><a href="{% url 'student_detail' req.student.id %}" class="fw-bold text-dark text-decoration-none">{{ req.student.first_name }}</a></td>
                             <td><a href="{% url 'view_answer_sheet' req.id %}" class="fw-bold text-dark text-decoration-none">{{ req.exam.exam_name|truncatechars:20 }}</a></td>
-                            <td>{{ req.created_at|date:"M d" }}</td>
+                            <td>{{ req.start_time|date:"Y-m-d H:i" }} ({{ req.timezone }})</td>
                             <td>
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonExam{{ req.id }}" data-bs-toggle="dropdown" aria-expanded="false">
@@ -4910,7 +4910,7 @@
 
         function approveSubject(id) {
             // Confirm explicitly handled by modal now, but function called by confirm button.
-            fetch(`/students/subjects/toggle-approval/${id}/`, {
+            fetch(`/menu/students/subjects/toggle-approval/${id}/`, {
                 method: 'POST', // View expects POST? or GET usually for toggle? The view provided earlier: student_subjects_toggle_approval doesn't force POST but good practice.
                                 // Checked view: just @login_required. Let's try GET first as it's a toggle, or POST if needed.
                                 // Actually usually better to use POST for state change.
@@ -4931,7 +4931,7 @@
         }
 
         function rejectSubject(id) {
-            fetch(`/students/subjects/delete/${id}/`, {
+            fetch(`/menu/students/subjects/delete/${id}/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': csrftoken},
             })
@@ -4957,7 +4957,7 @@
             select.innerHTML = '<option value="">Loading...</option>';
             
             // Fetch available subjects
-            fetch(`/students/subjects/get-available/${studentId}/`)
+            fetch(`/menu/students/subjects/get-available/${studentId}/`)
             .then(res => res.json())
             .then(data => {
                 select.innerHTML = '';
@@ -4999,7 +4999,7 @@
             const formData = new FormData();
             formData.append('subject_id', subjectId);
 
-            fetch(`/students/subjects/update/${id}/`, {
+            fetch(`/menu/students/subjects/update/${id}/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': csrftoken},
                 body: formData
@@ -5026,7 +5026,7 @@
         // --- Exam Actions ---
 
         function approveExam(id) {
-            fetch(`/students/exams/toggle-approval/${id}/`, {
+            fetch(`/menu/students/exams/toggle-approval/${id}/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': csrftoken},
             })
@@ -5043,7 +5043,7 @@
         }
 
         function rejectExam(id) {
-            fetch(`/students/exams/delete/${id}/`, {
+            fetch(`/menu/students/exams/delete/${id}/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': csrftoken},
             })

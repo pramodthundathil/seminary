@@ -5105,18 +5105,21 @@ def student_subjects_toggle_approval(request, id):
 @login_required
 def ajax_get_available_subjects(request, student_id):
     """Fetch subjects NOT yet assigned to this student, but available in their course's branch"""
-    student = get_object_or_404(Students, id=student_id)
-    if not student.course_applied:
-        return JsonResponse({'success': True, 'subjects': []})
-    
-    assigned_subject_ids = StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True).values_list('subject_id', flat=True)
-    
-    # Get subjects from student's course branch that are not already assigned
-    available_subjects = Subjects.objects.filter(
-        deleted_at__isnull=True
-    ).exclude(id__in=assigned_subject_ids).values('id', 'subject_name', 'subject_code').distinct()
-    
-    return JsonResponse({'success': True, 'subjects': list(available_subjects)})
+    try:
+        student = get_object_or_404(Students, id=student_id)
+        
+        assigned_subject_ids = StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True).values_list('subject_id', flat=True)
+        
+        # Get all available subjects that are not assigned to the student
+        # Filtering by course removed as no direct link found between Course and Subject/Branch
+        available_subjects = Subjects.objects.filter(
+            deleted_at__isnull=True
+        ).exclude(id__in=assigned_subject_ids).values('id', 'subject_name', 'subject_code').distinct().order_by('subject_name')
+        
+        return JsonResponse({'success': True, 'subjects': list(available_subjects)}, safe=False)
+    except Exception as e:
+        print(f"Error in ajax_get_available_subjects: {e}")
+        return JsonResponse({'success': False, 'message': str(e), 'subjects': []})
 
 @login_required
 @require_POST
@@ -5586,6 +5589,12 @@ def student_exams_datatable(request):
         order_col = 'subject__subject_name'
     elif order_column_index == 4:
         order_col = 'exam__exam_name'
+    elif order_column_index == 5:
+        order_col = 'start_time'
+    elif order_column_index == 6:
+        order_col = 'is_approved'
+    elif order_column_index == 7:
+        order_col = 'updated_by__username'
 
     if order_direction == 'desc' and not order_col.startswith('-'):
         order_col = '-' + order_col
@@ -5604,7 +5613,7 @@ def student_exams_datatable(request):
         updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
         updated_info = f"{updated_by}<br><small>{updated_date}</small>"
         
-        start_time = item.start_time.strftime('%Y-%m-%d %H:%M') if item.start_time else '-'
+        start_time = f"{item.start_time.strftime('%Y-%m-%d %H:%M')} ({item.timezone})" if item.start_time else '-'
         
         # Status Badge
         if item.is_approved:

@@ -530,6 +530,7 @@ def student_exam_hall(request):
             "exam_name": getattr(exam_obj, "exam_name", "N/A"),
             "subject_name": getattr(subject_obj, "subject_name", "N/A"),
             "requested_time": e.start_time, # Should use start_time which is the scheduled time
+            "timezone": e.timezone,
             "status": status,
             "can_start": can_start,
             "action": action
