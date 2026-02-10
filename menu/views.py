@@ -109,7 +109,7 @@ def admin_index(request):
     attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
     
     # ---------------- DASHBOARD NEW METRICS ----------------
-    new_students_count = Students.objects.filter(status=False).count()
+    new_students_count = Students.objects.filter(status=False, active = False).count()
     pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False, deleted_at__isnull=True).count()
     pending_books_count = StudentsBooks.objects.filter(is_approved=False, deleted_at__isnull=True).count()
     # -------------------------------------------------------
