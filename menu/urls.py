@@ -141,6 +141,7 @@ urlpatterns = [
     path('students/subjects/get-available/<int:student_id>/', views.ajax_get_available_subjects, name='ajax_get_available_subjects'),
     path('students/subjects/bulk-assign/', views.student_subjects_bulk_assign, name='student_subjects_bulk_assign'),
     path('students/subjects/toggle-approval/<int:id>/', views.student_subjects_toggle_approval, name='student_subjects_toggle_approval'),
+    path('students/subjects/update/<int:id>/', views.student_subjects_update, name='student_subjects_update'),
     path('students/subjects/delete/<int:id>/', views.student_subjects_delete, name='student_subjects_delete'),
     
     # Student Instructors Workflow
@@ -217,6 +218,7 @@ urlpatterns = [
     #subjects
 
     path("admin/subjects",views.subjects, name="subjects_list"),
+    path("admin/subjects/export",views.subjects_export, name="subjects_export"),
     path("admin/subjects/create",views.subjects_create, name="subjects_create"),
     path("admin/subjects/<int:subjects_id>/view", views.subjects_view, name="subjects_view"),
     path("admin/subjects/<int:subjects_id>/edit", views.subjects_edit, name="subjects_edit"),
@@ -233,6 +235,7 @@ urlpatterns = [
 
     #contact request
     path("admin/contact",views.contact_list, name='contact_list'),
+    path('admin/contact/<int:contact_id>/view/', views.contact_view, name='contact_view'),
     path('contacts/delete/<int:id>/', views.contact_delete, name='contact_delete'),
     path('contacts/permanent-delete/<int:id>/', views.contact_permanent_delete, name='contact_permanent_delete'),
 

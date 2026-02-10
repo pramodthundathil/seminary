@@ -16,6 +16,10 @@
                 <i class="fas fa-user-plus"></i>
                 Add Student
             </button>
+            <button class="btn btn-success" onclick="exportStudents()">
+                <i class="fas fa-file-excel"></i>
+                Export to Excel
+            </button>
         </div>
     </div>
 
@@ -426,6 +430,13 @@
 
     function filterTable() {
         studentTable.ajax.reload();
+    }
+
+    function exportStudents() {
+        const status = $('#statusFilter').val();
+        let url = '{% url "student_datatable" %}?export=excel&type=student';
+        if(status) url += '&status=' + status;
+        window.location.href = url;
     }
 
     // Open Create Modal

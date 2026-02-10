@@ -1,0 +1,75 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>
+            <a href="{% url 'contact_list' %}" class="btn btn-secondary me-3">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            Contact Request Details
+        </h1>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary">Request #{{ contact.id }}</h5>
+                        <div>
+                            {% if contact.deleted_at %}
+                            <span class="badge bg-danger">Deleted</span>
+                            {% else %}
+                            <span class="badge bg-success">Active</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold mb-1">Sender Name</label>
+                            <div class="fs-5 text-dark">{{ contact.name|default:"-" }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold mb-1">Sender Email</label>
+                            <div class="fs-5 text-dark">{{ contact.email|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1">Subject</label>
+                        <div class="fs-5 text-dark">{{ contact.subject|default:"-" }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1">Message</label>
+                        <div class="p-3 bg-light rounded border">
+                            {{ contact.message|linebreaks|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div class="row border-top pt-3 mt-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">Received on: {{ contact.created_at|date:"F d, Y H:i" }}</small>
+                        </div>
+                        {% if contact.updated_at %}
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">Last updated: {{ contact.updated_at|date:"F d, Y H:i" }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top py-3 d-flex justify-content-end gap-2">
+                    <a href="{% url 'contact_delete' contact.id %}" class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to delete this contact request?')">
+                        <i class="fas fa-trash me-2"></i> Delete Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

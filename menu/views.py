@@ -25,6 +25,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
+from seminary.utils import export_to_excel
 
 from home.models import News, MediaLibrary
 from home.models import *
@@ -2133,6 +2134,15 @@ def course_datatable(request):
         # Get total count
         total_records = courses.count()
         
+        # Check for export
+        if request.GET.get('export') == 'excel':
+            return export_to_excel(
+                queryset=courses,
+                filename="courses_list",
+                columns=['course_name', 'course_code', 'highest_qualification.qualification_name', 'credit_hours', 'status', 'created_at'],
+                headers=['Course Name', 'Code', 'Qualification', 'Credit Hours', 'Status', 'Created At']
+            )
+
         # Apply ordering and pagination
         courses = courses.order_by(order_column)[start:start + length]
 
@@ -2418,6 +2428,15 @@ def student_datatable(request):
         total_records = Students.objects.count()
         filtered_records = students.count()
         
+        # Check for export
+        if request.GET.get('export') == 'excel':
+            return export_to_excel(
+                queryset=students,
+                filename="students_list",
+                columns=['student_id', 'first_name', 'last_name', 'email', 'phone_number', 'course_applied.course_name', 'status', 'active', 'created_at'],
+                headers=['Student ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Course', 'Approved', 'Active', 'Joined Date']
+            )
+
         # Pagination
         students = students[start:start + length]
         
@@ -3571,6 +3590,20 @@ def subjects(request):
     })
 
 @login_required
+def subjects_export(request):
+    """Export subjects to Excel"""
+    subjects_list = Subjects.objects.filter(
+        deleted_at__isnull=True
+    ).order_by('-id')
+    
+    return export_to_excel(
+        queryset=subjects_list,
+        filename="subjects_list",
+        columns=['subject_name', 'subject_code', 'subject_type', 'credit_hours', 'status', 'created_at'],
+        headers=['Subject Name', 'Code', 'Type', 'Credit Hours', 'Status', 'Created At']
+    )
+
+@login_required
 def subjects_create(request):
     """Create new subject"""
     if request.method == 'POST':
@@ -3731,6 +3764,19 @@ def contact_list(request):
     }
     
     return render(request, 'admin/contacts/contact_requests.html', context)
+
+@login_required
+def contact_view(request, contact_id):
+    """
+    View contact request details
+    """
+    contact = get_object_or_404(Contacts, id=contact_id, deleted_at__isnull=True)
+    
+    context = {
+        'contact': contact,
+        'page_title': 'View Contact Request'
+    }
+    return render(request, 'admin/contacts/contact_view.html', context)
 
 @login_required
 def contact_delete(request, id):
@@ -4852,24 +4898,6 @@ def ajax_get_students_by_course(request, course_id):
     students = Students.objects.filter(course_applied_id=course_id, active=1, status=1).values('id', 'first_name', 'last_name', 'student_id')
     return JsonResponse({'success': True, 'students': list(students)})
 
-@login_required
-def ajax_get_subjects_by_student(request, student_id):
-    """Fetch subjects for a student based on their assigned subjects"""
-    student = get_object_or_404(Students, id=student_id)
-    # Get subjects from StudentsSubjects model
-    # related_name='subjects' on StudentsSubjects.student returns StudentsSubjects objects
-    student_subjects = StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True).select_related('subject')
-    
-    subjects = []
-    for ss in student_subjects:
-        if ss.subject:
-            subjects.append({
-                'id': ss.subject.id,
-                'subject_name': ss.subject.subject_name,
-                'subject_code': ss.subject.subject_code
-            })
-            
-    return JsonResponse({'success': True, 'subjects': subjects})
 
 @login_required
 def ajax_get_books_by_subject(request, subject_id):
@@ -6357,7 +6385,12 @@ def ajax_get_subjects_by_student(request, student_id=None):
         subjects = []
         for ss in student_subjects:
             if ss.subject:
-                subjects.append({'id': ss.subject.id, 'name': ss.subject.subject_name}) # Using 'name' to match exams workflow
+                subjects.append({
+                    'id': ss.subject.id, 
+                    'name': ss.subject.subject_name,
+                    'subject_name': ss.subject.subject_name,
+                    'subject_code': ss.subject.subject_code
+                })
                 
         return JsonResponse({'subjects': subjects})
     except Exception as e:
@@ -6899,6 +6932,28 @@ def student_exams_update(request, id):
             return JsonResponse({'success': True, 'message': 'Exam updated successfully'})
         except StudentsExams.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Exam not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+def student_subjects_update(request, id):
+    if request.method == 'POST':
+        try:
+            student_subject = StudentsSubjects.objects.get(id=id)
+            
+            subject_id = request.POST.get('subject_id')
+            
+            if subject_id:
+                subject = get_object_or_404(Subjects, id=subject_id)
+                student_subject.subject = subject
+            
+            student_subject.updated_by = request.user
+            student_subject.save()
+            
+            return JsonResponse({'success': True, 'message': 'Subject updated successfully'})
+        except StudentsSubjects.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Subject assignment not found'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})

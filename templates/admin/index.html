@@ -3964,6 +3964,7 @@
                 /* Force MAX 2 lines */
                 display: -webkit-box !important;
                 -webkit-line-clamp: 2 !important;
+                line-clamp: 2;
                 /* limit to 2 lines */
                 -webkit-box-orient: vertical !important;
 
@@ -4218,6 +4219,7 @@
                         <a href="{% url 'student_detail' student.id %}" class="notif-item">
                             <span class="notif-badge badge-new">New Student</span>
                             <span class="notif-title">New registration: {{ student.first_name }} {{ student.last_name }}</span>
+                                
                             <span class="notif-meta">{{ student.created_at|date:"M d, H:i" }}</span>
                         </a>
                         {% endfor %}
@@ -4229,6 +4231,7 @@
                             <span class="notif-badge badge-warn">Subject Request</span>
                             <span class="notif-title">{{ req.student.first_name }}: Request for {{ eq.subject.subject_name }}</span>
                                 
+
                             <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
                         </a>
                         {% endfor %}
@@ -4239,6 +4242,7 @@
                         <a href="{% url 'student_books_list' %}" class="notif-item">
                             <span class="notif-badge badge-warn">Book Request</span>
                             <span class="notif-title">{{ req.student.first_name }}: Request for {{ req.book.title}}</span>
+                                
                             <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
                         </a>
                         {% endfor %}
@@ -4249,6 +4253,7 @@
                         <a href="{% url 'student_exams_list' %}" class="notif-item">
                             <span class="notif-badge badge-alert">Exam Request</span>
                             <span class="notif-title">{{ req.student.first_name }}: Request for {{ req.exam.exam_name }}</span>
+                                
 
 
                             <span class="notif-meta">{{ req.created_at|date:"M d, H:i" }}</span>
@@ -4257,6 +4262,7 @@
                         {% endif %}
 
                         {% if not new_students_list and not pending_subjects and not pending_books and not pending_exams %}
+                        
                         <div class="notif-item" style="text-align: center; color: var(--text-light);">No new
                             notifications</div>
                         {% endif %}
@@ -4272,8 +4278,8 @@
                 </a> -->
                 <div class="profile-dropdown">
                     <!-- Profile Image safe url -->
-                    <img src="https://ui-avatars.com/api/?name=ADMIN&background=00CED1&color=fff"
-                        alt="Profile" class="profile-img" onclick="toggleProfileDropdown()">
+                    <img src="https://ui-avatars.com/api/?name=ADMIN&background=00CED1&color=fff" alt="Profile"
+                        class="profile-img" onclick="toggleProfileDropdown()">
                     <div class="dropdown-menu-custom" id="profileDropdown">
                         <!-- Try to link to a user profile view if available, else # -->
                         <a href="{% url 'users_view' request.user.id %}" class="dropdown-item-custom">
@@ -4285,7 +4291,7 @@
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
                         </a> -->
-                        <a href="{% url 'signout' %}" class="dropdown-item-custom" >
+                        <a href="{% url 'signout' %}" class="dropdown-item-custom">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Logout</span>
                         </a>
@@ -4329,309 +4335,341 @@
         </div>
 
         <!-- Replacing old summary cards with Request Tables Grid -->
-            <style>
+        <style>
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+                margin-bottom: 30px;
+            }
+
+            @media (max-width: 992px) {
                 .dashboard-grid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 24px;
-                    margin-bottom: 30px;
+                    grid-template-columns: 1fr;
                 }
-                
-                @media (max-width: 992px) {
-                    .dashboard-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-                
-                .request-card {
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    overflow: hidden;
-                    border: 1px solid var(--border);
-                }
-                
-                .request-header {
-                    padding: 16px 20px;
-                    background: var(--gray-50);
-                    border-bottom: 1px solid var(--border);
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                
-                .request-title {
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: var(--text-dark);
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                
-                .request-count {
-                    background: var(--danger);
-                    color: white;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 11px;
-                    font-weight: 700;
-                }
-                
-                .request-table {
-                    width: 100%;
-                }
-                
-                .request-table th {
-                   font-size: 12px;
-                   color: var(--text-light);
-                   padding: 12px 20px;
-                   text-align: left;
-                   border-bottom: 1px solid var(--gray-200);
-                   font-weight: 500;
-                }
-                
-                .request-table td {
-                    padding: 12px 20px;
-                    font-size: 14px;
-                    color: var(--text-dark);
-                    border-bottom: 1px solid var(--gray-100);
-                }
-                
-                .request-table tr:last-child td {
-                    border-bottom: none;
-                }
-                
-                .empty-message {
-                    padding: 30px;
-                    text-align: center;
-                    color: var(--text-light);
-                    font-size: 14px;
-                }
-                
-                .view-all-link {
-                    color: var(--primary);
-                    font-size: 13px;
-                    font-weight: 600;
-                    text-decoration: none;
-                }
-                
-                .view-all-link:hover {
-                    text-decoration: underline;
-                }
-                
-                .status-badge-sm {
-                    font-size: 11px;
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                }
-                .status-badge-sm.pending {
-                    background: #FEF3C7;
-                    color: #D97706;
-                }
-            </style>
+            }
 
-            <div class="dashboard-grid">
-                <!-- 1. Student Applications -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-user-plus text-primary"></i> Pending Applications
-                            {% if pending_applications.count > 0 %} <span class="request-count">{{ pending_applications.count }}</span> {% endif %}
-                        </div>
-                        <a href="{% url 'application_list_view' %}" class="view-all-link">View All</a>
-                    </div>
-                    {% if pending_applications %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for app in pending_applications %}
-                            <tr>
-                                <td>{{ app.first_name }} {{ app.last_name }}</td>
-                                <td>{{ app.created_at|date:"M d, Y" }}</td>
-                                <td><span class="status-badge-sm pending">Pending</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No pending applications</div>
-                    {% endif %}
-                </div>
+            .request-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                border: 1px solid var(--border);
+            }
 
-                <!-- 2. Contact Requests -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-envelope text-info"></i> Contact Requests
-                        </div>
-                        <a href="{% url 'contact_list' %}" class="view-all-link">View All</a>
-                    </div>
-                    {% if contact_requests %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Subject</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for contact in contact_requests %}
-                            <tr>
-                                <td>{{ contact.name }}</td>
-                                <td>{{ contact.subject|truncatechars:20 }}</td>
-                                <td>{{ contact.created_at|date:"M d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No contact requests</div>
-                    {% endif %}
-                </div>
+            .request-header {
+                padding: 16px 20px;
+                background: var(--gray-50);
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
 
-                <!-- 3. Book Requests -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-book text-success"></i> Book Requests
-                        </div>
-                        <a href="{% url 'student_books_list' %}" class="view-all-link">View All</a>
-                    </div>
-                    {% if pending_books %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Book</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for req in pending_books %}
-                            <tr>
-                                <td>{{ req.student.first_name }}</td>
-                                <td>{{ req.book.title|truncatechars:20 }}</td>
-                                <td>{{ req.created_at|date:"M d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No pending book requests</div>
-                    {% endif %}
-                </div>
+            .request-title {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-dark);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-                <!-- 4. Subject Requests -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-graduation-cap text-warning"></i> Subject Requests
-                        </div>
-                        <a href="{% url 'student_subjects_list' %}" class="view-all-link">View All</a>
-                    </div>
-                    {% if pending_subjects %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Subject</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for req in pending_subjects %}
-                            <tr>
-                                <td>{{ req.student.first_name }}</td>
-                                <td>{{ req.subject.subject_name|truncatechars:20 }}</td>
-                                <td>{{ req.created_at|date:"M d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No pending subject requests</div>
-                    {% endif %}
-                </div>
+            .request-count {
+                background: var(--danger);
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 700;
+            }
 
-                <!-- 5. Assignment Requests -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-tasks text-danger"></i> Pending Assignments
-                        </div>
-                        <a href="{% url 'student_assignment_list' %}" class="view-all-link">View All</a>
-                    </div>
-                    {% if assignment_requests %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Assignment</th>
-                                <th>Submitted</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for assign in assignment_requests %}
-                            <tr>
-                                <td>{{ assign.student.first_name }}</td>
-                                <td>{{ assign.assignment.assignment_name|truncatechars:20 }}</td>
-                                <td>{{ assign.submitted_on|date:"M d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No pending assignments</div>
-                    {% endif %}
-                </div>
+            .request-table {
+                width: 100%;
+            }
 
-                <!-- 6. Exam Requests -->
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="request-title">
-                            <i class="fas fa-file-alt text-secondary"></i> Exam Requests
-                        </div>
-                        <a href="{% url 'student_exams_list' %}" class="view-all-link">View All</a>
+            .request-table th {
+                font-size: 12px;
+                color: var(--text-light);
+                padding: 12px 20px;
+                text-align: left;
+                border-bottom: 1px solid var(--gray-200);
+                font-weight: 500;
+            }
+
+            .request-table td {
+                padding: 12px 20px;
+                font-size: 14px;
+                color: var(--text-dark);
+                border-bottom: 1px solid var(--gray-100);
+            }
+
+            .request-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .empty-message {
+                padding: 30px;
+                text-align: center;
+                color: var(--text-light);
+                font-size: 14px;
+            }
+
+            .view-all-link {
+                color: var(--primary);
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .view-all-link:hover {
+                text-decoration: underline;
+            }
+
+            .status-badge-sm {
+                font-size: 11px;
+                padding: 2px 6px;
+                border-radius: 4px;
+            }
+
+            .status-badge-sm.pending {
+                background: #FEF3C7;
+                color: #D97706;
+            }
+        </style>
+
+        <div class="dashboard-grid">
+            <!-- 1. Student Applications -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-user-plus text-primary"></i> Pending Applications
+                        {% if pending_applications.count > 0 %} <span class="request-count">{{ pending_applications.count }}</span> {% endif %}
+                            
                     </div>
-                    {% if pending_exams %}
-                    <table class="request-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Exam</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for req in pending_exams %}
-                            <tr>
-                                <td>{{ req.student.first_name }}</td>
-                                <td>{{ req.exam.exam_name|truncatechars:20 }}</td>
-                                <td>{{ req.created_at|date:"M d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <div class="empty-message">No pending exam requests</div>
-                    {% endif %}
+                    <a href="{% url 'application_list_view' %}" class="view-all-link">View All</a>
                 </div>
+                {% if pending_applications %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in pending_applications %}
+                        <tr>
+                            <td><a href="{% url 'student_detail' app.id %}"
+                                    class="fw-bold text-dark text-decoration-none">{{ app.first_name }} {{ app.last_name }}</a></td>
+                                    
+                            <td>{{ app.created_at|date:"M d, Y" }}</td>
+                            <td><span class="status-badge-sm pending">Pending</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No pending applications</div>
+                {% endif %}
             </div>
+
+            <!-- 2. Contact Requests -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-envelope text-info"></i> Contact Requests
+                    </div>
+                    <a href="{% url 'contact_list' %}" class="view-all-link">View All</a>
+                </div>
+                {% if contact_requests %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in contact_requests %}
+                        <tr>
+                            <td><a href="{% url 'contact_view' contact.id %}"
+                                    class="fw-bold text-dark text-decoration-none">{{ contact.name }}</a></td>
+                            <td>{{ contact.subject|truncatechars:20 }}</td>
+                            <td>{{ contact.created_at|date:"M d" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No contact requests</div>
+                {% endif %}
+            </div>
+
+            <!-- 3. Book Requests -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-book text-success"></i> Book Requests
+                    </div>
+                    <a href="{% url 'student_books_list' %}" class="view-all-link">View All</a>
+                </div>
+                {% if pending_books %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Book</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in pending_books %}
+                        <tr>
+                            <td><a href="{% url 'student_detail' req.student.id %}" class="fw-bold text-dark text-decoration-none">{{ req.student.first_name }}</a></td>
+                            <td><a href="{% url 'reference_view' req.book.id %}" class="fw-bold text-dark text-decoration-none">{{ req.book.title|truncatechars:20 }}</a></td>
+                            <td>{{ req.created_at|date:"M d" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No pending book requests</div>
+                {% endif %}
+            </div>
+
+            <!-- 4. Subject Requests -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-graduation-cap text-warning"></i> Subject Requests
+                    </div>
+                    <a href="{% url 'student_subjects_list' %}" class="view-all-link">View All</a>
+                </div>
+                {% if pending_subjects %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th style="width: 140px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in pending_subjects %}
+                        <tr id="subject-row-{{ req.id }}">
+                            <td><a href="{% url 'student_detail' req.student.id %}" class="fw-bold text-dark text-decoration-none">{{ req.student.first_name }}</a></td>
+                            <td class="subject-name">{{ req.subject.subject_name|truncatechars:20 }}</td>
+                            <td>{{ req.created_at|date:"M d" }}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonSubject{{ req.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonSubject{{ req.id }}">
+                                        <li><a class="dropdown-item" href="#" onclick="openSubjectActionModal('approve', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.subject.subject_name|escapejs }}')"><i class="fas fa-check text-success me-2"></i>Approve</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="openSubjectActionModal('reject', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.subject.subject_name|escapejs }}')"><i class="fas fa-times text-danger me-2"></i>Reject</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="openSubjectModal({{ req.id }}, '{{ req.subject.id }}', {{ req.student.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.subject.subject_name|escapejs }}')"><i class="fas fa-edit text-primary me-2"></i>Modify</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No pending subject requests</div>
+                {% endif %}
+            </div>
+
+            <!-- 5. Assignment Requests -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-tasks text-danger"></i> Pending Assignments
+                    </div>
+                    <a href="{% url 'student_assignment_list' %}" class="view-all-link">View All</a>
+                </div>
+                {% if assignment_requests %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Assignment</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assign in assignment_requests %}
+                        <tr>
+                            <td><a href="{% url 'student_detail' assign.student.id %}" class="fw-bold text-dark text-decoration-none">{{ assign.student.first_name }}</a></td>
+                            <td><a href="{% url 'view_assignment_answer_sheet' assign.id %}" class="fw-bold text-dark text-decoration-none">{{ assign.assignment.assignment_name|truncatechars:20 }}</a></td>
+                            <td>{{ assign.submitted_on|date:"M d" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No pending assignments</div>
+                {% endif %}
+            </div>
+
+            <!-- 6. Exam Requests -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-file-alt text-secondary"></i> Exam Requests
+                    </div>
+                    <a href="{% url 'student_exams_list' %}" class="view-all-link">View All</a>
+                </div>
+                {% if pending_exams %}
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Exam</th>
+                            <th>Date</th>
+                            <th style="width: 140px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in pending_exams %}
+                        <tr id="exam-row-{{ req.id }}">
+                            <td><a href="{% url 'student_detail' req.student.id %}" class="fw-bold text-dark text-decoration-none">{{ req.student.first_name }}</a></td>
+                            <td><a href="{% url 'view_answer_sheet' req.id %}" class="fw-bold text-dark text-decoration-none">{{ req.exam.exam_name|truncatechars:20 }}</a></td>
+                            <td>{{ req.created_at|date:"M d" }}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonExam{{ req.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonExam{{ req.id }}">
+                                        <li><a class="dropdown-item" href="#" onclick="openExamActionModal('approve', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}', '{{ req.created_at|date:'M d, Y' }}')"><i class="fas fa-check text-success me-2"></i>Approve</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="openExamActionModal('reject', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}', '{{ req.created_at|date:'M d, Y' }}')"><i class="fas fa-times text-danger me-2"></i>Reject</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="openExamModal({{ req.id }}, '{{ req.start_time|date:'Y-m-d' }}', '{{ req.start_time|time:'H:i' }}', '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}')"><i class="fas fa-edit text-primary me-2"></i>Modify</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-message">No pending exam requests</div>
+                {% endif %}
+            </div>
+        </div>
 
         <!-- Recent Students Table -->
         <div class="data-table">
             <div class="table-header">
                 <h5 class="card-title">Recent Students</h5>
                 <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <a href="{% url 'student_list' %}" class="btn btn-sm btn-primary" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+                    <a href="{% url 'student_list' %}" class="btn btn-sm btn-primary"
+                        style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
                         All Students <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -4652,7 +4690,7 @@
                     {% for student in new_students %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td><a href="{% url 'student_detail' student.id %}" class="fw-bold text-dark text-decoration-none">{{ student.first_name }} {{ student.last_name }}</a></td>
                         <td>{{ student.email|truncatechars:25 }}</td>
                         <td>{{ student.phone_number|default:"N/A" }}</td>
                         <td>{{ student.created_at|date:"d M Y" }}</td>
@@ -4666,7 +4704,9 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'student_detail' student.id %}" class="action-btn" title="View" style="display: inline-block; text-decoration: none; color: inherit;"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'student_detail' student.id %}" class="action-btn" title="View"
+                                style="display: inline-block; text-decoration: none; color: inherit;"><i
+                                    class="fas fa-eye"></i></a>
                         </td>
                     </tr>
                     {% empty %}
@@ -4693,8 +4733,375 @@
             </div>
         </div>
 
-        
-        {% endblock %}
+
+            <!-- Modify Exam Modal -->
+    <div class="modal fade" id="modifyExamModal" tabindex="-1" aria-hidden="true" style="z-index: 1052;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modify Exam Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="details-box p-3 bg-light rounded mb-3">
+                        <p class="mb-1"><strong>Student:</strong> <span id="modifyExamStudentName"></span></p>
+                        <p class="mb-0"><strong>Exam:</strong> <span id="modifyExamName"></span></p>
+                    </div>
+                    <form id="modifyExamForm">
+                        <input type="hidden" id="examRequestId">
+                        <div class="mb-3">
+                            <label for="examDate" class="form-label">Exam Date</label>
+                            <input type="date" class="form-control" id="examDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="examTime" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="examTime" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveExamModification()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modify Subject Modal -->
+    <div class="modal fade" id="modifySubjectModal" tabindex="-1" aria-hidden="true" style="z-index: 1052;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modify Subject Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="details-box p-3 bg-light rounded mb-3">
+                        <p class="mb-1"><strong>Student:</strong> <span id="modifySubjectStudentName"></span></p>
+                        <p class="mb-0"><strong>Current Subject:</strong> <span id="modifySubjectName"></span></p>
+                    </div>
+                    <form id="modifySubjectForm">
+                        <input type="hidden" id="subjectRequestId">
+                        <input type="hidden" id="subjectStudentId">
+                        <div class="mb-3">
+                            <label for="subjectSelect" class="form-label">Select Subject</label>
+                            <select class="form-select" id="subjectSelect" required>
+                                <option value="">Loading subjects...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSubjectModification()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve/Reject Action Modal (Generic) -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-hidden="true" style="z-index: 1052;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="actionModalMessage"></p>
+                    <div class="details-box p-3 bg-light rounded">
+                        <p><strong>Student:</strong> <span id="actionStudentName"></span></p>
+                        <p><strong>Item:</strong> <span id="actionItemName"></span></p>
+                        <p id="actionDateRow" style="display:none;"><strong>Date:</strong> <span id="actionDate"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" id="actionConfirmBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSRF Token Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // --- Generic Modal Action Handler ---
+        let currentActionCallback = null;
+
+        function openSubjectActionModal(action, id, studentName, subjectName) {
+            const modalTitle = document.getElementById('actionModalTitle');
+            const modalMessage = document.getElementById('actionModalMessage');
+            const studentSpan = document.getElementById('actionStudentName');
+            const itemSpan = document.getElementById('actionItemName');
+            const confirmBtn = document.getElementById('actionConfirmBtn');
+            const dateRow = document.getElementById('actionDateRow');
+
+            studentSpan.textContent = studentName;
+            itemSpan.textContent = subjectName;
+            dateRow.style.display = 'none';
+
+            if (action === 'approve') {
+                modalTitle.textContent = 'Approve Subject Request';
+                modalMessage.textContent = 'Are you sure you want to approve this subject request?';
+                confirmBtn.textContent = 'Approve';
+                confirmBtn.className = 'btn btn-success';
+                currentActionCallback = () => approveSubject(id);
+            } else {
+                modalTitle.textContent = 'Reject Subject Request';
+                modalMessage.textContent = 'Are you sure you want to reject this subject request? This action cannot be undone.';
+                confirmBtn.textContent = 'Reject';
+                confirmBtn.className = 'btn btn-danger';
+                currentActionCallback = () => rejectSubject(id);
+            }
+
+            confirmBtn.onclick = currentActionCallback;
+            new bootstrap.Modal(document.getElementById('actionModal')).show();
+        }
+
+        function openExamActionModal(action, id, studentName, examName, date) {
+            const modalTitle = document.getElementById('actionModalTitle');
+            const modalMessage = document.getElementById('actionModalMessage');
+            const studentSpan = document.getElementById('actionStudentName');
+            const itemSpan = document.getElementById('actionItemName');
+            const dateSpan = document.getElementById('actionDate');
+            const confirmBtn = document.getElementById('actionConfirmBtn');
+            const dateRow = document.getElementById('actionDateRow');
+
+            studentSpan.textContent = studentName;
+            itemSpan.textContent = examName;
+            dateSpan.textContent = date;
+            dateRow.style.display = 'block';
+
+            if (action === 'approve') {
+                modalTitle.textContent = 'Approve Exam Request';
+                modalMessage.textContent = 'Are you sure you want to approve this exam request?';
+                confirmBtn.textContent = 'Approve';
+                confirmBtn.className = 'btn btn-success';
+                currentActionCallback = () => approveExam(id);
+            } else {
+                modalTitle.textContent = 'Reject Exam Request';
+                modalMessage.textContent = 'Are you sure you want to reject this exam request? This action cannot be undone.';
+                confirmBtn.textContent = 'Reject';
+                confirmBtn.className = 'btn btn-danger';
+                currentActionCallback = () => rejectExam(id);
+            }
+
+            confirmBtn.onclick = currentActionCallback;
+            new bootstrap.Modal(document.getElementById('actionModal')).show();
+        }
+
+        // --- Subject Actions ---
+
+        function approveSubject(id) {
+            // Confirm explicitly handled by modal now, but function called by confirm button.
+            fetch(`/students/subjects/toggle-approval/${id}/`, {
+                method: 'POST', // View expects POST? or GET usually for toggle? The view provided earlier: student_subjects_toggle_approval doesn't force POST but good practice.
+                                // Checked view: just @login_required. Let's try GET first as it's a toggle, or POST if needed.
+                                // Actually usually better to use POST for state change.
+                headers: {'X-CSRFToken': csrftoken},
+            })
+            .then(response => response.json())
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                if(data.success) {
+                    // Remove row or update status. Since it's "Pending" table, remove row.
+                    document.getElementById(`subject-row-${id}`).remove();
+                    // Update count if possible (optional)
+                    alert('Subject approved successfully');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function rejectSubject(id) {
+            fetch(`/students/subjects/delete/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+            })
+            .then(response => response.json())
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                if(data.success) {
+                    document.getElementById(`subject-row-${id}`).remove();
+                    alert('Subject rejected successfully');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function openSubjectModal(requestId, currentSubjectId, studentId, studentName, subjectName) {
+            document.getElementById('subjectRequestId').value = requestId;
+            document.getElementById('subjectStudentId').value = studentId;
+            document.getElementById('modifySubjectStudentName').textContent = studentName;
+            document.getElementById('modifySubjectName').textContent = subjectName;
+            
+            const select = document.getElementById('subjectSelect');
+            select.innerHTML = '<option value="">Loading...</option>';
+            
+            // Fetch available subjects
+            fetch(`/students/subjects/get-available/${studentId}/`)
+            .then(res => res.json())
+            .then(data => {
+                select.innerHTML = '';
+                if(data.success) {
+                    data.subjects.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.text = sub.subject_name + (sub.subject_code ? ` (${sub.subject_code})` : '');
+                        if(sub.id == currentSubjectId) option.selected = true; // Though usually current is not in available if filtered.
+                        // Wait, the "current" subject is already assigned (but pending). So it might NOT show up in "available" list 
+                        // because ajax_get_available_subjects excludes assigned ones.
+                        // Use case: Modify to a DIFFERENT subject.
+                        // If the current one is pending, it IS assigned.
+                        // So I should probably add the current one manually if I want it to be selectable (to keep valid), 
+                        // or just list others.
+                        // Logic: The current subject IS assigned. `ajax_get_available_subjects` excludes it.
+                        // So we just show OTHER available subjects.
+                        select.appendChild(option);
+                    });
+                     // If we want to allow keeping the current one (no change), we might need to fetch it or just assume "Modify" means "Change to something else".
+                     // Let's assume they want to change it.
+                } else {
+                    alert('Failed to load subjects');
+                }
+            });
+            
+            new bootstrap.Modal(document.getElementById('modifySubjectModal')).show();
+        }
+
+        function saveSubjectModification() {
+            const id = document.getElementById('subjectRequestId').value;
+            const subjectId = document.getElementById('subjectSelect').value;
+            
+            if(!subjectId) {
+                alert('Please select a subject');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('subject_id', subjectId);
+
+            fetch(`/students/subjects/update/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    // Update UI - maybe just reload or update text
+                    // Simplest: Reload or remove row (since it's still pending but now changed? Or just update text)
+                    // Let's update the text.
+                    const row = document.getElementById(`subject-row-${id}`);
+                    const select = document.getElementById('subjectSelect');
+                    const selectedText = select.options[select.selectedIndex].text;
+                    row.querySelector('.subject-name').textContent = selectedText; // Need to add class subject-name
+                    
+                    bootstrap.Modal.getInstance(document.getElementById('modifySubjectModal')).hide();
+                    alert('Subject updated successfully');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        // --- Exam Actions ---
+
+        function approveExam(id) {
+            fetch(`/students/exams/toggle-approval/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+            })
+            .then(response => response.json())
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                if(data.success) {
+                    document.getElementById(`exam-row-${id}`).remove();
+                    alert('Exam approved successfully');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function rejectExam(id) {
+            fetch(`/students/exams/delete/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+            })
+            .then(response => response.json())
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                if(data.success) {
+                    document.getElementById(`exam-row-${id}`).remove();
+                    alert('Exam rejected successfully');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function openExamModal(requestId, date, time, studentName, examName) {
+            document.getElementById('examRequestId').value = requestId;
+            document.getElementById('examDate').value = date;
+            document.getElementById('examTime').value = time;
+            document.getElementById('modifyExamStudentName').textContent = studentName;
+            document.getElementById('modifyExamName').textContent = examName;
+            new bootstrap.Modal(document.getElementById('modifyExamModal')).show();
+        }
+
+        function saveExamModification() {
+            const id = document.getElementById('examRequestId').value;
+            const date = document.getElementById('examDate').value;
+            const time = document.getElementById('examTime').value;
+            
+            if(!date || !time) {
+                alert('Please select date and time');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('exam_date', date);
+            formData.append('start_time', time);
+
+            fetch(`/students/exams/update/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modifyExamModal')).hide();
+                    alert('Exam updated successfully');
+                    // Optional: Update the date displayed in the row
+                    // But parsing date format in JS to match template is annoying.
+                    // For now, let user know it updated.
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+    </script>
+{% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

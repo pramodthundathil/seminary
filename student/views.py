@@ -16,7 +16,7 @@ import re
 # -------------------------------
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 from django.db.models import Q, Count, Sum
@@ -1203,7 +1203,36 @@ def student_confirm_payment(request):
     }
     return render(request, "student/confirm_payment.html",context)
 
+@login_required
+@student_or_church_user
 def student_change_password(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            current_password = data.get("current_password")
+            new_password = data.get("new_password")
+            confirm_password = data.get("confirm_password")
+
+            if not all([current_password, new_password, confirm_password]):
+                return JsonResponse({"status": "error", "message": "All fields are required"}, status=400)
+
+            if new_password != confirm_password:
+                return JsonResponse({"status": "error", "message": "New passwords do not match"}, status=400)
+
+            user = request.user
+            if not user.check_password(current_password):
+                return JsonResponse({"status": "error", "message": "Incorrect current password"}, status=400)
+
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)  # Important!
+
+            return JsonResponse({"status": "success", "message": "Password changed successfully"})
+
+        except Exception as e:
+            logger.error(f"Error changing password for user {request.user.id}: {e}")
+            return JsonResponse({"status": "error", "message": "An error occurred"}, status=500)
+
     return render(request, "student/change_password.html")
 
 def student_doubt_view(request,id):
