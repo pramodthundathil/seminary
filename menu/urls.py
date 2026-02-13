@@ -310,6 +310,7 @@ urlpatterns = [
     #users 
 
     path("admin/users/", views.users_list, name="users_list"),
+    path("users/create/", views.users_create, name="users_create"),
     path("users/<int:id>/view/", views.users_view, name="users_view"),
     path("users/<int:id>/delete/", views.users_delete, name="users_delete"),
 

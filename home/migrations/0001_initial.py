@@ -4,7 +4,7 @@ import django_ckeditor_5.fields
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import storages.backends.s3
+
 
 
 class Migration(migrations.Migration):
@@ -331,7 +331,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('file_name', models.TextField()),
-                ('file_path', models.FileField(db_column='file_path', max_length=250, storage=storages.backends.s3.S3Storage(), upload_to='uploads/')),
+                ('file_path', models.FileField(db_column='file_path', max_length=250, upload_to='uploads/')),
                 ('thumb_file_path', models.CharField(max_length=250)),
                 ('slider_file_path', models.CharField(blank=True, max_length=250, null=True)),
                 ('file_type', models.CharField(max_length=100)),

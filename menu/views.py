@@ -4565,6 +4565,52 @@ def users_list(request):
     return render(request, "admin/users/users_list.html", context)
 
 @login_required
+def users_create(request):
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            role_id = request.POST.get('role')
+
+            if not all([name, username, email, password, role_id]):
+                messages.error(request, 'All fields are required.')
+                return redirect('users_create')
+
+            if Users.objects.filter(email=email).exists():
+                messages.error(request, 'Email already exists.')
+                return redirect('users_create')
+
+            if Users.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('users_create')
+
+            with transaction.atomic():
+                user = Users.objects.create_user(
+                    email=email,
+                    username=username,
+                    password=password,
+                    name=name,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                    is_active=True
+                )
+                
+                role = Roles.objects.get(id=role_id)
+                RoleUsers.objects.create(user=user, role=role)
+
+            messages.success(request, 'User created successfully.')
+            return redirect('users_list')
+
+        except Exception as e:
+            messages.error(request, f'Error creating user: {str(e)}')
+            return redirect('users_create')
+
+    roles = Roles.objects.filter(deleted_at__isnull=True)
+    return render(request, "admin/users/users_create.html", {'roles': roles})
+
+@login_required
 def users_view(request, id):
     user = get_object_or_404(Users, id=id, deleted_at__isnull=True)
     return render(request, "admin/users/users_view.html", {
@@ -6370,7 +6416,7 @@ def ajax_get_students_by_course(request, course_id=None):
             course_id = request.GET.get('course_id')
             
         # Students model does NOT have deleted_at. Use active=True.
-        students = Students.objects.filter(course_applied_id=course_id, active=True).values('id', 'first_name', 'last_name', 'student_id')
+        students = Students.objects.filter(course_applied_id=course_id, active=True).order_by('first_name', 'last_name').values('id', 'first_name', 'last_name', 'student_id')
         return JsonResponse({'students': list(students)})
     except Exception as e:
         import traceback

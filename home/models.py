@@ -544,9 +544,9 @@ class Languages(models.Model):
     def __str__(self):
         return str(self.language_name or "")
 
-from storages.backends.s3boto3 import S3Boto3Storage
+# from storages.backends.s3boto3 import S3Boto3Storage
 
-s3_storage = S3Boto3Storage()   
+# s3_storage = S3Boto3Storage()   
 
 class MediaLibrary(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1013,7 +1013,7 @@ class ReferenceForm(models.Model):
         return f"{self.first_name or ''} {self.last_name or ''}"
 
 class RoleHasPermissions(models.Model):
-    id = models.PositiveIntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     permission = models.ForeignKey(Permissions, on_delete=models.CASCADE)
     role = models.ForeignKey(Roles, on_delete=models.CASCADE)
 
