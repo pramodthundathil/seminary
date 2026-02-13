@@ -58,12 +58,14 @@
 
                     <!-- Status -->
                     <td>
-                        {% if sup.status == "A" %}
-                            <span class="status-badge status-active">Active</span>
-                        {% elif sup.status == "C" %}
+                        {% if sup.status == "open" %}
+                            <span class="status-badge status-active">Open</span>
+                        {% elif sup.status == "closed" or sup.status == "completed" %}
                             <span class="status-badge status-inactive">Closed</span>
+                         {% elif sup.status == "in_progress" %}
+                            <span class="status-badge status-pending" style="background-color: #17a2b8; color: white;">In Progress</span>
                         {% else %}
-                            <span class="status-badge status-inactive">Pending</span>
+                            <span class="status-badge status-pending">Pending</span>
                         {% endif %}
                     </td>
 

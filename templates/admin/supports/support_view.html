@@ -283,8 +283,8 @@
                 <h2 style="margin: 0 0 10px 0; color: #333;">Question #{{ support.id }}</h2>
                 <div class="support-meta">
                     <i class="fas fa-user"></i> {{ support.student.name|default:"Student" }}
-                    <span class="badge badge-{% if support.status == '1' %}open{% elif support.status == '0' %}closed{% else %}pending{% endif %}">
-                        {% if support.status == '1' %}Open{% elif support.status == '0' %}Closed{% else %}Pending{% endif %}
+                    <span class="badge badge-{% if support.status == 'open' %}open{% elif support.status == 'closed' or support.status == 'completed' %}closed{% elif support.status == 'in_progress' %}pending{% else %}pending{% endif %}">
+                        {% if support.status == 'open' %}Open{% elif support.status == 'closed' or support.status == 'completed' %}Closed{% elif support.status == 'in_progress' %}In Progress{% else %}Pending{% endif %}
                     </span>
                 </div>
             </div>

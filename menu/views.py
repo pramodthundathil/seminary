@@ -143,7 +143,9 @@ def admin_index(request):
         # New Dashboard Tables Data
         'pending_applications': Students.objects.filter(status=False, active = False).order_by('-created_at')[:5],
         'contact_requests': Contacts.objects.filter(deleted_at__isnull=True).order_by('-created_at')[:5],
-        'assignment_requests': StudentsAssignment.objects.filter(submitted_on__isnull=False, total_marks__isnull=True, deleted_at__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
+        'submitted_assignments': StudentsAssignment.objects.filter(submitted_on__isnull=False, deleted_at__isnull=True).select_related('student', 'assignment').order_by('-submitted_on')[:5],
+        'support_requests': Support.objects.filter(deleted_at__isnull=True).select_related('student').order_by('-updated_at')[:5],
+        'recent_payments': Payments.objects.filter(deleted_at__isnull=True).select_related('student').order_by('-created_at')[:5],
     }
     
     return render(request, "admin/index.html", context)
@@ -4397,6 +4399,12 @@ def support_view(request, support_id):
                 created_by=request.user,
                 updated_by=request.user
             )
+            
+            # Update status to in_progress if it's currently open or pending
+            if support.status in ['open', 'pending']:
+                support.status = 'in_progress'
+                support.save()
+                
             messages.success(request, 'Reply added successfully!')
             return redirect('support_view', support_id=support_id)
     

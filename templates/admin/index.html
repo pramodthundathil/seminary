@@ -4585,15 +4585,15 @@
                 {% endif %}
             </div>
 
-            <!-- 5. Assignment Requests -->
+            <!-- 5. Submitted Assignments -->
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
-                        <i class="fas fa-tasks text-danger"></i> Pending Assignments
+                        <i class="fas fa-tasks text-danger"></i> Submitted Assignments
                     </div>
                     <a href="{% url 'student_assignment_list' %}" class="view-all-link">View All</a>
                 </div>
-                {% if assignment_requests %}
+                {% if submitted_assignments %}
                 <table class="request-table">
                     <thead>
                         <tr>
@@ -4603,7 +4603,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for assign in assignment_requests %}
+                        {% for assign in submitted_assignments %}
                         <tr>
                             <td><a href="{% url 'student_detail' assign.student.id %}" class="fw-bold text-dark text-decoration-none">{{ assign.student.first_name }}</a></td>
                             <td><a href="{% url 'view_assignment_answer_sheet' assign.id %}" class="fw-bold text-dark text-decoration-none">{{ assign.assignment.assignment_name|truncatechars:20 }}</a></td>
@@ -4613,7 +4613,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="empty-message">No pending assignments</div>
+                <div class="empty-message">No submitted assignments</div>
                 {% endif %}
             </div>
 
@@ -4661,6 +4661,160 @@
                 <div class="empty-message">No pending exam requests</div>
                 {% endif %}
             </div>
+
+            <!-- 7. Support Tickets -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-headset text-primary"></i> Recent Support Tickets
+                    </div>
+                    <a href="{% url 'support_list' %}" class="view-all-link">View All</a>
+                </div>
+                
+                <div class="request-content">
+                    {% if support_requests %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Question</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sup in support_requests %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 500;">{{ sup.student.first_name }} {{ sup.student.last_name }}</div>
+                                    <div style="font-size: 11px; color: var(--text-light);">{{ sup.created_at|date:"M d" }}</div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ sup.doubt_question }}">
+                                        {{ sup.doubt_question }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if sup.status == 'open' %}
+                                        <span class="status-badge-sm" style="background: #d1fae5; color: #047857;">Open</span>
+                                    {% elif sup.status == 'in_progress' %}
+                                        <span class="status-badge-sm" style="background: #e0f2fe; color: #0369a1;">In Progress</span>
+                                    {% elif sup.status == 'closed' or sup.status == 'completed' %}
+                                        <span class="status-badge-sm" style="background: #fee2e2; color: #b91c1c;">Closed</span>
+                                    {% else %}
+                                        <span class="status-badge-sm pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'support_view' sup.id %}" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">
+                        No recent support tickets found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- 8. Recent References -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-users text-info"></i> Recent References
+                    </div>
+                </div>
+                
+                <div class="request-content">
+                    {% if references %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Referrer</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ref in references %}
+                            <tr>
+                                <td class="fw-bold">{{ ref.applicant_name }}</td>
+                                <td>{{ ref.first_name }} {{ ref.last_name }}</td>
+                                <td>{{ ref.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">
+                        No recent references found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 9. Recent Payments -->
+            <div class="request-card">
+                <div class="request-header">
+                    <div class="request-title">
+                        <i class="fas fa-money-bill-wave text-success"></i> Recent Payments
+                    </div>
+                </div>
+                
+                <div class="request-content">
+                    {% if recent_payments %}
+                    <table class="request-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pay in recent_payments %}
+                            <tr>
+                                <td>
+                                    {% if pay.student %}
+                                        <a href="{% url 'student_detail' pay.student.id %}" class="fw-bold text-dark text-decoration-none">{{ pay.student.first_name }}</a>
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'payments_view' pay.id %}" class="fw-bold text-dark text-decoration-none">${{ pay.amount }}</a>
+                                </td>
+                                <td>{{ pay.created_at|date:"M d" }}</td>
+                                <td>
+                                    {% if pay.is_paid %}
+                                        <span class="status-badge-sm" style="background: #d1fae5; color: #047857;">Paid</span>
+                                    {% else %}
+                                        <span class="status-badge-sm pending">Unpaid</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'payments_view' pay.id %}" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">
+                        No recent payments found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
 
         <!-- Recent Students Table -->

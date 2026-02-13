@@ -1370,7 +1370,18 @@ class Support(models.Model):
     doubt_answer = models.CharField(max_length=1000)
     category = models.CharField(max_length=50)
     subjects = models.ForeignKey(Subjects, on_delete=models.SET_NULL, null=True, blank=True, related_name='supports')
-    status = models.CharField(max_length=1)
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('open', 'Open'),
+            ('pending', 'Pending'),
+            ('in_progress', 'In Progress'),
+            ('completed', 'Completed'),
+        ],
+        default='open'
+    )
+
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="support_created")
     updated_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="support_updated")
     
