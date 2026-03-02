@@ -327,5 +327,6 @@ urlpatterns = [
 
     # Church Code Usage (Church Admins List)
     path('admin/church-codes', views.church_codes_usage_list, name='church_codes_usage_list'),
+    path('admin/church-codes/<int:admin_id>/view/', views.church_codes_usage_view, name='church_codes_usage_view'),
     path('admin/church-codes/delete/<int:admin_id>/', views.church_codes_usage_delete, name='church_codes_usage_delete'),
 ]

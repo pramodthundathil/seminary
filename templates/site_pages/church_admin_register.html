@@ -454,28 +454,60 @@
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label>Register As <span class="required">*</span></label>
-                    <select name="register_as" class="form-select" required>
-                        <option value="">User</option>
-                        <option value="church_admin">Church Admin</option>
-                        <option value="pastor">Pastor</option>
-                        <option value="elder">Elder</option>
+                    <select name="register_as" id="register_as" class="form-select" required onchange="toggleAdminFields()">
+                        <option value="user" {% if request.POST.register_as == "user" %}selected{% endif %}>User</option>
+                        <option value="church_admin" {% if request.POST.register_as == "church_admin" %}selected{% endif %}>Church Admin</option>
                     </select>
                     <small class="error-message" id="register_as_error"></small>
                 </div>
-                <div class="form-group">
+                <div class="form-group user-field" id="church_code_group">
                     <label>Enter church Code <span class="required">*</span></label>
-                    <input type="text" name="church_code" class="form-control" value="{{ request.POST.church_code|default:'' }}" required>
+                    <input type="text" name="church_code" id="church_code" class="form-control" value="{{ request.POST.church_code|default:'' }}" required>
                     <small class="error-message" id="church_code_error"></small>
                 </div>
-                <div class="form-group">
-                    <label>Associate Degree <span class="required">*</span></label>
-                    <select name="associate_degree" class="form-select" required>
-                        <option value="">Select Degree</option>
-                        {% for course_applied in courses %}
-                        <option value="{{ course_applied.id }}">{{ course_applied.course_name }}</option>
+                <!-- Admin specific fields -->
+                <div class="form-group admin-field" style="display: none;">
+                    <label>Associate Degree / Branch <span class="required">*</span></label>
+                    <select name="associate_degree" id="associate_degree" class="form-select" onchange="updateBranchPackages()">
+                        <option value="">Select Branch</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch.id }}">{{ branch.branch_name }}</option>
                         {% endfor %}
                     </select>
                     <small class="error-message" id="associate_degree_error"></small>
+                </div>
+
+                <div class="form-group admin-field" id="package_group" style="display: none;">
+                    <label>Select Package <span class="required">*</span></label>
+                    <select name="package" id="package" class="form-select" onchange="updatePackageDetails()">
+                        <option value="">Select Package</option>
+                    </select>
+                    <div id="package_details" style="display: none; margin-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 0.9em; border-left: 3px solid #0056b3;">
+                        <strong>Package Features:</strong>
+                        <div style="margin-top: 5px;">
+                            <i class="fas fa-users" style="color: #666; width: 20px;"></i> Max Users: <span id="pkg_user_count" style="font-weight: bold;"></span><br>
+                            <i class="fas fa-money-bill-wave" style="color: #666; width: 20px;"></i> Price: $<span id="pkg_price" style="font-weight: bold;"></span>
+                        </div>
+                    </div>
+                    <small class="error-message" id="package_error"></small>
+                </div>
+            </div>
+
+            <div class="form-row three-cols admin-field" style="display: none;">
+                <div class="form-group">
+                    <label>Name of Church <span class="required">*</span></label>
+                    <input type="text" name="name_of_church" id="name_of_church" class="form-control" value="{{ request.POST.name_of_church|default:'' }}">
+                    <small class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>Name of Pastor</label>
+                    <input type="text" name="name_of_paster" class="form-control" value="{{ request.POST.name_of_paster|default:'' }}">
+                    <small class="error-message"></small>
+                </div>
+                <div class="form-group">
+                    <label>Church Address</label>
+                    <input type="text" name="church_address" class="form-control" value="{{ request.POST.church_address|default:'' }}">
+                    <small class="error-message"></small>
                 </div>
             </div>
         </div>
@@ -654,7 +686,100 @@
             placeholder: "Search code or country",
             allowClear: true
         });
+
+        // Initialize admin fields visibility
+        toggleAdminFields();
     });
+
+    function toggleAdminFields() {
+        const role = document.getElementById('register_as').value;
+        const adminFields = document.querySelectorAll('.admin-field');
+        const userFields = document.querySelectorAll('.user-field');
+        const associateDegreeInput = document.getElementById('associate_degree');
+        const packageInput = document.getElementById('package');
+        const nameOfChurchInput = document.getElementById('name_of_church');
+        const churchCodeInput = document.getElementById('church_code');
+        
+        if (role === 'user' || role === '') {
+            adminFields.forEach(el => {
+                if (el.classList.contains('three-cols')) {
+                    el.style.display = 'none';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            userFields.forEach(el => el.style.display = 'block');
+            if (churchCodeInput) churchCodeInput.setAttribute('required', 'required');
+            associateDegreeInput.removeAttribute('required');
+            if (packageInput) packageInput.removeAttribute('required');
+            nameOfChurchInput.removeAttribute('required');
+        } else {
+            adminFields.forEach(el => {
+                // Ensure package dropdown starts hidden until branch is selected
+                if (el.id === 'package_group') {
+                    el.style.display = associateDegreeInput.value ? 'block' : 'none';
+                } else if (el.classList.contains('three-cols')) {
+                    el.style.display = 'grid';
+                } else {
+                    el.style.display = 'block';
+                }
+            });
+            userFields.forEach(el => el.style.display = 'none');
+            if (churchCodeInput) churchCodeInput.removeAttribute('required');
+            associateDegreeInput.setAttribute('required', 'required');
+            if (packageInput) packageInput.setAttribute('required', 'required');
+            nameOfChurchInput.setAttribute('required', 'required');
+        }
+    }
+
+    const packagesByBranch = JSON.parse('{{ packages_json|escapejs }}');
+
+    function updateBranchPackages() {
+        const branchSelect = document.getElementById('associate_degree');
+        const packageSelect = document.getElementById('package');
+        const packageGroup = document.getElementById('package_group');
+        const detailsDiv = document.getElementById('package_details');
+        
+        // Reset package dropdown
+        packageSelect.innerHTML = '<option value="">Select Package</option>';
+        detailsDiv.style.display = 'none';
+        
+        const branchId = branchSelect.value;
+        if (branchId && packagesByBranch[branchId]) {
+            const pkgs = packagesByBranch[branchId];
+            pkgs.forEach(pkg => {
+                const opt = document.createElement('option');
+                opt.value = pkg.id;
+                opt.textContent = pkg.name;
+                opt.setAttribute('data-users', pkg.max_user);
+                opt.setAttribute('data-amount', pkg.amount);
+                packageSelect.appendChild(opt);
+            });
+            packageGroup.style.display = 'block';
+        } else if (branchId) {
+            // Option if no packages exist for this branch
+            const opt = document.createElement('option');
+            opt.value = "";
+            opt.textContent = "No packages available";
+            packageSelect.appendChild(opt);
+            packageGroup.style.display = 'block';
+        } else {
+            packageGroup.style.display = 'none';
+        }
+    }
+
+    function updatePackageDetails() {
+        const select = document.getElementById('package');
+        const detailsDiv = document.getElementById('package_details');
+        if (select.selectedIndex > 0 && select.value !== "") {
+            const option = select.options[select.selectedIndex];
+            document.getElementById('pkg_user_count').textContent = option.getAttribute('data-users');
+            document.getElementById('pkg_price').textContent = option.getAttribute('data-amount');
+            detailsDiv.style.display = 'block';
+        } else {
+            detailsDiv.style.display = 'none';
+        }
+    }
 
     // Form submission with loading and validation
     document.getElementById('churchRegistrationForm').addEventListener('submit', function (e) {
@@ -703,7 +828,7 @@
         
         const sections = [
             {
-                fields: ['register_as', 'church_code', 'associate_degree']
+                fields: ['register_as', 'church_code', 'associate_degree', 'package', 'name_of_church'] // Check all step 1 fields that might be required
             },
             {
                 fields: ['first_name', 'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 'gender', 'mailing_address']
@@ -720,6 +845,7 @@
             return sectionFields.every(fieldName => {
                 const field = form.elements[fieldName];
                 if (!field) return true;
+                if (!field.hasAttribute('required')) return true;
                 
                 if (field.type === 'select-one') {
                     return field.value !== '';

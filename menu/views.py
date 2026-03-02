@@ -4824,6 +4824,28 @@ def church_codes_usage_list(request):
     return render(request, "admin/church_codes/list.html", context)
 
 @login_required
+def church_codes_usage_view(request, admin_id):
+    """Detailed view for a single Church Admin"""
+    
+    admin = get_object_or_404(
+        ChurchAdmins.objects.select_related('church_code', 'church_code__branches', 'student'), 
+        id=admin_id, 
+        deleted_at__isnull=True
+    )
+    
+    # Attempt to fetch the associated user login info
+    user_info = Users.objects.filter(church_admin=admin, deleted_at__isnull=True).first()
+    
+    context = {
+        'admin': admin,
+        'user_info': user_info,
+        'page_title': 'View Church Admin'
+    }
+    
+    return render(request, "admin/church_codes/view.html", context)
+
+
+@login_required
 
 def church_codes_usage_delete(request, admin_id):
 

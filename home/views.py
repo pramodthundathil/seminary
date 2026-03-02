@@ -54,7 +54,9 @@ from .models import (
     Payments,
     Contacts,
     Sliders,
-    SliderPhotos
+    SliderPhotos,
+    Branches,
+    ChurchLoginCodeSettings
 )
 
 # Set up logger
@@ -1139,16 +1141,21 @@ def signup_church_admin(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Generate unique church admin ID
-                admin_id = f"CHA{uuid.uuid4().hex[:8].upper()}"
+                # Generate unique ID based on role
+                register_as = request.POST.get('register_as')
+                is_user = (register_as == 'user')
                 
-                # Validate required fields
-                required_fields = ['register_as', 'church_code', 'associate_degree', 'first_name', 
+                required_fields = ['register_as', 'first_name', 
                                  'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 
                                  'gender', 'mailing_address', 'city', 'state', 'country', 'zipcode', 
                                  'timezone', 'language', 'church_affiliation']
-                missing_fields = []
                 
+                if is_user:
+                    required_fields.append('church_code')
+                else:
+                    required_fields.extend(['associate_degree', 'package', 'name_of_church'])
+                
+                missing_fields = []
                 for field in required_fields:
                     if not request.POST.get(field):
                         missing_fields.append(field.replace('_', ' ').title())
@@ -1158,14 +1165,29 @@ def signup_church_admin(request):
                     context = get_church_admin_context()
                     return render(request, 'site_pages/church_admin_register.html', context)
                 
-                # Validate church code
+                email = request.POST.get('email')
+                
+                # For Users, verify church code exists
+                church_admin_obj = None
+                church_code_obj = None
                 church_code = request.POST.get('church_code')
-                # try:
-                #     church_code_obj = ChurchCodes.objects.get(code=church_code, status=True)
-                # except ChurchCodes.DoesNotExist:
-                #     messages.error(request, 'Invalid or inactive church code. Please contact support.')
-                #     context = get_church_admin_context()
-                #     return render(request, 'site_pages/church_admin_register.html', context)
+                if is_user:
+                    # User needs to join an existing church
+                    church_admin_obj = ChurchAdmins.objects.filter(code=church_code).first()
+                    if not church_admin_obj:
+                        messages.error(request, 'Invalid church code. Please ask your Church Admin for a valid code.')
+                        context = get_church_admin_context()
+                        return render(request, 'site_pages/church_admin_register.html', context)
+                else:
+                    # Admin/Pastor/Elder is creating a new church code
+                    church_code = get_random_string(6).upper()
+                    package_id = request.POST.get('package')
+                    # Find the package (ChurchLoginCodeSettings) for this selection
+                    church_code_obj = ChurchLoginCodeSettings.objects.filter(id=package_id).first()
+                    if not church_code_obj:
+                        messages.error(request, 'Could not find a valid package. Please select a valid package.')
+                        context = get_church_admin_context()
+                        return render(request, 'site_pages/church_admin_register.html', context)
                 
                 # Get language instance
                 language_id = request.POST.get('language')
@@ -1176,14 +1198,8 @@ def signup_church_admin(request):
                     context = get_church_admin_context()
                     return render(request, 'site_pages/church_admin_register.html', context)
                 
-                # # Check if email already exists
-                # if ChurchAdmins.objects.filter(email=request.POST.get('email')).exists():
-                #     messages.error(request, 'A church admin account with this email already exists.')
-                #     context = get_church_admin_context()
-                #     return render(request, 'site_pages/church_admin_register.html', context)
-                
                 # Check if email already exists in Users table
-                if Users.objects.filter(email=request.POST.get('email')).exists():
+                if Users.objects.filter(email=email).exists():
                     messages.error(request, 'An account with this email already exists.')
                     context = get_church_admin_context()
                     return render(request, 'site_pages/church_admin_register.html', context)
@@ -1196,75 +1212,103 @@ def signup_church_admin(request):
                         'secret': settings.RECAPTCHA_SECRET_KEY,
                         'response': recaptcha_response
                     }
-                    
-                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', 
-                                    data=data, timeout=5)
+                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
                     result = r.json()
-                    
                     if not result.get('success'):
                         messages.error(request, "Invalid reCAPTCHA. Please try again.")
                         context = get_church_admin_context()
                         return render(request, 'site_pages/church_admin_register.html', context)
-                        
-                except requests.exceptions.RequestException:
-                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
-                    context = get_church_admin_context()
-                    return render(request, 'site_pages/church_admin_register.html', context)
-                    
-                except ValueError:
-                    messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
+                except Exception:
+                    messages.error(request, "reCAPTCHA verification failed. Please try again.")
                     context = get_church_admin_context()
                     return render(request, 'site_pages/church_admin_register.html', context)
                 
-                # Create church admin record
-              
-                church_admin = ChurchAdmins.objects.create(
-                    student=None,  # or link to Students model if required
-                    name_of_church=request.POST.get('name_of_church')or None,
-                    name_of_paster=request.POST.get('name_of_paster')or None,
-                    church_address=request.POST.get('church_address')or None,
-
-                    church_code_id=request.POST.get('church_code')or None,
-                    code=request.POST.get('church_code')or None,
-
-                    amount=0.0,  
-                    max_user_no=0,
-                    current_user_no=0,
-                    created_at=timezone.now(),
-                    updated_at=timezone.now(),
-                )                   
-                
-                # Generate random password
-                password = get_random_string(10)              
+                # Common data
                 first_name = request.POST.get('first_name')
                 last_name = request.POST.get('last_name')
-                email = request.POST.get('email')
-                # Create user record
-                user = Users.objects.create(
-                    name=f"{first_name} {last_name or ''}".strip(),
+                unique_prefix = "CHU" if is_user else "CHA"
+                new_id = f"{unique_prefix}{uuid.uuid4().hex[:8].upper()}"
+                
+                # 1. ALWAYS Create Students record
+                student = Students.objects.create(
+                    student_id=new_id,
+                    first_name=first_name,
+                    middle_name=request.POST.get('middle_name') or None,
+                    last_name=last_name,
                     email=email,
-                    username=admin_id,
-                    church_admin=church_admin,
+                    gender=request.POST.get('gender'),
+                    phone_code=int(request.POST.get('phone_code')) if request.POST.get('phone_code') else None,
+                    phone_number=request.POST.get('phone_number'),
+                    date_of_birth=request.POST.get('date_of_birth'),
+                    mailing_address=request.POST.get('mailing_address'),
+                    city=request.POST.get('city'),
+                    state=request.POST.get('state'),
+                    country_id=request.POST.get('country'),
+                    zip_code=request.POST.get('zipcode'),
+                    timezone=request.POST.get('timezone'),
+                    language_id=language.id,
+                    church_affiliation=request.POST.get('church_affiliation'),
                     created_at=timezone.now(),
                     updated_at=timezone.now(),
-                    is_active=False,                    
+                    status=False,
+                    active=False
+                )
+
+                if not is_user:
+                    # 2. Create ChurchAdmins record if they are Admin
+                    church_admin_obj = ChurchAdmins.objects.create(
+                        student=student,
+                        name_of_church=request.POST.get('name_of_church'),
+                        name_of_paster=request.POST.get('name_of_paster') or None,
+                        church_address=request.POST.get('church_address') or None,
+                        church_code_id=church_code_obj.id,
+                        code=church_code,
+                        amount=church_code_obj.amount if church_code_obj else 0.0,
+                        max_user_no=church_code_obj.max_user_no if church_code_obj else 0,
+                        current_user_no=1, # Including themselves
+                        created_at=timezone.now(),
+                        updated_at=timezone.now(),
+                    )
+                else:
+                    # For User, increment the church admin user count
+                    if church_admin_obj:
+                        church_admin_obj.current_user_no = (church_admin_obj.current_user_no or 0) + 1
+                        church_admin_obj.save()
+
+                # Generate random password
+                password = get_random_string(10)
+                
+                # 3. Create User record
+                user = Users.objects.create(
+                    name=f"{first_name} {last_name}".strip(),
+                    email=email,
+                    username=new_id,
+                    church_admin=church_admin_obj, # This links the user to the ChurchAdmin
+                    created_at=timezone.now(),
+                    updated_at=timezone.now(),
+                    is_active=False,
                 )
                 
+                # Link user back to student
+                student.user = user
+                student.save()
+
                 # Set hashed password
                 user.set_password(password)
                 user.save()
                 
                 # Send email
+                role_display = "Church User" if is_user else "Church Admin"
                 try:
-                    subject = "Your Church Admin Account Login Details"
+                    subject = f"Your {role_display} Account Login Details"
                     message = f"""
                     Hello {first_name},
 
-                    Your church admin account has been created successfully.
+                    Your {role_display.lower()} account has been created successfully.
 
                     Login Details:
                     Email: {email}
-                    Username: {admin_id}
+                    Username: {new_id}
                     Temporary Password: {password}
                     Church Code: {church_code}
 
@@ -1274,7 +1318,7 @@ def signup_church_admin(request):
 
                     Best regards,
                     Trinity Theological Seminary
-                                        """
+                    """
                     
                     email_sent = send_mail(
                         subject=subject,
@@ -1285,19 +1329,18 @@ def signup_church_admin(request):
                     )
                     
                     if email_sent:
-                        messages.success(request, f'Church admin account created successfully! Login details sent to {church_admin.email}')
+                        messages.success(request, f'{role_display} account created successfully! Login details sent to {email}')
                         logger.info(f'Email sent successfully to {email}')
                     else:
-                        messages.warning(request, 'Church admin account created but email could not be sent.')
+                        messages.warning(request, f'{role_display} account created but email could not be sent.')
                         logger.warning(f'Email failed to send to {email}')
                         
                 except Exception as e:
-                    messages.warning(request, f'Church admin account created but error sending email: {str(e)}')
+                    messages.warning(request, f'{role_display} account created but error sending email: {str(e)}')
                     logger.error(f'Email error: {str(e)}')
                 
-                return redirect('church_admin_registration_success', admin_id=admin_id)             
+                return redirect('church_admin_registration_success', admin_id=new_id)             
         
-            
         except Languages.DoesNotExist:
             messages.error(request, 'Invalid language selection.')
             context = get_church_admin_context()
@@ -1323,10 +1366,24 @@ def signup_church_admin(request):
 
 def get_church_admin_context():
     """Helper function to get context for church admin registration form"""
+    import json
+    packages_query = ChurchLoginCodeSettings.objects.filter(status=1)
+    packages_by_branch = {}
+    for pkg in packages_query:
+        if pkg.branches_id not in packages_by_branch:
+            packages_by_branch[pkg.branches_id] = []
+        packages_by_branch[pkg.branches_id].append({
+            'id': pkg.id,
+            'name': pkg.name,
+            'amount': pkg.amount,
+            'max_user': pkg.max_user_no
+        })
+        
     return {
         'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),
         'countries': Countries.objects.all(),
-        'courses': Courses.objects.all(),
+        'branches': Branches.objects.filter(is_associate_degree=True, status=True),
+        'packages_json': json.dumps(packages_by_branch),
         'RECAPTCHA_SITE_KEY': settings.RECAPTCHA_SITE_KEY
     }
 
