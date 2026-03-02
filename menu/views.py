@@ -201,14 +201,22 @@ def menu_datatable(request):
         items_count = MenuItems.objects.filter(menus=menu, deleted_at__isnull=True).count()
         
         actions = f'''
-            <div class="action-buttons">
-                <a href="/menu/menus/engineer/{menu.id}/" class="btn-action btn-edit" title="Edit">
-                    <i class="fas fa-edit"></i>
+            <div class="btn-group" role="group">
+        
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{menu.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{menu.id}">
+                <a href="/menu/menus/engineer/{menu.id}/" class="dropdown-item" title="Edit">
+                    <i class="fas fa-edit mr-2 text-primary"></i> Edit
                 </a>
-                <button class="btn-action btn-delete" onclick="deleteMenu({menu.id}, '{menu.name}')" title="Delete">
-                    <i class="fas fa-trash"></i>
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteMenu({menu.id}, '{menu.name}')" title="Delete">
+                    <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                 </button>
             </div>
+        </div>
+    </div>
         '''
         
         data.append({
@@ -751,14 +759,22 @@ def news_datatable(request):
             media_preview = '<div class="no-image">No Image</div>'
         
         actions = f'''
-            <div class="action-buttons">
-                <button class="btn-action btn-edit" onclick="editNews({news.id})" title="Edit">
-                    <i class="fas fa-edit"></i>
+            <div class="btn-group" role="group">
+        
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{news.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{news.id}">
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="editNews({news.id})" title="Edit">
+                    <i class="fas fa-edit mr-2 text-primary"></i> Edit
                 </button>
-                <button class="btn-action btn-delete" onclick="deleteNews({news.id}, '{news.title}')" title="Delete">
-                    <i class="fas fa-trash"></i>
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteNews({news.id}, '{news.title}')" title="Delete">
+                    <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                 </button>
             </div>
+        </div>
+    </div>
         '''
         
         data.append({
@@ -1924,17 +1940,24 @@ def slider_photos_datatable(request, slider_id):
                 ''',
                 'created_at': photo.created_at.strftime('%b %d, %Y') if photo.created_at else '-',
                 'actions': f'''
-                    <div class="action-buttons">
-                        <button class="btn-action btn-view" onclick="viewPhoto({photo.id})" title="View">
+                    <div class="btn-group" role="group">
+        <button class="btn btn-info btn-sm mr-1" onclick="viewPhoto({photo.id})" title="View">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-action btn-edit" onclick="editPhoto({photo.id})" title="Edit">
-                            <i class="fas fa-edit"></i>
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{photo.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{photo.id}">
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="editPhoto({photo.id})" title="Edit">
+                            <i class="fas fa-edit mr-2 text-primary"></i> Edit
                         </button>
-                        <button class="btn-action btn-delete" onclick="deletePhoto({photo.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deletePhoto({photo.id})" title="Delete">
+                            <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                         </button>
-                    </div>
+            </div>
+        </div>
+    </div>
                 '''
             })
 
@@ -2182,17 +2205,24 @@ def course_datatable(request):
                 </div>''',
                 'status': f'<span class="status-badge {status_class}">{status_text}</span>',
                 'created_at': course.created_at.strftime('%Y-%m-%d') if course.created_at else '-',
-                'actions': f'''<div class="action-buttons">
-                    <button class="btn-action btn-view" onclick="viewCourse({course.id})" title="View">
+                'actions': f'''<div class="btn-group" role="group">
+        <button class="btn btn-info btn-sm mr-1" onclick="viewCourse({course.id})" title="View">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <a href="/menu/courses/update/{course.id}/" class="btn-action btn-edit" title="Edit">
-                        <i class="fas fa-edit"></i>
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{course.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{course.id}">
+                <a href="/menu/courses/update/{course.id}/" class="dropdown-item" title="Edit">
+                        <i class="fas fa-edit mr-2 text-primary"></i> Edit
                     </a>
-                    <button class="btn-action btn-delete" onclick="deleteCourse({course.id}, '{course.course_name}')" title="Delete">
-                        <i class="fas fa-trash"></i>
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteCourse({course.id}, '{course.course_name}')" title="Delete">
+                        <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                     </button>
-                </div>'''
+            </div>
+        </div>
+    </div>'''
             })
 
         return JsonResponse({
@@ -5300,11 +5330,19 @@ def student_instructors_datatable(request):
         updated_info = f"{updated_by}<br><small>{updated_date}</small>"
         
         actions = f'''
-            <div class="action-buttons">
-                <button class="btn-action btn-delete" onclick="deleteStudentInstructor({item.id})" title="Delete">
-                    <i class="fas fa-trash"></i>
+            <div class="btn-group" role="group">
+        
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{item.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{item.id}">
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteStudentInstructor({item.id})" title="Delete">
+                    <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                 </button>
             </div>
+        </div>
+    </div>
         '''
         
         data.append({
@@ -5496,11 +5534,19 @@ def student_uploads_datatable(request):
                 upload_type = 'YouTube'
 
         actions = f'''
-            <div class="action-buttons">
-                <button class="btn-action btn-delete" onclick="deleteStudentUpload({item.id})" title="Delete">
-                    <i class="fas fa-trash"></i>
+            <div class="btn-group" role="group">
+        
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{item.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{item.id}">
+                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteStudentUpload({item.id})" title="Delete">
+                    <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
                 </button>
             </div>
+        </div>
+    </div>
         '''
         
         data.append({
@@ -6096,12 +6142,19 @@ def student_submitted_exams_datatable(request):
         # Actions - always show view answer sheet button
         actions = f'''
 
-            <div class="action-buttons">
-
-                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+            <div class="btn-group" role="group">
+        <button class="btn btn-info btn-sm mr-1" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
                     <i class="bi bi-eye"></i>
                 </button>
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{item.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{item.id}">
+                
             </div>
+        </div>
+    </div>
 
         '''
         data.append({
@@ -6196,11 +6249,19 @@ def student_submitted_exams_datatable(request):
         
         # Actions - view answer sheet button
         actions = f'''
-            <div class="action-buttons">
-                <button class="btn-action btn-view" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
+            <div class="btn-group" role="group">
+        <button class="btn btn-info btn-sm mr-1" onclick="viewAnswerSheet({item.id})" title="View Answer Sheet">
                     <i class="bi bi-eye"></i> 
                 </button>
+        <div class="btn-group" role="group">
+            <button id="btnGroupDrop{item.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{item.id}">
+                
             </div>
+        </div>
+    </div>
         '''   
         data.append({
             'student_name': student_name,

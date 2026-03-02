@@ -1,4 +1,4 @@
-from django.shortcuts import redirect 
+from django.shortcuts import redirect, HttpResponse
 from django.contrib import messages 
 
 
@@ -12,8 +12,10 @@ def role_redirection(view_func):
             print(role,"-------------------------------")
             if role == "Admin":
                 return view_func(request, *args, **kwargs)
-            else:
+            elif role == "Student":
                 return redirect("student_home")
+            else:
+                return HttpResponse("Ypu are Autherised As " + role)
         else:
             return redirect('signin')
     return wrapper_func
