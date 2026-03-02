@@ -1,0 +1,142 @@
+{% extends 'church/admin_index.html' %}
+
+{% block middle %}
+{% if messages %}
+    <div class="row mb-3">
+        <div class="col-12">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<div class="details-card mt-4" style="background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);">
+    <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title" style="margin: 0; font-size: 1.1rem; color: #1e293b;"><i class="bi bi-person-lines-fill text-primary"></i> Student Information</h3>
+        
+        <div>
+            {% if not student.active %}
+            <form action="{% url 'church_student_approve' student.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm me-2" onclick="return confirm('Are you sure you want to approve this student? This will activate their account and email them login credentials.')">
+                    <i class="bi bi-check-circle"></i> Approve Registration
+                </button>
+            </form>
+            {% else %}
+                <span class="badge bg-success rounded-pill me-2 px-3 py-2"><i class="bi bi-patch-check"></i> Approved</span>
+            {% endif %}
+
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="studentDelete({{ student.id }})">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+    
+    <div class="p-4">
+        <div class="row mb-4">
+            <div class="col-md-6 border-end">
+                <p class="text-muted small mb-1">Full Name</p>
+                <h5 class="mb-3">{{ student.first_name }} {{ student.last_name }}</h5>
+
+                <p class="text-muted small mb-1">Student ID</p>
+                <p class="fw-bold mb-3">{{ student.student_id|default:"Pending Approval" }}</p>
+
+                <p class="text-muted small mb-1">Email Address</p>
+                <p class="mb-3"><i class="bi bi-envelope text-primary"></i> {{ student.email }}</p>
+                
+                <p class="text-muted small mb-1">Phone Number</p>
+                <p class="mb-3"><i class="bi bi-telephone text-primary"></i> {{ student.phone_number }}</p>
+            </div>
+            <div class="col-md-6 ps-4">
+                <p class="text-muted small mb-1">Registration Date</p>
+                <p class="mb-3"><i class="bi bi-calendar-event text-success"></i> {{ student.created_at|date:"F d, Y" }}</p>
+                
+                <p class="text-muted small mb-1">Gender</p>
+                <p class="mb-3">{{ student.gender }}</p>
+                
+                <p class="text-muted small mb-1">Date of Birth</p>
+                <p class="mb-3">{{ student.date_of_birth|date:"N d, Y" }}</p>
+
+                <p class="text-muted small mb-1">Marital Status</p>
+                <p class="mb-0">{{ student.mrital_status }}</p>
+            </div>
+        </div>
+        
+        <h6 class="border-bottom pb-2 mt-4 text-primary"><i class="bi bi-geo-alt"></i> Address Information</h6>
+        <div class="row mt-3">
+            <div class="col-12">
+                <p class="mb-1">{{ student.mailing_address }}</p>
+                <p class="mb-1">{{ student.city }}, {{ student.state }} {{ student.zip_code }}</p>
+                <p class="mb-0">{{ student.country.name }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function studentDelete(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this! The student's data will be permanently removed.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Execute deletion
+                fetch(`{% url 'church_student_delete' 0 %}`.replace('0', id), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire(
+                            'Deleted!',
+                            'Student record has been wiped.',
+                            'success'
+                        ).then(() => {
+                            window.location.href = "{% url 'church_students_list' %}";
+                        });
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                    console.error('Error:', error);
+                });
+            }
+        })
+    }
+</script>
+{% endblock %}
+
+{% block right %}
+<div class="small-box" style="border: 1px solid #3224ef; border-radius: 8px; padding: 16px; background: #ffffff; margin-top: 20px;">
+    <div class="small-box-header" style="background: #00CED1; color: white; padding: 10px 14px; font-weight: 700; border-top-left-radius: 8px; border-top-right-radius: 8px; margin: -16px -16px 12px -16px;">
+        <i class="bi bi-shield-check"></i> Account Status
+    </div>
+    
+    <div class="mt-3">
+        {% if student.active %}
+            <p class="mb-2 text-success fw-bold"><i class="bi bi-circle-fill" style="font-size: 0.6rem;"></i> Active & Approved</p>
+            <p class="text-muted small">This student was approved on <br><b>{{ student.approve_date|date:"F d, Y g:i A" }}</b></p>
+            <p class="text-muted small">Credentials have been generated and the student has full course access privileges.</p>
+        {% else %}
+            <p class="mb-2 text-warning fw-bold"><i class="bi bi-circle-fill" style="font-size: 0.6rem;"></i> Verification Pending</p>
+            <p class="text-muted small">This student registration needs to be reviewed and approved by the Church Administrator. Click the green <b>Approve</b> button in the main card header to certify this account.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

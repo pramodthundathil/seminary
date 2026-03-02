@@ -424,16 +424,7 @@
                 <button class="register-btn">Register Now</button>
             </div>
 
-            <div class="register-card" onclick="handleRegister('guest')">
-                <div class="icon-wrapper">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                    </svg>
-                </div>
-                <h2>Guest Register</h2>
-                <p>Register as a guest to explore our platform, attend events, and connect with our community.</p>
-                <button class="register-btn">Register Now</button>
-            </div>
+
 
             <div class="register-card" onclick="handleRegister('church')">
                 <div class="icon-wrapper">
@@ -454,9 +445,6 @@
             window.location.href = "{% url 'signup_student' %}";
         }
 
-        if (type === 'guest') {
-            window.location.href = "{% url 'guest_register' %}";
-        }
 
         if (type === 'church') {
             window.location.href = "{% url 'church_admin_register' %}";

@@ -1,0 +1,183 @@
+{% extends "church/user_index.html" %}
+
+{% block middle %}
+<style>
+    /* NOTIFICATION CARD */
+    .alerts-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .alert-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        transition: background 0.2s;
+    }
+
+    .alert-item:last-child {
+        border-bottom: none;
+    }
+
+    .alert-item:hover {
+        background: #f8fafc;
+    }
+
+    .alert-icon {
+        font-size: 16px;
+        color: var(--primary);
+        margin-top: 2px;
+    }
+
+    .alert-text {
+        margin: 0;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.4;
+    }
+
+    .no-alerts {
+        padding: 16px;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .notifications-title {
+        background: #00CED1;
+        /* teal header */
+        color: white;
+        padding: 10px 10px;
+        font-weight: 700;
+        border-radius: 8px 8px 0 0;
+        /* rounded top */
+        font-size: 15px;
+        letter-spacing: 0.5px;
+    }
+    .small-box {
+        border: 1px solid #3224ef;
+        /* green border */
+        border-radius: 8px;
+        /* rounded */
+        padding: 16px;
+        background: #ffffff;
+        margin-top: 20px;
+    }
+
+    .small-box-header {
+        background: #00CED1;
+        /* green header */
+        color: white;
+        padding: 10px 14px;
+        font-weight: 700;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        margin: -16px -16px 12px -16px;
+        /* attach header to top border */
+    }
+
+    .small-box-item {
+        font-size: 15px;
+        color: #334155;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12 col-lg-8 mb-4">
+        <div class="details-card w-100">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-person-lines-fill"></i> Student Information</h3>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-card-heading"></i> Student ID</span>
+                    <span class="detail-value">{{student.student_id}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-person"></i> Full Name</span>
+                    <span class="detail-value">
+                        {% if student.first_name %}{{ student.first_name }}{% endif %}
+                        {% if student.middle_name %} {{ student.middle_name }}{% endif %}
+                        {% if student.last_name %} {{ student.last_name }}{% endif %}
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-envelope"></i> Email Address</span>
+                    <span class="detail-value">{{student.email}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-calendar-event"></i> Date of Approval</span>
+                    <span class="detail-value">{{student.approve_date}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-cake2"></i> Date of Birth</span>
+                    <span class="detail-value">{{student.date_of_birth}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-mortarboard"></i> Course</span>
+                    <span class="detail-value">{{course.name|default:"-"}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-building"></i> Church Name</span>
+                    <span class="detail-value">{{church_name|default:"-"}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-diagram-3"></i> Branch</span>
+                    <span class="detail-value">{{branch_name|default:"-"}}</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label"><i class="bi bi-globe"></i> Medium</span>
+                    <span class="detail-value">{{language|default:"-"}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 col-lg-4">
+        <div class="alerts-card shadow-sm">
+            <div class="notifications-title">NOTIFICATIONS</div>
+
+            {% if notifications %}
+            {% for n in notifications|slice:":5" %}
+            <div class="alert-item">
+                <div class="alert-icon"><i class="bi bi-bell"></i></div>
+                <p class="alert-text">
+                    <strong>{{ n.notification_type|default:"Alert" }}:</strong> {{ n.message }}
+                </p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="no-alerts">No notifications found</div>
+            {% endif %}
+        </div>
+
+        <div class="small-box shadow-sm mt-4 border-0" style="border-top: 1px solid #00CED1 !important;">
+            <div class="small-box-header">INSTRUCTORS</div>
+
+            <div class="small-box-item mt-3">
+                <i class="bi bi-star-fill text-warning"></i> {{instructor_name|default:"No instructor assigned"}}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

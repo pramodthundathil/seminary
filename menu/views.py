@@ -4836,9 +4836,21 @@ def church_codes_usage_view(request, admin_id):
     # Attempt to fetch the associated user login info
     user_info = Users.objects.filter(church_admin=admin, deleted_at__isnull=True).first()
     
+    # Fetch registered users linked to this admin, excluding the admin's own student record
+    registered_students = Students.objects.filter(
+        user__church_admin=admin,
+        user__deleted_at__isnull=True
+    ).select_related('user')
+    
+    if admin.student:
+        registered_students = registered_students.exclude(id=admin.student.id)
+        
+    registered_students = registered_students.order_by('-created_at')
+    
     context = {
         'admin': admin,
         'user_info': user_info,
+        'registered_students': registered_students,
         'page_title': 'View Church Admin'
     }
     

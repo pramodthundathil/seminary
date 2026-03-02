@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, HttpResponse
 from django.contrib import messages 
-
+from django.contrib.auth import logout
 
 def role_redirection(view_func):
     def wrapper_func(request, *args, **kwargs):
@@ -15,7 +15,9 @@ def role_redirection(view_func):
             elif role == "Student":
                 return redirect("student_home")
             else:
-                return HttpResponse("Ypu are Autherised As " + role)
+                logout(request)
+                messages.error(request, "You are not authorized to access this page.Make Sure that you are logged in as the correct user.")
+                return redirect('signin')
         else:
             return redirect('signin')
     return wrapper_func

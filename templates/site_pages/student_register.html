@@ -880,16 +880,7 @@
             <h2 class="section-title"> <i class="fa fa-wallet section-icon"></i>Financial Information</h2>
 
             <div class="form-row two-cols">
-                <div class="form-group">
-                    <label>Scholarship Needed? <span class="required">*</span></label>
-                    <select name="scholarship_needed" class="form-select" required>
-                        <option value="">Select Option</option>
-                        <option value="yes" {% if request.POST.scholarship_needed == 'yes' %}selected{% endif %}>Yes
-                        </option>
-                        <option value="no" {% if request.POST.scholarship_needed == 'no' %}selected{% endif %}>No</option>
-                        <small id="scholarship_needed_error" class="error-message"></small>
-                    </select>
-                </div>
+
                 <div class="form-group">
                     <label>Currently Employed? <span class="required">*</span></label>
                     <select name="currently_employed" class="form-select" required>
@@ -902,27 +893,7 @@
                 </div>
             </div>
 
-            <div class="form-row two-cols">
-                <div class="form-group">
-                    <label>Annual Income Range</label>
-                    <select name="income" class="form-select">
-                        <option value="">Select Range</option>
-                        <option value="0-25000" {% if request.POST.income == '0-25000' %}selected{% endif %}>$0 - $25,000
-                        </option>
-                        <option value="25000-50000" {% if request.POST.income == '25000-50000' %}selected{% endif %}>
-                            $25,000 - $50,000</option>
-                        <option value="50000-75000" {% if request.POST.income == '50000-75000' %}selected{% endif %}>
-                            $50,000 - $75,000</option>
-                        <option value="75000+" {% if request.POST.income == '75000+' %}selected{% endif %}>$75,000+
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Affordable Amount per Semester</label>
-                    <input type="text" name="affordable_amount" class="form-control"
-                        value="{{ request.POST.affordable_amount|default:'' }}" placeholder="Enter amount">
-                </div>
-            </div>
+
         </div>
 
         <!-- Section 5: References -->

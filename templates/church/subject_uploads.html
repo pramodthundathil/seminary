@@ -1,0 +1,231 @@
+{% extends 'church/user_index.html' %}
+{% load static %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'church_user_subjects' %}">Subjects</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .upload-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .upload-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-color: #bcecf5;
+    }
+
+    .upload-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background: #f0f9ff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #0d6efd;
+        flex-shrink: 0;
+    }
+
+    .upload-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .upload-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-bottom: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .upload-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .format-badge {
+        font-size: 0.75rem;
+        padding: 0.2em 0.6em;
+        border-radius: 4px;
+        background-color: #e9ecef;
+        color: #495057;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .format-badge.material { background-color: #cfe2ff; color: #084298; }
+    .format-badge.assignment { background-color: #f8d7da; color: #842029; }
+    .format-badge.video { background-color: #d1e7dd; color: #0f5132; }
+
+    .action-btn {
+        margin-left: 1rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: #fff;
+        border-radius: 12px;
+        color: #6c757d;
+        border: 1px dashed #ccc;
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3" style="color: #2c3e50; font-weight: 700;">
+            <i class="bi bi-folder2-open me-2"></i> {{ page_title }}
+        </h2>
+        <p class="text-muted">Resources shared for this subject by your Church Administrator.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <ul class="nav nav-tabs mb-4" id="subjectTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">Study Materials ({{ references.count }})</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments" type="button" role="tab" aria-controls="assignments" aria-selected="false">Assignments ({{ assignments.count }})</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="recordings-tab" data-bs-toggle="tab" data-bs-target="#recordings" type="button" role="tab" aria-controls="recordings" aria-selected="false">Class Recordings ({{ recordings|length }})</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="subjectTabContent">
+            
+            <!-- Study Materials Tab -->
+            <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                {% if references %}
+                    {% for ref in references %}
+                    <div class="upload-card">
+                        <div class="upload-icon-wrapper">
+                            {% if ref.format == 'PDF' %}
+                            <i class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                            {% else %}
+                            <i class="bi bi-file-text-fill fs-3 text-primary"></i>
+                            {% endif %}
+                        </div>
+                        <div class="upload-details">
+                            <div class="upload-title">{{ ref.title }}</div>
+                            <div class="upload-meta">
+                                <span><i class="bi bi-person"></i> {{ ref.auther_name|default:"Unknown Author" }}</span>
+                                <span class="format-badge material">{{ ref.format|default:"Book" }}</span>
+                            </div>
+                        </div>
+                        <div class="action-btn">
+                            {% if ref.reference_file %}
+                            <a href="{{ ref.reference_file.file_path.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                <i class="bi bi-cloud-download me-1"></i> Download
+                            </a>
+                            {% else %}
+                            <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>No File</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-journal-x fs-1 mb-3 d-block text-muted"></i>
+                        <h4>No Study Materials</h4>
+                        <p>There are currently no study materials for this subject.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Assignments Tab -->
+            <div class="tab-pane fade" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+                {% if assignments %}
+                    {% for assign in assignments %}
+                    <div class="upload-card">
+                        <div class="upload-icon-wrapper" style="background:#fff3cd; color:#ffc107;">
+                            <i class="bi bi-pencil-square fs-3"></i>
+                        </div>
+                        <div class="upload-details">
+                            <div class="upload-title">{{ assign.assignment_name }}</div>
+                            <div class="upload-meta">
+                                <span><i class="bi bi-calendar"></i> Added: {{ assign.created_at|date:"M d, Y" }}</span>
+                                <span class="text-muted">|</span>
+                                <span><i class="bi bi-award"></i> Score: {{ assign.total_score }}</span>
+                                <span class="format-badge assignment">{{ assign.assignment_type|default:"Assignment" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-list-task fs-1 mb-3 d-block text-muted"></i>
+                        <h4>No Assignments</h4>
+                        <p>There are currently no assignments for this subject.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-pane fade" id="recordings" role="tabpanel" aria-labelledby="recordings-tab">
+                {% if recordings %}
+                    {% for rec in recordings %}
+                    <div class="upload-card">
+                        <div class="upload-icon-wrapper" style="background:#e0f8e9; color:#198754;">
+                            <i class="bi bi-play-circle-fill fs-3"></i>
+                        </div>
+                        <div class="upload-details">
+                            <div class="upload-title">{{ rec.title }}</div>
+                            <div class="upload-meta">
+                                <span><i class="bi bi-calendar"></i> Added: {{ rec.date|date:"M d, Y" }}</span>
+                                <span class="format-badge video">{{ rec.type }}</span>
+                            </div>
+                        </div>
+                        <div class="action-btn">
+                            {% if rec.type == 'youtube' and rec.youtube_id %}
+                                <a href="https://www.youtube.com/watch?v={{ rec.youtube_id }}" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-youtube me-1"></i> Watch
+                                </a>
+                            {% elif rec.url %}
+                                <a href="{{ rec.url }}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                    <i class="bi bi-play-fill me-1"></i> View Video
+                                </a>
+                            {% else %}
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>Unavailable</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-camera-video fs-1 mb-3 d-block text-muted"></i>
+                        <h4>No Class Recordings</h4>
+                        <p>There are currently no recordings available for this subject.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Church Admin Dashboard - Trinity Theological Seminary</title>
+    <link rel="shortcut icon" href="{% static 'img/Trinity_logo.png' %}" type="image/x-icon">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Reusing Student index CSS for layout -->
+    <link rel="stylesheet" href="{% static 'css/student/index.css' %}">
+    
+    <style>
+        a { text-decoration: none; }
+        .dropdown-menu {
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .dropdown-item { padding: 0.75rem 1rem; border-radius: 0.5rem; }
+        .dropdown-item:hover { background-color: #f0fdfd; color: #00CED1; }
+        .dropdown-item i { margin-right: 0.5rem; }
+        .navbar-toggler { border: none; padding: 0; }
+        .navbar-toggler:focus { box-shadow: none; }
+    </style>
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- Custom Navigation -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <div class="logo-section">
+                <a href="#" style="text-decoration:none;">
+                    <img src="{% static 'img/Trinity_final2.png' %}" style="width:180px; height: 50px;" alt="Logo">
+                </a>
+            </div>
+
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li class="nav-item">
+                    <a href="{% url 'church_admin_dashboard' %}" class="nav-link">
+                        <i class="bi bi-house-door"></i> Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'church_students_list' %}" class="nav-link">
+                        <i class="bi bi-people"></i> Students
+                    </a>
+                </li>
+            
+                <li class="nav-item">
+                    <a href="{% url 'church_subjects_list' %}" class="nav-link">
+                        <i class="bi bi-book-half"></i> Subjects
+                    </a>
+                </li>
+            
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'church_admin_settings' %}">
+                        <i class="bi bi-gear"></i> Settings
+                    </a>
+                </li>
+
+                <li class="nav-item" style="margin-left: 1rem; position: relative;">
+                    <div class="user-profile-header" onclick="toggleUserDropdown(event)">
+                        <div class="user-avatar-small">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <span style="font-weight: 600; font-size: 0.9rem;">My Account</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="{% url 'signout' %}" style="color: var(--danger)"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <br><br>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Column - Profile -->
+        <div>
+            <div class="profile-card">
+                <div class="profile-avatar"><i class="bi bi-bank"></i></div>
+                <h2 class="profile-name">{% if admin.name_of_church %}{{ admin.name_of_church }}{% else %}Church Admin{% endif %}</h2>
+                <p class="profile-id">{{ admin.code }}</p>
+                <span class="role-badge"><i class="bi bi-shield-lock-fill"></i> Church Admin</span>
+                <br><br>
+                <div class="stats-wrapper">
+                    <div class="stats-grid">
+                        <br><br><br><br><br><br><br><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column - Details -->
+        <div class="middle-column">
+            {% block middle %}{% endblock %}
+        </div>
+
+        <!-- Right Column - Sidebar -->
+        <div class="right-column">
+            {% block right %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        function toggleUserDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+
+            document.querySelectorAll('.nav-item.active').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        function toggleDropdown(event, element) {
+            event.preventDefault();
+            event.stopPropagation();
+            const userDropdown = document.getElementById('userDropdown');
+            if (userDropdown) userDropdown.classList.remove('show');
+
+            const parent = element.closest('.nav-item');
+            const wasActive = parent.classList.contains('active');
+
+            document.querySelectorAll('.nav-item.active').forEach(item => {
+                if (item !== parent) {
+                    item.classList.remove('active');
+                }
+            });
+
+            if (!wasActive) {
+                parent.classList.add('active');
+            } else {
+                parent.classList.remove('active');
+            }
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.nav-item') && !event.target.closest('.user-profile-header')) {
+                document.querySelectorAll('.nav-item.active').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const userDropdown = document.getElementById('userDropdown');
+                if (userDropdown) userDropdown.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

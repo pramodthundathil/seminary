@@ -438,15 +438,36 @@ def signin(request):
     if request.method == "POST":
         username = request.POST['email']
         password = request.POST['password']
+        login_role = request.POST.get('login_role', 'student')
 
         user = authenticate(request, email = username, password = password)
         if user is not None:
-            login(request,user)
+            # Check role-specific access before logging them in entirely (or log them in and redirect fallback)
+            
+            if login_role == 'church_admin':
+                # Determine if user is actually a ChurchAdmin (meaning they own it)
+                is_church_admin = ChurchAdmins.objects.filter(student__user=user, deleted_at__isnull=True).exists()
+                if not is_church_admin:
+                    messages.error(request, "You do not have a Church Admin account.")
+                    return redirect("signin")
+                
+                login(request, user)
+                return redirect('church_admin_dashboard')
+                
+            elif login_role == 'church_user':
+                # They must have a linked church admin, but they must NOT be the admin itself for strict separation.
+                # If you allow admins to log in as users, just checking user.church_admin is enough.
+                if not user.church_admin:
+                    messages.error(request, "You are not affiliated with any Church User account.")
+                    return redirect("signin")
+                
+                login(request, user)
+                return redirect('church_user_home')
+                
+            # 'student' generic fallback role
+            login(request, user)
             role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
-            # if role == "Student":
-            #     return redirect('student_home')
-            # elif role=="Church User":  
-            #     return redirect('church_user_home')
+            
             return redirect('admin_index')
         else:
             messages.info(request,"User name or password incorrect")

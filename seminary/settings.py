@@ -35,18 +35,18 @@ PAYPAL_CLIENT_SECRET = "EIKuqztjf9XAIb7cfgwk9XHAfqBB1Cf04sh35HxWBjFwHosgOpKL0KIA
 SECRET_KEY = 'django-insecure-7cg!gvx@8ej(2wr_8c_oeyv%ecn=km6rvb3cqw@r*3qhwx*v7('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
 #for testing
 
-RECAPTCHA_SITE_KEY = "6LegFxwsAAAAAPuKJ6Fhea_53wqGHMW1gYtXWAJG"
-RECAPTCHA_SECRET_KEY = "6LegFxwsAAAAAAJiRfIuSh95YkkVSMmPmL0wX_BB"
+# RECAPTCHA_SITE_KEY = "6LegFxwsAAAAAPuKJ6Fhea_53wqGHMW1gYtXWAJG"
+# RECAPTCHA_SECRET_KEY = "6LegFxwsAAAAAAJiRfIuSh95YkkVSMmPmL0wX_BB"
 
 #for production
-# RECAPTCHA_SITE_KEY = "6Lfd8kUsAAAAAAcmWQ0K5KO9r6dQGvAcu8PQsrqm"
-# RECAPTCHA_SECRET_KEY = "6Lfd8kUsAAAAANPuFgC3yyKLXKh2P65XVb-xvgTa"
+RECAPTCHA_SITE_KEY = "6Lfd8kUsAAAAAAcmWQ0K5KO9r6dQGvAcu8PQsrqm"
+RECAPTCHA_SECRET_KEY = "6Lfd8kUsAAAAANPuFgC3yyKLXKh2P65XVb-xvgTa"
 
 # Application definition
 
@@ -58,9 +58,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'home',
-    "django_ckeditor_5", 
+    'django_ckeditor_5', 
     'menu',
     'student',
+    'church',
 ]
 
 CKEDITOR_UPLOAD_PATH = 'content/ckeditor/'

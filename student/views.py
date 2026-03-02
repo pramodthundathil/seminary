@@ -246,7 +246,6 @@ def student_class_recordings(request):
                 item['youtube_id'] = match.group(1) if match else None
                 item['thumb'] = upload.youtube.thumb_file_path if upload.youtube.thumb_file_path else ''
             
-            # 2. Check direct Media
             elif upload.media:
                 file_url = upload.media.file_path.url if upload.media.file_path else ''
                 ext = upload.media.file_type.lower() if upload.media.file_type else ''
@@ -258,6 +257,14 @@ def student_class_recordings(request):
                 else:
                     item['type'] = 'file'
                     item['url'] = file_url
+
+            elif upload.aws_url:
+                item['url'] = upload.aws_url
+                ext = upload.aws_url.split('.')[-1].lower() if '.' in upload.aws_url else ''
+                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
+                    item['type'] = 'video'
+                else:
+                    item['type'] = 'file'
 
             # 3. Check video_id relation
             elif upload.video_id:

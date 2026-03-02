@@ -1,0 +1,706 @@
+{% extends "church/user_index.html" %}
+
+{% block title %}Pending Assignments{% endblock %}
+{% block body_class %}no-right{% endblock %}
+{% block middle %}
+
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+
+{% else %}
+
+<div class="details-card">
+    <div class="card-header">
+        <h2 class="card-title"><i class="bi bi-hourglass-split"></i> Pending Assignments</h2>
+    </div>
+
+    <!-- Table Controls -->
+    <div class="table-controls">
+        <div class="entries-control">
+            <span>Show</span>
+            <select class="entries-select" id="entriesSelect">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>entries</span>
+        </div>
+        <div class="search-control">
+            <label><i class="bi bi-search"></i> Search:</label>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search assignments...">
+        </div>
+    </div>
+
+    <!-- Advanced Table -->
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="sortTable(0)">
+                        <div class="th-content">
+                            Assignment
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(1)">
+                        <div class="th-content">
+                            Subject
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(2)">
+                        <div class="th-content">
+                            Due Date
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(3)">
+                        <div class="th-content">
+                            Status
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% if pending_assignments %}
+                {% for assignment in pending_assignments %}
+                <tr>
+                    <td>{{ assignment.assignment.assignment_name }}</td>
+
+                    <td>{{ assignment.assignment.subject.subject_name }}</td>
+
+                    <td>{{ assignment.submission_date}}</td>
+
+                    <td>
+                        <span class="status-badge pending"><i class="bi bi-hourglass"></i> Pending</span>
+                    </td>
+
+                    <td>
+                        <a href="{% url 'submit_assignment' assignment.id %}" class="action-btn submit-btn">
+                            <i class="bi bi-upload"></i> Submit
+                        </a>
+                    </td>
+                </tr>
+
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" class="no-data">
+                        <div class="no-data-content">
+                            <!-- <div class="no-data-icon">🎉</div> -->
+                            <p class=""><i class="bi bi-check-circle-fill text-success"></i> No pending assignments</p>
+                            <!-- <span class="no-data-subtitle">Great job! You're all caught up with your assignments.</span> -->
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <div class="pagination-info">
+            Showing <span id="startEntry">0</span> to <span id="endEntry">0</span> of <span id="totalEntries">0</span>
+            entries
+        </div>
+        <div class="pagination-controls">
+            <button class="pagination-btn" id="prevBtn" disabled>◄ Previous</button>
+            <div class="pagination-pages" id="paginationPages">
+                <button class="page-btn active">1</button>
+            </div>
+            <button class="pagination-btn" id="nextBtn" disabled>Next ►</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ——————————————
+   BASE STYLES
+   —————————————— */
+    .filter-section {
+        background: var(--bg-gray);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .filter-select {
+        padding: 10px 14px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: var(--white);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .entries-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .entries-select {
+        padding: 8px 12px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+    }
+
+    .search-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-input {
+        padding: 10px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        min-width: 250px;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    .data-table thead {
+        background: linear-gradient(135deg, var(--light-blue), var(--sky-blue));
+    }
+
+    .data-table th {
+        padding: 16px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* ——————————————————————
+   ✨ STATUS BADGES
+   —————————————————————— */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-badge.pending {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border: 1px solid #fbbf24;
+    }
+
+    .status-badge.overdue {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 1px solid #f87171;
+        animation: pulse-red 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-red {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+        }
+    }
+
+    /* ——————————————————————
+   ✨ ACTION BUTTONS
+   —————————————————————— */
+    .action-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: 1px solid #2563eb;
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* ——————————————————————
+   ✨ NO DATA STATE
+   —————————————————————— */
+    .no-data {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border: none !important;
+    }
+
+    .no-data-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 2rem;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .no-data-icon {
+        font-size: 5rem;
+        margin-bottom: 0.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .no-data-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .no-data-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    /* ——————————————————————
+   ✨ PAGINATION
+   —————————————————————— */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-card);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .pagination-info span {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .pagination-btn {
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: var(--bg-page);
+    }
+
+    .pagination-pages {
+        display: flex;
+        gap: 0.375rem;
+    }
+
+    .page-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-btn:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+    }
+
+    /* ——————————————————————
+   TABLE COLUMN WIDTHS
+   —————————————————————— */
+    .data-table {
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 30%;
+        /* Assignment */
+    }
+
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+        width: 20%;
+        /* Subject */
+    }
+
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+        width: 20%;
+        /* Due Date */
+    }
+
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+        width: 15%;
+        /* Status */
+    }
+
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+        width: 15%;
+        /* Action */
+    }
+
+    /* ——————————————————————
+   MOBILE RESPONSIVE
+   —————————————————————— */
+    @media screen and (max-width: 968px) {
+        .container {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .container>div:first-child {
+            order: 1;
+        }
+
+        .middle-column {
+            order: 2 !important;
+            width: 100%;
+        }
+
+        .right-column {
+            display: none !important;
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .pagination-info {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-data-content {
+            padding: 3rem 1.5rem;
+        }
+
+        .no-data-icon {
+            font-size: 4rem;
+        }
+
+        .no-data-title {
+            font-size: 1.25rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.9375rem;
+        }
+    }
+
+    @media screen and (max-width: 576px) {
+        .table-controls {
+            gap: 12px;
+        }
+
+        .search-input {
+            min-width: 100%;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            min-width: 600px !important;
+            table-layout: auto;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 10px;
+            font-size: 0.8125rem;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .no-data-content {
+            padding: 2.5rem 1rem;
+        }
+
+        .no-data-icon {
+            font-size: 3.5rem;
+        }
+
+        .no-data-title {
+            font-size: 1.125rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.875rem;
+        }
+
+        .pagination-wrapper {
+            padding: 1rem 0.75rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .page-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.8125rem;
+        }
+
+        .pagination-info {
+            font-size: 0.8125rem;
+        }
+    }
+
+    @media screen and (max-width: 400px) {
+        .no-data-icon {
+            font-size: 3rem;
+        }
+
+        .no-data-title {
+            font-size: 1rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.8125rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.625rem;
+            font-size: 0.75rem;
+        }
+
+        .page-btn {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.75rem;
+        }
+
+        .data-table {
+            min-width: 550px !important;
+        }
+    }
+</style>
+
+<script>
+    let sortDirection = {};
+
+    function sortTable(columnIndex) {
+        const table = document.querySelector('.data-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('.no-data'));
+
+        if (rows.length === 0) return;
+
+        const direction = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+        sortDirection[columnIndex] = direction;
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].textContent.trim();
+            const bText = b.cells[columnIndex].textContent.trim();
+
+            // Special handling for date column (index 2)
+            if (columnIndex === 2) {
+                const aDate = new Date(aText);
+                const bDate = new Date(bText);
+                return direction === 'asc' ? aDate - bDate : bDate - aDate;
+            }
+
+            return direction === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('.sort-icon').forEach((icon, idx) => {
+            icon.innerHTML = idx === columnIndex ? (direction === 'asc' ? '<i class="bi bi-caret-up-fill"></i>' : '<i class="bi bi-caret-down-fill"></i>') : '<i class="bi bi-arrow-down-up"></i>';
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.data-table tbody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.no-data')) return;
+            row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+    });
+</script>
+
+{% endif %}
+{% endblock %}
+
+{% block right %}
+<style>
+    .stats-card {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px;
+        background: var(--bg-gray);
+        border-radius: 10px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+</style>
+{% endblock %}

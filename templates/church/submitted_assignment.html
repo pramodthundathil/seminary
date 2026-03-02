@@ -1,0 +1,684 @@
+{% extends "church/user_index.html" %}
+
+{% block title %}Query Management{% endblock %}
+{% block body_class %}no-right{% endblock %}
+{% block middle %}
+{% if error %}
+<div style="
+    padding: 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+">
+    {{ error }}
+</div>
+
+{% else %}
+
+<div class="details-card">
+    <div class="card-header">
+        <h2 class="card-title"><i class="bi bi-clipboard-check"></i> Submitted Assignments</h2>
+    </div>
+
+    <!-- Table Controls -->
+    <div class="table-controls">
+        <div class="entries-control">
+            <span>Show</span>
+            <select class="entries-select" id="entriesSelect">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>entries</span>
+        </div>
+        <div class="search-control">
+            <label><i class="bi bi-search"></i> Search:</label>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search assignments...">
+        </div>
+    </div>
+
+    <!-- Advanced Table -->
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="sortTable(0)">
+                        <div class="th-content">
+                            Assignment
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(1)">
+                        <div class="th-content">
+                            Subject
+                            <span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(2)">
+                        <div class="th-content">
+                            Submitted On
+                        </div>
+                    </th>
+                    <th class="sortable" onclick="sortTable(3)"></th>
+                    <th class="sortable" onclick="sortTable(4)"></th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% if submitted_assignments %}
+                {% for s in submitted_assignments %}
+                <tr>
+                    <td>{{ s.assignment.assignment_name }}</td>
+
+                    <td>{{ s.assignment.subject.subject_name }}</td>
+
+                    <td>{{ s.submitted_on|date:"d M Y, h:i A" }}</td>
+
+                    <td>
+                        <button type="button" class="action-btn btn btn-info" data-bs-toggle="modal"
+                            data-bs-target="#viewAnswerModal{{ s.id }}">
+                            <i class="bi bi-eye"></i> View Answer
+                        </button>
+
+                        <!-- View Answer Modal -->
+                        <div class="modal fade" id="viewAnswerModal{{ s.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Answer: {{ s.assignment.assignment_name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <strong>Submitted On:</strong> {{ s.submitted_on|date:"d M Y, h:i A" }}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <strong>Mark:</strong> {{ s.submitted_answer.marks_optained }}
+                                        </div>
+
+
+                                        <hr>
+
+                                        {% if s.assignment.assignment_type == 'Paper Upload Type' %}
+                                        <div class="text-center p-4">
+                                            {% if s.submitted_answer.answer_file %}
+                                            <i class="bi bi-file-earmark-text display-1 text-primary mb-3"></i>
+                                            <br>
+                                            <a href="{{ s.submitted_answer.answer_file.url }}" target="_blank"
+                                                class="btn btn-primary">
+                                                <i class="bi bi-download"></i> Download / View File
+                                            </a>
+                                            {% else %}
+                                            <p class="text-danger">File not found.</p>
+                                            {% endif %}
+                                        </div>
+                                        {% elif s.assignment.assignment_type == 'Paper Submit Type' %}
+                                        <div class="p-3 bg-light rounded" style="min-height: 200px;">
+                                            <label class="fw-bold mb-2">Your Answer:</label>
+                                            <div>
+                                                {{ s.submitted_answer.answer_text|safe }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><!-- Extra column kept for spacing/structure if needed --></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" class="no-data">
+                        <div class="no-data-content">
+                            <!-- <div class="no-data-icon">📭</div> -->
+                            <p class=""><i class="bi bi-inbox"></i> No submitted assignments</p>
+                            <!-- <span class="no-data-subtitle">You have not submitted any assignments yet.</span> -->
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <div class="pagination-info">
+            Showing <span id="startEntry">0</span> to <span id="endEntry">0</span> of <span id="totalEntries">0</span>
+            entries
+        </div>
+        <div class="pagination-controls">
+            <button class="pagination-btn" id="prevBtn" disabled>◄ Previous</button>
+            <div class="pagination-pages" id="paginationPages">
+                <button class="page-btn active">1</button>
+            </div>
+            <button class="pagination-btn" id="nextBtn" disabled>Next ►</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ——————————————
+   YOUR ORIGINAL STYLES (unchanged)
+   —————————————— */
+    .filter-section {
+        background: var(--bg-gray);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .filter-select {
+        padding: 10px 14px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: var(--white);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .entries-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .entries-select {
+        padding: 8px 12px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+    }
+
+    .search-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-input {
+        padding: 10px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        min-width: 250px;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    .data-table thead {
+        background: linear-gradient(135deg, var(--light-blue), var(--sky-blue));
+    }
+
+    .data-table th {
+        padding: 16px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* ——————————————————————
+   ✨ IMPROVED NO DATA STATE
+   —————————————————————— */
+    .no-data {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border: none !important;
+    }
+
+    .no-data-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 2rem;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .no-data-icon {
+        font-size: 5rem;
+        margin-bottom: 0.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .no-data-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .no-data-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    /* ——————————————————————
+   ✨ IMPROVED PAGINATION
+   —————————————————————— */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-card);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .pagination-info span {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .pagination-btn {
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: var(--bg-page);
+    }
+
+    .pagination-pages {
+        display: flex;
+        gap: 0.375rem;
+    }
+
+    .page-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-btn:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+    }
+
+    /* ——————————————————————
+   ✓ MOBILE STACKING + TABLE WIDTH
+   —————————————————————— */
+    @media screen and (max-width: 968px) {
+        .container {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .container>div:first-child {
+            order: 1;
+        }
+
+        .middle-column {
+            order: 2 !important;
+            width: 100%;
+        }
+
+        .right-column {
+            display: none !important;
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .pagination-info {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-data-content {
+            padding: 3rem 1.5rem;
+        }
+
+        .no-data-icon {
+            font-size: 4rem;
+        }
+
+        .no-data-title {
+            font-size: 1.25rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.9375rem;
+        }
+    }
+
+    /* ——————————————————————
+   ✓ MOBILE TABLE WIDTH FIX
+   —————————————————————— */
+    @media screen and (max-width: 576px) {
+        .table-controls {
+            gap: 12px;
+        }
+
+        .search-input {
+            min-width: 100%;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            min-width: 500px !important;
+            table-layout: auto;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 10px;
+            font-size: 0.8125rem;
+        }
+
+        .no-data-content {
+            padding: 2.5rem 1rem;
+        }
+
+        .no-data-icon {
+            font-size: 3.5rem;
+        }
+
+        .no-data-title {
+            font-size: 1.125rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.875rem;
+        }
+
+        .pagination-wrapper {
+            padding: 1rem 0.75rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .page-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.8125rem;
+        }
+
+        .pagination-info {
+            font-size: 0.8125rem;
+        }
+    }
+
+    @media screen and (max-width: 400px) {
+        .no-data-icon {
+            font-size: 3rem;
+        }
+
+        .no-data-title {
+            font-size: 1rem;
+        }
+
+        .no-data-subtitle {
+            font-size: 0.8125rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.625rem;
+            font-size: 0.75rem;
+        }
+
+        .page-btn {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<script>
+    let sortDirection = {};
+
+    function sortTable(columnIndex) {
+        const table = document.querySelector('.data-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('.no-data'));
+
+        if (rows.length === 0) return;
+
+        const direction = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+        sortDirection[columnIndex] = direction;
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].textContent.trim();
+            const bText = b.cells[columnIndex].textContent.trim();
+            return direction === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('.sort-icon').forEach((icon, idx) => {
+            icon.innerHTML = idx === columnIndex ? (direction === 'asc' ? '<i class="bi bi-caret-up-fill"></i>' : '<i class="bi bi-caret-down-fill"></i>') : '<i class="bi bi-arrow-down-up"></i>';
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.data-table tbody tr');
+        rows.forEach(row => {
+            if (row.querySelector('.no-data')) return;
+            row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% block right %}
+<style>
+    .stats-card {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px;
+        background: var(--bg-gray);
+        border-radius: 10px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    /* TABLE ALWAYS FULL WIDTH */
+    .data-table {
+        width: 100% !important;
+        table-layout: fixed;
+    }
+
+    /* COLUMN WIDTH RATIO (ALL SCREENS) */
+    .data-table th:nth-child(1),
+    .data-table td:nth-child(1) {
+        width: 40%;
+        /* Assignment */
+    }
+
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+        width: 30%;
+        /* Subject */
+    }
+
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3) {
+        width: 20%;
+        /* Submitted On */
+    }
+
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4),
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+        width: 5%;
+        /* empty icons/buttons */
+    }
+
+    /* MOBILE — TABLE STILL 100% WIDTH */
+    @media screen and (max-width: 576px) {
+        .data-table {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+    }
+
+
+    @media screen and (max-width: 576px) {
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100% !important;
+            /* full width */
+            min-width: 100% !important;
+            /* no extra scroll */
+            table-layout: fixed;
+        }
+    }
+</style>
+{% endblock %}
