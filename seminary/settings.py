@@ -35,7 +35,7 @@ PAYPAL_CLIENT_SECRET = "EIKuqztjf9XAIb7cfgwk9XHAfqBB1Cf04sh35HxWBjFwHosgOpKL0KIA
 SECRET_KEY = 'django-insecure-7cg!gvx@8ej(2wr_8c_oeyv%ecn=km6rvb3cqw@r*3qhwx*v7('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
