@@ -12,6 +12,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/student/index.css' %}">
     
@@ -27,6 +30,47 @@
         .dropdown-item i { margin-right: 0.5rem; }
         .navbar-toggler { border: none; padding: 0; }
         .navbar-toggler:focus { box-shadow: none; }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+        
+        @media (min-width: 992px) {
+            .container {
+                flex-direction: row;
+                padding: 0 2rem;
+            }
+            .left-column { width: 300px; flex-shrink: 0; }
+            .middle-column { flex-grow: 1; min-width: 0; }
+            .no-left .left-column { display: none; }
+            .no-left .middle-column { width: 100%; }
+        }
+        
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #00CED1 0%, #008B8B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 3rem;
+        }
+        .profile-name { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
+        .profile-id { color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; }
     </style>
 </head>
 
@@ -57,9 +101,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'church_user_assignments' %}" class="nav-link {% if request.resolver_match.url_name == 'church_user_assignments' %}active{% endif %}">
-                        <i class="bi bi-journal-check"></i> Assignments
+                    <a class="nav-link" onclick="toggleDropdown(event, this)">
+                        <i class="bi bi-journal-check"></i> Assignments <i class="bi bi-chevron-down" style="font-size: 0.8em; margin-left:auto;"></i>
                     </a>
+                    <div class="dropdown">
+                        <a href="{% url 'church_user_assignments' %}"><i class="bi bi-list-task"></i> Course Assignments</a>
+                        <a href="{% url 'church_user_submitted_assignment' %}"><i class="bi bi-check2-square"></i> Submitted Assignments</a>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'church_user_recordings' %}" class="nav-link {% if request.resolver_match.url_name == 'church_user_recordings' %}active{% endif %}">
@@ -85,8 +133,26 @@
     <br><br>
 
     <!-- Main Container -->
-    <div class="container-fluid py-4" style="margin-top: 60px;">
-        {% block content %}{% endblock %}
+    <div class="container {% if request.resolver_match.url_name != 'church_user_home' %}no-left{% endif %}">
+        <!-- Left Column - Profile -->
+        <div class="left-column" {% if request.resolver_match.url_name != 'church_user_home' %}style="display:none;"{% endif %}>
+            <div class="profile-card">
+                <div class="profile-avatar"><i class="bi bi-person"></i></div>
+                <h2 class="profile-name">
+                    {% if student.first_name %}{{ student.first_name }}{% endif %}
+                    {% if student.middle_name %} {{ student.middle_name }}{% endif %}
+                    {% if student.last_name %} {{ student.last_name }}{% endif %}
+                </h2>
+                <p class="profile-id">{{ student.student_id|default:"-" }}</p>
+                <span class="role-badge bg-info text-white" style="padding: 5px 10px; border-radius: 12px; font-size: 0.8rem;"><i class="bi bi-bank"></i> Church User</span>
+            </div>
+        </div>
+
+        <!-- Middle Column - Details (template block) -->
+        <div class="middle-column w-100">
+            {% block middle %}{% endblock %}
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <!-- Bootstrap Bundle with Popper -->
@@ -140,5 +206,21 @@
             }
         }
     </script>
+
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                Swal.fire({
+                    icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% else %}success{% endif %}',
+                    title: '{% if message.tags == "error" %}Error{% elif message.tags == "warning" %}Warning{% else %}Success{% endif %}',
+                    text: '{{ message }}',
+                    confirmButtonText: 'OK'
+                });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+    
 </body>
 </html>

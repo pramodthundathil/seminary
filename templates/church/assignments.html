@@ -1,4 +1,5 @@
 {% extends 'church/user_index.html' %}
+{% block body_class %}no-right{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
@@ -17,27 +18,31 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="py-3 px-4">Subject</th>
-                                <th class="py-3 px-4">Assignment No</th>
+                                <th class="py-3 px-4">Assignment Name</th>
                                 <th class="py-3 px-4">Type</th>
                                 <th class="py-3 px-4 text-center">Max Score</th>
-                                <th class="py-3 px-4 text-end">Date Added</th>
+                                <th class="py-3 px-4 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% if assignments %}
                                 {% for assignment in assignments %}
                                 <tr>
-                                    <td class="py-3 px-4 font-weight-bold">{{ assignment.subject.subject_name }}</td>
-                                    <td class="py-3 px-4 text-muted">{{ assignment.assignment_number|default:"N/A" }}</td>
+                                    <td class="py-3 px-4">{{ assignment.subject.subject_name }}</td>
+                                    <td class="py-3 px-4 font-weight-bold">{{ assignment.assignment_name }}</td>
                                     <td class="py-3 px-4">
                                         <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2">
                                             <i class="bi bi-tag-fill me-1"></i> {{ assignment.assignment_type|default:"General" }}
                                         </span>
                                     </td>
                                     <td class="py-3 px-4 text-center">
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">{{ assignment.maximum_score|default:"-" }} pts</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">{{ assignment.total_score|default:"-" }} pts</span>
                                     </td>
-                                    <td class="py-3 px-4 text-end text-muted small">{{ assignment.created_at|date:"M d, Y" }}</td>
+                                    <td class="py-3 px-4 text-center">
+                                        <a href="{% url 'church_user_view_assignment' assignment.id %}" class="btn btn-outline-primary btn-sm rounded-pill btn-flat">
+                                            <i class="bi bi-eye"></i> View details
+                                        </a>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             {% else %}

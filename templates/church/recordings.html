@@ -1,15 +1,18 @@
 {% extends 'church/user_index.html' %}
 {% load static %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h1 class="h3 mb-2 text-gray-800"><i class="bi bi-camera-video text-primary me-2"></i> {{ page_title }}</h1>
-        <p class="text-muted">Class recordings and videos provided by your Church Administrator.</p>
-    </div>
-</div>
+{% block body_class %}no-right{% endblock %}
 
-<div class="row g-4">
+{% block content %}
+<div class="row w-100">
+    <div class="col-12 mb-4">
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div class="card-header bg-white p-4" style="border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0;">
+                <h4 class="mb-0 text-primary"><i class="bi bi-camera-video me-2"></i> {{ page_title }}</h4>
+                <p class="text-muted mt-2 mb-0">Class recordings and videos provided by your Church Administrator.</p>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <div class="row g-4">
     {% if recordings %}
         {% for rec in recordings %}
         <div class="col-12 col-md-6 col-lg-4">
@@ -50,12 +53,16 @@
     {% else %}
         <!-- Empty state -->
         <div class="col-12">
-            <div class="text-center py-5 bg-white rounded-3 shadow-sm border border-light">
+            <div class="text-center py-5 bg-white rounded-3 border">
                 <div class="display-1 text-muted mb-3"><i class="bi bi-camera-video-off opacity-25"></i></div>
                 <h5 class="text-gray-800 font-weight-bold mb-2">No Recordings Found</h5>
                 <p class="text-muted mb-0">There are no class recordings available yet for your subjects.</p>
             </div>
         </div>
     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

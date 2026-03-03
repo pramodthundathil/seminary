@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from home.models import ChurchAdmins, Students, Branches, Subjects
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def church_user_home(request):
@@ -224,13 +227,113 @@ def church_user_assignments(request):
         return redirect('church_user_home')
 
 @login_required
+def church_user_view_assignment(request, assignment_id):
+    """
+    View to let a church user review details/questions about a single assignment.
+    """
+    try:
+        student = Students.objects.select_related("user").filter(user=request.user).first()
+        church_admin = student.user.church_admin if student and student.user else None
+        
+        if not student:
+            messages.error(request, "Unauthorized access.")
+            return redirect('signin')
+
+        from home.models import Assignments, AssignmentQuestions, StudentsAssignment, AssignmentAnswers
+        
+        assignment = get_object_or_404(Assignments, id=assignment_id)
+        questions = AssignmentQuestions.objects.filter(assignment=assignment).order_by('id')
+        
+        # Determine if logically assigned and if submitted
+        # We need to know if we've successfully submitted it
+        # Try to find an existing submission link record, or initialize one internally
+        student_assignment = StudentsAssignment.objects.filter(student=student, assignment=assignment).first()
+        submission = AssignmentAnswers.objects.filter(student=student, assignment=assignment).first() if student_assignment else None
+
+        
+        # If an action to submit was placed on the view
+        if request.method == "POST":
+            # Just mimicking the earlier logic for direct submission inside the viewer
+            if submission:
+                messages.warning(request, "You have already submitted this assignment.")
+                return redirect('church_user_view_assignment', assignment_id=assignment.id)
+                
+            with transaction.atomic():
+                # Verify student_assignment relation exists, if not create it
+                if not student_assignment:
+                    student_assignment = StudentsAssignment.objects.create(
+                        student=student, 
+                        assignment=assignment,
+                        created_by=request.user,
+                        updated_by=request.user
+                    )
+
+                assignment_type = assignment.assignment_type
+                answer_file_path = None
+                answer_text_content = None
+
+                if assignment_type in ('paper_upload', 'Paper Upload Type', 'Paper Upload type'):
+                    uploaded_file = request.FILES.get('answer_file')
+                    if not uploaded_file:
+                        messages.error(request, "Please upload a file.")
+                        return redirect('church_user_view_assignment', assignment_id=assignment.id)
+                    answer_file_path = uploaded_file 
+                    
+                elif assignment_type in ('paper_submit', 'Paper Submit Type', 'Paper Submit type'):
+                    if questions.exists():
+                        combined_answers = ""
+                        for index, q in enumerate(questions, 1):
+                            ans = request.POST.get(f'answer_text_{q.id}', '').strip()
+                            combined_answers += f"<strong>Q{index}: {q.question}</strong><br>"
+                            combined_answers += f"<p>{ans}</p><hr>"
+                        answer_text_content = combined_answers
+                    else:
+                        answer_text_content = request.POST.get('answer_text')
+
+                    if not answer_text_content:
+                        messages.error(request, "Please provide an answer.")
+                        return redirect('church_user_view_assignment', assignment_id=assignment.id)
+
+                AssignmentAnswers.objects.create(
+                    assignment=assignment,
+                    student=student,
+                    answer_file=answer_file_path,
+                    answer_text=answer_text_content,
+                    created_at=timezone.now()
+                )
+
+                student_assignment.submitted_on = timezone.now()
+                student_assignment.save()
+                
+                messages.success(request, "Assignment submitted successfully!")
+                return redirect('church_user_submitted_assignment')
+
+        context = {
+            "assignment": assignment,
+            "questions": questions,
+            "is_submitted": True if submission else False,
+            "submission": submission
+        }
+        return render(request, "church/view_assignment.html", context)
+        
+    except Exception as e:
+        logger.error(f"Error fetching assignment {assignment_id}: {e}")
+        messages.error(request, "Error fetching assignment details.")
+        return redirect('church_user_assignments')
+
+@login_required
 def church_user_recordings(request):
     """
     View to list all video recordings across all their branch subjects.
     """
     try:
         student = Students.objects.select_related("user").filter(user=request.user).first()
-        church_admin = student.user.church_admin if student and student.user else None
+        try:
+            church_admin = student.user.church_admin if student and student.user else None
+        except ObjectDoesNotExist:
+            church_admin = None
+        except Exception:
+            church_admin = None
         
         if not student or not church_admin:
             messages.error(request, "Unauthorized access.")
@@ -289,7 +392,10 @@ def church_user_recordings(request):
         return render(request, "church/recordings.html", {"recordings": recordings, "page_title": "Class Recordings"})
 
     except Exception as e:
-        messages.error(request, "Error fetching recordings.")
+        import traceback
+        error_msg = f"Error fetching recordings: {str(e)}\n\n{traceback.format_exc()}"
+        print(error_msg)
+        messages.error(request, f"Error fetching recordings: {str(e)}")
         return redirect('church_user_home')
 
 from django.http import JsonResponse
@@ -329,33 +435,16 @@ def church_user_change_password(request):
 
     return render(request, "church/change_password.html")
 
-@login_required
-def church_user_pending_assignment(request):
-    try:
-        student = Students.objects.select_related("user").filter(user=request.user).first()
-        if student is None:
-            return render(request, "church/pending_assignment.html", {"error": "Student not found"})
-    except Exception as e:
-        logger.error(f"Failed to fetch student for user {request.user.id}: {e}")
-        return render(request, "church/pending_assignment.html", {"error": "Database error while fetching student"})
 
-    try:
-        pending_assignments = StudentsAssignment.objects.filter(
-            student=student,
-            submitted_on__isnull=True
-        )
-    except Exception as e:
-        logger.error(f"Failed to fetch pending assignments for student {student.id}: {e}")
-        pending_assignments = []
-
-    return render(request, "church/pending_assignment.html", {"pending_assignments": pending_assignments})
 
 @login_required
 def church_user_submitted_assignment(request):
     try:
-        student = Students.objects.get(user=request.user)
+        student = Students.objects.select_related("user").get(user=request.user)
     except Students.DoesNotExist:
         return render(request, "church/submitted_assignment.html", {"error": "Student not found"})
+
+    from home.models import Assignments, AssignmentQuestions, StudentsAssignment, AssignmentAnswers
 
     try:
         submitted_assignments = StudentsAssignment.objects.filter(
@@ -388,7 +477,6 @@ def church_submit_assignment(request, pk):
         )
     except StudentsAssignment.DoesNotExist:
         messages.error(request, "Assignment not found.")
-        return redirect('church_user_pending_assignment')
     
     if student_assignment.submitted_on:
         messages.warning(request, "This assignment has already been submitted.")

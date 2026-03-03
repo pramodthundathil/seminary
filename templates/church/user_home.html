@@ -93,9 +93,7 @@
     }
 </style>
 
-<div class="row">
-    <div class="col-12 col-lg-8 mb-4">
-        <div class="details-card w-100">
+<div class="details-card w-100">
             <div class="card-header">
                 <h3 class="card-title"><i class="bi bi-person-lines-fill"></i> Student Information</h3>
             </div>
@@ -151,33 +149,31 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-12 col-lg-4">
-        <div class="alerts-card shadow-sm">
-            <div class="notifications-title">NOTIFICATIONS</div>
+{% endblock %}
 
-            {% if notifications %}
-            {% for n in notifications|slice:":5" %}
-            <div class="alert-item">
-                <div class="alert-icon"><i class="bi bi-bell"></i></div>
-                <p class="alert-text">
-                    <strong>{{ n.notification_type|default:"Alert" }}:</strong> {{ n.message }}
-                </p>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="no-alerts">No notifications found</div>
-            {% endif %}
+{% block right %}
+    <div class="alerts-card shadow-sm">
+        <div class="notifications-title">NOTIFICATIONS</div>
+
+        {% if notifications %}
+        {% for n in notifications|slice:":5" %}
+        <div class="alert-item">
+            <div class="alert-icon"><i class="bi bi-bell"></i></div>
+            <p class="alert-text">
+                <strong>{{ n.notification_type|default:"Alert" }}:</strong> {{ n.message }}
+            </p>
         </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-alerts">No notifications found</div>
+        {% endif %}
+    </div>
 
-        <div class="small-box shadow-sm mt-4 border-0" style="border-top: 1px solid #00CED1 !important;">
-            <div class="small-box-header">INSTRUCTORS</div>
+    <div class="small-box shadow-sm mt-4 border-0" style="border-top: 1px solid #00CED1 !important;">
+        <div class="small-box-header">INSTRUCTORS</div>
 
-            <div class="small-box-item mt-3">
-                <i class="bi bi-star-fill text-warning"></i> {{instructor_name|default:"No instructor assigned"}}
-            </div>
+        <div class="small-box-item mt-3">
+            <i class="bi bi-star-fill text-warning"></i> {{instructor_name|default:"No instructor assigned"}}
         </div>
     </div>
-</div>
 {% endblock %}

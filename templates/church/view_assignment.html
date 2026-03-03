@@ -1,0 +1,147 @@
+{% extends "church/user_index.html" %}
+
+{% block title %}View Assignment{% endblock %}
+
+{% block body_class %}no-right{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div class="card-header bg-white p-4" style="border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h4 class="mb-0 text-primary"><i class="bi bi-file-earmark-text me-2"></i>Assignment Details</h4>
+                <a href="{% url 'church_user_assignments' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to the Listing</a>
+            </div>
+            <div class="card-body p-4">
+
+                {% if error %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: '{{ error }}',
+                        });
+                    });
+                </script>
+                {% endif %}
+
+                <div class="assignment-info mb-4 p-3 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>Subject:</strong> {{ assignment.subject.subject_name }}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Assignment Name:</strong> {{ assignment.assignment_name }}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Type:</strong> 
+                            {% if assignment.assignment_type == 'paper_upload' or assignment.assignment_type == 'Paper Upload Type' or assignment.assignment_type == 'Paper Upload type' %}
+                            Paper Upload (File)
+                            {% else %}
+                            Paper Submit (Text)
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Total Marks:</strong> {{ assignment.total_score }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions/Instructions Section -->
+                <div class="mb-4">
+                    <h5 class="mb-3 border-bottom pb-2">Questions</h5>
+                    {% if questions %}
+                    <div class="questions-list">
+                        {% for q in questions %}
+                        <div class="question-item mb-3">
+                            <div class="fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No specific questions listed.</p>
+                    {% endif %}
+                </div>
+
+                {% if is_submitted %}
+                    <div class="alert alert-info border-info mt-4">
+                        <h5 class="text-info"><i class="bi bi-check-circle-fill me-2"></i> You have already submitted this assignment</h5>
+                        <hr class="border-info opacity-50">
+                        <p class="mb-2"><strong>Submitted on:</strong> {{ submission.created_at|date:"M d, Y h:i A" }}</p>
+                        {% if submission.answer_text %}
+                            <h6 class="mt-3">Your Answer:</h6>
+                            <div class="bg-white p-3 border rounded text-dark mt-2">
+                                {{ submission.answer_text|safe }}
+                            </div>
+                        {% endif %}
+                        {% if submission.answer_file %}
+                            <a href="{{ submission.answer_file.url }}" target="_blank" class="btn btn-primary mt-3">
+                                <i class="bi bi-file-earmark-arrow-down me-1"></i> View Submitted File
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <hr class="my-4">
+                    <h5 class="mb-3">Submit Your Answer</h5>
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'church_user_view_assignment' assignment.id %}">
+                        {% csrf_token %}
+
+                        {% if assignment.assignment_type == 'paper_upload' or assignment.assignment_type == 'Paper Upload Type' or assignment.assignment_type == 'Paper Upload type' %}
+                        <div class="mb-4">
+                            <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
+                            <input type="file" class="form-control" id="answer_file" name="answer_file" required>
+                            <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
+                        </div>
+                        
+                        {% elif assignment.assignment_type == 'paper_submit' or assignment.assignment_type == 'Paper Submit Type' or assignment.assignment_type == 'Paper Submit type' %}
+                            {% if questions %}
+                            <div class="mb-4">
+                                <p class="text-muted mb-2">Please answer the questions below:</p>
+                                {% for q in questions %}
+                                <div class="mb-4 p-3 border rounded bg-light">
+                                    <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
+                                    <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5" placeholder="Type your answer for Question {{ forloop.counter }}..."></textarea>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="mb-4">
+                                <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
+                                <textarea class="form-control" id="answer_text" name="answer_text" rows="10" placeholder="Type your answer here..." style="width: 100%;"></textarea>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="alert alert-warning">
+                            Unknown Assignment Type: "{{ assignment.assignment_type }}"
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-send-fill me-1"></i> Submit Assignment</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not is_submitted %}
+    {% if assignment.assignment_type == 'paper_submit' or assignment.assignment_type == 'Paper Submit Type' or assignment.assignment_type == 'Paper Submit type' %}
+        {% if not questions %}
+        <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                ClassicEditor
+                    .create(document.querySelector('#answer_text'))
+                    .catch(error => {
+                        console.error(error);
+                    });
+            });
+        </script>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+{% endblock %}

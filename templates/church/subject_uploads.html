@@ -1,5 +1,6 @@
 {% extends 'church/user_index.html' %}
 {% load static %}
+{% block body_class %}no-right{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item"><a href="{% url 'church_user_subjects' %}">Subjects</a></li>
@@ -139,9 +140,15 @@
                         </div>
                         <div class="action-btn">
                             {% if ref.reference_file %}
-                            <a href="{{ ref.reference_file.file_path.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                <i class="bi bi-cloud-download me-1"></i> Download
-                            </a>
+                                {% if ref.format == 'PDF' %}
+                                <button onclick="openPdfModal('{{ ref.reference_file.file_path.url }}', '{{ ref.title|escapejs }}')" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-eye me-1"></i> View
+                                </button>
+                                {% else %}
+                                <a href="{{ ref.reference_file.file_path.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-cloud-download me-1"></i> Download
+                                </a>
+                                {% endif %}
                             {% else %}
                             <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>No File</button>
                             {% endif %}
@@ -173,6 +180,10 @@
                                 <span><i class="bi bi-award"></i> Score: {{ assign.total_score }}</span>
                                 <span class="format-badge assignment">{{ assign.assignment_type|default:"Assignment" }}</span>
                             </div>
+                        <div class="action-btn">
+                            <a href="{% url 'church_user_view_assignment' assign.id %}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                <i class="bi bi-eye me-1"></i> View Assignment
+                            </a>
                         </div>
                     </div>
                     {% endfor %}
@@ -202,13 +213,13 @@
                         </div>
                         <div class="action-btn">
                             {% if rec.type == 'youtube' and rec.youtube_id %}
-                                <a href="https://www.youtube.com/watch?v={{ rec.youtube_id }}" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                <button onclick="openVideoModal('https://www.youtube.com/embed/{{ rec.youtube_id }}?rel=0&enablejsapi=1', '{{ rec.title|escapejs }}', true)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-youtube me-1"></i> Watch
-                                </a>
+                                </button>
                             {% elif rec.url %}
-                                <a href="{{ rec.url }}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                <button onclick="openVideoModal('{{ rec.url }}', '{{ rec.title|escapejs }}', false)" class="btn btn-outline-success btn-sm rounded-pill px-3">
                                     <i class="bi bi-play-fill me-1"></i> View Video
-                                </a>
+                                </button>
                             {% else %}
                                 <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>Unavailable</button>
                             {% endif %}
@@ -227,5 +238,72 @@
         </div>
     </div>
 </div>
+
+<!-- PDF Viewer Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">Document Viewer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light" style="height: 80vh; padding: 0;">
+                <iframe id="pdfIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoModalLabel">Video Viewer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light" id="videoModalBody" style="height: 70vh; padding: 0;">
+                <!-- Video player will be injected here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openPdfModal(url, title) {
+        document.getElementById('pdfModalLabel').innerText = title;
+        document.getElementById('pdfIframe').src = url;
+        var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+        pdfModal.show();
+    }
+
+    function openVideoModal(url, title, isYoutube) {
+        document.getElementById('videoModalLabel').innerText = title;
+        var body = document.getElementById('videoModalBody');
+        body.innerHTML = ''; // Clear existing content
+        
+        if (isYoutube) {
+            body.innerHTML = '<iframe src="' + url + '" style="width: 100%; height: 100%; border: none;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+        } else {
+            // Native HTML5 video with download disabled (controlsList="nodownload") and right-click to download disabled
+            body.innerHTML = '<video src="' + url + '" style="width: 100%; height: 100%; background: #000;" controls controlsList="nodownload" oncontextmenu="return false;" autoplay></video>';
+        }
+
+        var videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+        videoModal.show();
+    }
+
+    // Clear iframe src when modal is closed to stop audio/video and reset
+    document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('pdfModal');
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('pdfIframe').src = '';
+        });
+
+        var videoModalEl = document.getElementById('videoModal');
+        videoModalEl.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('videoModalBody').innerHTML = ''; // Destroy video instance
+        });
+    });
+</script>
 
 {% endblock %}
