@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from home.models import ChurchAdmins, Students, Branches, Subjects
+from django.utils import timezone
+from django.db.models import Sum
+from datetime import timedelta
+from home.models import ChurchAdmins, Students, Branches, Subjects, StudentsExams, Exams, StudentsAssignment
 import logging
 
 logger = logging.getLogger(__name__)
@@ -63,6 +66,7 @@ def church_user_home(request):
         return render(request, "church/user_home.html", context)
 
     except Exception as e:
+        logger.error(f"Dashboard error: {str(e)}", exc_info=True)
         messages.error(request, "Error fetching your dashboard information.")
         return redirect('signin')
 
@@ -142,7 +146,7 @@ def church_user_subject_uploads(request, subject_id):
         uploads = Uploads.objects.filter(
             subject=subject,
             status=True
-        ).select_related('youtube', 'media', 'video_id', 'video_id__youtube', 'video_id__media').order_by('-created_at')
+        ).select_related('youtube', 'media', 'video_id').order_by('-created_at')
         
         recordings = []
         for upload in uploads:
@@ -185,17 +189,53 @@ def church_user_subject_uploads(request, subject_id):
             
             recordings.append(item)
 
+        # 4. Fetch Exams for the subject
+        exams = Exams.objects.filter(subject=subject, deleted_at=None)
+        
+        # Determine status for each exam for this student
+        exam_list = []
+        for exam in exams:
+            # Check if there is an existing StudentsExams record
+            se = StudentsExams.objects.filter(student=student, exam=exam, deleted_at=None).first()
+            
+            status = "Not Started"
+            can_take = True
+            se_id = None
+            
+            if se:
+                se_id = se.id
+                if se.is_exam_ended:
+                    status = "Completed"
+                    can_take = False
+                elif se.is_exam_started:
+                    status = "Ongoing"
+                    can_take = True
+                else:
+                    status = "Ready"
+                    can_take = True
+            
+            exam_list.append({
+                "id": exam.id,
+                "se_id": se_id,
+                "name": exam.exam_name,
+                "duration": exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                "status": status,
+                "can_take": can_take
+            })
+
         context = {
             "subject": subject,
             "references": references,
             "assignments": assignments,
             "recordings": recordings,
+            "exams": exam_list,
             "page_title": f"Uploads - {subject.subject_name}"
         }
 
         return render(request, "church/subject_uploads.html", context)
 
     except Exception as e:
+        logger.error(f"Subject uploads error: {str(e)}", exc_info=True)
         messages.error(request, "An error occurred while loading subject resources.")
         return redirect('church_user_subjects')
 
@@ -612,6 +652,74 @@ def church_user_exam_hall(request):
         "exams_page": exams_page,
     })
 
+from django.utils.timezone import make_aware
+from datetime import datetime
+
+@login_required
+def church_user_start_exam(request, exam_id):
+    """
+    Directly start or resume an exam. Creates a StudentsExams record if one doesn't exist.
+    """
+    try:
+        student = Students.objects.filter(user=request.user).first()
+        if not student:
+             messages.error(request, "Student profile not found.")
+             return redirect('church_user_subjects')
+
+        exam = get_object_or_404(Exams, id=exam_id, deleted_at=None)
+        
+        # Find or create StudentsExams
+        student_exam, created = StudentsExams.objects.get_or_create(
+            student=student,
+            exam=exam,
+            deleted_at=None,
+            defaults={
+                'start_time': timezone.now(),
+                'is_approved': True,
+                'is_exam_started': True,
+                'timezone': 'UTC+05:30', 
+                'requested_by': request.user,
+                'created_by': request.user,
+                'updated_by': request.user,
+                'exam_duration': exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                'show_on_score': 0,
+            }
+        )
+        
+        if not created:
+            if student_exam.is_exam_ended:
+                messages.warning(request, "You have already completed this exam.")
+                return redirect('church_user_subject_uploads', subject_id=exam.subject.id)
+            
+            if not student_exam.is_exam_started:
+                student_exam.is_exam_started = True
+                student_exam.start_time = timezone.now()
+                student_exam.is_approved = True
+                student_exam.save()
+        
+        from home.models import ObjectiveAnswers, DescriptiveAnswers
+        
+        # Initialize empty answers if they don't exist
+        for obj_q in exam.objective_questions.all():
+            ObjectiveAnswers.objects.get_or_create(
+                assignment=student_exam,
+                question=obj_q,
+                defaults={'answer': '', 'mark': 0}
+            )
+
+        for desc_q in exam.descriptive_questions.all():
+            DescriptiveAnswers.objects.get_or_create(
+                assignment=student_exam,
+                question=desc_q,
+                defaults={'answer': '', 'mark': 0}
+            )
+
+        return redirect('church_user_take_exam', exam_id=student_exam.id)
+        
+    except Exception as e:
+        messages.error(request, f"Error starting exam: {str(e)}")
+        return redirect('church_user_subjects')
+
 @login_required
 def church_user_take_exam(request, exam_id):
     try:
@@ -637,6 +745,23 @@ def church_user_take_exam(request, exam_id):
     exam_obj = student_exam.exam
     objective_questions = exam_obj.objective_questions.all()
     descriptive_questions = exam_obj.descriptive_questions.all()
+    
+    from home.models import ObjectiveAnswers, DescriptiveAnswers
+    
+    # Ensure empty answers are perfectly initialized for this exam session
+    for obj_q in objective_questions:
+        ObjectiveAnswers.objects.get_or_create(
+            assignment=student_exam,
+            question=obj_q,
+            defaults={'answer': '', 'mark': 0}
+        )
+
+    for desc_q in descriptive_questions:
+        DescriptiveAnswers.objects.get_or_create(
+            assignment=student_exam,
+            question=desc_q,
+            defaults={'answer': '', 'mark': 0}
+        )
     
     if student_exam.exam_duration:
         exam_end_time = student_exam.start_time + timedelta(minutes=student_exam.exam_duration)

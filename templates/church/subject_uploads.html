@@ -77,6 +77,7 @@
     .format-badge.material { background-color: #cfe2ff; color: #084298; }
     .format-badge.assignment { background-color: #f8d7da; color: #842029; }
     .format-badge.video { background-color: #d1e7dd; color: #0f5132; }
+    .format-badge.exam { background-color: #e0f8ff; color: #007791; }
 
     .action-btn {
         margin-left: 1rem;
@@ -114,6 +115,9 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-bold" id="recordings-tab" data-bs-toggle="tab" data-bs-target="#recordings" type="button" role="tab" aria-controls="recordings" aria-selected="false">Class Recordings ({{ recordings|length }})</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab" aria-controls="exams" aria-selected="false">Exams ({{ exams|length }})</button>
             </li>
         </ul>
 
@@ -231,6 +235,46 @@
                         <i class="bi bi-camera-video fs-1 mb-3 d-block text-muted"></i>
                         <h4>No Class Recordings</h4>
                         <p>There are currently no recordings available for this subject.</p>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Exams Tab -->
+            <div class="tab-pane fade" id="exams" role="tabpanel" aria-labelledby="exams-tab">
+                {% if exams %}
+                    {% for ex in exams %}
+                    <div class="upload-card">
+                        <div class="upload-icon-wrapper" style="background:#e0f2fe; color:#0ea5e9;">
+                            <i class="bi bi-pencil-square fs-3"></i>
+                        </div>
+                        <div class="upload-details">
+                            <div class="upload-title">{{ ex.name }}</div>
+                            <div class="upload-meta">
+                                <span><i class="bi bi-clock"></i> Duration: {{ ex.duration }} mins</span>
+                                <span class="format-badge exam">{{ ex.status }}</span>
+                            </div>
+                        </div>
+                        <div class="action-btn">
+                            {% if ex.status == 'Completed' %}
+                                <a href="{% url 'church_user_score_card' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                    <i class="bi bi-file-earmark-check me-1"></i> View Score
+                                </a>
+                            {% elif ex.status == 'Ongoing' %}
+                                <a href="{% url 'church_user_take_exam' ex.se_id %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                                    <i class="bi bi-play-circle me-1"></i> Resume Exam
+                                </a>
+                            {% else %}
+                                <a href="{% url 'church_user_start_exam' ex.id %}" onclick="return confirm('Are you sure you want to start this exam? Your timer will begin immediately.');" class="btn btn-primary btn-sm rounded-pill px-3">
+                                    <i class="bi bi-play-circle me-1"></i> Take Exam
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-pencil-square fs-1 mb-3 d-block text-muted"></i>
+                        <h4>No Exams</h4>
+                        <p>There are currently no exams available for this subject.</p>
                     </div>
                 {% endif %}
             </div>

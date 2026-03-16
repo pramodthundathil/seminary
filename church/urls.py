@@ -17,6 +17,7 @@ urlpatterns = [
     path('user-dashboard/take-exam/<int:exam_id>/', views.church_user_take_exam, name='church_user_take_exam'),
     path('user-dashboard/submit-exam/<int:exam_id>/', views.church_user_submit_exam, name='church_user_submit_exam'),
     path('user-dashboard/score-card/', views.church_user_score_card, name='church_user_score_card'),
+    path('user-dashboard/start-exam/<int:exam_id>/', views.church_user_start_exam, name='church_user_start_exam'),
     path('user-dashboard/profile/', views.church_user_profile_view, name='church_user_profile_view'),
     path('user-dashboard/doubts-answers/', views.church_user_doubts_answers, name='church_user_doubts_answers'),
     path('user-dashboard/support/create/', views.church_user_support_create, name='church_user_support_create'),

@@ -114,6 +114,15 @@
                         <i class="bi bi-camera-video"></i> Class Recordings
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="toggleDropdown(event, this)">
+                        <i class="bi bi-pencil-square"></i> Exams <i class="bi bi-chevron-down" style="font-size: 0.8em; margin-left:auto;"></i>
+                    </a>
+                    <div class="dropdown">
+                        <a href="{% url 'church_user_exam_hall' %}"><i class="bi bi-building-check"></i> Exam Hall</a>
+                        <a href="{% url 'church_user_score_card' %}"><i class="bi bi-file-earmark-check"></i> Score Card</a>
+                    </div>
+                </li>
             
                 <li class="nav-item" style="margin-left: 1rem; position: relative;">
                     <div class="user-profile-header" onclick="toggleUserDropdown(event)">

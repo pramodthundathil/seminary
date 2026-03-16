@@ -641,7 +641,7 @@
                 <p>You have no scheduled exams</p>
             </div>
         </div>
-        <button class="request-exam-btn" onclick="location.href='request-exam/'">Request Exam</button>
+        <button class="request-exam-btn" onclick="location.href='{% url 'church_user_subjects' %}'">Take New Exam</button>
     </div>
 
     <!-- Table Section -->
@@ -686,11 +686,11 @@
 
                     <td data-label="Action">
                         {% if e.can_start %}
-                        <a href="{% url 'take_exam' e.id %}" class="action-btn"
+                        <a href="{% url 'church_user_take_exam' e.id %}" onclick="return confirm('Are you sure you want to start or resume this exam?');" class="action-btn"
                             style="background:#10b981; color:white; padding:8px 12px; text-decoration:none; display:inline-block;">Start
                             Exam</a>
                         {% elif e.status == "Completed" %}
-                        <a href="{% url 'student_score_card' %}" class="action-btn" style="color:#3b82f6;">View
+                        <a href="{% url 'church_user_score_card' %}" class="action-btn" style="color:#3b82f6;">View
                             Result</a>
                         {% else %}
                         
