@@ -31,6 +31,7 @@ urlpatterns = [
     path('request-exam/submit/', views.submit_request_exam, name='submit-request-exam'),
     path("take-exam/<int:exam_id>/", views.take_exam, name="take_exam"),
     path("submit-exam/<int:exam_id>/", views.submit_exam, name="submit_exam"),
+    path("reschedule-exam/", views.student_reschedule_exam, name="student_reschedule_exam"),
     path("payment-input/", views.student_payment_input, name="student_payment_input"),
 
     path("confirm-payment/", views.student_confirm_payment, name="student_confirm_payment"),

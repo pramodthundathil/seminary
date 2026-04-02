@@ -466,7 +466,7 @@ def student_exam_hall(request):
         student = (
             Students.objects
             .select_related('course_applied')
-            .only('id', 'course_applied__course_name')
+            .only('id', 'course_applied__course_name', 'timezone')
             .get(user=request.user)
         )
     except Students.DoesNotExist:
@@ -484,9 +484,12 @@ def student_exam_hall(request):
             "exam__exam_name",
             "exam__subject__subject_name",
             "created_at",
+            "start_time",
+            "timezone",
             "is_exam_started",
             "is_exam_ended",
-            "is_approved", # Added is_approved
+            "is_approved",
+            "is_rescheduled",
         )
         .order_by('-created_at')  # Order by most recent first
     )
@@ -517,12 +520,22 @@ def student_exam_hall(request):
                 status = "Ongoing"
                 action = "Start"
                 can_start = True
-            # 3. Not Approved but time reached (Pending Approval)
+            # 3. Approved and Not Ready (Future time)
+            elif e.is_approved:
+                status = "Approved"
+                action = "Wait"
+                can_start = False
+            # 4. Rescheduled
+            elif e.is_rescheduled and not e.is_approved:
+                status = "Rescheduled"
+                action = "Wait"
+                can_start = False
+            # 5. Not Approved but time reached (Late Approval)
             elif not e.is_approved and e.start_time and e.start_time <= now:
                 status = "Pending Approval"
                 action = "Wait"
                 can_start = False
-            # 4. Future / Other Pending
+            # 6. Future / Other Pending
             else:
                 status = "Pending"
                 action = "Wait"
@@ -539,16 +552,63 @@ def student_exam_hall(request):
             "requested_time": e.start_time, # Should use start_time which is the scheduled time
             "timezone": e.timezone,
             "status": status,
+            "is_rescheduled": e.is_rescheduled,
+            "is_approved": e.is_approved,
+            "is_exam_ended": e.is_exam_ended,
             "can_start": can_start,
             "action": action
         })
 
+    import pytz
     return render(request, "student/exam_hall.html", {
+        "student": student,
         "exam_list": exam_list,
         "paginator": paginator,
         "exams_page": exams_page,
+        "timezones": pytz.all_timezones,
         "request_exam_url": "/student/request-exam/",
     })
+
+@login_required
+@student_or_church_user
+@require_POST
+def student_reschedule_exam(request):
+    try:
+        exam_id = request.POST.get("exam_id")
+        exam_date = request.POST.get("examDate")
+        start_time = request.POST.get("startTime")
+        timezone_val = request.POST.get("timezone")
+
+        if not all([exam_id, exam_date, start_time, timezone_val]):
+            return JsonResponse({"status": "error", "message": "All fields are required"}, status=400)
+
+        # Get student and verify exam ownership
+        student = Students.objects.get(user=request.user)
+        student_exam = get_object_or_404(StudentsExams, id=exam_id, student=student)
+
+        # Combine date + time
+        try:
+            datetime_str = f"{exam_date} {start_time}"
+            final_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            final_datetime = make_aware(final_datetime)
+        except ValueError:
+            return JsonResponse({"status": "error", "message": "Invalid date or time format"}, status=400)
+
+        # Update the exam record
+        student_exam.start_time = final_datetime
+        student_exam.timezone = timezone_val
+        student_exam.is_approved = False
+        student_exam.is_rescheduled = True
+        student_exam.updated_by = request.user
+        student_exam.save()
+
+        return JsonResponse({"status": "success", "message": "Exam rescheduled successfully. Waiting for admin approval."})
+
+    except Students.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Student not found"}, status=404)
+    except Exception as e:
+        logger.error(f"Failed to reschedule exam: {str(e)}")
+        return JsonResponse({"status": "error", "message": f"Failed to reschedule exam: {str(e)}"}, status=500)
 
 
 

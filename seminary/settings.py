@@ -272,7 +272,7 @@ LOGGING = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 
@@ -296,6 +296,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Session settings for inactivity timeout
+SESSION_COOKIE_AGE = 600  # 10 minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 LOGIN_URL = '/signin/'
 

@@ -49,7 +49,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ page.description|truncatewords:15|striptags|default:"-" }}
+                        {{ page.description|truncatewords:15|striptags|default:"-"|safe }}
                     </td>
                     <td>
                         {% if page.status %}

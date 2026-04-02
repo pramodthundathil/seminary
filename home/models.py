@@ -91,9 +91,20 @@ class Users(AbstractBaseUser, PermissionsMixin):
     class Meta:
         managed = True  # ✅ because the table already exists
         db_table = 'users'
+        ordering = ['name']
 
     def __str__(self):
         return f'{self.username or ""} ({self.email or ""})'
+
+    def check_password(self, raw_password):
+        import bcrypt
+        if self.password and (self.password.startswith('$2y$') or self.password.startswith('$2a$') or self.password.startswith('$2b$')):
+            try:
+                if bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8')):
+                    return True
+            except Exception:
+                pass
+        return super().check_password(raw_password)
 
 
 
@@ -125,6 +136,7 @@ class Roles(models.Model):
     class Meta:
         managed = True
         db_table = 'roles'
+        ordering = ['name']
 
     def __str__(self):
         return str(self.name or "")
@@ -173,6 +185,7 @@ class AdminPages(models.Model):
     class Meta:
         managed = True
         db_table = 'admin_pages'
+        ordering = ['title']
     def __str__(self):
         return f'{self.title or ""} - order {self.menu_order or 0}'  
 
@@ -197,6 +210,7 @@ class Assignments(models.Model):
     class Meta:
         managed = True
         db_table = 'assignments'
+        ordering = ['assignment_name']
 
     def __str__(self):
         return str(self.assignment_name or "")
@@ -266,6 +280,7 @@ class Books(models.Model):
     class Meta:
         managed = True
         db_table = 'books'
+        ordering = ['book_name']
 
     def __str__(self):
         return str(self.book_name or "")
@@ -297,6 +312,7 @@ class BookReferences(models.Model):
     class Meta:
         managed = True
         db_table = 'book_references'
+        ordering = ['title']
 
     def __str__(self):
         return str(self.title or "")
@@ -316,6 +332,7 @@ class Branches(models.Model):
     class Meta:
         managed = True
         db_table = 'branches'
+        ordering = ['branch_name']
 
     def __str__(self):
         return f"{str(self.branch_name or '')} - {str(self.branch_code or '')}"
@@ -340,6 +357,7 @@ class Categories(models.Model):
     class Meta:
         managed = True
         db_table = 'categories'
+        ordering = ['name']
 
     def __str__(self):
         return str(self.name or "")
@@ -363,6 +381,7 @@ class ChurchAdmins(models.Model):
     class Meta:
         managed = True
         db_table = 'church_admins'
+        ordering = ['name_of_church']
 
     def __str__(self):
         return str(self.name_of_church or "")
@@ -382,6 +401,7 @@ class ChurchLoginCodeSettings(models.Model):
     class Meta:
         managed = True
         db_table = 'church_login_code_settings'
+        ordering = ['name']
 
     def __str__(self):
         return str(self.name or "")
@@ -415,6 +435,7 @@ class Countries(models.Model):
     class Meta:
         managed = True
         db_table = 'countries'
+        ordering = ['name']
     
     def __str__(self):
         return str(self.name or "")
@@ -442,6 +463,7 @@ class Courses(models.Model):
     class Meta:
         managed = True
         db_table = 'courses'
+        ordering = ['course_name']
     def __str__(self):
         return str(self.course_name or "")
 
@@ -503,6 +525,7 @@ class Exams(models.Model):
     class Meta:
         managed = True
         db_table = 'exams'
+        ordering = ['exam_name']
 
     def __str__(self):
         return str(self.exam_name or "")
@@ -540,6 +563,7 @@ class Languages(models.Model):
     class Meta:
         managed = True
         db_table = 'languages'
+        ordering = ['language_name']
 
     def __str__(self):
         return str(self.language_name or "")
@@ -598,6 +622,7 @@ class Menus(models.Model):
     class Meta:
         managed = True
         db_table = 'menus'
+        ordering = ['name']
 
     def __str__(self):
         return str(self.name or "")
@@ -624,6 +649,7 @@ class MenuItems(models.Model):
     class Meta:
         managed = True
         db_table = 'menu_items'
+        ordering = ['title']
 
     def __str__(self):
         return str(self.title or "")
@@ -677,6 +703,7 @@ class News(models.Model):
     class Meta:
         managed = True
         db_table = 'news'
+        ordering = ['title']
 
     def __str__(self):
         return str(self.title or "")
@@ -805,6 +832,7 @@ class Pages(models.Model):
     class Meta:
         managed = True
         db_table = 'pages'
+        ordering = ['title']
     
     def __str__(self):
         return str(self.title or "")
@@ -976,6 +1004,7 @@ class Qualifications(models.Model):
     class Meta:
         managed = True
         db_table = 'qualifications'
+        ordering = ['qualification_name']
 
     def __str__(self):
         return str(self.qualification_name or "")
@@ -1061,6 +1090,7 @@ class Sliders(models.Model):
     class Meta:
         managed = True
         db_table = 'sliders'
+        ordering = ['slider_name']
 
     def __str__(self):
         return str(self.slider_name or "")
@@ -1094,6 +1124,7 @@ class Staffs(models.Model):
     class Meta:
         managed = True
         db_table = 'staffs'
+        ordering = ['staff_name']
 
     def save(self, *args, **kwargs):
         """Auto-generate staff_id if not exists"""
@@ -1195,6 +1226,7 @@ class Students(models.Model):
         managed = True
         db_table = 'students'
         unique_together = (('course_applied', 'user'),)
+        ordering = ['first_name']
 
     def __str__(self):
         return f"{self.first_name or ''} {self.last_name or ''}"
@@ -1263,6 +1295,7 @@ class StudentsExams(models.Model):
     timezone = models.CharField(max_length=50)
     requested_by = models.ForeignKey(Users,on_delete=models.SET_NULL, blank=True, null=True, related_name='exam_requested')
     is_approved = models.BooleanField(default=False)
+    is_rescheduled = models.BooleanField(default=False)
     reject_reason = models.TextField(blank=True, null=True)
     is_exam_started = models.BooleanField(default=False)
     is_exam_ended = models.BooleanField(default=False)
@@ -1359,6 +1392,7 @@ class Subjects(models.Model):
     class Meta:
         managed = True
         db_table = 'subjects'
+        ordering = ['subject_name']
 
     def __str__(self):
         return str(self.subject_name or "")
@@ -1430,6 +1464,7 @@ class Tags(models.Model):
     class Meta:
         managed = True
         db_table = 'tags'
+        ordering = ['name']
 
     def __str__(self):
         return str(self.name or "")
@@ -1455,6 +1490,7 @@ class Uploads(models.Model):
     class Meta:
         managed = True
         db_table = 'uploads'
+        ordering = ['upload_name']
 
     def __str__(self):
         return str(self.upload_name or "")
@@ -1476,6 +1512,7 @@ class Videos(models.Model):
     class Meta:
         managed = True
         db_table = 'videos'
+        ordering = ['title']
 
     def __str__(self):
         return str(self.title or "")

@@ -1327,15 +1327,9 @@ def signup_church_admin(request):
 
                     Your {role_display.lower()} account has been created successfully.
 
-                    Login Details:
-                    Email: {email}
-                    Username: {new_id}
-                    Temporary Password: {password}
-                    Church Code: {church_code}
+                    Please wait for approvel of Trinity Theological Seminary.
 
-                    Please log in and change your password immediately for security reasons.
-
-                    Login here: {request.build_absolute_uri('/signin/')}
+                    
 
                     Best regards,
                     Trinity Theological Seminary

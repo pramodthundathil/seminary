@@ -230,6 +230,30 @@
         });
     </script>
     {% endif %}
+    <script>
+        // Inactivity Logout Logic
+        (function() {
+            let timeout;
+            const inactivityTime = 10 * 60 * 1000; // 10 minutes
+
+            function logout() {
+                console.log("Inactivity detected. Logging out...");
+                window.location.href = "{% url 'signout' %}";
+            }
+
+            function resetTimer() {
+                clearTimeout(timeout);
+                timeout = setTimeout(logout, inactivityTime);
+            }
+
+            // Events to track user activity
+            window.onload = resetTimer;
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+            document.onclick = resetTimer;
+            document.onscroll = resetTimer;
+        })();
+    </script>
     
 </body>
 </html>

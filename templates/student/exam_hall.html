@@ -269,6 +269,11 @@
         background: #fee2e2;
         color: #991b1b;
     }
+    
+    .status-badge.rescheduled {
+        background: #ffedd5;
+        color: #9a3412;
+    }
 
     .action-buttons {
         display: flex;
@@ -679,6 +684,12 @@
                         <span class="status-badge approved">Completed</span>
                         {% elif e.status == "Ongoing" %}
                         <span class="status-badge ongoing">Ongoing</span>
+                        {% elif e.status == "Approved" %}
+                        <span class="status-badge approved">Approved</span>
+                        {% elif e.status == "Rescheduled" %}
+                        <span class="status-badge rescheduled">Rescheduled</span>
+                        {% elif e.status == "Pending Approval" %}
+                        <span class="status-badge pending">Pending Approval</span>
                         {% else %}
                         <span class="status-badge pending">Pending</span>
                         {% endif %}
@@ -693,8 +704,14 @@
                         <a href="{% url 'student_score_card' %}" class="action-btn" style="color:#3b82f6;">View
                             Result</a>
                         {% else %}
-                        
-                        <span style="font-size:12px; color:#9ca3af;">{{ e.action }}</span>
+                        <div class="action-buttons">
+                            {% if not e.is_exam_ended %}
+                            <button class="action-btn edit" onclick="openRescheduleModal({{ e.id }}, '{{ e.exam_name|escapejs }}')" title="Reschedule">
+                                <i class="bi bi-calendar-event"></i> Reschedule
+                            </button>
+                            {% endif %}
+                            <span style="font-size:12px; color:#9ca3af;">{{ e.action }}</span>
+                        </div>
                         {% endif %}
                     </td>
 
@@ -812,6 +829,55 @@
     {% endif %}
 
 </div>
+
+<!-- Reschedule Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold" id="rescheduleModalLabel">Reschedule Exam</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div id="rescheduleAlert" class="alert d-none" role="alert"></div>
+                <form id="rescheduleForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="exam_id" id="rescheduleExamId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Exam Name</label>
+                        <p id="rescheduleExamName" class="fw-bold mb-0 text-dark"></p>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="rescheduleDate" class="form-label small fw-semibold">New Date*</label>
+                            <input type="date" class="form-control" name="examDate" id="rescheduleDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="rescheduleTime" class="form-label small fw-semibold">New Time*</label>
+                            <input type="time" class="form-control" name="startTime" id="rescheduleTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label for="rescheduleTimezone" class="form-label small fw-semibold">Timezone*</label>
+                        <select class="form-select" name="timezone" id="rescheduleTimezone" required>
+                            {% for tz in timezones %}
+                            <option value="{{ tz }}" {% if student.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4 fw-semibold" id="confirmRescheduleBtn" onclick="submitReschedule()">Confirm Reschedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endif %}
 {% endblock %}
 {% block right %}
@@ -845,6 +911,62 @@
             const row = btn.closest("tr");
             if (row) row.remove();
         }
+    }
+
+    function openRescheduleModal(id, name) {
+        document.getElementById('rescheduleExamId').value = id;
+        document.getElementById('rescheduleExamName').innerText = name;
+        const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+        modal.show();
+    }
+
+    function submitReschedule() {
+        const form = document.getElementById('rescheduleForm');
+        const btn = document.getElementById('confirmRescheduleBtn');
+        const alert = document.getElementById('rescheduleAlert');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+        
+        const formData = new FormData(form);
+        
+        fetch("{% url 'student_reschedule_exam' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert.className = 'alert alert-success';
+                alert.innerText = data.message;
+                alert.classList.remove('d-none');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                alert.className = 'alert alert-danger';
+                alert.innerText = data.message;
+                alert.classList.remove('d-none');
+                btn.disabled = false;
+                btn.innerText = 'Confirm Reschedule';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert.className = 'alert alert-danger';
+            alert.innerText = 'An error occurred. Please try again.';
+            alert.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerText = 'Confirm Reschedule';
+        });
     }
 </script>
 {% endblock %}

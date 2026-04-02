@@ -1,6 +1,8 @@
 {% extends 'student/index.html' %}
 {% load static %}
 
+{% block body_class %}no-right{% endblock %}
+
 {% block middle %}
 <style>
     .book-card {
@@ -87,6 +89,25 @@
         background: #fff;
         border-radius: 12px;
         color: #6c757d;
+    }
+
+    /* Mobile Responsive - STACK BELOW PROFILE */
+    @media screen and (max-width: 968px) {
+        /* Force stacking order */
+        body.no-right .container {
+            display: flex !important;
+            flex-direction: column !important;
+            grid-template-columns: unset !important;
+        }
+
+        body.no-right .container > div:first-child {
+            order: 1; /* Profile card first */
+        }
+
+        body.no-right .middle-column {
+            order: 2 !important; /* Content below profile */
+            width: 100%;
+        }
     }
 </style>
 

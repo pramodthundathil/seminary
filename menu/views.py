@@ -6164,6 +6164,8 @@ def student_submitted_exams_datatable(request):
             status = '<span class="status-badge status-started">In Progress</span>'
         elif item.is_approved:
             status = '<span class="status-badge status-approved">Approved</span>'
+        elif item.is_rescheduled:
+            status = '<span class="status-badge status-rescheduled">Rescheduled</span>'
         else:
             status = '<span class="status-badge status-pending">Pending</span>'
         # Calculate total marks if available
@@ -6270,6 +6272,8 @@ def student_submitted_exams_datatable(request):
             status = '<span class="status-badge status-started">In Progress</span>'
         elif item.is_approved:
             status = '<span class="status-badge status-approved">Approved</span>'
+        elif item.is_rescheduled:
+            status = '<span class="status-badge status-rescheduled">Rescheduled</span>'
         else:
             status = '<span class="status-badge status-pending">Pending</span>'
         

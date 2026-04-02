@@ -641,6 +641,16 @@ class RolesForm(forms.ModelForm):
             }),
         }
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        # Check if name already exists (excluding current instance in edit mode)
+        existing = Roles.objects.filter(name=name, deleted_at__isnull=True)
+        if self.instance.pk:
+            existing = existing.exclude(pk=self.instance.pk)
+        if existing.exists():
+            raise forms.ValidationError('This role name already exists. Please use a unique name.')
+        return name
+
 
 
 from home.models import Uploads
