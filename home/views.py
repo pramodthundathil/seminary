@@ -1169,10 +1169,10 @@ def signup_church_admin(request):
                 required_fields = ['register_as', 'first_name', 
                                  'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 
                                  'gender', 'mailing_address', 'city', 'state', 'country', 'zipcode', 
-                                 'timezone', 'language', 'church_affiliation']
+                                 'timezone', 'language']
                 
                 if is_user:
-                    required_fields.append('church_code')
+                    required_fields.extend(['church_code', 'church_affiliation'])
                 else:
                     required_fields.extend(['associate_degree', 'package', 'name_of_church'])
                 
@@ -1357,19 +1357,30 @@ def signup_church_admin(request):
                 return redirect('church_admin_registration_success', admin_id=new_id)             
         
         except Languages.DoesNotExist:
+            logger.error("Languages.DoesNotExist during registrations")
             messages.error(request, 'Invalid language selection.')
+            context = get_church_admin_context()
+            return render(request, 'site_pages/church_admin_register.html', context)
+        
+        except IntegrityError as e:
+            logger.error(f"IntegrityError in registration: {str(e)}")
+            error_msg = str(e)
+            if 'unique' in error_msg.lower() and 'email' in error_msg.lower():
+                messages.error(request, 'This email is already registered. Please use a different email or log in.')
+            else:
+                messages.error(request, 'A database error occurred. Please ensure all details are correct.')
             context = get_church_admin_context()
             return render(request, 'site_pages/church_admin_register.html', context)
             
         except ValueError as e:
+            logger.error(f"ValueError in registration: {str(e)}")
             messages.error(request, f'Invalid data format: {str(e)}')
             context = get_church_admin_context()
             return render(request, 'site_pages/church_admin_register.html', context)
             
         except Exception as e:
-            messages.error(request, f'An error occurred while submitting your registration. Please try again.')
-            print(f"Error in church admin registration: {str(e)}")
-            logger.error(f"Church admin registration error: {str(e)}")
+            logger.exception("Unexpected error in church admin registration")
+            messages.error(request, f'An error occurred while submitting your registration. Please try again later.')
             context = get_church_admin_context()
             return render(request, 'site_pages/church_admin_register.html', context)
     
@@ -1399,9 +1410,33 @@ def get_church_admin_context():
         'countries': Countries.objects.all(),
         'branches': Branches.objects.filter(is_associate_degree=True, status=True),
         'packages_json': json.dumps(packages_by_branch),
-        'RECAPTCHA_SITE_KEY': settings.RECAPTCHA_SITE_KEY
+        'RECAPTCHA_SITE_KEY': settings.RECAPTCHA_SITE_KEY,
+        'selected_branch': None, # Default if needed
     }
 
+def check_email_exists(request):
+    """AJAX view to check if an email already exists in Users"""
+    email = request.GET.get('email', '').strip()
+    if not email:
+        return JsonResponse({'exists': False, 'message': 'Email is required'}, status=400)
+    
+    exists = Users.objects.filter(email=email).exists()
+    return JsonResponse({
+        'exists': exists,
+        'message': 'This email is already registered.' if exists else 'Email is available.'
+    })
+
+def check_church_code(request):
+    """AJAX view to check if a church code exists in ChurchAdmins"""
+    code = request.GET.get('code', '').strip()
+    if not code:
+        return JsonResponse({'exists': False, 'message': 'Code is required'}, status=400)
+    
+    exists = ChurchAdmins.objects.filter(code=code).exists()
+    return JsonResponse({
+        'exists': exists,
+        'message': 'Valid church code found.' if exists else 'Invalid church code. Please check with your Church Admin.'
+    })
 
 # Success page views
 def guest_registration_success(request, guest_id):

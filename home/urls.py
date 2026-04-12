@@ -67,5 +67,8 @@ urlpatterns = [
     # Church Admin Registration
     path('church-admin/register/', views.signup_church_admin, name='church_admin_register'),
     path('church-admin/success/<str:admin_id>/', views.church_admin_registration_success, name='church_admin_registration_success'),
-    
+
+    # AJAX Validation
+    path('ajax/check-email/', views.check_email_exists, name='check_email_exists'),
+    path('ajax/check-church-code/', views.check_church_code, name='check_church_code'),
 ]

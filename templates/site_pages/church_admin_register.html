@@ -235,7 +235,7 @@
         color: #ef4444;
         font-size: 0.85rem;
         margin-top: 5px;
-        display: block;
+        display: none;
     }
 
     .phone-group {
@@ -444,7 +444,7 @@
         </div>
     </div>
 
-    <form method="POST" onsubmit="return validateForm(event)" enctype="multipart/form-data" id="churchRegistrationForm">
+    <form method="POST" enctype="multipart/form-data" id="churchRegistrationForm" novalidate>
         {% csrf_token %}
 
         <!-- Section 1: Church Information -->
@@ -497,17 +497,17 @@
                 <div class="form-group">
                     <label>Name of Church <span class="required">*</span></label>
                     <input type="text" name="name_of_church" id="name_of_church" class="form-control" value="{{ request.POST.name_of_church|default:'' }}">
-                    <small class="error-message"></small>
+                    <small id="name_of_church_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Name of Pastor</label>
-                    <input type="text" name="name_of_paster" class="form-control" value="{{ request.POST.name_of_paster|default:'' }}">
-                    <small class="error-message"></small>
+                    <input type="text" name="name_of_paster" id="name_of_paster" class="form-control" value="{{ request.POST.name_of_paster|default:'' }}">
+                    <small id="name_of_paster_error" class="error-message"></small>
                 </div>
                 <div class="form-group">
                     <label>Church Address</label>
-                    <input type="text" name="church_address" class="form-control" value="{{ request.POST.church_address|default:'' }}">
-                    <small class="error-message"></small>
+                    <input type="text" name="church_address" id="church_address" class="form-control" value="{{ request.POST.church_address|default:'' }}">
+                    <small id="church_address_error" class="error-message"></small>
                 </div>
             </div>
         </div>
@@ -641,10 +641,10 @@
                 </div>
             </div>
 
-            <div class="form-row" style="display: none;">
+            <div class="form-row user-field">
                 <div class="form-group">
                     <label>Church Affiliation <span class="required">*</span></label>
-                    <input type="text" name="church_affiliation" class="form-control" value="{{ request.POST.church_affiliation|default:'' }}" required placeholder="Enter your church name">
+                    <input type="text" name="church_affiliation" id="church_affiliation" class="form-control" value="{{ request.POST.church_affiliation|default:'' }}" placeholder="Enter your church name">
                     <small id="church_affiliation_error" class="error-message"></small>
                 </div>
             </div>
@@ -699,6 +699,7 @@
         const packageInput = document.getElementById('package');
         const nameOfChurchInput = document.getElementById('name_of_church');
         const churchCodeInput = document.getElementById('church_code');
+        const churchAffiliationInput = document.getElementById('church_affiliation');
         
         if (role === 'user' || role === '') {
             adminFields.forEach(el => {
@@ -710,6 +711,7 @@
             });
             userFields.forEach(el => el.style.display = 'block');
             if (churchCodeInput) churchCodeInput.setAttribute('required', 'required');
+            if (churchAffiliationInput) churchAffiliationInput.setAttribute('required', 'required');
             associateDegreeInput.removeAttribute('required');
             if (packageInput) packageInput.removeAttribute('required');
             nameOfChurchInput.removeAttribute('required');
@@ -726,6 +728,7 @@
             });
             userFields.forEach(el => el.style.display = 'none');
             if (churchCodeInput) churchCodeInput.removeAttribute('required');
+            if (churchAffiliationInput) churchAffiliationInput.removeAttribute('required');
             associateDegreeInput.setAttribute('required', 'required');
             if (packageInput) packageInput.setAttribute('required', 'required');
             nameOfChurchInput.setAttribute('required', 'required');
@@ -781,43 +784,162 @@
         }
     }
 
+    // Form validation and AJAX checks
+    let emailValid = true;
+    let churchCodeValid = true;
+
+    // Email check on blur
+    document.getElementById('email').addEventListener('blur', function() {
+        const email = this.value.trim();
+        const errorElement = document.getElementById('email_error');
+        
+        if (!email) return;
+
+        // Basic regex first
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showFieldError(this, "Enter a valid email address.", errorElement);
+            emailValid = false;
+            return;
+        }
+
+        // AJAX check
+        fetch(`{% url 'check_email_exists' %}?email=${encodeURIComponent(email)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    showFieldError(this, data.message, errorElement);
+                    emailValid = false;
+                } else {
+                    clearFieldError(this, errorElement);
+                    emailValid = true;
+                }
+            })
+            .catch(error => console.error('Error checking email:', error));
+    });
+
+    // Church code check on blur
+    const churchCodeInput = document.getElementById('church_code');
+    if (churchCodeInput) {
+        churchCodeInput.addEventListener('blur', function() {
+            const code = this.value.trim();
+            const errorElement = document.getElementById('church_code_error');
+            const role = document.getElementById('register_as').value;
+            
+            if (!code || role !== 'user') return;
+
+            // AJAX check
+            fetch(`{% url 'check_church_code' %}?code=${encodeURIComponent(code)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.exists) {
+                        showFieldError(this, data.message, errorElement);
+                        churchCodeValid = false;
+                    } else {
+                        clearFieldError(this, errorElement);
+                        churchCodeValid = true;
+                    }
+                })
+                .catch(error => console.error('Error checking church code:', error));
+        });
+    }
+
+    function showFieldError(input, message, errorElement) {
+        input.classList.add('error');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    }
+
+    function clearFieldError(input, errorElement) {
+        input.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+    }
+
     // Form submission with loading and validation
     document.getElementById('churchRegistrationForm').addEventListener('submit', function (e) {
         const requiredFields = this.querySelectorAll('[required]');
-        const email = document.getElementById("email").value.trim();
-        const phone = document.getElementById("phone_number").value.trim();
-
         let isValid = true;
-        let errors = [];
+        let firstErrorField = null;
+
+        // Clear all previous errors
+        this.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        this.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('error'));
 
         requiredFields.forEach(field => {
+            // Skip hidden fields (like admin fields when role is user)
+            if (field.offsetParent === null) return;
+
             if (!field.value.trim()) {
                 isValid = false;
-                field.classList.add('error');
-            } else {
-                field.classList.remove('error');
+                const errorElement = field.closest('.form-group').querySelector('.error-message');
+                showFieldError(field, "This field is required.", errorElement);
+                if (!firstErrorField) firstErrorField = field;
             }
         });
 
+        // Check email validity from AJAX and regex
+        const emailInput = document.getElementById('email');
+        const email = emailInput.value.trim();
+        const emailError = document.getElementById('email_error');
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        
+        if (email && !emailRegex.test(email)) {
             isValid = false;
-            errors.push("Enter a valid email address.");
+            showFieldError(emailInput, "Enter a valid email address.", emailError);
+            if (!firstErrorField) firstErrorField = emailInput;
+        } else if (!emailValid) {
+            isValid = false;
+            showFieldError(emailInput, "This email is already registered.", emailError);
+            if (!firstErrorField) firstErrorField = emailInput;
         }
 
-        const phoneRegex = /^[6-9]\d{9}$/;
-        if (!phoneRegex.test(phone)) {
+        // Check church code validity
+        const role = document.getElementById('register_as').value;
+        if (role === 'user' && !churchCodeValid) {
             isValid = false;
-            errors.push("Enter a valid 10-digit phone number (starts with 6-9).");
+            const codeInput = document.getElementById('church_code');
+            showFieldError(codeInput, "Invalid church code.", document.getElementById('church_code_error'));
+            if (!firstErrorField) firstErrorField = codeInput;
+        }
+
+        // Phone number validation
+        const phoneInput = document.querySelector('input[name="phone_number"]');
+        const phone = phoneInput.value.trim();
+        const phoneRegex = /^\d{7,15}$/; // More inclusive than start with 6-9
+        if (phone && !phoneRegex.test(phone)) {
+            isValid = false;
+            showFieldError(phoneInput, "Enter a valid phone number.", document.getElementById('phone_number_error'));
+            if (!firstErrorField) firstErrorField = phoneInput;
+        }
+
+        const recaptcha = grecaptcha.getResponse();
+        if (!recaptcha || recaptcha.length === 0) {
+            isValid = false;
+            alert("Please complete the reCAPTCHA.");
         }
 
         if (!isValid) {
             e.preventDefault();
-            alert(errors.join("\n"));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (firstErrorField) {
+                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstErrorField.focus();
+            }
         } else {
             document.getElementById('loadingOverlay').classList.add('active');
             document.getElementById('submitBtn').disabled = true;
+            
+            // If valid, allow submit and then reset form (optional, usually not done on full POST submit)
+            // But user had it in their script, I'll keep it as a timeout to not break their logic flow
+            setTimeout(() => {
+                if(document.getElementById("churchRegistrationForm")) {
+                    // document.getElementById("churchRegistrationForm").reset(); // Usually we don't reset on successful POST redirect
+                }
+            }, 1000);
         }
     });
 
@@ -828,7 +950,7 @@
         
         const sections = [
             {
-                fields: ['register_as', 'church_code', 'associate_degree', 'package', 'name_of_church'] // Check all step 1 fields that might be required
+                fields: ['register_as', 'church_code', 'associate_degree', 'package', 'name_of_church']
             },
             {
                 fields: ['first_name', 'last_name', 'email', 'phone_code', 'phone_number', 'date_of_birth', 'gender', 'mailing_address']
@@ -845,7 +967,7 @@
             return sectionFields.every(fieldName => {
                 const field = form.elements[fieldName];
                 if (!field) return true;
-                if (!field.hasAttribute('required')) return true;
+                if (!field.hasAttribute('required') || field.offsetParent === null) return true;
                 
                 if (field.type === 'select-one') {
                     return field.value !== '';
@@ -898,22 +1020,10 @@
             }
         });
     });
-     function validateForm(event) {
-    const recaptcha = grecaptcha.getResponse();
 
-    // If reCAPTCHA not checked
-    if (!recaptcha || recaptcha.length === 0) {
-        alert("Please complete the reCAPTCHA before submitting.");
-        event.preventDefault(); // STOP submission
-        return false;
+    function validateForm(event) {
+        // This is now handled in the 'submit' event listener above
+        return true;
     }
-
-    // If valid, allow submit and then reset form
-    setTimeout(() => {
-        document.getElementById("churchRegistrationForm").reset();
-    }, 300);
-
-    return true;
-}
 </script>
 {% endblock %}
