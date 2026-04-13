@@ -15,12 +15,12 @@
         <table id="pagesTable" class="display" style="width:100%">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Preview</th>
-                    <th>Info</th>
+                    <th style="width: 60px;">ID</th>
+                    <th style="width: 100px;">Preview</th>
+                    <th style="width: 200px;">Info</th>
                     <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 150px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -39,12 +39,12 @@
                         {% endif %}
                     </td>
                     <td>
-                        <div style="line-height:1.5;">
+                        <div style="line-height:1.5; word-wrap: break-word; white-space: normal;">
                             <div style="font-weight:600;font-size:15px;color:var(--text-dark);margin-bottom:4px;">
-                                {{ page.title }}
+                                {{ page.title|default:"Untitled"|striptags }}
                             </div>
                             <div style="font-size:13px;color:var(--text-light);">
-                                Code: {{ page.code }}
+                                Code: {{ page.code|default:"N/A"|striptags }}
                             </div>
                         </div>
                     </td>
@@ -110,11 +110,13 @@
                 zeroRecords: "No matching pages found",
                 emptyTable: "No pages available"
             },
+            autoWidth: false,
             columnDefs: [
                 { orderable: false, targets: [1, 5] },
                 { width: '60px', targets: 0 },
                 { width: '100px', targets: 1 },
                 { width: '200px', targets: 2 },
+                { width: 'auto', targets: 3 },
                 { width: '100px', targets: 4 },
                 { width: '150px', targets: 5 }
             ]
