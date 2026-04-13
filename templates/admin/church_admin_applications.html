@@ -1,0 +1,324 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .applications-container {
+        padding: 24px;
+        background: #f8fafc;
+        min-height: calc(100vh - 64px);
+    }
+
+    .page-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #00CED1;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .card-header h2 {
+        color: #fff;
+        font-size: 1.25rem;
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .table-section {
+        padding: 24px;
+    }
+
+    /* DataTable Overrides */
+    table.dataTable thead th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    table.dataTable tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: 0.2s;
+        border: none;
+        color: white;
+    }
+
+    .btn-view { background: #6366f1; }
+    .btn-approve { background: #22c55e; }
+    .btn-reject { background: #ef4444; }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+        filter: brightness(0.9);
+    }
+
+    /* Modal Details Styling */
+    .detail-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .detail-label {
+        width: 140px;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    .detail-value {
+        flex: 1;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="applications-container">
+    <div class="page-card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-church"></i>
+                Church Admin Applications
+            </h2>
+        </div>
+
+        <div class="table-section">
+            <table id="applicationsTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Church Branch</th>
+                        <th>Package</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td class="fw-bold">{{ app.student.first_name }} {{ app.student.last_name }}</td>
+                        <td>{{ app.name_of_church }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                {{ app.church_code_settings.name }}
+                            </span>
+                        </td>
+                        <td>{{ app.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <span class="status-badge status-{{ app.status }}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button class="action-btn btn-view" onclick="viewDetails({{ app.id }})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if app.status == 'pending' %}
+                                <button class="action-btn btn-approve" onclick="approveApplication({{ app.id }}, '{{ app.name_of_church|escapejs }}')" title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="action-btn btn-reject" onclick="rejectApplication({{ app.id }}, '{{ app.name_of_church|escapejs }}')" title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="viewDetailsModal" tabindex="-1" style="z-index: 1054;" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Application Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="modalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#applicationsTable').DataTable({
+            responsive: true,
+            order: [[3, 'desc']],
+            pageLength: 10,
+            dom: '<"d-flex justify-content-between mb-3"fl>rtip'
+        });
+    });
+
+    function viewDetails(id) {
+        const modal = new bootstrap.Modal(document.getElementById('viewDetailsModal'));
+        modal.show();
+        
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
+
+        fetch(`/menu/admin/church-admin-applications/${id}/details/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const app = data.data;
+                    modalBody.innerHTML = `
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="detail-row"><span class="detail-label">Student</span><span class="detail-value fw-bold">${app.student_name}</span></div>
+                                <div class="detail-row"><span class="detail-label">Church Name</span><span class="detail-value text-primary">${app.church_name}</span></div>
+                                <div class="detail-row"><span class="detail-label">Pastor Name</span><span class="detail-value">${app.pastor_name}</span></div>
+                                <div class="detail-row"><span class="detail-label">Applied Date</span><span class="detail-value">${app.created_at}</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-row"><span class="detail-label">Package</span><span class="detail-value badge bg-info-subtle text-info-emphasis">${app.package_name}</span></div>
+                                <div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value fw-bold text-success">$${app.package_price}</span></div>
+                                <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value status-badge status-${app.status}">${app.status}</span></div>
+                            </div>
+                            <div class="col-12 py-3">
+                                <h6 class="fw-bold mb-2">Church Address</h6>
+                                <p class="text-muted p-3 bg-light rounded">${app.church_address}</p>
+                            </div>
+                            ${app.rejection_reason ? `
+                            <div class="col-12">
+                                <div class="alert alert-danger mb-0">
+                                    <strong>Rejection Reason:</strong><br>${app.rejection_reason}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    modalBody.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                }
+            });
+    }
+
+    function approveApplication(id, churchName) {
+        Swal.fire({
+            title: 'Approve Application?',
+            text: `Confirming "${churchName}". This will create a Church Admin account and send their Church Code via email.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#22c55e',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Approve'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Sending Email...',
+                    text: 'Please wait while we process the account creation.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                fetch(`/menu/admin/church-admin-applications/approve/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Approved!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    function rejectApplication(id, churchName) {
+        Swal.fire({
+            title: 'Reject Application',
+            text: `Provide a reason for rejecting "${churchName}":`,
+            input: 'textarea',
+            inputPlaceholder: 'Type reason for rejection...',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Confirm Rejection',
+            inputValidator: (value) => { if (!value) return 'A reason is required!' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', didOpen: () => { Swal.showLoading(); } });
+
+                const formData = new FormData();
+                formData.append('reason', result.value);
+
+                fetch(`/menu/admin/church-admin-applications/reject/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Rejected', data.message, 'info').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

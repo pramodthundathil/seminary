@@ -13,6 +13,7 @@ urlpatterns = [
     path("score-card/", views.student_score_card, name="student_score_card"),
     path("class-recordings/", views.student_class_recordings, name="student_class_recordings"),
     path("profile/", views.student_profile_view, name="student_profile_view"),
+    path("apply-church-admin/", views.apply_church_admin, name="apply_church_admin"),
     path('support/create/', views.student_support_create, name='student_support_create'),
     path("request-subject/", views.request_subject_view, name="request_subject"),
     path("exam-hall/request-exam/", views.student_request_exam, name="student_request_exam"),

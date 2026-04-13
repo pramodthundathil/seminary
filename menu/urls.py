@@ -329,4 +329,10 @@ urlpatterns = [
     path('admin/church-codes', views.church_codes_usage_list, name='church_codes_usage_list'),
     path('admin/church-codes/<int:admin_id>/view/', views.church_codes_usage_view, name='church_codes_usage_view'),
     path('admin/church-codes/delete/<int:admin_id>/', views.church_codes_usage_delete, name='church_codes_usage_delete'),
+
+    # Church Admin Promotion Applications
+    path('admin/church-admin-applications/', views.church_admin_applications_list, name='church_admin_applications_list'),
+    path('admin/church-admin-applications/approve/<int:application_id>/', views.approve_church_admin, name='approve_church_admin'),
+    path('admin/church-admin-applications/reject/<int:application_id>/', views.reject_church_admin, name='reject_church_admin'),
+    path('admin/church-admin-applications/<int:application_id>/details/', views.get_church_admin_application_details, name='get_church_admin_application_details'),
 ]

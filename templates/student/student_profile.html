@@ -591,6 +591,24 @@
       <span><i class="bi bi-clipboard-data"></i></span>
       View Full Profile
     </button>
+    {% if not church_admin %}
+      {% if pending_application %}
+        <button class="btn btn-secondary" disabled style="opacity: 0.7; cursor: not-allowed;">
+          <span><i class="bi bi-hourglass-split"></i></span>
+          Church Admin Application Pending
+        </button>
+      {% else %}
+        <a href="{% url 'apply_church_admin' %}" class="btn btn-secondary">
+          <span><i class="bi bi-plus-circle"></i></span>
+          Apply for Church Admin
+        </a>
+      {% endif %}
+    {% else %}
+      <div class="badge" style="background: var(--success); padding: 0.7rem 1.25rem; border-radius: 8px;">
+        <span><i class="bi bi-check-circle"></i></span>
+        Authorized Church Admin
+      </div>
+    {% endif %}
   </div>
 </div>
 

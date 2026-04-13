@@ -35,6 +35,9 @@ from datetime import datetime, timedelta
 
 from django.views.decorators.csrf import csrf_exempt
 
+import logging
+logger = logging.getLogger(__name__)
+
 @role_redirection
 @login_required
 def admin_index(request):
@@ -7119,3 +7122,126 @@ def student_subjects_update(request, id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+def church_admin_applications_list(request):
+    """
+    List all church admin applications.
+    """
+    applications = ChurchAdminApplication.objects.all().order_by('-created_at')
+    
+    return render(request, 'admin/church_admin_applications.html', {
+        'applications': applications,
+        'page_title': 'Church Admin Applications'
+    })
+
+@login_required
+@require_POST
+def approve_church_admin(request, application_id):
+    """
+    Approve a church admin application and create the ChurchAdmins record.
+    """
+    application = get_object_or_404(ChurchAdminApplication, id=application_id)
+    
+    if application.status != 'pending':
+        return JsonResponse({'success': False, 'message': 'Application is already processed.'}, status=400)
+    
+    try:
+        with transaction.atomic():
+            # Create ChurchAdmins record
+            from django.utils.crypto import get_random_string
+            from home.models import ChurchAdmins
+            
+            church_code = get_random_string(6).upper()
+            
+            church_admin = ChurchAdmins.objects.create(
+                student=application.student,
+                name_of_church=application.name_of_church,
+                name_of_paster=application.name_of_pastor,
+                church_address=application.church_address,
+                church_code=application.church_code_settings,
+                code=church_code,
+                amount=application.church_code_settings.amount if application.church_code_settings else 0.0,
+                max_user_no=application.church_code_settings.max_user_no if application.church_code_settings else 0,
+                current_user_no=1, # The admin themselves
+                created_at=timezone.now(),
+                updated_at=timezone.now(),
+            )
+            
+            # Application status update
+            application.status = 'approved'
+            application.save()
+            
+            # Send Email
+            subject = "Church Admin Application Approved"
+            message = f"Hello {application.student.first_name},\n\nYour application to become a Church Admin for {application.name_of_church} has been approved.\n\nYour Church Code is: {church_code}\n\nYou can now log in as a Church Admin using your existing credentials.\n\nBest regards,\nTrinity Theological Seminary"
+            
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [application.student.email],
+                fail_silently=True
+            )
+            
+            return JsonResponse({'success': True, 'message': 'Application approved successfully!'})
+            
+    except Exception as e:
+        logger.error(f"Error approving church admin application: {e}")
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@login_required
+@require_POST
+def reject_church_admin(request, application_id):
+    """
+    Reject a church admin application.
+    """
+    application = get_object_or_404(ChurchAdminApplication, id=application_id)
+    reason = request.POST.get('reason', 'No reason provided.')
+    
+    if application.status != 'pending':
+        return JsonResponse({'success': False, 'message': 'Application is already processed.'}, status=400)
+    
+    application.status = 'rejected'
+    application.rejection_reason = reason
+    application.save()
+    
+    # Send Email
+    subject = "Church Admin Application Update"
+    message = f"Hello {application.student.first_name},\n\nWe regret to inform you that your application for the Church Admin role has been rejected.\n\nReason: {reason}\n\nBest regards,\nTrinity Theological Seminary"
+    
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [application.student.email],
+        fail_silently=True
+    )
+    
+    return JsonResponse({'success': True, 'message': 'Application rejected successfully.'})
+
+
+@login_required
+def get_church_admin_application_details(request, application_id):
+    """
+    Fetch application details for viewing in a modal (AJAX)
+    """
+    try:
+        app = ChurchAdminApplication.objects.get(id=application_id)
+        data = {
+            'id': app.id,
+            'student_name': f"{app.student.first_name} {app.student.last_name}",
+            'church_name': app.name_of_church,
+            'pastor_name': app.name_of_pastor or "N/A",
+            'church_address': app.church_address or "N/A",
+            'package_name': app.church_code_settings.name,
+            'package_price': str(app.church_code_settings.amount),
+            'status': app.status,
+            'rejection_reason': app.rejection_reason or "",
+            'created_at': app.created_at.strftime('%Y-%m-%d %H:%M'),
+        }
+        return JsonResponse({'success': True, 'data': data})
+    except ChurchAdminApplication.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Application not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

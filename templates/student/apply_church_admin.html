@@ -1,0 +1,239 @@
+{% extends "student/index.html" %}
+
+{% block middle %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --bg-glass: rgba(255, 255, 255, 0.9);
+    }
+
+    .app-card {
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .app-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        padding: 1.5rem;
+        color: white;
+    }
+
+    .form-section {
+        padding: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #374151;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #e5e7eb;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-submit {
+        background: var(--primary);
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-submit:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .btn-back {
+        color: #6b7280;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+
+    .btn-back:hover {
+        color: #374151;
+    }
+
+    .helper-text {
+        font-size: 0.7rem;
+        color: #9ca3af;
+        margin-top: 0.2rem;
+    }
+</style>
+
+<div class="app-card">
+    <div class="app-header">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-person-badge-fill fs-5"></i>
+            <h2 class="h5 mb-0 fw-bold">Elevate to Church Admin</h2>
+        </div>
+        <p class="mb-0 small opacity-75">Apply to manage your church branch and students.</p>
+    </div>
+
+    <div class="form-section">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label" for="name_of_church">Church Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name_of_church" id="name_of_church" class="form-control" required placeholder="e.g. Grace Community Church">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label" for="name_of_pastor">Pastor Name</label>
+                    <input type="text" name="name_of_pastor" id="name_of_pastor" class="form-control" placeholder="e.g. Rev. John Smith">
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="church_address">Church Address</label>
+                    <textarea name="church_address" id="church_address" rows="2" class="form-control" placeholder="Complete physical address"></textarea>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label" for="package">Membership Package <span class="text-danger">*</span></label>
+                    <select name="package" id="package" class="form-select" required>
+                        <option value="" selected disabled>Choose a package</option>
+                        {% for pkg in packages %}
+                            <option value="{{ pkg.id }}">
+                                {{ pkg.name }} — ${{ pkg.amount }} ({{ pkg.max_user_no }} Students)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between align-items-center">
+                <a href="{% url 'student_profile_view' %}" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn-submit">
+                    <span>Submit</span>
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block right %}
+<style>
+    .info-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .info-box-header {
+        background: #00CED1;
+        color: white;
+        padding: 8px 12px;
+        font-weight: 700;
+        border-radius: 8px 8px 0 0;
+        margin: -1.25rem -1.25rem 1rem -1.25rem;
+        font-size: 0.9rem;
+    }
+    .info-item {
+        font-size: 0.85rem;
+        color: #475569;
+        margin-bottom: 0.75rem;
+        display: flex;
+        gap: 8px;
+    }
+    .info-item i {
+        color: #00CED1;
+    }
+</style>
+
+<div class="info-box">
+    <div class="info-box-header">WHY PROMOTE?</div>
+    <div class="info-item">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Manage multiple students under your church branch.</span>
+    </div>
+    <div class="info-item">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Track progress and grades of your congregation.</span>
+    </div>
+    <div class="info-item">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Access unified billing and package management.</span>
+    </div>
+</div>
+
+<div class="info-box" style="background: #f0fdfd; border-color: #99f6e4;">
+    <div class="info-box-header" style="background: #0d9488;">PROCESS</div>
+    <div class="info-item">
+        <i class="bi bi-1-circle"></i>
+        <span>Submit the application form.</span>
+    </div>
+    <div class="info-item">
+        <i class="bi bi-2-circle"></i>
+        <span>Wait for Admin approval (1-2 days).</span>
+    </div>
+    <div class="info-item">
+        <i class="bi bi-3-circle"></i>
+        <span>Login as Church Admin upon approval.</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const churchName = document.getElementById('name_of_church').value;
+            
+            Swal.fire({
+                title: 'Submit Application?',
+                text: `You are applying for Church Admin status with "${churchName}".`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Submit Application',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Submitting...',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

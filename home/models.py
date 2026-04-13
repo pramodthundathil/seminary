@@ -386,6 +386,36 @@ class ChurchAdmins(models.Model):
     def __str__(self):
         return str(self.name_of_church or "")
 
+class ChurchAdminApplication(models.Model):
+    id = models.AutoField(primary_key=True)
+    student = models.ForeignKey('Students', on_delete=models.CASCADE, related_name='church_admin_applications')
+    name_of_church = models.CharField(max_length=250)
+    name_of_pastor = models.CharField(max_length=250, null=True, blank=True)
+    church_address = models.TextField(null=True, blank=True)
+    church_code_settings = models.ForeignKey('ChurchLoginCodeSettings', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('rejected', 'Rejected'),
+        ],
+        default='pending'
+    )
+    rejection_reason = models.TextField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'church_admin_applications'
+
+    def __str__(self):
+        return f"Application by {self.student.first_name} {self.student.last_name} for {self.name_of_church}"
+
 class ChurchLoginCodeSettings(models.Model):
     id = models.AutoField(primary_key=True)
     branches = models.ForeignKey('Branches', on_delete=models.DO_NOTHING, related_name='code_settings')

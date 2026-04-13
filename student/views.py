@@ -45,6 +45,7 @@ from home.models import (
     StudentsExams,
     ReferenceForm,
     StudentsSubjects,
+    ChurchAdminApplication,
     ChurchAdmins,
     StudentsAssignment,
     Pages,
@@ -800,14 +801,19 @@ def student_profile_view(request):
             {"error": "Unable to load your profile at the moment."}
         )
 
-    # ---- Log success ----
-    logger.info(f"[PROFILE] Student profile loaded successfully for user {request.user.id}")
+    # ---- Check for Church Admin status or application ----
+    church_admin = ChurchAdmins.objects.filter(student=student).first()
+    pending_application = ChurchAdminApplication.objects.filter(student=student, status='pending').first()
 
     # ---- Render ----
     return render(
         request,
         "student/student_profile.html",
-        {"student": student}
+        {
+            "student": student,
+            "church_admin": church_admin,
+            "pending_application": pending_application,
+        }
     )
 
 
@@ -2029,3 +2035,59 @@ def check_email_availability(request):
         return JsonResponse({'exists': False})
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
+@login_required
+def apply_church_admin(request):
+    """
+    View for students to apply for Church Admin role.
+    """
+    try:
+        student = Students.objects.get(user=request.user)
+    except Students.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect('student_home')
+
+    # Check if already a church admin
+    if ChurchAdmins.objects.filter(student=student, deleted_at__isnull=True).exists():
+        messages.info(request, "You are already a Church Admin.")
+        return redirect('student_profile_view')
+
+    # Check for pending application
+    pending_app = ChurchAdminApplication.objects.filter(student=student, status='pending').first()
+    if pending_app:
+        messages.info(request, "You already have a pending application.")
+        return redirect('student_profile_view')
+
+    if request.method == 'POST':
+        name_of_church = request.POST.get('name_of_church')
+        name_of_pastor = request.POST.get('name_of_pastor')
+        church_address = request.POST.get('church_address')
+        package_id = request.POST.get('package')
+
+        if not name_of_church or not package_id:
+            messages.error(request, "Please fill in all required fields.")
+        else:
+            try:
+                from home.models import ChurchLoginCodeSettings
+                package = ChurchLoginCodeSettings.objects.get(id=package_id)
+                
+                ChurchAdminApplication.objects.create(
+                    student=student,
+                    name_of_church=name_of_church,
+                    name_of_pastor=name_of_pastor,
+                    church_address=church_address,
+                    church_code_settings=package
+                )
+                messages.success(request, "Application submitted successfully! Please wait for admin approval.")
+                return redirect('student_profile_view')
+            except Exception as e:
+                logger.error(f"Error submitting church admin application: {e}")
+                messages.error(request, "An error occurred while submitting your application.")
+
+    from home.models import ChurchLoginCodeSettings
+    packages = ChurchLoginCodeSettings.objects.filter(status=1)
+    
+    return render(request, 'student/apply_church_admin.html', {
+        'student': student,
+        'packages': packages,
+        'page_title': 'Apply for Church Admin'
+    })
