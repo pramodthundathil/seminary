@@ -598,12 +598,12 @@ def student_reschedule_exam(request):
         # Update the exam record
         student_exam.start_time = final_datetime
         student_exam.timezone = timezone_val
-        student_exam.is_approved = False
+        student_exam.is_approved = True  # Auto-approve rescheduled exams
         student_exam.is_rescheduled = True
         student_exam.updated_by = request.user
         student_exam.save()
 
-        return JsonResponse({"status": "success", "message": "Exam rescheduled successfully. Waiting for admin approval."})
+        return JsonResponse({"status": "success", "message": "Exam rescheduled and approved successfully."})
 
     except Students.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Student not found"}, status=404)
@@ -1044,6 +1044,7 @@ def submit_request_exam(request):
                 created_by=request.user,
                 updated_by=request.user,
                 show_on_score=0,
+                is_approved=True,  # Auto-approve exam requests
             )
 
             messages.success(request, "Exam request submitted successfully!")

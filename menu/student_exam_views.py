@@ -1,4 +1,11 @@
-# Student Submitted Exams Views
+
+#Student Submitted Exams Views
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db.models import Q, Sum
+from home.models import Students, StudentsExams, ObjectiveAnswers, DescriptiveAnswers
+
 @login_required
 def student_submitted_exams_list(request):
     """Render student submitted exams page"""

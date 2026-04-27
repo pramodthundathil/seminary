@@ -488,9 +488,29 @@ def signup_student(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Generate unique student ID
-                student_id = f"STU{uuid.uuid4().hex[:8].upper()}"
-                print("stud",student_id)
+                # Generate unique student ID based on course
+                course_id = request.POST.get('course_applied')
+                course_code = 'GEN'
+                if course_id:
+                    try:
+                        course = Courses.objects.get(id=course_id)
+                        course_code = course.course_code
+                    except Courses.DoesNotExist:
+                        pass
+                
+                # Find maximum existing count for this course code prefix
+                last_student = Students.objects.filter(student_id__startswith=f"TTS{course_code}").order_by('-student_id').first()
+                if last_student and last_student.student_id:
+                    try:
+                        last_num = int(last_student.student_id.replace(f"TTS{course_code}", ""))
+                        new_num = last_num + 1
+                    except ValueError:
+                        new_num = 1
+                else:
+                    new_num = 1
+                
+                student_id = f"TTS{course_code}{new_num:04d}"
+                print("Generated student_id:", student_id)
                 
                 # Validate required fields
                 required_fields = ['first_name', 'email', 'date_of_birth', 'gender', 
@@ -1197,6 +1217,11 @@ def signup_church_admin(request):
                     church_admin_obj = ChurchAdmins.objects.filter(code=church_code).first()
                     if not church_admin_obj:
                         messages.error(request, 'Invalid church code. Please ask your Church Admin for a valid code.')
+                        context = get_church_admin_context()
+                        return render(request, 'site_pages/church_admin_register.html', context)
+                    
+                    if not church_admin_obj.is_paid:
+                        messages.error(request, 'Church registration fee has not been paid. Please contact your Church Admin.')
                         context = get_church_admin_context()
                         return render(request, 'site_pages/church_admin_register.html', context)
                 else:

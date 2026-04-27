@@ -4882,6 +4882,23 @@ def church_codes_usage_delete(request, admin_id):
 
     return redirect('church_codes_usage_list')
 
+
+@login_required
+def church_admin_toggle_payment(request, admin_id):
+    """Toggle payment status (paid/waived) for a church admin"""
+    try:
+        admin = get_object_or_404(ChurchAdmins, id=admin_id, deleted_at__isnull=True)
+        admin.is_paid = not admin.is_paid
+        admin.save()
+        status = "Paid/Waived" if admin.is_paid else "Unpaid"
+        messages.success(request, f"Payment status updated to {status}.")
+    except Exception as e:
+        messages.error(request, f"Error updating payment status: {str(e)}")
+
+    return redirect('church_codes_usage_list')
+
+
+
 #@login_required
 
 def application_list_view(request):
@@ -5217,6 +5234,21 @@ def student_subjects_toggle_approval(request, id):
         subject = StudentsSubjects.objects.get(id=id)
         subject.is_approved = not subject.is_approved
         subject.save()
+        
+        # Auto-assign Books when subject is approved
+        if subject.is_approved:
+            from home.models import BookReferences, StudentsBooks
+            books = BookReferences.objects.filter(subject=subject.subject, status=True)
+            for book in books:
+                StudentsBooks.objects.get_or_create(
+                    student=subject.student,
+                    book=book,
+                    defaults={
+                        'created_by': request.user,
+                        'updated_by': request.user
+                    }
+                )
+                
         return JsonResponse({'success': True, 'message': 'Status updated successfully'})
     except StudentsSubjects.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Subject assignment not found'})

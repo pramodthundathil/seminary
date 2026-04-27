@@ -373,6 +373,7 @@ class ChurchAdmins(models.Model):
     amount = models.FloatField()
     max_user_no = models.IntegerField()
     current_user_no = models.IntegerField()
+    is_paid = models.BooleanField(default=False)
     renewed_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
