@@ -732,7 +732,9 @@
                         {% endfor %}
                     </select>
                     <input type="tel" name="phone_number" class="form-control"
-                        value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number">
+                        value="{{ request.POST.phone_number|default:'' }}" required placeholder="Phone Number"
+                        pattern="^[0-9]+$" oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                        title="Please enter a valid phone number containing only digits.">
                     <small id="phone_number_error" class="error-message"></small>
                 </div>
 
@@ -1326,13 +1328,62 @@
     });
 
     function validateForm(event) {
+        let isValid = true;
+
+        // Clear all previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.textContent = '';
+            el.style.color = '#ef4444';
+        });
+        document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('error'));
+
+        // Check required fields
+        const requiredFields = document.querySelectorAll('#studentApplicationForm [required]');
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
+                
+                // Find corresponding error message span (assuming ID is fieldName_error)
+                const errorSpanId = field.name ? `${field.name}_error` : null;
+                if (errorSpanId) {
+                    const errorSpan = document.getElementById(errorSpanId);
+                    if (errorSpan) {
+                        errorSpan.textContent = 'This field is required.';
+                        errorSpan.style.color = '#ef4444';
+                    }
+                }
+            }
+        });
+
+        // Also check if phone is exactly numbers
+        const phoneField = document.querySelector('input[name="phone_number"]');
+        if (phoneField && phoneField.value.trim()) {
+            if (!/^[0-9]+$/.test(phoneField.value.trim())) {
+                isValid = false;
+                phoneField.classList.add('error');
+                const phoneError = document.getElementById('phone_number_error');
+                if (phoneError) {
+                    phoneError.textContent = 'Please enter a valid phone number with digits only.';
+                }
+            }
+        }
 
         const recaptcha = grecaptcha.getResponse();
 
         // If reCAPTCHA not checked
         if (!recaptcha || recaptcha.length === 0) {
             alert("Please complete the reCAPTCHA before submitting.");
+            isValid = false;
+        }
+
+        if (!isValid) {
             event.preventDefault(); // STOP submission
+            // Scroll to the first error
+            const firstError = document.querySelector('.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return false;
         }
 

@@ -1689,7 +1689,22 @@ def student_register(request):
         # GENERATE STUDENT ID
         # -------------------------------
         try:
-            student_id = "TTS" + get_random_string(8).upper()
+            course_code = 'GEN'
+            if 'course_obj' in locals() and course_obj:
+                course_code = course_obj.course_code
+                
+            # Find maximum existing count for this course code prefix
+            last_student = Students.objects.filter(student_id__startswith=f"TTS{course_code}").order_by('-student_id').first()
+            if last_student and last_student.student_id:
+                try:
+                    last_num = int(last_student.student_id.replace(f"TTS{course_code}", ""))
+                    new_num = last_num + 1
+                except ValueError:
+                    new_num = 1
+            else:
+                new_num = 1
+            
+            student_id = f"TTS{course_code}{new_num:04d}"
             logger.info(f"Generated student ID: {student_id}")
             
         except Exception as e:
