@@ -114,35 +114,60 @@
 
     <div class="ticket-header">
         <div class="status-bar">
-            <span class="status-badge">OPEN</span>
+            <span class="status-badge">{{ ticket.get_status_display|upper }}</span>
         </div>
 
         <div class="ticket-info">
-            <div class="user-avatar">SS</div>
+            <div class="user-avatar">{{ ticket.student.first_name|first|upper }}{{ ticket.student.last_name|first|upper }}</div>
 
             <div class="ticket-details">
-                <div class="author-name">Sobha Sudheesh</div>
-                <div class="author-id">(TTSMDIV053)</div>
+                <div class="author-name">{{ ticket.student.first_name }} {{ ticket.student.last_name }}</div>
+                <div class="author-id">({{ ticket.student.student_id }})</div>
 
                 <div class="ticket-timestamp">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    03 Dec, 2025 07:55 AM
+                    {{ ticket.created_at|date:"d M, Y h:i A" }}
                 </div>
             </div>
         </div>
 
         <div class="ticket-message">
             <div class="category-label">
-                Category: <span class="category-value">General</span>
+                Category: <span class="category-value">{{ ticket.category|default:"General" }}</span>
             </div>
-            <textarea class="message-box">dewd</textarea>
+            <div class="message-box" style="white-space: pre-wrap; background: var(--gray-100);">{{ ticket.doubt_question }}</div>
         </div>
 
+        {% if ticket.doubt_answer %}
+        <div class="ticket-message">
+            <div class="category-label">
+                <span class="category-value">Response</span>
+            </div>
+            <div class="message-box" style="white-space: pre-wrap; background: #f0fdf4; border-color: #bbf7d0;">{{ ticket.doubt_answer }}</div>
+        </div>
+        {% endif %}
+
+        {% if replies %}
+        <div style="padding: 18px 22px; border-top: 1px solid var(--gray-200); background: #f9fafb;">
+            <h4 style="margin-bottom: 15px; font-size: 14px; color: var(--text-light);">Replies</h4>
+            {% for reply in replies %}
+            <div style="margin-bottom: 15px; padding: 15px; background: white; border: 1px solid var(--gray-300); border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                    <strong style="color: {% if reply.created_by == ticket.student.user %}var(--primary-cyan){% else %}#10b981{% endif %};">
+                        {{ reply.created_by.name|default:reply.created_by.username }}
+                    </strong>
+                    <span style="color: var(--text-light);">{{ reply.created_at|date:"d M, Y h:i A" }}</span>
+                </div>
+                <div style="white-space: pre-wrap; font-size: 14px;">{{ reply.doubt_answer }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="ticket-actions">
-            <button class="btn-submit">SUBMIT</button>
             <button class="btn-back" onclick="window.history.back()">Back to list</button>
         </div>
     </div>
@@ -155,7 +180,7 @@
 {% block right %}
 
 <style>
-    .new-query-section {
+    .reply-section {
         background: white;
         border: 1px solid var(--gray-200);
         border-radius: 6px;
@@ -174,31 +199,30 @@
     .form-footer {
         margin-top: 14px;
         display: flex;
-        flex-direction: column;
-        gap: 12px;
+        justify-content: flex-end;
     }
-
-    select {
-        padding: 10px;
+    
+    .btn-submit {
+        background: var(--success);
+        padding: 10px 18px;
+        color: white;
         border-radius: 4px;
-        border: 1px solid var(--gray-300);
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
     }
 </style>
 
-<div class="new-query-section">
-    <textarea class="query-input" placeholder="Ask a query..."></textarea>
+<div class="reply-section">
+    <h3 style="margin-top: 0; font-size: 16px; color: var(--text-dark); margin-bottom: 15px;">Post a Reply</h3>
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="doubt_answer" class="query-input" placeholder="Type your reply here..." required></textarea>
 
-    <div class="form-footer">
-        <select>
-            <option>General</option>
-            <option>Technical</option>
-            <option>Billing</option>
-            <option>Account</option>
-            <option>Other</option>
-        </select>
-
-        <button class="btn-submit">SUBMIT</button>
-    </div>
+        <div class="form-footer">
+            <button type="submit" class="btn-submit">SUBMIT REPLY</button>
+        </div>
+    </form>
 </div>
 
 {% endblock %}

@@ -959,13 +959,37 @@ def church_user_doubts_answers(request):
 
 @login_required
 def church_user_doubt_view(request, id):
+    from home.models import SupportReplies
+    
     try:
         doubt = Support.objects.select_related('student').get(id=id, student__user=request.user)
     except Support.DoesNotExist:
         messages.error(request, "Doubt not found or you don't have permission to view it.")
         return redirect('church_user_doubts_answers')
         
-    return render(request, "church/support_view.html", {'doubt': doubt})
+    replies = doubt.replies.filter(deleted_at__isnull=True).order_by('created_at')
+
+    if request.method == 'POST':
+        doubt_answer = request.POST.get('doubt_answer')
+        if doubt_answer:
+            SupportReplies.objects.create(
+                support=doubt,
+                doubt_answer=doubt_answer,
+                created_by=request.user,
+                updated_by=request.user
+            )
+            # Re-open the ticket if it was resolved
+            if doubt.status == 'completed':
+                doubt.status = 'in_progress'
+                doubt.save()
+                
+            messages.success(request, 'Reply sent successfully!')
+            return redirect('church_user_doubt_view', id=id)
+
+    return render(request, "church/support_view.html", {
+        'doubt': doubt,
+        'replies': replies
+    })
 
 from django.views.decorators.http import require_POST
 

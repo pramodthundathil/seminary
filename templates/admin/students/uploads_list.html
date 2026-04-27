@@ -179,8 +179,14 @@
 
                         <!-- Step 3: Subject -->
                         <div class="col-md-4 form-group">
-                            <label>3. Select Subject* <span id="subjectLoading" class="loading-spinner"><i
-                                        class="fas fa-spinner fa-spin"></i></span></label>
+                            <div class="d-flex justify-content-between align-items-end mb-1">
+                                <label class="mb-0">3. Select Subject* <span id="subjectLoading" class="loading-spinner"><i
+                                            class="fas fa-spinner fa-spin"></i></span></label>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="showAllSubjects" onchange="loadSubjects($('#studentSelect').val())" style="cursor: pointer; width: 30px; height: 15px; margin-top: 3px;">
+                                    <label class="form-check-label small text-muted ms-1" for="showAllSubjects" style="cursor: pointer;">Show all subjects</label>
+                                </div>
+                            </div>
                             <select class="form-control" name="subject" id="subjectSelect"
                                 onchange="loadUploads(this.value)" disabled required>
                                 <option value="">-- Choose Subject --</option>
@@ -292,8 +298,10 @@
             return;
         }
 
+        let showAll = $('#showAllSubjects').is(':checked') ? '?all=1' : '';
+
         $('#subjectLoading').show();
-        $.get('/menu/students/instructors/get-subjects/' + studentId + '/', function (data) {
+        $.get('/menu/students/instructors/get-subjects/' + studentId + '/' + showAll, function (data) {
             $('#subjectLoading').hide();
             let options = '<option value="">-- Choose Subject --</option>';
             data.subjects.forEach(function (s) {

@@ -451,7 +451,38 @@ def student_submitted_assignment(request):
 
 @student_only
 def student_view_post(request):
-    return render(request, "student/view_posts.html")
+    try:
+        doubt_queryset = (
+            Support.objects
+            .filter(student__user=request.user)
+            .select_related("student")
+            .order_by("-created_at")
+        )
+        
+        # Search functionality
+        search_query = request.GET.get('search', '')
+        if search_query:
+            doubt_queryset = doubt_queryset.filter(
+                doubt_question__icontains=search_query
+            )
+        
+        # Pagination - 10 items per page
+        paginator = Paginator(doubt_queryset, 10)
+        page_number = request.GET.get('page')
+        doubts_page = paginator.get_page(page_number)
+        
+    except Exception as e:
+        logger.error(f"Failed to fetch doubts for user {request.user.id}: {e}")
+        doubts_page = []
+        paginator = None
+        search_query = ""
+
+    return render(request, "student/view_posts.html", {
+        "doubt": doubts_page,
+        "paginator": paginator,
+        "doubts_page": doubts_page,
+        "search_query": search_query,
+    })
 
 
 # -----------------------------------------
@@ -1310,8 +1341,40 @@ def student_change_password(request):
 
     return render(request, "student/change_password.html")
 
-def student_doubt_view(request,id):
-    return render(request, "student/doubt_view.html")
+@login_required
+def student_doubt_view(request, id):
+    from home.models import Support, SupportReplies
+    ticket = get_object_or_404(Support, id=id, deleted_at__isnull=True)
+    
+    # Check if the ticket belongs to the current student
+    student = request.user.student.first()
+    if not student or ticket.student != student:
+        messages.error(request, "You are not authorized to view this ticket.")
+        return redirect('student_home')
+
+    replies = ticket.replies.filter(deleted_at__isnull=True).order_by('created_at')
+
+    if request.method == 'POST':
+        doubt_answer = request.POST.get('doubt_answer')
+        if doubt_answer:
+            SupportReplies.objects.create(
+                support=ticket,
+                doubt_answer=doubt_answer,
+                created_by=request.user,
+                updated_by=request.user
+            )
+            # Re-open the ticket if it was resolved
+            if ticket.status == 'completed':
+                ticket.status = 'in_progress'
+                ticket.save()
+                
+            messages.success(request, 'Reply sent successfully!')
+            return redirect('student_doubt_view', id=id)
+
+    return render(request, "student/doubt_view.html", {
+        'ticket': ticket,
+        'replies': replies
+    })
 
 
 @login_required

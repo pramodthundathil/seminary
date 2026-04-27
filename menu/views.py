@@ -5306,6 +5306,19 @@ def student_subjects_bulk_assign(request):
                 )
                 created_count += 1
                 
+                # Auto-assign uploads when a subject is assigned
+                from home.models import Uploads, StudentsUploads
+                uploads = Uploads.objects.filter(subject_id=subject_id, status=True)
+                for upload in uploads:
+                    StudentsUploads.objects.get_or_create(
+                        student=student,
+                        upload=upload,
+                        defaults={
+                            'created_by': request.user,
+                            'updated_by': request.user
+                        }
+                    )
+                
         message = f'Successfully assigned {created_count} subjects.'
         if skipped_count > 0:
             message += f' ({skipped_count} were already assigned and skipped).'
@@ -5429,21 +5442,37 @@ def student_instructors_datatable(request):
 def ajax_get_assigned_subjects_by_student(request, student_id):
     """Fetch subjects assigned to a specific student from StudentsSubjects"""
     student = get_object_or_404(Students, id=student_id)
-    # Get subjects from StudentsSubjects model for this student
-    subjects = StudentsSubjects.objects.filter(
-        student=student, 
-        deleted_at__isnull=True
-    ).select_related('subject').values(
-        'subject__id', 
-        'subject__subject_name', 
-        'subject__subject_code'
-    ).distinct()
     
-    # Format for JSON
-    subject_list = [{
-        'id': s['subject__id'],
-        'name': f"{s['subject__subject_name']} ({s['subject__subject_code']})"
-    } for s in subjects]
+    show_all = request.GET.get('all') == '1'
+    
+    if show_all:
+        from home.models import Subjects
+        subjects = Subjects.objects.filter(deleted_at__isnull=True).values(
+            'id', 
+            'subject_name', 
+            'subject_code'
+        ).distinct().order_by('subject_name')
+        
+        subject_list = [{
+            'id': s['id'],
+            'name': f"{s['subject_name']} ({s['subject_code']})"
+        } for s in subjects]
+    else:
+        # Get subjects from StudentsSubjects model for this student
+        subjects = StudentsSubjects.objects.filter(
+            student=student, 
+            deleted_at__isnull=True
+        ).select_related('subject').values(
+            'subject__id', 
+            'subject__subject_name', 
+            'subject__subject_code'
+        ).distinct()
+        
+        # Format for JSON
+        subject_list = [{
+            'id': s['subject__id'],
+            'name': f"{s['subject__subject_name']} ({s['subject__subject_code']})"
+        } for s in subjects]
     
     return JsonResponse({'success': True, 'subjects': subject_list})
 
@@ -5679,6 +5708,23 @@ def student_uploads_bulk_assign(request):
                     updated_by=request.user
                 )
                 created_count += 1
+                
+                # Auto-assign subject if not assigned
+                from home.models import Uploads, StudentsSubjects
+                upload = Uploads.objects.filter(id=upload_id).first()
+                if upload and upload.subject:
+                    StudentsSubjects.objects.get_or_create(
+                        student=student,
+                        subject=upload.subject,
+                        deleted_at__isnull=True,
+                        defaults={
+                            'created_by': request.user,
+                            'updated_by': request.user,
+                            'created_at': timezone.now(),
+                            'updated_at': timezone.now(),
+                            'is_approved': True
+                        }
+                    )
                 
         message = f'Successfully assigned {created_count} uploads.'
         if skipped_count > 0:
