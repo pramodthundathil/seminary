@@ -2,201 +2,858 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* CSS System & Visual Tokens */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .profile-card {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .profile-card:hover {
+        box-shadow: var(--hover-shadow);
+    }
+
+    /* Tabs Styling */
+    .student-profile-tabs {
+        border-bottom: 2px solid #e2e8f0;
+        gap: 6px;
+        margin-bottom: 0 !important;
+    }
+    .student-profile-tabs .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 14px 20px;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .student-profile-tabs .nav-link:hover {
+        color: #1e3a8a;
+        background-color: #f8fafc;
+        border-bottom-color: #cbd5e1;
+        border-radius: 12px 12px 0 0;
+    }
+    .student-profile-tabs .nav-link.active {
+        color: #2563eb;
+        background-color: #f0f6ff !important;
+        border-bottom: 3px solid #2563eb;
+        border-radius: 12px 12px 0 0;
+        font-weight: 700;
+    }
+
+    .tab-content-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 16px 16px;
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+    }
+
+    /* Detail Grid Layout */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    .detail-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s ease;
+    }
+    .detail-item:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+    }
+    .detail-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .detail-value {
+        font-size: 0.95rem;
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    /* Stat Cards */
+    .stat-card-premium {
+        border-radius: 16px;
+        border: none;
+        color: #fff;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card-premium:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--hover-shadow);
+    }
+    .stat-card-bg-icon {
+        position: absolute;
+        right: -10px;
+        bottom: -15px;
+        font-size: 6rem;
+        opacity: 0.15;
+        transform: rotate(-10deg);
+        pointer-events: none;
+    }
+
+    /* Progress bar */
+    .payment-progress {
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        margin-top: 12px;
+        overflow: hidden;
+    }
+    .payment-progress-bar {
+        height: 100%;
+        background-color: #fff;
+        border-radius: 3px;
+    }
+
+    /* Modern Badges */
+    .status-badge-pill {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Documents Cards */
+    .doc-card {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+    .doc-card:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.08);
+        transform: translateY(-3px);
+    }
+
+    /* Tables styling */
+    .premium-table {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .premium-table th {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #cbd5e1;
+        padding: 12px 16px;
+    }
+    .premium-table td {
+        padding: 14px 16px;
+        vertical-align: middle;
+    }
+
+    /* Section Header */
+    .section-title-modern {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+        position: relative;
+        padding-left: 14px;
+    }
+    .section-title-modern::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 3px;
+        bottom: 3px;
+        width: 4px;
+        background-color: #2563eb;
+        border-radius: 2px;
+    }
+
+    .empty-state {
+        padding: 50px 20px;
+        text-align: center;
+        color: #94a3b8;
+    }
+    .empty-state i {
+        font-size: 3.5rem;
+        margin-bottom: 16px;
+        color: #cbd5e1;
+    }
+</style>
+
+{% if not student.is_paid %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert" style="border-left: 5px solid #ef4444; background-color: #fff5f5; color: #991b1b; padding: 16px 20px; border-radius: 12px; border-top: 1px solid #fee2e2; border-right: 1px solid #fee2e2; border-bottom: 1px solid #fee2e2;">
+            <i class="fas fa-exclamation-circle me-3" style="font-size: 1.8rem; color: #ef4444;"></i>
+            <div>
+                <h6 class="mb-1 font-weight-bold" style="font-size: 1.05rem;">Unpaid Registration Request</h6>
+                <span style="font-size: 0.9rem;">This applicant has not completed the required registration payment. Please verify their payment status before approving the application.</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-12 mb-4">
         <div class="d-flex justify-content-between align-items-center">
-            <h3>Student Application Details</h3>
-            <a href="{% url 'student_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to
-                List</a>
+            <div>
+                <h3 class="font-weight-bold text-dark mb-1">Student Record Profile</h3>
+                <p class="text-muted mb-0">View comprehensive student data, personal history, course files, progress reports, and balances.</p>
+            </div>
+            <a href="{% url 'student_list' %}" class="btn btn-outline-secondary shadow-sm" style="border-radius: 8px;"><i class="fas fa-arrow-left me-2"></i> Back to List</a>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <!-- Student Info Card -->
+    <!-- Main Content Tabs Area -->
     <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Personal Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-3 text-center">
+        <ul class="nav nav-tabs student-profile-tabs" id="studentTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true">
+                    <i class="fas fa-user-circle"></i> Personal Details
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="course-tab" data-bs-toggle="tab" data-bs-target="#course" type="button" role="tab" aria-controls="course" aria-selected="false">
+                    <i class="fas fa-graduation-cap"></i> Course
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab" aria-controls="subjects" aria-selected="false">
+                    <i class="fas fa-book"></i> Subjects
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab" aria-controls="exams" aria-selected="false">
+                    <i class="fas fa-file-signature"></i> Exams
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="marks-tab" data-bs-toggle="tab" data-bs-target="#marks" type="button" role="tab" aria-controls="marks" aria-selected="false">
+                    <i class="fas fa-award"></i> Marks
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fee-tab" data-bs-toggle="tab" data-bs-target="#fee" type="button" role="tab" aria-controls="fee" aria-selected="false">
+                    <i class="fas fa-wallet"></i> Fee Structures
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content tab-content-container mb-4" id="studentTabContent">
+            <!-- Tab: Personal Details -->
+            <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                <div class="row mb-5 align-items-center">
+                    <div class="col-md-3 text-center border-end py-3">
                         {% if student.photo %}
-                        <img src="/media/{{ student.photo }}" alt="Student Photo" class="img-fluid rounded-circle mb-2"
-                            style="max-height: 150px;">
+                        <img src="/media/{{ student.photo }}" alt="Student Photo" class="img-fluid rounded-circle mb-3 shadow-sm border p-1" style="width: 140px; height: 140px; object-fit: cover;">
                         {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}"
-                            alt="Placeholder" class="img-fluid rounded-circle mb-2" style="max-height: 150px;">
+                        <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&size=140&background=eff6ff&color=2563eb&bold=true" alt="Placeholder" class="img-fluid rounded-circle mb-3 shadow-sm border p-1" style="width: 140px; height: 140px;">
                         {% endif %}
-                        <h5 class="mt-2">{{ student.first_name }} {{ student.last_name }}</h5>
-                        <p class="text-muted">{{ student.student_id|default:"ID: Pending" }}</p>
+                        <h4 class="mt-2 text-dark font-weight-bold mb-1">{{ student.first_name }} {{ student.last_name }}</h4>
+                        <span class="badge bg-light text-secondary border px-3 py-1 font-weight-bold" style="border-radius: 50px;">{{ student.student_id|default:"ID Pending" }}</span>
                     </div>
-                    <div class="col-md-9">
-                        <table class="table table-borderless">
-                            <tr>
-                                <th width="30%">Email:</th>
-                                <td>{{ student.email }}</td>
-                            </tr>
-                            <tr>
-                                <th>Phone:</th>
-                                <td>{{ student.phone_number }}</td>
-                            </tr>
-                            <tr>
-                                <th>Date of Birth:</th>
-                                <td>{{ student.date_of_birth }}</td>
-                            </tr>
-                            <tr>
-                                <th>Gender:</th>
-                                <td>{{ student.gender }}</td>
-                            </tr>
-                            <tr>
-                                <th>Marital Status:</th>
-                                <td>{{ student.mrital_status }}</td>
-                            </tr>
-                            <tr>
-                                <th>Address:</th>
-                                <td>{{ student.mailing_address }}<br>{{ student.city }}, {{ student.state }} {{ student.zip_code }}<br>{{ student.country.name }}</td>
-                                    
-                            </tr>
-                        </table>
+                    <div class="col-md-9 ps-md-4">
+                        <h6 class="section-title-modern mb-3">Basic Information</h6>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Email Address</div>
+                                <div class="detail-value text-break">{{ student.email|default:"N/A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Phone Number</div>
+                                <div class="detail-value">+{{ student.phone_code|default:"--" }} {{ student.phone_number|default:"N/A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Date of Birth</div>
+                                <div class="detail-value">{{ student.date_of_birth|default:"N/A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Gender</div>
+                                <div class="detail-value">{{ student.gender|title|default:"N/A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Marital Status</div>
+                                <div class="detail-value">{{ student.mrital_status|title|default:"N/A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Citizenship</div>
+                                <div class="detail-value">{{ student.citizenship.name|default:"N/A" }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">Academic & Ministry</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Academic</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Course Applied:</th>
-                                <td>{{ student.course_applied.course_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Language:</th>
-                                <td>{{ student.language.language_name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Highest Education:</th>
-                                <td>{{ student.highest_education }}</td>
-                            </tr>
-                            <tr>
-                                <th>Starting Year:</th>
-                                <td>{{ student.starting_year }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Ministry</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Ministry Status:</th>
-                                <td>{{ student.ministerial_status }}</td>
-                            </tr>
-                            <tr>
-                                <th>Church:</th>
-                                <td>{{ student.church_affiliation }}</td>
-                            </tr>
-                        </table>
+                <div class="mb-5">
+                    <h6 class="section-title-modern mb-3">Mailing Address Details</h6>
+                    <div class="p-3 bg-light rounded-3 border" style="border-radius: 12px !important;">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <span class="text-muted d-block small font-weight-bold text-uppercase">Street Address</span>
+                                <span class="text-dark font-weight-bold">{{ student.mailing_address|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <span class="text-muted d-block small font-weight-bold text-uppercase">City</span>
+                                <span class="text-dark font-weight-bold">{{ student.city|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <span class="text-muted d-block small font-weight-bold text-uppercase">State/Province</span>
+                                <span class="text-dark font-weight-bold">{{ student.state|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-muted d-block small font-weight-bold text-uppercase">Zip Code</span>
+                                <span class="text-dark font-weight-bold">{{ student.zip_code|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-muted d-block small font-weight-bold text-uppercase">Country</span>
+                                <span class="text-dark font-weight-bold">{{ student.country.name|default:"N/A" }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Documents & Uploads</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% if student.certificate1 %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-file-alt fa-3x text-primary mb-2"></i>
-                                <h6 class="card-title">Certificate 1</h6>
-                                <a href="/media/{{ student.certificate1 }}" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">View</a>
+                <div class="mb-5">
+                    <h6 class="section-title-modern mb-3">Ministry & Education Background</h6>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Ministerial Status</div>
+                            <div class="detail-value">{{ student.ministerial_status|default:"N/A" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Church Affiliation</div>
+                            <div class="detail-value">{{ student.church_affiliation|default:"N/A" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Highest Education</div>
+                            <div class="detail-value">{{ student.highest_education|default:"N/A" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Preferred Language</div>
+                            <div class="detail-value">{{ student.language.language_name|default:"N/A" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Scholarship Requested</div>
+                            <div class="detail-value">
+                                {% if student.scholarship_needed == 'Yes' or student.scholarship_needed == 'yes' %}
+                                <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i> Yes</span>
+                                {% else %}
+                                <span class="text-muted">No</span>
+                                {% endif %}
                             </div>
                         </div>
-                    </div>
-                    {% endif %}
-                    {% if student.certificate2 %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-file-alt fa-3x text-primary mb-2"></i>
-                                <h6 class="card-title">Certificate 2</h6>
-                                <a href="/media/{{ student.certificate2 }}" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">View</a>
-                            </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Employment Status</div>
+                            <div class="detail-value">{{ student.currently_employed|default:"N/A" }}</div>
                         </div>
                     </div>
-                    {% endif %}
-                    {% if student.certificate3 %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fas fa-file-alt fa-3x text-primary mb-2"></i>
-                                <h6 class="card-title">Certificate 3</h6>
-                                <a href="/media/{{ student.certificate3 }}" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">View</a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if not student.certificate1 and not student.certificate2 and not student.certificate3 %}
-                    <p class="text-muted text-center w-100">No documents uploaded.</p>
-                    {% endif %}
                 </div>
+
+                {% if student.message %}
+                <div class="mb-5">
+                    <h6 class="section-title-modern mb-3">Applicant Message</h6>
+                    <div class="p-3 bg-light rounded-3 border italic text-muted" style="border-radius: 12px !important; font-style: italic;">
+                        "{{ student.message }}"
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Documents Section -->
+                <div>
+                    <h6 class="section-title-modern mb-3">Certificates & Document Uploads</h6>
+                    <div class="row">
+                        {% if student.certificate1 %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 doc-card">
+                                <div class="card-body text-center p-3">
+                                    <div class="mb-3 text-primary"><i class="far fa-file-pdf fa-3x"></i></div>
+                                    <h6 class="font-weight-bold text-dark mb-2">Certificate 1</h6>
+                                    <a href="/media/{{ student.certificate1 }}" target="_blank" class="btn btn-sm btn-outline-primary w-100" style="border-radius: 8px;">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if student.certificate2 %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 doc-card">
+                                <div class="card-body text-center p-3">
+                                    <div class="mb-3 text-primary"><i class="far fa-file-pdf fa-3x"></i></div>
+                                    <h6 class="font-weight-bold text-dark mb-2">Certificate 2</h6>
+                                    <a href="/media/{{ student.certificate2 }}" target="_blank" class="btn btn-sm btn-outline-primary w-100" style="border-radius: 8px;">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if student.certificate3 %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 doc-card">
+                                <div class="card-body text-center p-3">
+                                    <div class="mb-3 text-primary"><i class="far fa-file-pdf fa-3x"></i></div>
+                                    <h6 class="font-weight-bold text-dark mb-2">Certificate 3</h6>
+                                    <a href="/media/{{ student.certificate3 }}" target="_blank" class="btn btn-sm btn-outline-primary w-100" style="border-radius: 8px;">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if student.certificate4 %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 doc-card">
+                                <div class="card-body text-center p-3">
+                                    <div class="mb-3 text-primary"><i class="far fa-file-pdf fa-3x"></i></div>
+                                    <h6 class="font-weight-bold text-dark mb-2">Certificate 4</h6>
+                                    <a href="/media/{{ student.certificate4 }}" target="_blank" class="btn btn-sm btn-outline-primary w-100" style="border-radius: 8px;">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if student.certificate5 %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 doc-card">
+                                <div class="card-body text-center p-3">
+                                    <div class="mb-3 text-primary"><i class="far fa-file-pdf fa-3x"></i></div>
+                                    <h6 class="font-weight-bold text-dark mb-2">Certificate 5</h6>
+                                    <a href="/media/{{ student.certificate5 }}" target="_blank" class="btn btn-sm btn-outline-primary w-100" style="border-radius: 8px;">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if not student.certificate1 and not student.certificate2 and not student.certificate3 and not student.certificate4 and not student.certificate5 %}
+                        <div class="col-md-12">
+                            <p class="text-muted text-center py-3">No certificates uploaded by the applicant.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab: Course -->
+            <div class="tab-pane fade" id="course" role="tabpanel" aria-labelledby="course-tab">
+                {% if student.course_applied %}
+                <div class="card shadow-sm border-0 mb-4 bg-light" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                            <div>
+                                <h4 class="text-primary mb-1 font-weight-bold">{{ student.course_applied.course_name }}</h4>
+                                <span class="text-muted small"><i class="fas fa-tag me-1"></i> Syllabus Code: <strong>{{ student.course_applied.course_code }}</strong></span>
+                            </div>
+                            <span class="status-badge-pill bg-success-subtle text-success border border-success font-weight-bold">
+                                <i class="fas fa-check-circle"></i> Active syllabus
+                            </span>
+                        </div>
+                        <hr class="my-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <span class="text-muted small d-block mb-1">Tuition Fees</span>
+                                <h3 class="text-dark font-weight-bold">${{ student.course_applied.fees|default:"0.00" }} USD</h3>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <span class="text-muted small d-block mb-1">Required Credit Hours</span>
+                                <h3 class="text-dark font-weight-bold">{{ student.course_applied.credit_hours }} Credits</h3>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <span class="text-muted small d-block mb-1">Academic Requirement</span>
+                                <h4 class="text-dark font-weight-bold">{{ student.course_applied.highest_qualification.qualification_name|default:"General Entry" }}</h4>
+                            </div>
+                        </div>
+                        {% if student.course_applied.description %}
+                        <div class="mt-4">
+                            <h6 class="text-secondary font-weight-bold mb-2">Syllabus Overview</h6>
+                            <div class="p-3 bg-white rounded-3 border" style="border-radius: 12px; font-size: 0.95rem;">
+                                {{ student.course_applied.description|safe }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-graduation-cap"></i>
+                    <p class="mb-0">No course details associated with this student's profile.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab: Subjects -->
+            <div class="tab-pane fade" id="subjects" role="tabpanel" aria-labelledby="subjects-tab">
+                <h6 class="section-title-modern mb-3">Assigned & Requested Subjects</h6>
+                {% if subjects %}
+                <div class="table-responsive premium-table">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Class Hours</th>
+                                <th>Fee</th>
+                                <th>Category</th>
+                                <th>Approval</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ss in subjects %}
+                            <tr>
+                                <td><span class="badge bg-light text-dark border font-weight-bold px-2 py-1">{{ ss.subject.subject_code }}</span></td>
+                                <td><span class="font-weight-bold text-dark">{{ ss.subject.subject_name }}</span></td>
+                                <td>{{ ss.subject.class_hours }} hours</td>
+                                <td><strong>${{ ss.subject.fees|default:"0.00" }}</strong></td>
+                                <td>
+                                    {% if ss.is_optional %}
+                                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">Optional</span>
+                                    {% else %}
+                                    <span class="badge bg-primary-subtle text-primary border px-2 py-1">Core</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ss.is_approved %}
+                                    <span class="status-badge-pill bg-success-subtle text-success border border-success py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-check-circle"></i> Approved</span>
+                                    {% else %}
+                                    <span class="status-badge-pill bg-warning-subtle text-warning border border-warning py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-clock"></i> Pending Approval</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <p class="mb-0">No subject enrollments found for this student.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab: Exams -->
+            <div class="tab-pane fade" id="exams" role="tabpanel" aria-labelledby="exams-tab">
+                <h6 class="section-title-modern mb-3">Scheduled & Registered Exams</h6>
+                {% if exams %}
+                <div class="table-responsive premium-table">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Exam Name</th>
+                                <th>Format</th>
+                                <th>Allowed Duration</th>
+                                <th>Status</th>
+                                <th>Completion Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for se in exams %}
+                            <tr>
+                                <td><span class="small text-muted">{{ se.subject.subject_name|default:"General Syllabus" }}</span></td>
+                                <td><span class="font-weight-bold text-dark">{{ se.exam.exam_name }}</span></td>
+                                <td><span class="badge bg-info-subtle text-info border px-2 py-1 text-uppercase">{{ se.exam.exam_type }}</span></td>
+                                <td>{{ se.exam_duration }} mins</td>
+                                <td>
+                                    {% if se.is_approved %}
+                                    <span class="status-badge-pill bg-success-subtle text-success border border-success py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-check-circle"></i> Active</span>
+                                    {% else %}
+                                    <span class="status-badge-pill bg-warning-subtle text-warning border border-warning py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-clock"></i> Waitlist Approval</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if se.is_exam_ended %}
+                                    <span class="status-badge-pill bg-secondary-subtle text-secondary py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-flag"></i> Exam Ended</span>
+                                    {% elif se.is_exam_started %}
+                                    <span class="status-badge-pill bg-primary-subtle text-primary py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-spinner fa-spin"></i> Started</span>
+                                    {% else %}
+                                    <span class="status-badge-pill bg-light text-dark border py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-hourglass-start"></i> Not Attempted</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-file-signature"></i>
+                    <p class="mb-0">No exam slots currently assigned to this student.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab: Marks -->
+            <div class="tab-pane fade" id="marks" role="tabpanel" aria-labelledby="marks-tab">
+                <h6 class="section-title-modern mb-3">Exam Results & Graded Scores</h6>
+                {% if exams %}
+                <div class="table-responsive premium-table mb-5">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Exam Name</th>
+                                <th>Score Possible</th>
+                                <th>Obtained Score</th>
+                                <th>Result / Pass Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for se in exams %}
+                            <tr>
+                                <td><span class="small text-muted">{{ se.subject.subject_name|default:"General Syllabus" }}</span></td>
+                                <td><span class="font-weight-bold text-dark">{{ se.exam.exam_name }}</span></td>
+                                <td><strong>{{ se.total_possible }}</strong></td>
+                                <td>
+                                    {% if se.is_exam_ended %}
+                                    <h5 class="text-primary font-weight-bold mb-0">{{ se.total_obtained }}</h5>
+                                    <span class="text-muted small">({{ se.percentage|floatformat:1 }}%)</span>
+                                    {% else %}
+                                    <span class="text-muted italic">Ungraded</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if se.is_exam_ended %}
+                                        {% if se.percentage >= 50.0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success px-3 py-1 font-weight-bold"><i class="fas fa-check me-1"></i> PASS</span>
+                                        {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 font-weight-bold"><i class="fas fa-times me-1"></i> FAILED</span>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="badge bg-light text-dark border px-2 py-1">Pending Exam Completion</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state mb-5">
+                    <i class="fas fa-award"></i>
+                    <p class="mb-0">No exam results available for this student.</p>
+                </div>
+                {% endif %}
+
+                <h6 class="section-title-modern mb-3">Assignment Graded Submissions</h6>
+                {% if assignments %}
+                <div class="table-responsive premium-table">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Assignment Details</th>
+                                <th>Submission Date</th>
+                                <th>Possible Score</th>
+                                <th>Obtained Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sa in assignments %}
+                            <tr>
+                                <td><span class="font-weight-bold text-dark">{{ sa.assignment.title|default:"Class Assignment" }}</span></td>
+                                <td>{{ sa.submitted_on|default:"Not Submitted Yet" }}</td>
+                                <td>{{ sa.assignment.total_score|default:"--" }}</td>
+                                <td>
+                                    {% if sa.submitted_on %}
+                                        {% if sa.total_marks is not None %}
+                                        <h5 class="text-success font-weight-bold mb-0">{{ sa.total_marks }}</h5>
+                                        {% else %}
+                                        <span class="text-warning italic"><i class="fas fa-spinner fa-spin me-1"></i> Reviewing</span>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="badge bg-light text-dark border">Not Submitted</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <p class="mb-0">No assignment files logged for this student.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab: Fee Structure -->
+            <div class="tab-pane fade" id="fee" role="tabpanel" aria-labelledby="fee-tab">
+                <h6 class="section-title-modern mb-3">Financial Dashboard</h6>
+                
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card-premium" style="background: var(--primary-gradient);">
+                            <h6 class="text-uppercase mb-1" style="opacity: 0.8; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">Total Fee Expected</h6>
+                            <h2 class="mb-1 font-weight-bold">${{ total_fee_expected|floatformat:2 }}</h2>
+                            <div class="small" style="opacity: 0.9;">
+                                Tuition: ${{ course_fee|floatformat:2 }} | Add-ons: ${{ subject_fees_total|floatformat:2 }}
+                            </div>
+                            <i class="fas fa-file-invoice-dollar stat-card-bg-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card-premium" style="background: var(--success-gradient);">
+                            <h6 class="text-uppercase mb-1" style="opacity: 0.8; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">Total Tuition Paid</h6>
+                            <h2 class="mb-1 font-weight-bold">${{ total_paid|floatformat:2 }}</h2>
+                            
+                            {% if total_fee_expected > 0 %}
+                            <div class="payment-progress">
+                                <div class="payment-progress-bar" style="width: {% widthratio total_paid total_fee_expected 100 %}%"></div>
+                            </div>
+                            <div class="small mt-2" style="opacity: 0.95;">
+                                {% widthratio total_paid total_fee_expected 100 %}% of expected fee collected
+                            </div>
+                            {% else %}
+                            <div class="payment-progress">
+                                <div class="payment-progress-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="small mt-2" style="opacity: 0.95;">
+                                No expected fees registered
+                            </div>
+                            {% endif %}
+                            <i class="fas fa-check-double stat-card-bg-icon"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="stat-card-premium" style="background: {% if balance_due > 0 %}var(--danger-gradient){% else %}var(--success-gradient){% endif %};">
+                            <h6 class="text-uppercase mb-1" style="opacity: 0.8; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">Outstanding Balance</h6>
+                            <h2 class="mb-1 font-weight-bold">${{ balance_due|floatformat:2 }}</h2>
+                            <div class="small" style="opacity: 0.95;">
+                                {% if balance_due > 0 %}
+                                Pending collection actions
+                                {% else %}
+                                Account fully paid up!
+                                {% endif %}
+                            </div>
+                            <i class="fas fa-hand-holding-usd stat-card-bg-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="section-title-modern mb-3">Tuition Payments Log</h6>
+                {% if payments %}
+                <div class="table-responsive premium-table">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Payer / Payment Reason</th>
+                                <th>Amount Paid</th>
+                                <th>Collection State</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in payments %}
+                            <tr>
+                                <td><span class="badge bg-light text-dark border font-weight-bold px-2 py-1">{{ p.code|default:"N/A" }}</span></td>
+                                <td>
+                                    <span class="font-weight-bold text-dark">{{ p.name }}</span><br>
+                                    <span class="text-muted small">
+                                        {% if p.subjects_id %}
+                                        Subject tuition: {{ p.subjects_id.subject_name }}
+                                        {% else %}
+                                        General Course Payment / Registration Fees
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td><span class="font-weight-bold text-dark">${{ p.amount|floatformat:2 }}</span></td>
+                                <td>
+                                    {% if p.is_paid %}
+                                    <span class="status-badge-pill bg-success-subtle text-success border border-success py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-check-circle"></i> Success</span>
+                                    {% else %}
+                                    <span class="status-badge-pill bg-warning-subtle text-warning border border-warning py-1 px-2" style="font-size: 0.75rem;"><i class="fas fa-exclamation-triangle"></i> Unresolved</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ p.created_at|default:"N/A" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <p class="mb-0">No payments have been logged for this student record.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Actions Sidebar -->
+    <!-- Actions Sidebar Area -->
     <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Actions</h5>
+        <div class="profile-card shadow-sm border">
+            <div class="card-header bg-dark text-white p-3">
+                <h5 class="mb-0 font-weight-bold d-flex align-items-center gap-2"><i class="fas fa-sliders-h"></i> Registration Actions</h5>
             </div>
-            <div class="card-body">
-                <p><strong>Status:</strong>
+            <div class="card-body p-3">
+                <div class="mb-3 p-2 bg-light rounded-3 border">
+                    <label class="font-weight-bold text-secondary d-block small mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Application Status</label>
                     {% if student.status %}
-                    <span class="badge bg-success">Approved</span>
+                    <span class="status-badge-pill bg-success text-white py-1 px-3 w-100 justify-content-center" style="font-size: 0.9rem;"><i class="fas fa-check-circle"></i> Approved Application</span>
                     {% else %}
-                    <span class="badge bg-warning text-dark">Pending</span>
+                    <span class="status-badge-pill bg-warning text-dark py-1 px-3 w-100 justify-content-center" style="font-size: 0.9rem;"><i class="fas fa-clock"></i> Pending Approval</span>
                     {% endif %}
-                </p>
-                <p><strong>Active:</strong>
+                </div>
+                
+                <div class="mb-3 p-2 bg-light rounded-3 border">
+                    <label class="font-weight-bold text-secondary d-block small mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Portal Access Status</label>
                     {% if student.active %}
-                    <span class="badge bg-success">Yes</span>
+                    <span class="status-badge-pill bg-success text-white py-1 px-3 w-100 justify-content-center" style="font-size: 0.9rem;"><i class="fas fa-unlock"></i> Portal Access Granted</span>
                     {% else %}
-                    <span class="badge bg-secondary">No</span>
+                    <span class="status-badge-pill bg-secondary text-white py-1 px-3 w-100 justify-content-center" style="font-size: 0.9rem;"><i class="fas fa-lock"></i> Portal Access Suspended</span>
                     {% endif %}
-                </p>
-                <p><strong>Submitted:</strong> {{ student.created_at }}</p>
+                </div>
 
-                <hr>
+                <div class="mb-4 text-center">
+                    <span class="text-muted small d-block">Record Created:</span>
+                    <span class="text-dark font-weight-bold small">{{ student.created_at }}</span>
+                </div>
+
+                <hr class="my-3">
 
                 <div class="d-grid gap-2">
                     {% if not student.status %}
                     <form action="{% url 'student_approve_action' student.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-success btn-lg btn-block w-100 mb-2">
-                            <i class="fas fa-check"></i> Approve Application
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-2" style="border-radius: 8px; font-size: 0.95rem; font-weight: 700;">
+                            <i class="fas fa-check-circle me-2"></i> Approve Application
                         </button>
                     </form>
                     {% else %}
                     <form action="{% url 'student_disapprove_action' student.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-warning btn-lg btn-block w-100 mb-2">
-                            <i class="fas fa-times"></i> Revoke Approval
+                        <button type="submit" class="btn btn-warning btn-lg w-100 mb-2" style="border-radius: 8px; font-size: 0.95rem; font-weight: 700; color: #fff; background: #eab308; border-color: #eab308;">
+                            <i class="fas fa-times-circle me-2"></i> Revoke Approval
                         </button>
                     </form>
                     {% endif %}
@@ -204,43 +861,55 @@
                     {% if student.active %}
                     <form action="{% url 'student_deactivate_action' student.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-block w-100">
-                            <i class="fas fa-user-slash"></i> Deactivate User
+                        <button type="submit" class="btn btn-outline-danger w-100" style="border-radius: 8px; font-size: 0.9rem; font-weight: 600;">
+                            <i class="fas fa-user-slash me-2"></i> Suspend Portal Access
                         </button>
                     </form>
                     {% else %}
                     <form action="{% url 'student_activate_action' student.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-success btn-block w-100">
-                            <i class="fas fa-user-check"></i> Activate User
+                        <button type="submit" class="btn btn-outline-success w-100" style="border-radius: 8px; font-size: 0.9rem; font-weight: 600;">
+                            <i class="fas fa-user-check me-2"></i> Enable Portal Access
                         </button>
                     </form>
                     {% endif %}
 
-                    <button onclick="deleteStudent({{ student.id }})" class="btn btn-danger btn-block w-100 mt-3">
-                        <i class="fas fa-trash"></i> Delete Student
+                    <button onclick="deleteStudent({{ student.id }})" class="btn btn-danger w-100 mt-4" style="border-radius: 8px; font-size: 0.9rem; font-weight: 700;">
+                        <i class="fas fa-trash-alt me-2"></i> Delete Student Profile
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">References</h5>
+        <div class="profile-card border">
+            <div class="card-header bg-light p-3 border-bottom">
+                <h5 class="mb-0 font-weight-bold text-secondary d-flex align-items-center gap-2"><i class="fas fa-address-book"></i> Reference Contacts</h5>
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled">
+            <div class="card-body p-3">
+                <ul class="list-unstyled mb-0">
                     {% if student.reference_name1 %}
-                    <li><strong>{{ student.reference_name1 }}</strong><br>{{ student.reference_email1 }}<br>{{ student.reference_phone1 }}</li>
-                    <hr>
+                    <li class="mb-3 p-2 bg-light rounded-3 border" style="border-radius: 8px !important;">
+                        <h6 class="mb-1 font-weight-bold text-dark" style="font-size: 0.9rem;">{{ student.reference_name1 }}</h6>
+                        <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-1"></i> {{ student.reference_email1 }}</span>
+                        <span class="text-muted d-block small"><i class="fas fa-phone me-1"></i> {{ student.reference_phone1 }}</span>
+                    </li>
                     {% endif %}
                     {% if student.reference_name2 %}
-                    <li><strong>{{ student.reference_name2 }}</strong><br>{{ student.reference_email2 }}<br>{{ student.reference_phone2 }}</li>
-                        
-                    <hr>
+                    <li class="mb-3 p-2 bg-light rounded-3 border" style="border-radius: 8px !important;">
+                        <h6 class="mb-1 font-weight-bold text-dark" style="font-size: 0.9rem;">{{ student.reference_name2 }}</h6>
+                        <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-1"></i> {{ student.reference_email2 }}</span>
+                        <span class="text-muted d-block small"><i class="fas fa-phone me-1"></i> {{ student.reference_phone2 }}</span>
+                    </li>
                     {% endif %}
                     {% if student.reference_name3 %}
-                    <li><strong>{{ student.reference_name3 }}</strong><br>{{ student.reference_email3 }}<br>{{ student.reference_phone3 }}</li>
+                    <li class="p-2 bg-light rounded-3 border" style="border-radius: 8px !important;">
+                        <h6 class="mb-1 font-weight-bold text-dark" style="font-size: 0.9rem;">{{ student.reference_name3 }}</h6>
+                        <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-1"></i> {{ student.reference_email3 }}</span>
+                        <span class="text-muted d-block small"><i class="fas fa-phone me-1"></i> {{ student.reference_phone3 }}</span>
+                    </li>
+                    {% endif %}
+                    {% if not student.reference_name1 and not student.reference_name2 and not student.reference_name3 %}
+                    <li class="text-muted text-center py-2">No contact references listed.</li>
                     {% endif %}
                 </ul>
             </div>

@@ -1312,6 +1312,7 @@ def signup_church_admin(request):
                         amount=church_code_obj.amount if church_code_obj else 0.0,
                         max_user_no=church_code_obj.max_user_no if church_code_obj else 0,
                         current_user_no=1, # Including themselves
+                        is_paid=False,
                         created_at=timezone.now(),
                         updated_at=timezone.now(),
                     )
@@ -1343,43 +1344,58 @@ def signup_church_admin(request):
                 user.set_password(password)
                 user.save()
                 
-                # Send email
-                role_display = "Church User" if is_user else "Church Admin"
-                try:
-                    subject = f"Your {role_display} Account Login Details"
-                    message = f"""
-                    Hello {first_name},
-
-                    Your {role_display.lower()} account has been created successfully.
-
-                    Please wait for approvel of Trinity Theological Seminary.
-
-                    
-
-                    Best regards,
-                    Trinity Theological Seminary
-                    """
-                    
-                    email_sent = send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email],
-                        fail_silently=False,
+                if not is_user:
+                    # Redirect to payment for Church Admin
+                    from home.models import Payments
+                    payment = Payments.objects.create(
+                        name=f"{first_name} {last_name}".strip(),
+                        email=email,
+                        phone=request.POST.get('phone_number'),
+                        person_group="church_admin",
+                        amount=church_admin_obj.amount,
+                        is_paid=False,
+                        student=student,
+                        church_admin=church_admin_obj
                     )
-                    
-                    if email_sent:
-                        messages.success(request, f'{role_display} account created successfully! Login details sent to {email}')
-                        logger.info(f'Email sent successfully to {email}')
-                    else:
-                        messages.warning(request, f'{role_display} account created but email could not be sent.')
-                        logger.warning(f'Email failed to send to {email}')
+                    request.session['registration_payment_id'] = payment.id
+                    return redirect('registration_payment')
+                else:
+                    # Send email and redirect to success for Church User
+                    role_display = "Church User"
+                    try:
+                        subject = f"Your {role_display} Account Login Details"
+                        message = f"""
+                        Hello {first_name},
+
+                        Your {role_display.lower()} account has been created successfully.
+
+                        Please wait for approval of Trinity Theological Seminary.
+
+
+                        Best regards,
+                        Trinity Theological Seminary
+                        """
                         
-                except Exception as e:
-                    messages.warning(request, f'{role_display} account created but error sending email: {str(e)}')
-                    logger.error(f'Email error: {str(e)}')
-                
-                return redirect('church_admin_registration_success', admin_id=new_id)             
+                        email_sent = send_mail(
+                            subject=subject,
+                            message=message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[email],
+                            fail_silently=False,
+                        )
+                        
+                        if email_sent:
+                            messages.success(request, f'{role_display} account created successfully! Login details sent to {email}')
+                            logger.info(f'Email sent successfully to {email}')
+                        else:
+                            messages.warning(request, f'{role_display} account created but email could not be sent.')
+                            logger.warning(f'Email failed to send to {email}')
+                            
+                    except Exception as e:
+                        messages.warning(request, f'{role_display} account created but error sending email: {str(e)}')
+                        logger.error(f'Email error: {str(e)}')
+                    
+                    return redirect('church_admin_registration_success', admin_id=new_id)             
         
         except Languages.DoesNotExist:
             logger.error("Languages.DoesNotExist during registrations")
@@ -1490,3 +1506,145 @@ def church_admin_registration_success(request, admin_id):
     except ChurchAdmins.DoesNotExist:
         messages.error(request, 'Church admin account not found.')
         return redirect('church_admin_register')
+
+
+from django.views.decorators.csrf import csrf_exempt
+from home.models import Payments
+
+def registration_payment(request):
+    payment_id = request.session.get("registration_payment_id")
+    if not payment_id:
+        messages.error(request, "No pending registration payment found.")
+        return redirect("register")
+    
+    payment = get_object_or_404(Payments, id=payment_id)
+    if payment.is_paid:
+        messages.success(request, "This registration fee has already been paid.")
+        return redirect("index")
+        
+    context = {
+        "payment": payment,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
+    }
+    return render(request, "site_pages/registration_payment.html", context)
+
+@csrf_exempt
+def capture_registration_payment(request):
+    import json
+    try:
+        data = json.loads(request.body)
+        order_id = data.get("orderID")
+        if not order_id:
+            return JsonResponse({"status": "failed", "message": "Order ID missing"}, status=400)
+
+        payment_id = request.session.get("registration_payment_id")
+        if not payment_id:
+            return JsonResponse({"status": "failed", "message": "No pending payment session"}, status=400)
+
+        payment_obj = get_object_or_404(Payments, id=payment_id)
+
+        # 1) PayPal API Credentials
+        CLIENT_ID = settings.PAYPAL_CLIENT_ID
+        CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+
+        # Get Access Token from PayPal Sandbox
+        token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+        token_headers = {
+            "Accept": "application/json",
+            "Accept-Language": "en_US"
+        }
+        token_data = {"grant_type": "client_credentials"}
+        token_response = requests.post(
+            token_url,
+            headers=token_headers,
+            data=token_data,
+            auth=(CLIENT_ID, CLIENT_SECRET),
+            timeout=10
+        )
+        access_token = token_response.json()["access_token"]
+
+        # Capture Order
+        capture_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
+        capture_headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        capture_response = requests.post(capture_url, headers=capture_headers, timeout=10)
+        capture_json = capture_response.json()
+        status = capture_json.get("status")
+
+        if status == "COMPLETED":
+            with transaction.atomic():
+                payment_obj.is_paid = True
+                payment_obj.save()
+
+                redirect_url = "/"
+
+                if payment_obj.student:
+                    student = payment_obj.student
+                    student.is_paid = True
+                    student.save()
+
+                    # Send Email to Student
+                    try:
+                        subject = 'Application Received - Trinity Seminary'
+                        message = f'''Dear {student.first_name},
+
+Thank you for applying to Trinity Seminary. Your application has been received and is currently under review.
+You will receive another email once your application status changes.
+
+Best regards,
+Administration'''
+                        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email], fail_silently=True)
+                    except Exception as e:
+                        logger.error(f"Failed to send student confirmation email: {e}")
+
+                    # Send Email to Admin
+                    try:
+                        admin_subject = 'New Student Application Received'
+                        admin_message = f'''A new student application has been submitted.
+Name: {student.first_name} {student.last_name}
+Course: {student.course_applied.course_name if student.course_applied else 'N/A'}
+
+Please login to the admin panel to review.'''
+                        send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'], fail_silently=True)
+                    except Exception as e:
+                        logger.error(f"Failed to send admin notification email: {e}")
+
+                    redirect_url = f"/student/application/success/{student.student_id}/"
+
+                elif payment_obj.church_admin:
+                    church_admin = payment_obj.church_admin
+                    church_admin.is_paid = True
+                    church_admin.save()
+
+                    # Send welcome email for Church Admin
+                    try:
+                        subject = "Your Church Admin Account Login Details"
+                        message = f"""
+                        Hello {church_admin.student.first_name},
+
+                        Your church admin account has been created successfully.
+
+                        Please wait for approval of Trinity Theological Seminary.
+
+
+                        Best regards,
+                        Trinity Theological Seminary
+                        """
+                        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [church_admin.student.email], fail_silently=True)
+                    except Exception as e:
+                        logger.error(f"Failed to send church admin confirmation email: {e}")
+
+                    redirect_url = f"/church-admin/success/{church_admin.student.student_id}/"
+
+                # Clear session payment ID
+                request.session.pop("registration_payment_id", None)
+                
+                return JsonResponse({"status": "success", "redirect_url": redirect_url})
+        else:
+            return JsonResponse({"status": "failed", "message": "PayPal capture did not complete"}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error capturing registration payment: {e}")
+        return JsonResponse({"status": "failed", "message": str(e)}, status=500)

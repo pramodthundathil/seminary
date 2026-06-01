@@ -1871,39 +1871,61 @@ def student_register(request):
                 certificate3=c3,
                 certificate4=c4,
                 certificate5=c5,
+                is_paid=False,
             )
             
             logger.info(f"Student saved successfully!")
             logger.info(f"Database ID: {student.id}")
             logger.info(f"Student ID: {student.student_id}")
 
-            # Send Email to Student
-            try:
-                subject = 'Application Received - Trinity Seminary'
-                message = f'''Dear {student.first_name},
+            course_fee = course_obj.fees if course_obj and course_obj.fees else 0.00
+
+            if course_fee > 0.00:
+                # Create a pending payment
+                from home.models import Payments
+                payment = Payments.objects.create(
+                    name=f"{student.first_name} {student.last_name or ''}".strip(),
+                    email=student.email,
+                    phone=student.phone_number,
+                    person_group="student",
+                    amount=course_fee,
+                    is_paid=False,
+                    student=student
+                )
+                request.session['registration_payment_id'] = payment.id
+                return redirect("registration_payment")
+            else:
+                # Auto-approve payment status (since fee is 0 or empty)
+                student.is_paid = True
+                student.save()
+
+                # Send Email to Student
+                try:
+                    subject = 'Application Received - Trinity Seminary'
+                    message = f'''Dear {student.first_name},
 
 Thank you for applying to Trinity Seminary. Your application has been received and is currently under review.
 You will receive another email once your application status changes.
 
 Best regards,
 Administration'''
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email])
-            except Exception as e:
-                logger.error(f"Failed to send student email: {e}")
+                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email])
+                except Exception as e:
+                    logger.error(f"Failed to send student email: {e}")
 
-            # Send Email to Admin
-            try:
-                admin_subject = 'New Student Application Received'
-                admin_message = f'''A new student application has been submitted.
+                # Send Email to Admin
+                try:
+                    admin_subject = 'New Student Application Received'
+                    admin_message = f'''A new student application has been submitted.
 Name: {student.first_name} {student.last_name}
 Course: {student.course_applied.course_name if student.course_applied else 'N/A'}
 
 Please login to the admin panel to review.'''
-                send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'])
-            except Exception as e:
-                logger.error(f"Failed to send admin email: {e}")
+                    send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'])
+                except Exception as e:
+                    logger.error(f"Failed to send admin email: {e}")
 
-            return redirect("student_application_success", student_id=student.student_id)
+                return redirect("student_application_success", student_id=student.student_id)
 
         except IntegrityError as e:
             logger.error(f" Database integrity error: {e}", exc_info=True)

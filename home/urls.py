@@ -71,4 +71,8 @@ urlpatterns = [
     # AJAX Validation
     path('ajax/check-email/', views.check_email_exists, name='check_email_exists'),
     path('ajax/check-church-code/', views.check_church_code, name='check_church_code'),
+
+    # Registration Payment
+    path('register/payment/', views.registration_payment, name='registration_payment'),
+    path('register/payment/capture/', views.capture_registration_payment, name='capture_registration_payment'),
 ]

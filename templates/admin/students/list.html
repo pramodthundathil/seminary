@@ -702,6 +702,7 @@
                                 <tr><th>Language</th><td>${d.language_name || '-'}</td></tr>
                                 <tr><th>Status</th><td>${d.status == 1 ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-warning">Pending</span>'}</td></tr>
                                 <tr><th>Active</th><td>${d.active == 1 ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>'}</td></tr>
+                                <tr><th>Payment Status</th><td>${d.is_paid ? '<span class="badge bg-success text-white">Paid</span>' : '<span class="badge bg-danger text-white">Not Paid</span>'}</td></tr>
                             </tbody>
                         </table>
                     `;

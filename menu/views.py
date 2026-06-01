@@ -112,7 +112,8 @@ def admin_index(request):
     attendance_percentage = round((attended_classes / total_classes) * 100) if total_classes > 0 else 0
     
     # ---------------- DASHBOARD NEW METRICS ----------------
-    new_students_count = Students.objects.filter(status=False, active = False).count()
+    new_students_count = Students.objects.filter(status=False, active=False, is_paid=True).count()
+    unpaid_students_count = Students.objects.filter(status=False, active=False, is_paid=False).count()
     pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False, deleted_at__isnull=True).count()
     pending_books_count = StudentsBooks.objects.filter(is_approved=False, deleted_at__isnull=True).count()
     # -------------------------------------------------------
@@ -135,6 +136,7 @@ def admin_index(request):
         'students_end': min(10, len(new_students)),
         'admin_pages': admin_pages,  # Dynamic navigation pages
         'new_students_count': new_students_count,
+        'unpaid_students_count': unpaid_students_count,
         'pending_subjects_count': pending_subjects_count,
         'pending_books_count': pending_books_count,
         # Notifications Data
@@ -2412,6 +2414,7 @@ def student_datatable(request):
         active_filter = request.GET.get('active', '')
         course_filter = request.GET.get('course', '')
         list_type = request.GET.get('type', 'student') # 'student' or 'applicant'
+        payment_status_filter = request.GET.get('payment_status', '')
         
         # Base queryset
         students = Students.objects.select_related('user', 'language').all()
@@ -2419,7 +2422,12 @@ def student_datatable(request):
         # Filter by Type (Student vs Applicant)
         if list_type == 'applicant':
             # Applicants are those with status=False and active=False
-            students = students.filter(status=False, active=False)
+            if payment_status_filter == 'unpaid':
+                students = students.filter(status=False, active=False, is_paid=False)
+            elif payment_status_filter == 'all':
+                students = students.filter(status=False, active=False)
+            else: # Default or 'paid'
+                students = students.filter(status=False, active=False, is_paid=True)
         else:
             # Students list should show ALL records to allow filtering by Pending/Approved
             # Previously: students = students.filter(approve_date__isnull=False)
@@ -2509,9 +2517,14 @@ def student_datatable(request):
                 </div>
             '''
             
+            # Payment Badge
+            payment_status_class = 'approved' if student.is_paid else 'inactive'
+            payment_status_text = 'Paid' if student.is_paid else 'Unpaid'
+            payment_icon = 'credit-card' if student.is_paid else 'exclamation-circle'
+            
             # Status badges - stacked for mobile
             status_html = f'''
-                <div class="status-container">
+                <div class="status-container" style="display: flex; flex-direction: column; gap: 4px;">
                     <span class="status-badge status-{'approved' if is_approved else 'pending'}">
                         <i class="fas fa-{'check-circle' if is_approved else 'clock'}"></i>
                         {'Approved' if is_approved else 'Pending'}
@@ -2519,6 +2532,10 @@ def student_datatable(request):
                     <span class="status-badge status-{'active' if student.active else 'inactive'}">
                         <i class="fas fa-{'power-off' if student.active else 'ban'}"></i>
                         {'Active' if student.active else 'Inactive'}
+                    </span>
+                    <span class="status-badge status-{payment_status_class}">
+                        <i class="fas fa-{payment_icon}"></i>
+                        {payment_status_text}
                     </span>
                 </div>
             '''
@@ -2706,6 +2723,7 @@ def student_get(request, student_id):
             'reference_phone3': student.reference_phone3 or '',
             'status': 1 if student.status else 0,
             'active': 1 if student.active else 0,
+            'is_paid': student.is_paid,
             'approve_date': student.approve_date.strftime('%Y-%m-%d %H:%M:%S') if student.approve_date else None,
             'created_at': student.created_at.strftime('%Y-%m-%d %H:%M:%S') if student.created_at else 'N/A',
             'updated_at': student.updated_at.strftime('%Y-%m-%d %H:%M:%S') if student.updated_at else 'N/A',
@@ -2731,8 +2749,89 @@ def student_get(request, student_id):
 
 def student_detail(request, student_id):
     """View to show full student details"""
-    student = get_object_or_404(Students.objects.select_related('course_applied', 'language', 'country'), id=student_id)
-    return render(request, 'admin/students/view.html', {'student': student})
+    from django.db.models import Sum
+    
+    student = get_object_or_404(
+        Students.objects.select_related('course_applied', 'language', 'country', 'citizenship'),
+        id=student_id
+    )
+    
+    # 1. Subjects
+    subjects = StudentsSubjects.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).select_related('subject')
+    
+    # 2. Exams & Marks
+    exams = StudentsExams.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).select_related('exam', 'subject', 'course')
+    
+    for se in exams:
+        total_obtained = 0
+        total_possible = 0
+        exam = se.exam
+        
+        if exam:
+            if exam.exam_type == 'objective' or exam.exam_type == 'both':
+                # Obtained objective marks
+                obj_ans = ObjectiveAnswers.objects.filter(assignment=se)
+                for ans in obj_ans:
+                    if ans.mark:
+                        total_obtained += float(ans.mark)
+                # Possible objective marks
+                total_possible += float(exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0)
+                
+            if exam.exam_type == 'descriptive' or exam.exam_type == 'both':
+                # Obtained descriptive marks
+                desc_ans = DescriptiveAnswers.objects.filter(assignment=se)
+                for ans in desc_ans:
+                    if ans.mark:
+                        total_obtained += float(ans.mark)
+                # Possible descriptive marks
+                total_possible += float(exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0)
+        
+        se.total_obtained = total_obtained
+        se.total_possible = total_possible
+        if total_possible > 0:
+            se.percentage = (total_obtained / total_possible) * 100
+        else:
+            se.percentage = 0.0
+
+    # 3. Assignments
+    assignments = StudentsAssignment.objects.filter(
+        student=student,
+        deleted_at__isnull=True
+    ).select_related('assignment')
+    
+    # 4. Payments/Fees structure
+    payments = Payments.objects.filter(
+        student=student,
+        deleted_at__isnull=True
+    ).select_related('subjects_id')
+    
+    # Calculate fee totals
+    course_fee = float(student.course_applied.fees or 0) if student.course_applied else 0.0
+    subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
+    total_fee_expected = course_fee + subject_fees_total
+    
+    total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
+    balance_due = total_fee_expected - total_paid
+
+    context = {
+        'student': student,
+        'subjects': subjects,
+        'exams': exams,
+        'assignments': assignments,
+        'payments': payments,
+        'course_fee': course_fee,
+        'subject_fees_total': subject_fees_total,
+        'total_fee_expected': total_fee_expected,
+        'total_paid': total_paid,
+        'balance_due': balance_due,
+    }
+    return render(request, 'admin/students/view.html', context)
 
 @require_http_methods(["POST"])
 def student_approve_action(request, student_id):

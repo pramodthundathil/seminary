@@ -935,6 +935,7 @@ class CourseForm(forms.ModelForm):
             'course_code',
             'highest_qualification',
             'credit_hours',
+            'fees',
             'description',
             'browser_title',
             'meta_description',
@@ -955,6 +956,11 @@ class CourseForm(forms.ModelForm):
             'credit_hours': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01'
+            }),
+            'fees': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Enter course fee (e.g. 100.00)'
             }),
             'description': CKEditor5Widget(
                 attrs={"class": "django_ckeditor_5"}, config_name="default"

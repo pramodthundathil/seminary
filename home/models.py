@@ -477,6 +477,7 @@ class Courses(models.Model):
     course_code = models.CharField(max_length=250)
     highest_qualification = models.ForeignKey('Qualifications', on_delete=models.DO_NOTHING)
     credit_hours = models.DecimalField(max_digits=10, decimal_places=2)
+    fees = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     description = CKEditor5Field(blank=True, null=True)
     browser_title = models.CharField(max_length=250, blank=True, null=True)
     meta_description = models.TextField(blank=True, null=True)
@@ -1252,6 +1253,7 @@ class Students(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False)
 
     class Meta:
         managed = True

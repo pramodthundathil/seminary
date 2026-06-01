@@ -4223,7 +4223,11 @@
                         {% if new_students_list %}
                         {% for student in new_students_list %}
                         <a href="{% url 'student_detail' student.id %}" class="notif-item">
+                            {% if not student.is_paid %}
+                            <span class="notif-badge badge-alert">New Student (Unpaid)</span>
+                            {% else %}
                             <span class="notif-badge badge-new">New Student</span>
+                            {% endif %}
                             <span class="notif-title">New registration: {{ student.first_name }} {{ student.last_name }}</span>
                                 
                             <span class="notif-meta">{{ student.created_at|date:"M d, H:i" }}</span>
@@ -4306,6 +4310,23 @@
             </div>
         </div>
         {% block content %}
+        {% if unpaid_students_count > 0 %}
+        <div class="alert alert-warning d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-left: 5px solid var(--danger); background-color: #fff9db; color: #856404; padding: 15px 20px; border-radius: 8px;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle text-danger me-3" style="font-size: 1.5rem;"></i>
+                <div>
+                    <h5 class="mb-1" style="font-weight: 700; color: #721c24; font-family: inherit;">Unpaid Registration Requests</h5>
+                    <span>There are <strong>{{ unpaid_students_count }}</strong> student registration(s) that are pending payment. Unpaid applications are hidden from the main applicant list.</span>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'application_list_view' %}?payment_status=unpaid" class="btn btn-danger btn-sm text-white fw-bold px-3 py-2">
+                    <i class="fas fa-search me-1"></i> View Unpaid Applications
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Pending Actions -->
         <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Pending Actions</h4>
         <div class="stats-row">
@@ -4471,7 +4492,14 @@
                                     class="fw-bold text-dark text-decoration-none">{{ app.first_name }} {{ app.last_name }}</a></td>
                                     
                             <td>{{ app.created_at|date:"M d, Y" }}</td>
-                            <td><span class="status-badge-sm pending">Pending</span></td>
+                            <td>
+                                <span class="status-badge-sm pending">Pending</span>
+                                {% if app.is_paid %}
+                                <span class="badge bg-success text-white" style="font-size: 0.75rem;">Paid</span>
+                                {% else %}
+                                <span class="badge bg-danger text-white" style="font-size: 0.75rem;">Not Paid</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

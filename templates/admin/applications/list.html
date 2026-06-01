@@ -7,11 +7,16 @@
 
 <div class="gallery-container">
     <div class="page-header">
-        <h1>
+        <h1 id="pageTitleHeader">
             <i class="fas fa-file-signature"></i>
             Application Management
         </h1>
-        <div class="header-actions">
+        <div class="header-actions d-flex align-items-center gap-2">
+            <select class="form-select w-auto d-inline-block" id="paymentStatusFilter" onchange="filterPaymentStatus(this.value)" style="height: 40px; font-weight: 500; border-radius: 8px;">
+                <option value="paid">Paid Applicants (Default)</option>
+                <option value="unpaid">Unpaid Requests</option>
+                <option value="all">All Applicants</option>
+            </select>
             <button class="btn btn-primary" onclick="openCreateModal()">
                 <i class="fas fa-plus"></i>
                 Add Application
@@ -365,7 +370,27 @@
 <script>
     let applicationTable;
 
+    function filterPaymentStatus(value) {
+        // Update header subtitle
+        if (value === 'unpaid') {
+            $('#pageTitleHeader').html('<i class="fas fa-file-signature"></i> Application Management <span class="badge bg-danger ms-2" style="font-size: 0.4em; vertical-align: middle;">Unpaid Requests</span>');
+        } else if (value === 'all') {
+            $('#pageTitleHeader').html('<i class="fas fa-file-signature"></i> Application Management <span class="badge bg-secondary ms-2" style="font-size: 0.4em; vertical-align: middle;">All Requests</span>');
+        } else {
+            $('#pageTitleHeader').html('<i class="fas fa-file-signature"></i> Application Management');
+        }
+        if (applicationTable) {
+            applicationTable.ajax.reload();
+        }
+    }
+
     $(document).ready(function () {
+        // Read URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPaymentStatus = urlParams.get('payment_status') || 'paid';
+        $('#paymentStatusFilter').val(urlPaymentStatus);
+        filterPaymentStatus(urlPaymentStatus);
+
         applicationTable = $('#applicationTable').DataTable({
             processing: true,
             serverSide: true,
@@ -375,6 +400,7 @@
                 type: 'GET',
                 data: function (d) {
                     d.type = 'applicant'; // Show ONLY pending applicants
+                    d.payment_status = $('#paymentStatusFilter').val();
                 },
                 error: function (xhr, error, code) {
                     console.error('DataTables Error:', error);
@@ -408,7 +434,11 @@
     });
 
     function exportApplications() {
+        const paymentStatus = $('#paymentStatusFilter').val();
         let url = '{% url "student_datatable" %}?export=excel&type=applicant';
+        if (paymentStatus) {
+            url += '&payment_status=' + paymentStatus;
+        }
         window.location.href = url;
     }
 
@@ -654,6 +684,7 @@
                                 <tr><th>Course Applied</th><td>${d.course_applied_name || '-'}</td></tr>
                                 <tr><th>Language</th><td>${d.language_name || '-'}</td></tr>
                                 <tr><th>Status</th><td>${d.status == 1 ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-warning">Pending</span>'}</td></tr>
+                                <tr><th>Payment Status</th><td>${d.is_paid ? '<span class="badge bg-success text-white">Paid</span>' : '<span class="badge bg-danger text-white">Not Paid</span>'}</td></tr>
                             </tbody>
                         </table>
                     `;
