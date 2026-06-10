@@ -2542,8 +2542,9 @@ def student_datatable(request):
             safe_name=full_name.replace("'", "\\'")
             # Actions - responsive
             # Changed data-toggle to data-bs-toggle for Bootstrap 5
-            # Generate detail URL
+            # Generate detail and edit URLs
             detail_url = reverse('student_detail', kwargs={'student_id': student.id})
+            edit_url = reverse('student_edit', kwargs={'student_id': student.id})
             
             actions_html = f'''
                 <div class="btn-group" role="group">
@@ -2555,7 +2556,7 @@ def student_datatable(request):
                             Actions
                         </button>
                         <div class="dropdown-menu" aria-labelledby="btnGroupDrop{student.id}">
-                            <a class="dropdown-item" href="#" onclick="editStudent({student.id}); return false;">
+                            <a class="dropdown-item" href="{edit_url}">
                                 <i class="fas fa-edit mr-2 text-primary"></i> Edit
                             </a>
                             <a class="dropdown-item" href="#" onclick="toggleActive({student.id}, {str(student.active).lower()}); return false;">
@@ -2833,6 +2834,106 @@ def student_detail(request, student_id):
     }
     return render(request, 'admin/students/view.html', context)
 
+
+@login_required
+@require_POST
+def manual_mark_paid(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    payment_note = request.POST.get('payment_note', 'Manual payment marking')
+    
+    # 1. Update student payment status
+    student.is_paid = True
+    student.save()
+    
+    # 2. Update/create associated Payments record(s) to is_paid=True
+    from home.models import Payments
+    payment = Payments.objects.filter(student=student, is_paid=False, subjects_id__isnull=True).first()
+    if not payment:
+        course_fee = student.course_applied.fees if (student.course_applied and student.course_applied.fees) else 0.00
+        payment = Payments.objects.create(
+            name=f"{student.first_name} {student.last_name or ''}".strip(),
+            email=student.email,
+            phone=student.phone_number,
+            person_group="student",
+            amount=course_fee,
+            is_paid=True,
+            student=student,
+            message=payment_note
+        )
+    else:
+        payment.is_paid = True
+        payment.message = f"{payment.message or ''} | Manually marked paid: {payment_note}".strip(' | ')
+        payment.save()
+        
+    messages.success(request, "Student registration marked as PAID successfully.")
+    return redirect('student_detail', student_id=student_id)
+
+
+@login_required
+@require_POST
+def manual_mark_payment_paid(request, payment_id):
+    from home.models import Payments
+    payment = get_object_or_404(Payments, id=payment_id)
+    payment.is_paid = True
+    payment.save()
+    
+    # If this was a general/registration payment, also update student status
+    if not payment.subjects_id and payment.student:
+        student = payment.student
+        student.is_paid = True
+        student.save()
+        
+    messages.success(request, "Transaction marked as PAID successfully.")
+    if payment.student:
+        return redirect('student_detail', student_id=payment.student.id)
+    return redirect('admin_index')
+
+
+@login_required
+@require_POST
+def manual_apply_discount(request, student_id):
+    student = get_object_or_404(Students, id=student_id)
+    discount_amount = request.POST.get('discount_amount', '')
+    discount_percent = request.POST.get('discount_percent', '')
+    
+    from home.models import Payments
+    payment = Payments.objects.filter(student=student, is_paid=False, subjects_id__isnull=True).first()
+    if not payment:
+        course_fee = student.course_applied.fees if (student.course_applied and student.course_applied.fees) else 0.00
+        if course_fee <= 0:
+            messages.error(request, "This student has no pending course fee to discount.")
+            return redirect('student_detail', student_id=student_id)
+            
+        payment = Payments.objects.create(
+            name=f"{student.first_name} {student.last_name or ''}".strip(),
+            email=student.email,
+            phone=student.phone_number,
+            person_group="student",
+            amount=course_fee,
+            is_paid=False,
+            student=student
+        )
+    
+    original_amount = float(payment.amount or 0)
+    final_amount = original_amount
+    
+    if discount_amount:
+        final_amount -= float(discount_amount)
+    elif discount_percent:
+        final_amount -= original_amount * (float(discount_percent) / 100.0)
+        
+    if final_amount < 0:
+        final_amount = 0.00
+        
+    payment.amount = final_amount
+    discount_detail = f"${discount_amount}" if discount_amount else f"{discount_percent}%"
+    payment.message = f"{payment.message or ''} | Discount applied: {discount_detail} (Original: ${original_amount:.2f})".strip(' | ')
+    payment.save()
+    
+    messages.success(request, f"Discount applied successfully. New amount: ${final_amount:.2f}")
+    return redirect('student_detail', student_id=student_id)
+
+
 @require_http_methods(["POST"])
 def student_approve_action(request, student_id):
     try:
@@ -3000,6 +3101,142 @@ def student_update(request, student_id):
             }, status=400)
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
+
+@login_required
+def student_edit_view(request, student_id):
+    """View to edit all details of a student on a separate page"""
+    student = get_object_or_404(Students, id=student_id)
+    
+    if request.method == 'POST':
+        try:
+            # Update text fields
+            student.student_id = request.POST.get('student_id', student.student_id)
+            student.first_name = request.POST.get('first_name', '')
+            student.middle_name = request.POST.get('middle_name', '')
+            student.last_name = request.POST.get('last_name', '')
+            student.email = request.POST.get('email', '')
+            student.gender = request.POST.get('gender', '')
+            
+            # Date of Birth
+            dob = request.POST.get('date_of_birth')
+            student.date_of_birth = dob if dob else None
+            
+            student.phone_code = request.POST.get('phone_code') or None
+            student.phone_number = request.POST.get('phone_number', '')
+            student.mrital_status = request.POST.get('mrital_status', '')
+            student.spouse_name = request.POST.get('spouse_name', '')
+            
+            children = request.POST.get('children')
+            student.children = int(children) if children else None
+            
+            # Address
+            student.mailing_address = request.POST.get('mailing_address', '')
+            student.city = request.POST.get('city', '')
+            student.state = request.POST.get('state', '')
+            student.zip_code = request.POST.get('zip_code', '')
+            
+            country_id = request.POST.get('country')
+            student.country_id = int(country_id) if country_id else None
+            
+            citizenship_id = request.POST.get('citizenship')
+            student.citizenship_id = int(citizenship_id) if citizenship_id else None
+            
+            student.timezone = request.POST.get('timezone', 'UTC')
+            
+            # Academic
+            course_applied_id = request.POST.get('course_applied')
+            student.course_applied_id = int(course_applied_id) if course_applied_id else None
+            
+            language_id = request.POST.get('language')
+            student.language_id = int(language_id) if language_id else None
+            
+            student.highest_education = request.POST.get('highest_education', '')
+            
+            starting_year = request.POST.get('starting_year')
+            student.starting_year = int(starting_year) if starting_year else None
+            
+            student.ministerial_status = request.POST.get('ministerial_status', '')
+            student.church_affiliation = request.POST.get('church_affiliation', '')
+            
+            associate_degree = request.POST.get('associate_degree')
+            student.associate_degree = int(associate_degree) if associate_degree else None
+            
+            # Financial
+            student.currently_employed = request.POST.get('currently_employed', '')
+            student.scholarship_needed = request.POST.get('scholarship_needed', '')
+            student.income = request.POST.get('income', '')
+            student.affordable_amount = request.POST.get('affordable_amount', '')
+            student.message = request.POST.get('message', '')
+            
+            # References
+            student.reference_name1 = request.POST.get('reference_name1', '')
+            student.reference_email1 = request.POST.get('reference_email1', '')
+            student.reference_phone1 = request.POST.get('reference_phone1', '')
+            student.reference_name2 = request.POST.get('reference_name2', '')
+            student.reference_email2 = request.POST.get('reference_email2', '')
+            student.reference_phone2 = request.POST.get('reference_phone2', '')
+            student.reference_name3 = request.POST.get('reference_name3', '')
+            student.reference_email3 = request.POST.get('reference_email3', '')
+            student.reference_phone3 = request.POST.get('reference_phone3', '')
+            
+            # Status toggles
+            new_status = request.POST.get('status') == '1'
+            if new_status and not student.status: # transitioning to approved
+                if not student.approve_date:
+                    student.approve_date = timezone.now()
+            student.status = new_status
+            student.active = request.POST.get('active') == '1'
+            student.is_paid = request.POST.get('is_paid') == '1'
+            
+            # Photo - handle clear or upload
+            if request.POST.get('clear_photo') == '1':
+                student.photo = None
+            else:
+                profile_pic = request.FILES.get('photo')
+                if profile_pic:
+                    from django.utils.crypto import get_random_string
+                    import os
+                    from django.conf import settings
+                    file_path = f"uploads/students/{get_random_string(8)}_{profile_pic.name}"
+                    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+                    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                    with open(full_path, "wb+") as destination:
+                        for chunk in profile_pic.chunks():
+                            destination.write(chunk)
+                    student.photo = file_path
+                    
+            # Certificates - handle clear or upload
+            for i in range(1, 6):
+                cert_field = f"certificate{i}"
+                if request.POST.get(f'clear_{cert_field}') == '1':
+                    setattr(student, cert_field, None)
+                else:
+                    cert_file = request.FILES.get(cert_field)
+                    if cert_file:
+                        setattr(student, cert_field, cert_file)
+                        
+            student.updated_at = timezone.now()
+            student.save()
+            
+            from django.contrib import messages
+            messages.success(request, f"Student {student.first_name} details updated successfully.")
+            return redirect('student_detail', student_id=student.id)
+            
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            from django.contrib import messages
+            messages.error(request, f"Error updating student: {str(e)}")
+            
+    context = {
+        'student': student,
+        'countries': Countries.objects.all().order_by('name'),
+        'languages': Languages.objects.filter(status=True).order_by('language_name'),
+        'courses': Courses.objects.filter(status=1).order_by('course_name'),
+    }
+    return render(request, 'admin/students/edit.html', context)
+
 
 #@login_required
 def student_delete(request, student_id):
@@ -3569,8 +3806,22 @@ def roles_view(request, id):
         id=id,
         deleted_at__isnull=True)
     
+    # Get permissions assigned to this role
+    assigned_permissions = RoleHasPermissions.objects.filter(
+        role=role
+    ).select_related('permission').order_by('permission__group_name', 'permission__name')
+    
+    # Group assigned permissions by group_name
+    permissions_by_group = {}
+    for rp in assigned_permissions:
+        group = rp.permission.group_name or 'Other'
+        if group not in permissions_by_group:
+            permissions_by_group[group] = []
+        permissions_by_group[group].append(rp.permission)
+        
     return render(request, 'admin/roles/roles_view.html', {
-        'role': role
+        'role': role,
+        'permissions_by_group': permissions_by_group
     })
 
 from django.db import transaction
@@ -4751,6 +5002,68 @@ def users_create(request):
     return render(request, "admin/users/users_create.html", {'roles': roles})
 
 @login_required
+def users_edit(request, id):
+    user_edit = get_object_or_404(Users, id=id, deleted_at__isnull=True)
+    
+    # Get current role
+    try:
+        current_role = user_edit.user_roles.first().role
+        current_role_id = current_role.id if current_role else None
+    except Exception:
+        current_role_id = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        role_id = request.POST.get('role')
+        is_active = request.POST.get('is_active') == 'true'
+
+        if not all([name, username, email, role_id]):
+            messages.error(request, 'Name, Username, Email and Role are required.')
+            return redirect('users_edit', id=id)
+
+        # Check unique email/username excluding current user
+        if Users.objects.filter(email=email).exclude(id=id).exists():
+            messages.error(request, 'Email already exists.')
+            return redirect('users_edit', id=id)
+
+        if Users.objects.filter(username=username).exclude(id=id).exists():
+            messages.error(request, 'Username already exists.')
+            return redirect('users_edit', id=id)
+
+        try:
+            with transaction.atomic():
+                user_edit.name = name
+                user_edit.username = username
+                user_edit.email = email
+                user_edit.is_active = is_active
+                if password:
+                    user_edit.set_password(password)
+                user_edit.updated_at = timezone.now()
+                user_edit.save()
+                
+                # Update role
+                role = Roles.objects.get(id=role_id)
+                RoleUsers.objects.filter(user=user_edit).delete()
+                RoleUsers.objects.create(user=user_edit, role=role)
+
+            messages.success(request, 'User updated successfully.')
+            return redirect('users_list')
+
+        except Exception as e:
+            messages.error(request, f'Error updating user: {str(e)}')
+            return redirect('users_edit', id=id)
+
+    roles = Roles.objects.filter(deleted_at__isnull=True)
+    return render(request, "admin/users/users_edit.html", {
+        'user_edit': user_edit,
+        'roles': roles,
+        'current_role_id': current_role_id
+    })
+
+@login_required
 def users_view(request, id):
     user = get_object_or_404(Users, id=id, deleted_at__isnull=True)
     return render(request, "admin/users/users_view.html", {
@@ -5850,16 +6163,20 @@ def student_exams_list(request):
     """Render student exams management page"""
     courses = Courses.objects.filter(status=1).order_by('course_name')
     
-    # Get all available timezones
-    try:
-        import zoneinfo
-        common_timezones = sorted(zoneinfo.available_timezones())
-    except ImportError:
-        try:
-            import pytz
-            common_timezones = pytz.all_timezones
-        except ImportError:
-            common_timezones = ['UTC', 'America/New_York', 'Europe/London', 'Asia/Kolkata', 'Asia/Dubai', 'Asia/Singapore']
+    # Minimal curated set of common timezones to keep the selection simple and clear
+    common_timezones = [
+        'UTC',
+        'Asia/Kolkata',        # India Standard Time
+        'Asia/Dubai',          # Gulf Standard Time
+        'Asia/Singapore',      # Singapore Standard Time
+        'Europe/London',       # Western European / Greenwich Mean Time
+        'America/New_York',    # Eastern Standard Time
+        'America/Chicago',     # Central Standard Time
+        'America/Denver',      # Mountain Standard Time
+        'America/Los_Angeles', # Pacific Standard Time
+        'Africa/Nairobi',      # East Africa Time
+        'Australia/Sydney'     # Australian Eastern Standard Time
+    ]
 
     context = {
         'page_title': 'Student Submitted Exams Management',
@@ -5962,6 +6279,9 @@ def student_exams_datatable(request):
         dropdown_items += f'''
             <a class="dropdown-item" href="#" onclick="toggleApproval({item.id}); return false;">
                 <i class="fas fa-{approval_icon} mr-2 {approval_color}"></i> {approval_text}
+            </a>
+            <a class="dropdown-item" href="#" onclick="editExam({item.id}); return false;">
+                <i class="fas fa-edit mr-2 text-primary"></i> Reschedule / Edit Time
             </a>
         '''
         

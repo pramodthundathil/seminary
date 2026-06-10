@@ -10,10 +10,23 @@ def role_redirection(view_func):
             except:
                 role = None
             print(role,"-------------------------------")
-            if role == "Admin":
-                return view_func(request, *args, **kwargs)
-            elif role == "Student":
+            # Check if user is Church Admin
+            from home.models import ChurchAdmins
+            is_church_admin = False
+            try:
+                if request.user.church_admin or ChurchAdmins.objects.filter(student__user=request.user, deleted_at__isnull=True).exists():
+                    is_church_admin = True
+            except Exception:
+                pass
+
+            if role == "Student":
                 return redirect("student_home")
+            elif is_church_admin or role == "Church Admin":
+                return redirect("church_admin_dashboard")
+            elif role == "Church User":
+                return redirect("church_user_home")
+            elif role is not None:
+                return view_func(request, *args, **kwargs)
             else:
                 logout(request)
                 messages.error(request, "You are not authorized to access this page.Make Sure that you are logged in as the correct user.")

@@ -1,0 +1,392 @@
+{% extends 'site_pages/index.html' %}
+{% block content %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #4f46e5 20%, #06b6d4 70%);
+        min-height: 100vh;
+    }
+
+    .inactive-container {
+        max-width: 750px;
+        margin: 60px auto;
+        padding: 0 20px;
+        text-align: center;
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .inactive-card {
+        background: white;
+        border-radius: 24px;
+        padding: 60px 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Decorative background shapes */
+    .inactive-card::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(79, 70, 229, 0.1));
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    .inactive-card::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        left: -80px;
+        width: 250px;
+        height: 250px;
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(6, 182, 212, 0.08));
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    .inactive-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Pulse/Review Icon */
+    .status-icon-box {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #f59e0b, #e11d48);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        animation: rotatePulse 2s infinite ease-in-out;
+        box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+        position: relative;
+    }
+
+    .status-icon-box::before {
+        content: '';
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        border: 3px solid rgba(245, 158, 11, 0.3);
+        border-radius: 50%;
+        animation: pulseRing 2s infinite;
+    }
+
+    .status-icon-box i {
+        font-size: 3.5rem;
+        color: white;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    @keyframes rotatePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.08);
+        }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1.25);
+            opacity: 0;
+        }
+    }
+
+    .status-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1e1b4b, #4338ca);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+    }
+
+    .status-message {
+        font-size: 1.15rem;
+        color: #4b5563;
+        line-height: 1.7;
+        margin-bottom: 35px;
+    }
+
+    .student-info-box {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 25px;
+        margin: 35px 0;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        border-bottom: 1px dashed #cbd5e1;
+        padding-bottom: 8px;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .info-val {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .info-list {
+        text-align: left;
+        background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+        border-radius: 16px;
+        padding: 30px 35px;
+        margin: 35px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    }
+
+    .info-list h3 {
+        font-size: 1.25rem;
+        color: #1e1b4b;
+        margin-bottom: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-list h3::before {
+        content: '✨';
+        font-size: 1.4rem;
+    }
+
+    .info-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li {
+        padding: 12px 0;
+        color: #4b5563;
+        display: flex;
+        align-items: start;
+        transition: all 0.3s;
+        border-radius: 8px;
+    }
+
+    .info-list li i {
+        color: #4f46e5;
+        margin-right: 15px;
+        margin-top: 3px;
+        font-size: 1.2rem;
+        min-width: 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 45px;
+    }
+
+    .btn-action {
+        padding: 16px 36px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action-primary {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        color: white;
+    }
+
+    .btn-action-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+        color: white;
+    }
+
+    .btn-action-outline {
+        background: white;
+        color: #1e293b;
+        border: 2px solid #e2e8f0;
+    }
+
+    .btn-action-outline:hover {
+        border-color: #ef4444;
+        color: white;
+        background: #ef4444;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+
+    .help-text {
+        margin-top: 45px;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .help-text a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+
+    .help-text a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .inactive-container {
+            margin: 40px auto;
+        }
+
+        .inactive-card {
+            padding: 40px 30px;
+            border-radius: 20px;
+        }
+
+        .status-icon-box {
+            width: 100px;
+            height: 100px;
+        }
+
+        .status-icon-box i {
+            font-size: 2.8rem;
+        }
+
+        .status-title {
+            font-size: 1.8rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="inactive-container">
+    <div class="inactive-card">
+        <div class="inactive-content">
+            <!-- Pulsing Status Icon -->
+            <div class="status-icon-box">
+                <i class="bi bi-clock-history"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="status-title">Account Pending Approval</h1>
+
+            <!-- Message -->
+            <p class="status-message">
+                Thank you! Your registration payment has been successfully processed. 
+                Your student account is currently undergoing final review by the admissions team. 
+                You will receive an email notification as soon as your account is fully activated.
+            </p>
+
+            <!-- Student ID and Info Box -->
+            <div class="student-info-box">
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-val">{{ student.get_full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Student ID</span>
+                    <span class="info-val">{{ student.student_id|default:"Pending" }}</span>
+                </div>
+                {% if student.course_applied %}
+                <div class="info-row">
+                    <span class="info-label">Course Applied</span>
+                    <span class="info-val">{{ student.course_applied.course_name }}</span>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="info-label">Account Status</span>
+                    <span class="info-val" style="color: #f59e0b;"><i class="bi bi-shield-fill-exclamation"></i> Pending Activation</span>
+                </div>
+            </div>
+
+            <!-- Process Details -->
+            <div class="info-list">
+                <h3>What Happens Next?</h3>
+                <ul>
+                    <li>
+                        <i class="bi bi-shield-check"></i>
+                        <span><strong>Document Verification:</strong> The admissions board verifies your references and certificates.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-envelope-check"></i>
+                        <span><strong>Activation Email:</strong> Once approved, you will receive an activation email with portal instructions.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-gear-fill"></i>
+                        <span><strong>Access Granted:</strong> All dashboard pages (subjects, references, exam hall) will become accessible immediately.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{% url 'student_home' %}" class="btn-action btn-action-primary">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Check Status</span>
+                </a>
+                <a href="{% url 'signout' %}" class="btn-action btn-action-outline">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+
+            <!-- Contact Support -->
+            <p class="help-text">
+                Need immediate assistance? We're happy to help!<br>
+                Reach us at <a href="mailto:info@trinityseminary.edu">info@trinityseminary.edu</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -176,20 +176,51 @@ def notifications_context(request):
     if not request.user.is_authenticated:
          return {}
 
+    user = request.user
+    role = None
+    role_name = None
+    try:
+        role_user = user.user_roles.first()
+        if role_user:
+            role = role_user.role
+            role_name = role.name if role else None
+    except Exception:
+        pass
+
+    def check_permission(perm_name):
+        if role_name == "Admin":
+            return True
+        if role:
+            from home.models import RoleHasPermissions
+            return RoleHasPermissions.objects.filter(role=role, permission__name=perm_name).exists()
+        return False
+
+    has_students = check_permission('list-students')
+    has_subjects = check_permission('manage-subject-assignments')
+    has_books = check_permission('manage-book-assignments')
+    has_exams = check_permission('manage-exam-assignment')
+
     # notifications_context logic
-    new_students_count = Students.objects.filter(status=False).count()
-    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False).count()
-    pending_books_count = StudentsBooks.objects.filter(is_approved=False).count()
+    new_students_count = Students.objects.filter(status=False).count() if has_students else 0
+    pending_subjects_count = StudentsSubjects.objects.filter(is_approved=False).count() if has_subjects else 0
+    pending_books_count = StudentsBooks.objects.filter(is_approved=False).count() if has_books else 0
+    pending_exams_count = StudentsExams.objects.filter(is_approved=False).count() if has_exams else 0
+
+    new_students_list = Students.objects.filter(status=False).order_by('-created_at')[:5] if has_students else []
+    pending_subjects = StudentsSubjects.objects.filter(is_approved=False).select_related('student', 'subject').order_by('-created_at')[:5] if has_subjects else []
+    pending_books = StudentsBooks.objects.filter(is_approved=False).select_related('student', 'book').order_by('-created_at')[:5] if has_books else []
+    pending_exams = StudentsExams.objects.filter(is_approved=False).select_related('student', 'exam').order_by('-created_at')[:5] if has_exams else []
 
     context = {
         'new_students_count': new_students_count,
         'pending_subjects_count': pending_subjects_count,
         'pending_books_count': pending_books_count,
+        'pending_exams_count': pending_exams_count,
         # Notifications Data lists
-        'new_students_list': Students.objects.filter(status=False).order_by('-created_at')[:5],
-        'pending_subjects': StudentsSubjects.objects.filter(is_approved=False).select_related('student', 'subject').order_by('-created_at')[:5],
-        'pending_books': StudentsBooks.objects.filter(is_approved=False).select_related('student', 'book').order_by('-created_at')[:5],
-        'pending_exams': StudentsExams.objects.filter(is_approved=False).select_related('student', 'exam').order_by('-created_at')[:5],
+        'new_students_list': new_students_list,
+        'pending_subjects': pending_subjects,
+        'pending_books': pending_books,
+        'pending_exams': pending_exams,
     }
     
     return context

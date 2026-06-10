@@ -446,10 +446,26 @@ def signin(request):
             
             if login_role == 'church_admin':
                 # Determine if user is actually a ChurchAdmin (meaning they own it)
-                is_church_admin = ChurchAdmins.objects.filter(student__user=user, deleted_at__isnull=True).exists()
-                if not is_church_admin:
+                church_admin_obj = ChurchAdmins.objects.filter(student__user=user, deleted_at__isnull=True).first()
+                if not church_admin_obj:
                     messages.error(request, "You do not have a Church Admin account.")
                     return redirect("signin")
+                
+                if not church_admin_obj.is_paid and church_admin_obj.student and not church_admin_obj.student.status and not church_admin_obj.student.active:
+                    payment = Payments.objects.filter(church_admin=church_admin_obj, is_paid=False).first()
+                    if not payment:
+                        payment = Payments.objects.create(
+                            name=f"{user.first_name} {user.last_name or ''}".strip(),
+                            email=user.email,
+                            person_group="church_admin",
+                            amount=church_admin_obj.amount,
+                            is_paid=False,
+                            church_admin=church_admin_obj
+                        )
+                    login(request, user)
+                    request.session['registration_payment_id'] = payment.id
+                    messages.warning(request, "Please complete your registration payment to activate your Church Admin account.")
+                    return redirect('registration_payment')
                 
                 login(request, user)
                 return redirect('church_admin_dashboard')
@@ -465,9 +481,50 @@ def signin(request):
                 return redirect('church_user_home')
                 
             # 'student' generic fallback role
-            login(request, user)
             role = user.user_roles.first().role.name if user.user_roles.exists() else "No Role"
             
+            if role == "Student":
+                student = Students.objects.filter(user=user).first()
+                if student:
+                    if not student.is_paid:
+                        # Look for existing unpaid registration payment
+                        payment = Payments.objects.filter(student=student, is_paid=False, subjects_id__isnull=True, deleted_at__isnull=True).first()
+                        
+                        if payment:
+                            balance_due = float(payment.amount or 0)
+                        else:
+                            course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
+                            subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
+                            total_fee_expected = course_fee + subject_fees
+                            
+                            total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
+                            balance_due = total_fee_expected - total_paid
+                            
+                            if balance_due > 0:
+                                payment = Payments.objects.create(
+                                    name=f"{student.first_name} {student.last_name or ''}".strip(),
+                                    email=student.email,
+                                    phone=student.phone_number,
+                                    person_group="student",
+                                    amount=balance_due,
+                                    is_paid=False,
+                                    student=student
+                                )
+                        
+                        if payment and balance_due > 0:
+                            login(request, user)
+                            request.session['registration_payment_id'] = payment.id
+                            messages.warning(request, f"Please complete your registration payment of ${balance_due:.2f} to proceed.")
+                            return redirect('registration_payment')
+                        else:
+                            student.is_paid = True
+                            student.save()
+                    
+                    if not student.active:
+                        login(request, user)
+                        return redirect('student_inactive')
+            
+            login(request, user)
             return redirect('admin_index')
         else:
             messages.info(request,"User name or password incorrect")
@@ -1513,6 +1570,41 @@ from home.models import Payments
 
 def registration_payment(request):
     payment_id = request.session.get("registration_payment_id")
+    
+    if not payment_id and request.user.is_authenticated:
+        # Self-healing check for logged-in student who direct-navigates
+        student = Students.objects.filter(user=request.user).first()
+        if student and not student.is_paid:
+            payment = Payments.objects.filter(student=student, is_paid=False, subjects_id__isnull=True, deleted_at__isnull=True).first()
+            if payment:
+                balance_due = float(payment.amount or 0)
+            else:
+                course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
+                subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
+                total_fee_expected = course_fee + subject_fees
+                total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
+                balance_due = total_fee_expected - total_paid
+                
+                if balance_due > 0:
+                    payment = Payments.objects.create(
+                        name=f"{student.first_name} {student.last_name or ''}".strip(),
+                        email=student.email,
+                        phone=student.phone_number,
+                        person_group="student",
+                        amount=balance_due,
+                        is_paid=False,
+                        student=student
+                    )
+            
+            if payment and balance_due > 0:
+                payment_id = payment.id
+                request.session["registration_payment_id"] = payment.id
+            else:
+                student.is_paid = True
+                student.save()
+                messages.success(request, "Your registration fee has already been paid.")
+                return redirect("student_home")
+
     if not payment_id:
         messages.error(request, "No pending registration payment found.")
         return redirect("register")
@@ -1520,6 +1612,8 @@ def registration_payment(request):
     payment = get_object_or_404(Payments, id=payment_id)
     if payment.is_paid:
         messages.success(request, "This registration fee has already been paid.")
+        if request.user.is_authenticated:
+            return redirect("student_home")
         return redirect("index")
         
     context = {
@@ -1611,7 +1705,10 @@ Please login to the admin panel to review.'''
                     except Exception as e:
                         logger.error(f"Failed to send admin notification email: {e}")
 
-                    redirect_url = f"/student/application/success/{student.student_id}/"
+                    if request.user.is_authenticated:
+                        redirect_url = "/student/"
+                    else:
+                        redirect_url = f"/student/application/success/{student.student_id}/"
 
                 elif payment_obj.church_admin:
                     church_admin = payment_obj.church_admin
@@ -1636,7 +1733,10 @@ Please login to the admin panel to review.'''
                     except Exception as e:
                         logger.error(f"Failed to send church admin confirmation email: {e}")
 
-                    redirect_url = f"/church-admin/success/{church_admin.student.student_id}/"
+                    if request.user.is_authenticated:
+                        redirect_url = "/church-admin/dashboard/"
+                    else:
+                        redirect_url = f"/church-admin/success/{church_admin.student.student_id}/"
 
                 # Clear session payment ID
                 request.session.pop("registration_payment_id", None)

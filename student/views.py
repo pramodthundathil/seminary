@@ -535,11 +535,19 @@ def student_exam_hall(request):
 
     # ----- Build formatted data safely -----
     now = timezone.now()
+    from datetime import timedelta
     
     for e in exams_page:
         try:
             exam_obj = e.exam
             subject_obj = exam_obj.subject if exam_obj else None
+            
+            # Calculate expiry time: start_time + duration
+            is_expired = False
+            if e.start_time:
+                expiry_time = e.start_time + timedelta(minutes=e.exam_duration)
+                if now > expiry_time:
+                    is_expired = True
             
             # Logic for Exam Status
             # 1. Completed
@@ -547,27 +555,32 @@ def student_exam_hall(request):
                 status = "Completed"
                 action = "View"
                 can_start = False
-            # 2. Approved and Ready (Time reached)
+            # 2. Expired / Missed
+            elif is_expired:
+                status = "Missed"
+                action = "Reschedule"
+                can_start = False
+            # 3. Approved and Ready (Within duration window)
             elif e.is_approved and e.start_time and e.start_time <= now:
                 status = "Ongoing"
                 action = "Start"
                 can_start = True
-            # 3. Approved and Not Ready (Future time)
+            # 4. Approved and Not Ready (Future time)
             elif e.is_approved:
                 status = "Approved"
                 action = "Wait"
                 can_start = False
-            # 4. Rescheduled
+            # 5. Rescheduled (Pending approval)
             elif e.is_rescheduled and not e.is_approved:
                 status = "Rescheduled"
                 action = "Wait"
                 can_start = False
-            # 5. Not Approved but time reached (Late Approval)
+            # 6. Not Approved but time reached (Late Approval)
             elif not e.is_approved and e.start_time and e.start_time <= now:
                 status = "Pending Approval"
                 action = "Wait"
                 can_start = False
-            # 6. Future / Other Pending
+            # 7. Future / Other Pending
             else:
                 status = "Pending"
                 action = "Wait"
@@ -591,13 +604,27 @@ def student_exam_hall(request):
             "action": action
         })
 
-    import pytz
+    # Minimal curated set of common timezones to keep the selection simple and clear
+    common_timezones = [
+        'UTC',
+        'Asia/Kolkata',        # India Standard Time
+        'Asia/Dubai',          # Gulf Standard Time
+        'Asia/Singapore',      # Singapore Standard Time
+        'Europe/London',       # Western European / Greenwich Mean Time
+        'America/New_York',    # Eastern Standard Time
+        'America/Chicago',     # Central Standard Time
+        'America/Denver',      # Mountain Standard Time
+        'America/Los_Angeles', # Pacific Standard Time
+        'Africa/Nairobi',      # East Africa Time
+        'Australia/Sydney'     # Australian Eastern Standard Time
+    ]
+
     return render(request, "student/exam_hall.html", {
         "student": student,
         "exam_list": exam_list,
         "paginator": paginator,
         "exams_page": exams_page,
-        "timezones": pytz.all_timezones,
+        "timezones": common_timezones,
         "request_exam_url": "/student/request-exam/",
     })
 
@@ -626,15 +653,15 @@ def student_reschedule_exam(request):
         except ValueError:
             return JsonResponse({"status": "error", "message": "Invalid date or time format"}, status=400)
 
-        # Update the exam record
+        # Update the exam record (rescheduling requires admin approval)
         student_exam.start_time = final_datetime
         student_exam.timezone = timezone_val
-        student_exam.is_approved = True  # Auto-approve rescheduled exams
+        student_exam.is_approved = False  
         student_exam.is_rescheduled = True
         student_exam.updated_by = request.user
         student_exam.save()
 
-        return JsonResponse({"status": "success", "message": "Exam rescheduled and approved successfully."})
+        return JsonResponse({"status": "success", "message": "Exam reschedule request submitted. Waiting for admin approval."})
 
     except Students.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Student not found"}, status=404)
@@ -1291,11 +1318,15 @@ def student_payment_input(request):
         filter(None, [student.first_name, student.middle_name, student.last_name])
     )
 
+    # Fetch all students to allow selecting the specific student who is paying
+    all_students = Students.objects.all().order_by('first_name', 'last_name')
+
     context = {
         "student_name": full_name,
         "student_email": student.email or student.user.email,
         "student_phone": student.phone_number,
         "student": student,
+        "students": all_students,
     }
 
     return render(request, "student/payment_input.html", context)
@@ -1405,11 +1436,42 @@ def save_payment_temp(request):
 
     print("payment temp data=====",data)
 
+    # Retrieve the selected student or fall back to the logged-in student
+    selected_student_id = data.get("selected_student_id")
+    student = None
+    from home.models import Students
+    if selected_student_id:
+        try:
+            student = Students.objects.get(id=selected_student_id)
+        except Students.DoesNotExist:
+            pass
+
+    if not student:
+        try:
+            student = Students.objects.get(user=request.user)
+        except Students.DoesNotExist:
+            pass
+
+    # Create a pending payment in the database linked to this specific student
+    from home.models import Payments
+    payment_obj = Payments.objects.create(
+        name=data["name"],
+        email=data["email"],
+        phone=data["phone"],
+        person_group=data.get("group", "student"),
+        amount=data["amount"],
+        message=data["message"],
+        student=student,
+        is_paid=False
+    )
+
     request.session["payment_temp"] = {
+        "id": payment_obj.id,
         "name": data["name"],
         "email": data["email"],
         "phone": data["phone"],
-        "group": data["group"],
+        "group": data.get("group", "student"),
+        "student_name": f"{student.first_name} {student.last_name or ''}".strip() if student else data["name"],
         "amount": data["amount"],
         "message": data["message"],
     }
@@ -1788,16 +1850,17 @@ def student_register(request):
              messages.error(request, "A student application with this email already exists.")
              return render(request, "site_pages/student_register.html")
 
-        # Create System User (Inactive)
+        # Create System User
         user_obj = None
+        temp_password = get_random_string(10)
         try:
             with transaction.atomic():
                 user_obj = Users()
                 user_obj.name = f"{first_name} {last_name}".strip()
                 user_obj.email = email
                 user_obj.username = email
-                user_obj.set_unusable_password() # No password yet
-                user_obj.is_active = False # Inactive until approved
+                user_obj.set_password(temp_password)
+                user_obj.is_active = True  # Enable login for payment redirection
                 user_obj.created_at = timezone.now()
                 user_obj.updated_at = timezone.now()
                 user_obj.save()
@@ -1893,25 +1956,219 @@ def student_register(request):
                     student=student
                 )
                 request.session['registration_payment_id'] = payment.id
+
+                # Send Email to Student with credentials and payment details
+                try:
+                    subject = "Your Student Registration & Payment Details"
+                    payment_link = request.build_absolute_uri('/register/payment/')
+                    
+                    html_content = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                    <style>
+                      body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }}
+                      .email-container {{ max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e5e7eb; }}
+                      .header {{ background: linear-gradient(135deg, #1e3a8a, #0d9488); padding: 30px 20px; text-align: center; color: #ffffff; }}
+                      .header h1 {{ margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; }}
+                      .header p {{ margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }}
+                      .content {{ padding: 30px 25px; color: #374151; line-height: 1.6; }}
+                      .content h2 {{ color: #1e3a8a; font-size: 18px; margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; }}
+                      .details-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+                      .details-table th, .details-table td {{ padding: 12px; text-align: left; border-bottom: 1px solid #f3f4f6; }}
+                      .details-table th {{ background-color: #f9fafb; font-weight: 600; color: #4b5563; width: 40%; }}
+                      .details-table td {{ color: #1f2937; }}
+                      .credentials-box {{ background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 15px; margin: 20px 0; }}
+                      .credentials-box p {{ margin: 5px 0; font-size: 14px; color: #065f46; }}
+                      .btn-container {{ text-align: center; margin: 30px 0 10px 0; }}
+                      .btn {{ display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s; }}
+                      .btn:hover {{ background-color: #059669; }}
+                      .footer {{ background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }}
+                    </style>
+                    </head>
+                    <body>
+                      <div class="email-container">
+                        <div class="header">
+                          <h1>Trinity Theological Seminary</h1>
+                          <p>Student Registration & Payment Details</p>
+                        </div>
+                        <div class="content">
+                          <h2>Welcome, {student.first_name}!</h2>
+                          <p>Thank you for registering at Trinity Theological Seminary. Your student application has been successfully created. Please find your registration details and login credentials below.</p>
+                          
+                          <table class="details-table">
+                            <tr>
+                              <th>Student ID</th>
+                              <td>{student.student_id}</td>
+                            </tr>
+                            <tr>
+                              <th>Course Applied</th>
+                              <td>{course_obj.course_name if course_obj else 'N/A'}</td>
+                            </tr>
+                            <tr>
+                              <th>Registration Fee</th>
+                              <td><strong>${course_fee:.2f}</strong></td>
+                            </tr>
+                            <tr>
+                              <th>Payment Status</th>
+                              <td><span style="color: #ef4444; font-weight: bold;">Pending Payment</span></td>
+                            </tr>
+                          </table>
+                          
+                          <div class="credentials-box">
+                            <p><strong>Your Account Login Credentials:</strong></p>
+                            <p><strong>Username / Email:</strong> {student.email}</p>
+                            <p><strong>Temporary Password:</strong> <code style="font-family: monospace; font-size: 15px; font-weight: bold; background-color: #d1fae5; padding: 2px 6px; border-radius: 4px;">{temp_password}</code></p>
+                            <p style="font-size: 12px; margin-top: 8px; color: #047857;"><em>Note: You can use these details to log in to complete your payment or check your application status.</em></p>
+                          </div>
+
+                          <p>To finalize your registration, please complete the payment using the link below:</p>
+                          
+                          <div class="btn-container">
+                            <a href="{payment_link}" class="btn" style="color: #ffffff;">Proceed to Payment</a>
+                          </div>
+                        </div>
+                        <div class="footer">
+                          <p>&copy; 2026 Trinity Theological Seminary. All rights reserved.</p>
+                          <p>This is an automated email, please do not reply directly to this message.</p>
+                        </div>
+                      </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    text_content = f"""
+Dear {student.first_name},
+
+Thank you for registering at Trinity Theological Seminary. Your application has been received.
+
+Registration Details:
+Student ID: {student.student_id}
+Course Applied: {course_obj.course_name if course_obj else 'N/A'}
+Registration Fee: ${course_fee:.2f}
+Payment Status: Pending Payment
+
+Your Account Login Credentials:
+Username / Email: {student.email}
+Temporary Password: {temp_password}
+
+To complete your registration, please proceed to the payment page:
+{payment_link}
+
+Best regards,
+Trinity Theological Seminary
+                    """
+                    
+                    send_mail(
+                        subject=subject,
+                        message=text_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[student.email],
+                        html_message=html_content,
+                        fail_silently=False
+                    )
+                    logger.info(f"Registration & payment email sent to {student.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send student registration email: {e}")
+
                 return redirect("registration_payment")
             else:
                 # Auto-approve payment status (since fee is 0 or empty)
                 student.is_paid = True
                 student.save()
 
-                # Send Email to Student
+                # Send Email to Student with credentials
                 try:
-                    subject = 'Application Received - Trinity Seminary'
-                    message = f'''Dear {student.first_name},
+                    subject = "Your Student Login Details"
+                    html_content = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                    <style>
+                      body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }}
+                      .email-container {{ max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e5e7eb; }}
+                      .header {{ background: linear-gradient(135deg, #1e3a8a, #0d9488); padding: 30px 20px; text-align: center; color: #ffffff; }}
+                      .header h1 {{ margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; }}
+                      .header p {{ margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }}
+                      .content {{ padding: 30px 25px; color: #374151; line-height: 1.6; }}
+                      .content h2 {{ color: #1e3a8a; font-size: 18px; margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; }}
+                      .details-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+                      .details-table th, .details-table td {{ padding: 12px; text-align: left; border-bottom: 1px solid #f3f4f6; }}
+                      .details-table th {{ background-color: #f9fafb; font-weight: 600; color: #4b5563; width: 40%; }}
+                      .details-table td {{ color: #1f2937; }}
+                      .credentials-box {{ background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 15px; margin: 20px 0; }}
+                      .credentials-box p {{ margin: 5px 0; font-size: 14px; color: #065f46; }}
+                      .footer {{ background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }}
+                    </style>
+                    </head>
+                    <body>
+                      <div class="email-container">
+                        <div class="header">
+                          <h1>Trinity Theological Seminary</h1>
+                          <p>Student Registration Confirmation</p>
+                        </div>
+                        <div class="content">
+                          <h2>Welcome, {student.first_name}!</h2>
+                          <p>Thank you for registering at Trinity Theological Seminary. Your student application has been successfully received and is currently under review. Please find your registration details and login credentials below.</p>
+                          
+                          <table class="details-table">
+                            <tr>
+                              <th>Student ID</th>
+                              <td>{student.student_id}</td>
+                            </tr>
+                            <tr>
+                              <th>Course Applied</th>
+                              <td>{course_obj.course_name if course_obj else 'N/A'}</td>
+                            </tr>
+                            <tr>
+                              <th>Payment Status</th>
+                              <td><span style="color: #10b981; font-weight: bold;">Paid / No Fee</span></td>
+                            </tr>
+                          </table>
+                          
+                          <div class="credentials-box">
+                            <p><strong>Your Account Login Credentials:</strong></p>
+                            <p><strong>Username / Email:</strong> {student.email}</p>
+                            <p><strong>Temporary Password:</strong> <code style="font-family: monospace; font-size: 15px; font-weight: bold; background-color: #d1fae5; padding: 2px 6px; border-radius: 4px;">{temp_password}</code></p>
+                          </div>
+                        </div>
+                        <div class="footer">
+                          <p>&copy; 2026 Trinity Theological Seminary. All rights reserved.</p>
+                          <p>This is an automated email, please do not reply directly to this message.</p>
+                        </div>
+                      </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    text_content = f"""
+Dear {student.first_name},
 
-Thank you for applying to Trinity Seminary. Your application has been received and is currently under review.
-You will receive another email once your application status changes.
+Thank you for registering at Trinity Theological Seminary. Your application has been received and is currently under review.
+
+Registration Details:
+Student ID: {student.student_id}
+Course Applied: {course_obj.course_name if course_obj else 'N/A'}
+Payment Status: Paid / No Fee
+
+Your Account Login Credentials:
+Username / Email: {student.email}
+Temporary Password: {temp_password}
 
 Best regards,
-Administration'''
-                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email])
+Trinity Theological Seminary
+                    """
+                    
+                    send_mail(
+                        subject=subject,
+                        message=text_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[student.email],
+                        html_message=html_content,
+                        fail_silently=False
+                    )
                 except Exception as e:
-                    logger.error(f"Failed to send student email: {e}")
+                    logger.error(f"Failed to send student login details email: {e}")
 
                 # Send Email to Admin
                 try:
@@ -1971,6 +2228,60 @@ def student_application_success(request, student_id):
     # I assume it was there but I didn't see the code.
     # I will create a basic view for it.
     return render(request, "site_pages/application_success.html", {'student': student_id})
+
+
+@login_required
+def student_inactive(request):
+    try:
+        student = Students.objects.filter(user=request.user).first()
+    except Exception as e:
+        logger.error(f"Failed to fetch student in inactive view: {e}")
+        student = None
+
+    if not student:
+        messages.error(request, "Student profile not found.")
+        return redirect("signin")
+
+    # If the student is active and paid, redirect them to dashboard
+    if student.is_paid and student.active:
+        return redirect("student_home")
+
+    # If the student has not paid, redirect to payment screen
+    if not student.is_paid:
+        from home.models import Payments, StudentsSubjects
+        payment = Payments.objects.filter(student=student, is_paid=False, subjects_id__isnull=True, deleted_at__isnull=True).first()
+        if payment:
+            balance_due = float(payment.amount or 0)
+        else:
+            course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
+            subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
+            total_fee_expected = course_fee + subject_fees
+            total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
+            balance_due = total_fee_expected - total_paid
+            
+            if balance_due > 0:
+                payment = Payments.objects.create(
+                    name=f"{student.first_name} {student.last_name or ''}".strip(),
+                    email=student.email,
+                    phone=student.phone_number,
+                    person_group="student",
+                    amount=balance_due,
+                    is_paid=False,
+                    student=student
+                )
+        
+        if payment and balance_due > 0:
+            request.session['registration_payment_id'] = payment.id
+            messages.warning(request, f"Please complete your registration payment of ${balance_due:.2f} to proceed.")
+            return redirect('registration_payment')
+        else:
+            student.is_paid = True
+            student.save()
+            if student.active:
+                return redirect("student_home")
+
+    # Render the inactive view
+    return render(request, "student/inactive.html", {"student": student})
 
 
 @login_required

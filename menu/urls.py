@@ -111,12 +111,16 @@ urlpatterns = [
     
     # Student Detail & Actions
     path('students/view/<int:student_id>/', views.student_detail, name='student_detail'),
+    path('admin/students/edit/<int:student_id>/', views.student_edit_view, name='student_edit'),
     path('students/action/approve/<int:student_id>/', views.student_approve_action, name='student_approve_action'),
     path('students/action/disapprove/<int:student_id>/', views.student_disapprove_action, name='student_disapprove_action'),
     path('students/action/activate/<int:student_id>/', views.student_activate_action, name='student_activate_action'),
     path('students/action/deactivate/<int:student_id>/', views.student_deactivate_action, name='student_deactivate_action'),
     path('students/update/<int:student_id>/', views.student_update, name='student_update'),
     path('admin/students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
+    path('students/manual-mark-paid/<int:student_id>/', views.manual_mark_paid, name='manual_mark_paid'),
+    path('payments/manual-mark-paid/<int:payment_id>/', views.manual_mark_payment_paid, name='manual_mark_payment_paid'),
+    path('students/manual-apply-discount/<int:student_id>/', views.manual_apply_discount, name='manual_apply_discount'),
     
 
     # Applications
@@ -312,6 +316,7 @@ urlpatterns = [
     path("admin/users/", views.users_list, name="users_list"),
     path("users/create/", views.users_create, name="users_create"),
     path("users/<int:id>/view/", views.users_view, name="users_view"),
+    path("users/<int:id>/edit/", views.users_edit, name="users_edit"),
     path("users/<int:id>/delete/", views.users_delete, name="users_delete"),
 
     # Church Login Codes

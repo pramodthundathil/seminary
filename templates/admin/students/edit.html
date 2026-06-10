@@ -1,0 +1,804 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Premium Visual System & Design Tokens */
+    :root {
+        --theme-navy: #1b2845;
+        --theme-cyan: #00ced1;
+        --theme-indigo: #4f46e5;
+        --theme-indigo-dark: #3730a3;
+        --theme-slate: #64748b;
+        --theme-slate-light: #f8fafc;
+        
+        --gradient-primary: linear-gradient(135deg, var(--theme-navy) 0%, #2e3d5e 100%);
+        --gradient-accent: linear-gradient(135deg, #00ced1 0%, #00b5b5 100%);
+        --gradient-indigo: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+        --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        
+        --card-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+        --card-shadow-md: 0 4px 20px rgba(27, 40, 69, 0.05);
+        --card-shadow-lg: 0 10px 30px rgba(27, 40, 69, 0.08);
+        --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .edit-content-wrapper {
+        animation: pageFadeIn 0.5s ease-out;
+    }
+
+    @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .profile-card {
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        box-shadow: var(--card-shadow-md);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .profile-card .card-header {
+        background: var(--gradient-primary);
+        padding: 24px 32px;
+        border-bottom: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .profile-card .card-header h4 {
+        color: #ffffff;
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .profile-card .card-body {
+        padding: 32px;
+    }
+
+    /* Modern Tabs Navigation */
+    .student-profile-tabs {
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+        background: #f8fafc;
+        border-radius: 16px 16px 0 0;
+        padding: 10px 10px 0 10px;
+        gap: 4px;
+    }
+
+    .student-profile-tabs .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        border: 1px solid transparent;
+        border-bottom: none;
+        padding: 12px 20px;
+        transition: var(--transition-smooth);
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 10px 10px 0 0;
+        background: transparent;
+    }
+
+    .student-profile-tabs .nav-link:hover {
+        color: var(--theme-indigo);
+        background-color: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    .student-profile-tabs .nav-link.active {
+        color: var(--theme-indigo);
+        background-color: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        border-bottom: 3px solid #ffffff !important;
+        font-weight: 700;
+    }
+
+    .tab-content-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 20px 20px;
+        padding: 32px;
+        box-shadow: var(--card-shadow-md);
+        margin-bottom: 30px;
+    }
+
+    /* Form Fields */
+    .form-group-custom {
+        margin-bottom: 24px;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control-custom {
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        padding: 11px 14px;
+        font-size: 0.9rem;
+        transition: var(--transition-smooth);
+        background-color: #f8fafc;
+        color: #1e293b;
+        width: 100%;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--theme-indigo);
+        background-color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        outline: none;
+    }
+
+    /* Custom Toggles/Switches */
+    .switch-card {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: var(--transition-smooth);
+    }
+
+    .switch-card:hover {
+        background-color: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: var(--card-shadow-sm);
+    }
+
+    .switch-card-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .switch-card-title {
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: var(--theme-navy);
+    }
+
+    .switch-card-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .form-switch-custom {
+        width: 44px;
+        height: 24px;
+    }
+
+    /* File upload design */
+    .file-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background-color: #f1f5f9;
+        border-radius: 12px;
+        padding: 14px;
+        margin-top: 10px;
+        border: 1px dashed #cbd5e1;
+    }
+
+    .file-preview-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ffffff;
+    }
+
+    .file-preview-info {
+        flex: 1;
+        font-size: 0.82rem;
+        color: #334155;
+    }
+
+    /* Premium Modern Buttons */
+    .btn-custom {
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 11px 24px;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-custom-primary {
+        background: var(--gradient-indigo);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn-custom-primary:hover {
+        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.28);
+        color: #ffffff;
+    }
+
+    .btn-custom-secondary {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        box-shadow: var(--card-shadow-sm);
+    }
+
+    .btn-custom-secondary:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        color: #1e293b;
+    }
+
+    .back-btn-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        background: #ffffff;
+        font-weight: 600;
+        font-size: 0.88rem;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+    }
+
+    .back-btn-custom:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+
+    /* Reference Cards */
+    .reference-section-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px;
+        background-color: #f8fafc;
+        margin-bottom: 20px;
+    }
+
+    .reference-section-card h6 {
+        font-weight: 800;
+        color: var(--theme-navy);
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+</style>
+
+<div class="edit-content-wrapper">
+    <!-- Top Action/Title Row -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="font-weight-extrabold text-dark mb-1" style="font-weight: 800; letter-spacing: -0.02em;">Edit Student Profile</h3>
+                    <p class="text-muted mb-0">Modify student information, upload documents, and manage approval status settings.</p>
+                </div>
+                <a href="{% url 'student_detail' student.id %}" class="back-btn-custom"><i class="fas fa-arrow-left"></i> Cancel & Back</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Card -->
+    <div class="row">
+        <div class="col-md-12">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'student_edit' student.id %}">
+                {% csrf_token %}
+                
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-edit me-2"></i> Update details for {{ student.first_name }} {{ student.last_name }}</h4>
+                        <span class="badge bg-light text-dark font-weight-bold">ID: {{ student.student_id|default:"N/A" }}</span>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-tabs student-profile-tabs" id="studentEditTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true">
+                                    <i class="fas fa-user-circle"></i> Personal
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="address-tab" data-bs-toggle="tab" data-bs-target="#address" type="button" role="tab" aria-controls="address" aria-selected="false">
+                                    <i class="fas fa-map-marker-alt"></i> Address
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab" aria-controls="academic" aria-selected="false">
+                                    <i class="fas fa-graduation-cap"></i> Academic
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="false">
+                                    <i class="fas fa-wallet"></i> Financial
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="references-tab" data-bs-toggle="tab" data-bs-target="#references" type="button" role="tab" aria-controls="references" aria-selected="false">
+                                    <i class="fas fa-users"></i> References
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">
+                                    <i class="fas fa-file-alt"></i> Documents
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content Container -->
+                        <div class="tab-content p-4" id="studentEditTabContent">
+                            
+                            <!-- Tab 1: Personal Details -->
+                            <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">First Name*</label>
+                                        <input type="text" class="form-control-custom" name="first_name" value="{{ student.first_name }}" required>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Middle Name</label>
+                                        <input type="text" class="form-control-custom" name="middle_name" value="{{ student.middle_name|default:'' }}">
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Last Name</label>
+                                        <input type="text" class="form-control-custom" name="last_name" value="{{ student.last_name|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Email Address*</label>
+                                        <input type="email" class="form-control-custom" name="email" value="{{ student.email|default:'' }}" required>
+                                    </div>
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Custom Student ID</label>
+                                        <input type="text" class="form-control-custom" name="student_id" value="{{ student.student_id|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Gender</label>
+                                        <select class="form-control-custom" name="gender">
+                                            <option value="">Select Gender</option>
+                                            <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                                            <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                                            <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Date of Birth</label>
+                                        <input type="date" class="form-control-custom" name="date_of_birth" value="{{ student.date_of_birth|date:'Y-m-d' }}">
+                                    </div>
+                                    <div class="col-md-2 form-group-custom">
+                                        <label class="form-label-custom">Phone Code</label>
+                                        <input type="text" class="form-control-custom" name="phone_code" value="{{ student.phone_code|default:'' }}" placeholder="e.g. 91">
+                                    </div>
+                                    <div class="col-md-2 form-group-custom">
+                                        <label class="form-label-custom">Phone Number</label>
+                                        <input type="text" class="form-control-custom" name="phone_number" value="{{ student.phone_number|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Marital Status</label>
+                                        <select class="form-control-custom" name="mrital_status">
+                                            <option value="">Select Status</option>
+                                            <option value="Single" {% if student.mrital_status == 'Single' %}selected{% endif %}>Single</option>
+                                            <option value="Married" {% if student.mrital_status == 'Married' %}selected{% endif %}>Married</option>
+                                            <option value="Divorced" {% if student.mrital_status == 'Divorced' %}selected{% endif %}>Divorced</option>
+                                            <option value="Widowed" {% if student.mrital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Spouse Name</label>
+                                        <input type="text" class="form-control-custom" name="spouse_name" value="{{ student.spouse_name|default:'' }}">
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Children Count</label>
+                                        <input type="number" class="form-control-custom" name="children" value="{{ student.children|default:'' }}" min="0">
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-4 form-group-custom">
+                                        <div class="switch-card">
+                                            <div class="switch-card-info">
+                                                <span class="switch-card-title">Approved Status</span>
+                                                <span class="switch-card-desc">Approve this application</span>
+                                            </div>
+                                            <div class="form-check form-switch m-0">
+                                                <input class="form-check-input form-switch-custom" type="checkbox" name="status" value="1" id="statusSwitch" {% if student.status %}checked{% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <div class="switch-card">
+                                            <div class="switch-card-info">
+                                                <span class="switch-card-title">Portal Access (Active)</span>
+                                                <span class="switch-card-desc">Allow user login & activity</span>
+                                            </div>
+                                            <div class="form-check form-switch m-0">
+                                                <input class="form-check-input form-switch-custom" type="checkbox" name="active" value="1" id="activeSwitch" {% if student.active %}checked{% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <div class="switch-card">
+                                            <div class="switch-card-info">
+                                                <span class="switch-card-title">Payment Completed</span>
+                                                <span class="switch-card-desc">Mark registration fee as paid</span>
+                                            </div>
+                                            <div class="form-check form-switch m-0">
+                                                <input class="form-check-input form-switch-custom" type="checkbox" name="is_paid" value="1" id="paidSwitch" {% if student.is_paid %}checked{% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2: Address Details -->
+                            <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                                <div class="form-group-custom">
+                                    <label class="form-label-custom">Mailing Address</label>
+                                    <textarea class="form-control-custom" name="mailing_address" rows="3">{{ student.mailing_address|default:'' }}</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">City</label>
+                                        <input type="text" class="form-control-custom" name="city" value="{{ student.city|default:'' }}">
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">State/Province</label>
+                                        <input type="text" class="form-control-custom" name="state" value="{{ student.state|default:'' }}">
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Zip/Postal Code</label>
+                                        <input type="text" class="form-control-custom" name="zip_code" value="{{ student.zip_code|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Country</label>
+                                        <select class="form-control-custom" name="country">
+                                            <option value="">Select Country</option>
+                                            {% for c in countries %}
+                                            <option value="{{ c.id }}" {% if student.country_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Citizenship Country</label>
+                                        <select class="form-control-custom" name="citizenship">
+                                            <option value="">Select Country</option>
+                                            {% for c in countries %}
+                                            <option value="{{ c.id }}" {% if student.citizenship_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Preferred Timezone</label>
+                                        <input type="text" class="form-control-custom" name="timezone" value="{{ student.timezone|default:'UTC' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 3: Academic Information -->
+                            <div class="tab-pane fade" id="academic" role="tabpanel" aria-labelledby="academic-tab">
+                                <div class="row">
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Course Applied</label>
+                                        <select class="form-control-custom" name="course_applied">
+                                            <option value="">Select Course</option>
+                                            {% for c in courses %}
+                                            <option value="{{ c.id }}" {% if student.course_applied_id == c.id %}selected{% endif %}>{{ c.course_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Syllabus Language</label>
+                                        <select class="form-control-custom" name="language">
+                                            <option value="">Select Language</option>
+                                            {% for l in languages %}
+                                            <option value="{{ l.id }}" {% if student.language_id == l.id %}selected{% endif %}>{{ l.language_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Highest Education</label>
+                                        <input type="text" class="form-control-custom" name="highest_education" value="{{ student.highest_education|default:'' }}">
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Associate Degree status</label>
+                                        <select class="form-control-custom" name="associate_degree">
+                                            <option value="">Select status</option>
+                                            <option value="0" {% if student.associate_degree == 0 %}selected{% endif %}>No</option>
+                                            <option value="1" {% if student.associate_degree == 1 %}selected{% endif %}>Yes</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 form-group-custom">
+                                        <label class="form-label-custom">Starting Year</label>
+                                        <input type="number" class="form-control-custom" name="starting_year" value="{{ student.starting_year|default:'' }}" min="1900" max="2100">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Ministerial Status</label>
+                                        <input type="text" class="form-control-custom" name="ministerial_status" value="{{ student.ministerial_status|default:'' }}">
+                                    </div>
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Church Affiliation</label>
+                                        <input type="text" class="form-control-custom" name="church_affiliation" value="{{ student.church_affiliation|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 4: Financial Information -->
+                            <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                                <div class="row">
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Currently Employed?</label>
+                                        <select class="form-control-custom" name="currently_employed">
+                                            <option value="">Select</option>
+                                            <option value="Yes" {% if student.currently_employed == 'Yes' %}selected{% endif %}>Yes</option>
+                                            <option value="No" {% if student.currently_employed == 'No' %}selected{% endif %}>No</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Scholarship Needed?</label>
+                                        <select class="form-control-custom" name="scholarship_needed">
+                                            <option value="">Select</option>
+                                            <option value="Yes" {% if student.scholarship_needed == 'Yes' %}selected{% endif %}>Yes</option>
+                                            <option value="No" {% if student.scholarship_needed == 'No' %}selected{% endif %}>No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Annual Income</label>
+                                        <input type="text" class="form-control-custom" name="income" value="{{ student.income|default:'' }}">
+                                    </div>
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Affordable Amount (Monthly/Annual)</label>
+                                        <input type="text" class="form-control-custom" name="affordable_amount" value="{{ student.affordable_amount|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="form-group-custom">
+                                    <label class="form-label-custom">Personal Message / Comments</label>
+                                    <textarea class="form-control-custom" name="message" rows="4">{{ student.message|default:'' }}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Tab 5: References -->
+                            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+                                <div class="reference-section-card">
+                                    <h6>Reference 1</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Name</label>
+                                            <input type="text" class="form-control-custom" name="reference_name1" value="{{ student.reference_name1|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Email</label>
+                                            <input type="email" class="form-control-custom" name="reference_email1" value="{{ student.reference_email1|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Phone</label>
+                                            <input type="text" class="form-control-custom" name="reference_phone1" value="{{ student.reference_phone1|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="reference-section-card">
+                                    <h6>Reference 2</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Name</label>
+                                            <input type="text" class="form-control-custom" name="reference_name2" value="{{ student.reference_name2|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Email</label>
+                                            <input type="email" class="form-control-custom" name="reference_email2" value="{{ student.reference_email2|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Phone</label>
+                                            <input type="text" class="form-control-custom" name="reference_phone2" value="{{ student.reference_phone2|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="reference-section-card">
+                                    <h6>Reference 3</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Name</label>
+                                            <input type="text" class="form-control-custom" name="reference_name3" value="{{ student.reference_name3|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Email</label>
+                                            <input type="email" class="form-control-custom" name="reference_email3" value="{{ student.reference_email3|default:'' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label-custom">Phone</label>
+                                            <input type="text" class="form-control-custom" name="reference_phone3" value="{{ student.reference_phone3|default:'' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 6: Documents & File Uploads -->
+                            <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <label class="form-label-custom">Profile Photo</label>
+                                        <input type="file" class="form-control-custom" name="photo" accept="image/*">
+                                        {% if student.photo %}
+                                        <div class="file-preview-box">
+                                            <img src="/media/{{ student.photo }}" class="file-preview-avatar" alt="Current Photo">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current Photo:</span>
+                                                <a href="/media/{{ student.photo }}" target="_blank" class="small text-primary text-decoration-underline">View current photo</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_photo" value="1" id="clearPhoto">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearPhoto">Clear file</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <hr>
+                                
+                                <!-- Certificates 1-5 -->
+                                <h6 class="font-weight-extrabold mb-3 text-dark"><i class="fas fa-file-pdf text-danger me-2"></i> Academic Certificates & Supporting Files</h6>
+
+                                
+                                <!-- Let's render certificates 1 to 5 explicitly to avoid template getattr issues -->
+                                <div class="row mt-2">
+                                    <!-- Certificate 1 -->
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Certificate 1 (Academic Records)</label>
+                                        <input type="file" class="form-control-custom" name="certificate1" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                        {% if student.certificate1 %}
+                                        <div class="file-preview-box">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current File:</span>
+                                                <a href="/media/{{ student.certificate1 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate1 }}</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_certificate1" value="1" id="clearCert1">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearCert1">Clear</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Certificate 2 -->
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Certificate 2 (Recommendations)</label>
+                                        <input type="file" class="form-control-custom" name="certificate2" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                        {% if student.certificate2 %}
+                                        <div class="file-preview-box">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current File:</span>
+                                                <a href="/media/{{ student.certificate2 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate2 }}</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_certificate2" value="1" id="clearCert2">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearCert2">Clear</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Certificate 3 -->
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Certificate 3 (ID Proof)</label>
+                                        <input type="file" class="form-control-custom" name="certificate3" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                        {% if student.certificate3 %}
+                                        <div class="file-preview-box">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current File:</span>
+                                                <a href="/media/{{ student.certificate3 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate3 }}</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_certificate3" value="1" id="clearCert3">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearCert3">Clear</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Certificate 4 -->
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Certificate 4 (Other Document)</label>
+                                        <input type="file" class="form-control-custom" name="certificate4" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                        {% if student.certificate4 %}
+                                        <div class="file-preview-box">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current File:</span>
+                                                <a href="/media/{{ student.certificate4 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate4 }}</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_certificate4" value="1" id="clearCert4">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearCert4">Clear</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Certificate 5 -->
+                                    <div class="col-md-6 form-group-custom">
+                                        <label class="form-label-custom">Certificate 5 (Other Document)</label>
+                                        <input type="file" class="form-control-custom" name="certificate5" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                        {% if student.certificate5 %}
+                                        <div class="file-preview-box">
+                                            <div class="file-preview-info">
+                                                <span class="d-block font-weight-bold">Current File:</span>
+                                                <a href="/media/{{ student.certificate5 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate5 }}</a>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="clear_certificate5" value="1" id="clearCert5">
+                                                <label class="form-check-label small font-weight-bold text-danger" for="clearCert5">Clear</label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div> <!-- End Tab Content Container -->
+                    </div> <!-- End Card Body -->
+
+                    <!-- Footer Action Buttons -->
+                    <div class="card-footer bg-light p-4 d-flex justify-content-end gap-3 border-top" style="border-radius: 0 0 20px 20px;">
+                        <a href="{% url 'student_detail' student.id %}" class="btn-custom btn-custom-secondary"><i class="fas fa-times"></i> Cancel Changes</a>
+                        <button type="submit" class="btn-custom btn-custom-primary text-white"><i class="fas fa-save"></i> Save Student Details</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts to handle tab navigation locally if bootstrap JS is loaded -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Simple fallback for Tab toggling if bootstrap native data attributes fail
+        $('#studentEditTab button').on('click', function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+    });
+</script>
+{% endblock %}

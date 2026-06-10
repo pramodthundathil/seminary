@@ -38,6 +38,7 @@ urlpatterns = [
     path("confirm-payment/", views.student_confirm_payment, name="student_confirm_payment"),
     path("register/", views.signup_student, name="signup_student"),
     path('application/success/<str:student_id>/', views.student_application_success, name='student_application_success'),
+    path("inactive/", views.student_inactive, name="student_inactive"),
 
     # API
     path("get-exams/<int:subject_id>/", views.get_exams, name="get_exams"),

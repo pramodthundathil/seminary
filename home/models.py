@@ -100,7 +100,10 @@ class Users(AbstractBaseUser, PermissionsMixin):
         import bcrypt
         if self.password and (self.password.startswith('$2y$') or self.password.startswith('$2a$') or self.password.startswith('$2b$')):
             try:
-                if bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8')):
+                hashed = self.password
+                if hashed.startswith('$2y$'):
+                    hashed = hashed.replace('$2y$', '$2b$', 1)
+                if bcrypt.checkpw(raw_password.encode('utf-8'), hashed.encode('utf-8')):
                     return True
             except Exception:
                 pass

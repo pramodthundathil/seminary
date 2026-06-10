@@ -1,4 +1,3 @@
-import bcrypt
 from django.contrib.auth.backends import ModelBackend
 from .models import Users
 
@@ -9,7 +8,8 @@ class LaravelBackend(ModelBackend):
         except Users.DoesNotExist:
             return None
 
-        # Compare Laravel bcrypt hash with entered password
-        if user.password and bcrypt.checkpw(password.encode(), user.password.encode()):
+        # Compare hash with entered password using custom check_password method
+        if user.password and user.check_password(password):
             return user
         return None
+

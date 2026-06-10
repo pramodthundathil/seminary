@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 {% load admin_tags %}
-{% get_admin_pages as admin_pages %}
+{% get_admin_pages request as admin_pages %}
 <html lang="en">
 
 <head>
@@ -4101,10 +4101,12 @@
             {% endfor %}
 
             <!-- System Feature: Church Admin Promotion -->
+            {% if request.user|has_permission:'manage-church-admin-applications' %}
             <a href="{% url 'church_admin_applications_list' %}" class="nav-item">
                 <i class="fas fa-church"></i>
                 <span class="nav-item-text">Church Admin Apps</span>
             </a>
+            {% endif %}
         </div>
 
         <div class="sidebar-footer">
@@ -4128,7 +4130,7 @@
                 <div class="profile-dropdown">
                     <button class="icon-btn" onclick="toggleNotifications()">
                         <i class="fas fa-bell"></i>
-                        {% with total_notif=new_students_count|add:pending_books_count|add:pending_subjects_count %}
+                        {% with total_notif=new_students_count|add:pending_books_count|add:pending_subjects_count|add:pending_exams_count %}
                         {% if total_notif > 0 %}
                         <span class="notification-badge">{{ total_notif }}</span>
                         {% endif %}
@@ -4310,7 +4312,7 @@
             </div>
         </div>
         {% block content %}
-        {% if unpaid_students_count > 0 %}
+        {% if request.user|has_permission:'manage-applications' and unpaid_students_count > 0 %}
         <div class="alert alert-warning d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-left: 5px solid var(--danger); background-color: #fff9db; color: #856404; padding: 15px 20px; border-radius: 8px;">
             <div class="d-flex align-items-center">
                 <i class="fas fa-exclamation-circle text-danger me-3" style="font-size: 1.5rem;"></i>
@@ -4328,8 +4330,10 @@
         {% endif %}
 
         <!-- Pending Actions -->
+        {% if request.user|has_permission:'manage-applications' or request.user|has_permission:'manage-subject-assignments' or request.user|has_permission:'manage-book-assignments' %}
         <h4 style="margin-bottom: 20px; color: var(--dark-navy); font-weight: 600;">Pending Actions</h4>
         <div class="stats-row">
+            {% if request.user|has_permission:'manage-applications' %}
             <a href="{% url 'application_list_view' %}" style="text-decoration: none; color: inherit;">
                 <div class="stat-card" style="border-left: 5px solid #FFC107;">
                     <div class="stat-icon yellow">
@@ -4339,7 +4343,9 @@
                     <div class="stat-label">New Applications</div>
                 </div>
             </a>
+            {% endif %}
 
+            {% if request.user|has_permission:'manage-subject-assignments' %}
             <a href="{% url 'student_subjects_list' %}?status=pending" style="text-decoration: none; color: inherit;">
                 <div class="stat-card" style="border-left: 5px solid #FFC107;">
                     <div class="stat-icon yellow">
@@ -4349,7 +4355,9 @@
                     <div class="stat-label">Subject Requests</div>
                 </div>
             </a>
+            {% endif %}
 
+            {% if request.user|has_permission:'manage-book-assignments' %}
             <a href="{% url 'student_books_list' %}?status=pending" style="text-decoration: none; color: inherit;">
                 <div class="stat-card" style="border-left: 5px solid #FFC107;">
                     <div class="stat-icon yellow">
@@ -4359,7 +4367,9 @@
                     <div class="stat-label">Book Requests</div>
                 </div>
             </a>
+            {% endif %}
         </div>
+        {% endif %}
 
         <!-- Replacing old summary cards with Request Tables Grid -->
         <style>
@@ -4467,6 +4477,7 @@
 
         <div class="dashboard-grid">
             <!-- 1. Student Applications -->
+            {% if request.user|has_permission:'manage-applications' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4508,8 +4519,10 @@
                 <div class="empty-message">No pending applications</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 2. Contact Requests -->
+            {% if request.user|has_permission:'manage-contacts' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4541,8 +4554,10 @@
                 <div class="empty-message">No contact requests</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 3. Book Requests -->
+            {% if request.user|has_permission:'manage-book-assignments' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4573,8 +4588,10 @@
                 <div class="empty-message">No pending book requests</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 4. Subject Requests -->
+            {% if request.user|has_permission:'manage-subject-assignments' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4618,8 +4635,10 @@
                 <div class="empty-message">No pending subject requests</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 5. Submitted Assignments -->
+            {% if request.user|has_permission:'manage-assignment-assignment' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4650,8 +4669,10 @@
                 <div class="empty-message">No submitted assignments</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 6. Exam Requests -->
+            {% if request.user|has_permission:'manage-exam-assignment' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4695,8 +4716,10 @@
                 <div class="empty-message">No pending exam requests</div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <!-- 7. Support Tickets -->
+            {% if request.user|has_permission:'manage-supports' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4755,7 +4778,10 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
+
             <!-- 8. Recent References -->
+            {% if request.user|has_permission:'list-references' or request.user|has_permission:'manage-reference-forms' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4790,8 +4816,10 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
 
             <!-- 9. Recent Payments -->
+            {% if request.user|has_permission:'manage-payments' %}
             <div class="request-card">
                 <div class="request-header">
                     <div class="request-title">
@@ -4848,10 +4876,12 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
 
         </div>
 
         <!-- Recent Students Table -->
+        {% if request.user|has_permission:'list-students' %}
         <div class="data-table">
             <div class="table-header">
                 <h5 class="card-title">Recent Students</h5>
@@ -4920,6 +4950,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
 
             <!-- Modify Exam Modal -->

@@ -267,15 +267,15 @@
             </div>
 
             <div class="form-group">
-                <label>Category <span class="required">*</span></label>
-<select id="personGroup" required>
-    <option value="">Select category</option>
-    <option value="student" selected>Student</option>
-    <option value="teacher">Applicant</option>
-    <option value="staff">Guest</option>
-    <option value="parent">Donor</option>
-</select>
-
+                <label>Select Student <span class="required">*</span></label>
+                <select id="selectedStudent" required>
+                    <option value="">-- Select Student --</option>
+                    {% for s in students %}
+                    <option value="{{ s.id }}" data-name="{{ s.first_name }} {% if s.middle_name %}{{ s.middle_name }} {% endif %}{{ s.last_name|default:'' }}" data-email="{{ s.email|default:'' }}" data-phone="{{ s.phone_number|default:'' }}" {% if student.id == s.id %}selected{% endif %}>
+                        {{ s.first_name }} {{ s.last_name|default:"" }} {% if s.student_id %}({{ s.student_id }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 
@@ -302,6 +302,27 @@
 <div class="success-popup" id="successPopup">
     <div class="icon">✓</div>
     <span>Payment request submitted successfully!</span>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(27, 40, 69, 0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(4px); transition: all 0.3s ease;">
+    <style>
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #00CED1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 206, 209, 0.5);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; font-family: inherit; font-size: 16px; color: white; font-weight: 500; letter-spacing: 0.5px;">Processing, please wait...</p>
 </div>
 
 {% endblock %}
@@ -441,20 +462,38 @@
     const messageField = document.getElementById("message");
     const charCount = document.getElementById("charCount");
 
+    const studentSelect = document.getElementById("selectedStudent");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const contactInput = document.getElementById("contact");
+
+    // Dynamic pre-fill when student selection changes
+    studentSelect.addEventListener("change", function() {
+        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            nameInput.value = (selectedOption.getAttribute("data-name") || "").trim();
+            emailInput.value = selectedOption.getAttribute("data-email") || "";
+            contactInput.value = selectedOption.getAttribute("data-phone") || "";
+        } else {
+            nameInput.value = "";
+            emailInput.value = "";
+            contactInput.value = "";
+        }
+    });
+
     // Character counter
     messageField.addEventListener("input", () => {
         charCount.textContent = messageField.value.length;
     });
 
     // Submit from right panel
-document.getElementById("rightSubmitBtn").addEventListener("click", () => {
-    if (form.checkValidity()) {
-        document.getElementById("hiddenSubmit").click();
-    } else {
-        form.reportValidity();
-    }
-});
-
+    document.getElementById("rightSubmitBtn").addEventListener("click", () => {
+        if (form.checkValidity()) {
+            document.getElementById("hiddenSubmit").click();
+        } else {
+            form.reportValidity();
+        }
+    });
 
     // Reset from right panel
     document.getElementById("rightResetBtn").addEventListener("click", () => {
@@ -465,31 +504,36 @@ document.getElementById("rightSubmitBtn").addEventListener("click", () => {
     });
 
     // Form submission
-form.addEventListener("submit", e => {
-    e.preventDefault();
+    form.addEventListener("submit", e => {
+        e.preventDefault();
 
-    const data = {
-        name: document.getElementById("name").value,
-        email: document.getElementById("email").value,
-        phone: document.getElementById("contact").value,
-        group: document.getElementById("personGroup").value,
-        amount: document.getElementById("amount").value,
-        message: document.getElementById("message").value,
-    };
+        // Show loading spinner overlay
+        document.getElementById("loadingOverlay").style.display = "flex";
 
-    fetch("{% url 'save_payment_temp' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify(data)
-    }).then(() => {
-        window.location.href = "{% url 'student_confirm_payment' %}";
+        const data = {
+            name: nameInput.value,
+            email: emailInput.value,
+            phone: contactInput.value,
+            selected_student_id: studentSelect.value,
+            group: "student",
+            amount: document.getElementById("amount").value,
+            message: document.getElementById("message").value,
+        };
+
+        fetch("{% url 'save_payment_temp' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(data)
+        }).then(() => {
+            window.location.href = "{% url 'student_confirm_payment' %}";
+        }).catch(err => {
+            console.error(err);
+            document.getElementById("loadingOverlay").style.display = "none";
+        });
     });
-});
-
-
 </script>
 
 {% endblock %}

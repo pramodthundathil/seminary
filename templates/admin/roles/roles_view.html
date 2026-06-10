@@ -1,0 +1,196 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<div class="gallery-container">
+    <div class="page-header">
+        <h1>Role Details</h1>
+        <div>
+            <a href="{% url 'roles_edit' role.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Role
+            </a>
+            <a href="{% url 'roles' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container" style="max-width:1000px;margin:0 auto;">
+        
+        <!-- Role Information Section -->
+        <div class="form-section">
+            <h3 class="section-title">Role Information</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">ID</div>
+                    <div class="detail-value">{{ role.id }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Role Name</div>
+                    <div class="detail-value" style="font-weight: 600;">{{ role.name }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Guard Name</div>
+                    <div class="detail-value">{{ role.guard_name }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        {% if role.status %}
+                            <span class="status-badge status-active">Active</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Created At</div>
+                    <div class="detail-value">{{ role.created_at|date:"Y-m-d H:i"|default:"-" }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Updated At</div>
+                    <div class="detail-value">{{ role.updated_at|date:"Y-m-d H:i"|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Permissions Section -->
+        <div class="form-section" style="margin-top: 30px;">
+            <h3 class="section-title">Assigned Permissions</h3>
+            
+            {% if permissions_by_group %}
+                <div class="permissions-container">
+                    {% for group_name, permissions in permissions_by_group.items %}
+                    <div class="permission-group">
+                        <div class="permission-group-header">
+                            <h4>{{ group_name }}</h4>
+                            <span class="badge bg-secondary" style="font-size: 12px; padding: 4px 8px; border-radius: 4px;">
+                                {{ permissions|length }} Permission{{ permissions|pluralize }}
+                            </span>
+                        </div>
+                        
+                        <div class="permission-list">
+                            {% for permission in permissions %}
+                            <div class="permission-item">
+                                <span class="permission-name">
+                                    <i class="fas fa-check-circle text-success" style="margin-right: 8px;"></i>
+                                    {{ permission.name }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; background: var(--bg-secondary); border-radius: 8px; border: 1px dashed var(--border);">
+                    <i class="fas fa-shield-alt" style="font-size: 48px; color: var(--text-light); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 15px;">No permissions assigned to this role.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Buttons / Delete -->
+        <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--border);">
+            <a href="{% url 'roles_delete' role.id %}" class="btn btn-danger" 
+               onclick="return confirm('Are you sure you want to delete this role?')">
+                <i class="fas fa-trash"></i> Delete Role
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-section {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+.permissions-container {
+    display: grid;
+    gap: 20px;
+}
+
+.permission-group {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.permission-group-header {
+    background: var(--bg-tertiary);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.permission-group-header h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.permission-list {
+    padding: 15px 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+}
+
+.permission-item {
+    display: flex;
+    align-items: center;
+}
+
+.permission-name {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+</style>
+
+{% endblock %}

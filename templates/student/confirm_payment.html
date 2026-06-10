@@ -118,14 +118,7 @@
     <div class="content-confirm">
 
         <div class="detail-row">
-            <div class="detail-label">Name</div>
-            <!-- <div class="detail-value">Sobha Sudheesh</div> -->
-            <div class="detail-value">{{ payment.name }}</div>
-
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Name</div>
+            <div class="detail-label">Payer Name</div>
             <div class="detail-value">{{ payment.name }}</div>
         </div>
 
@@ -140,8 +133,8 @@
         </div>
 
         <div class="detail-row">
-            <div class="detail-label">Person Group</div>
-            <div class="detail-value">{{ payment.group }}</div>
+            <div class="detail-label">Student</div>
+            <div class="detail-value">{{ payment.student_name }}</div>
         </div>
 
         <div class="detail-row amount-row">
@@ -156,6 +149,27 @@
 
 
     </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(27, 40, 69, 0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(4px); transition: all 0.3s ease;">
+    <style>
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #00CED1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 206, 209, 0.5);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; font-family: inherit; font-size: 16px; color: white; font-weight: 500; letter-spacing: 0.5px;">Processing payment, please wait...</p>
 </div>
 
 {% endblock %}
@@ -258,7 +272,7 @@
 
 
 </div>
-<script src="https://www.paypal.com/sdk/js?client-id={{ settings.PAYPAL_CLIENT_ID }}&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
 
 <script>
 
@@ -266,6 +280,7 @@
 
         // STEP A — Ask Django backend to CREATE order
         createOrder: function () {
+            document.getElementById("loadingOverlay").style.display = "flex";
             return fetch("/student/create-paypal-order/", {
                 method: "POST",
                 headers: {
@@ -276,12 +291,23 @@
                     amount: "{{ payment.amount }}"
                 })
             })
-                .then(res => res.json())
-                .then(data => data.orderID);
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Failed to create order");
+                    }
+                    return res.json();
+                })
+                .then(data => data.orderID)
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("loadingOverlay").style.display = "none";
+                    alert("Error initiating PayPal checkout. Please try again.");
+                });
         },
 
         // STEP B — After PayPal approves payment
         onApprove: function (data) {
+            document.getElementById("loadingOverlay").style.display = "flex";
             return fetch("/student/capture-paypal-order/", {
                 method: "POST",
                 headers: {
@@ -292,14 +318,34 @@
                     orderID: data.orderID
                 })
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Capture failed");
+                    }
+                    return res.json();
+                })
                 .then(result => {
                     if (result.status === "success") {
                         window.location.href = "/student/payment-success/";
                     } else {
-                        alert("Payment failed!");
+                        document.getElementById("loadingOverlay").style.display = "none";
+                        alert("Payment capture failed!");
                     }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("loadingOverlay").style.display = "none";
+                    alert("Error capturing payment. Please contact support.");
                 });
+        },
+
+        onCancel: function (data) {
+            document.getElementById("loadingOverlay").style.display = "none";
+        },
+
+        onError: function (err) {
+            console.error(err);
+            document.getElementById("loadingOverlay").style.display = "none";
         }
 
     }).render('#paypal-button-container');
