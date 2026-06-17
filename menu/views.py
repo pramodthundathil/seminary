@@ -38,6 +38,86 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 logger = logging.getLogger(__name__)
 
+import pytz
+
+def localize_datetime(naive_dt, tz_str):
+    if not tz_str:
+        return timezone.make_aware(naive_dt)
+    
+    tz_str = tz_str.strip()
+    if tz_str.startswith("UTC"):
+        # Format: UTC+HH:MM or UTC-HH:MM or UTC
+        offset_str = tz_str[3:] # e.g. "+05:30", "-06:00", or ""
+        if not offset_str:
+            return pytz.UTC.localize(naive_dt)
+        try:
+            sign = 1 if offset_str[0] == '+' else -1
+            parts = offset_str[1:].split(':')
+            hours = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            td = timedelta(hours=hours, minutes=minutes)
+            tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+            return tz.localize(naive_dt)
+        except Exception as e:
+            logger.error(f"Error parsing UTC offset {tz_str}: {e}")
+            return timezone.make_aware(naive_dt)
+    else:
+        # It's an IANA timezone like 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_str)
+            return tz.localize(naive_dt)
+        except Exception as e:
+            logger.error(f"Error finding timezone {tz_str}: {e}")
+            if tz_str == 'Asia/Kolkata':
+                try:
+                    tz = pytz.timezone('Asia/Calcutta')
+                    return tz.localize(naive_dt)
+                except Exception:
+                    pass
+            return timezone.make_aware(naive_dt)
+
+def convert_to_timezone(dt, tz_str):
+    if not dt:
+        return None
+    if not tz_str:
+        return dt
+    
+    # If the datetime is naive, make it aware in UTC first
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, pytz.UTC)
+        
+    tz_str = tz_str.strip()
+    if tz_str.startswith("UTC"):
+        # Format: UTC+HH:MM or UTC-HH:MM or UTC
+        offset_str = tz_str[3:] # e.g. "+05:30", "-06:00", or ""
+        if not offset_str:
+            return dt.astimezone(pytz.UTC)
+        try:
+            sign = 1 if offset_str[0] == '+' else -1
+            parts = offset_str[1:].split(':')
+            hours = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            td = timedelta(hours=hours, minutes=minutes)
+            tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+            return dt.astimezone(tz)
+        except Exception as e:
+            logger.error(f"Error parsing UTC offset {tz_str} for astimezone: {e}")
+            return dt
+    else:
+        # It's an IANA timezone like 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_str)
+            return dt.astimezone(tz)
+        except Exception as e:
+            logger.error(f"Error finding timezone {tz_str} for astimezone: {e}")
+            if tz_str == 'Asia/Kolkata':
+                try:
+                    tz = pytz.timezone('Asia/Calcutta')
+                    return dt.astimezone(tz)
+                except Exception:
+                    pass
+            return dt
+
 @role_redirection
 @login_required
 def admin_index(request):
@@ -2813,12 +2893,13 @@ def student_detail(request, student_id):
     ).select_related('subjects_id')
     
     # Calculate fee totals
-    course_fee = float(student.course_applied.fees or 0) if student.course_applied else 0.0
+    course_fee = student.get_course_fee_at_registration()
     subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
     total_fee_expected = course_fee + subject_fees_total
     
+    discount = student.get_discount()
     total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
-    balance_due = total_fee_expected - total_paid
+    balance_due = max(0.0, total_fee_expected - discount - total_paid)
 
     context = {
         'student': student,
@@ -2829,6 +2910,7 @@ def student_detail(request, student_id):
         'course_fee': course_fee,
         'subject_fees_total': subject_fees_total,
         'total_fee_expected': total_fee_expected,
+        'discount': discount,
         'total_paid': total_paid,
         'balance_due': balance_due,
     }
@@ -5645,22 +5727,9 @@ def student_subjects_toggle_approval(request, id):
     try:
         subject = StudentsSubjects.objects.get(id=id)
         subject.is_approved = not subject.is_approved
+        subject.updated_by = request.user
         subject.save()
         
-        # Auto-assign Books when subject is approved
-        if subject.is_approved:
-            from home.models import BookReferences, StudentsBooks
-            books = BookReferences.objects.filter(subject=subject.subject, status=True)
-            for book in books:
-                StudentsBooks.objects.get_or_create(
-                    student=subject.student,
-                    book=book,
-                    defaults={
-                        'created_by': request.user,
-                        'updated_by': request.user
-                    }
-                )
-                
         return JsonResponse({'success': True, 'message': 'Status updated successfully'})
     except StudentsSubjects.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Subject assignment not found'})
@@ -6244,7 +6313,11 @@ def student_exams_datatable(request):
         updated_date = item.updated_at.strftime('%Y-%m-%d') if item.updated_at else ''
         updated_info = f"{updated_by}<br><small>{updated_date}</small>"
         
-        start_time = f"{item.start_time.strftime('%Y-%m-%d %H:%M')} ({item.timezone})" if item.start_time else '-'
+        if item.start_time:
+            local_dt = convert_to_timezone(item.start_time, item.timezone)
+            start_time = f"{local_dt.strftime('%Y-%m-%d %H:%M')} ({item.timezone})"
+        else:
+            start_time = '-'
         
         # Status Badge
         if item.is_approved:
@@ -6338,7 +6411,7 @@ def student_exams_datatable(request):
             'student_name': student_name,
             'course_name': item.course.course_name if item.course else '-',
             'subject_name': item.subject.subject_name if item.subject else '-',
-            'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
+            'exam_name': f"{item.exam.exam_name} (Retest - Attempt {item.attempt_number})" if item.exam and item.is_retest else (item.exam.exam_name if item.exam else 'Unknown Exam'),
             'start_time': start_time,
             'duration': f'{item.exam_duration} min',
             'status': status,
@@ -6393,6 +6466,7 @@ def student_exams_bulk_assign(request):
         try:
             start_time_combined_str = f"{exam_date} {start_time_str}"
             start_time_obj = datetime.strptime(start_time_combined_str, '%Y-%m-%d %H:%M')
+            start_time_obj = localize_datetime(start_time_obj, timezone_val)
         except ValueError as ve:
              return JsonResponse({'success': False, 'message': f'Invalid date or time format: {str(ve)}'}, status=400)
         
@@ -7531,6 +7605,10 @@ def student_exams_toggle_approval(request, id):
         try:
             student_exam = StudentsExams.objects.get(id=id)
             student_exam.is_approved = not student_exam.is_approved
+            
+            if student_exam.is_retest:
+                student_exam.retest_status = 'approved' if student_exam.is_approved else 'pending'
+                
             student_exam.updated_by = request.user
             student_exam.save()
             
@@ -7550,8 +7628,9 @@ def student_exams_get(request, id):
         exam_date = ''
         start_time = ''
         if student_exam.start_time:
-            exam_date = student_exam.start_time.strftime('%Y-%m-%d')
-            start_time = student_exam.start_time.strftime('%H:%M')
+            local_dt = convert_to_timezone(student_exam.start_time, student_exam.timezone)
+            exam_date = local_dt.strftime('%Y-%m-%d')
+            start_time = local_dt.strftime('%H:%M')
 
         data = {
             'id': student_exam.id,
@@ -7575,18 +7654,23 @@ def student_exams_update(request, id):
             exam_date = request.POST.get('exam_date')
             start_time = request.POST.get('start_time')
             duration = request.POST.get('duration')
-            timezone = request.POST.get('timezone')
+            timezone_val = request.POST.get('timezone')
             
+            tz_val = timezone_val or student_exam.timezone or 'UTC'
             if start_time and exam_date:
                 # Combine date and time
                 combined_dt_str = f"{exam_date} {start_time}"
-                student_exam.start_time = datetime.strptime(combined_dt_str, '%Y-%m-%d %H:%M')
+                naive_start_time = datetime.strptime(combined_dt_str, '%Y-%m-%d %H:%M')
+                student_exam.start_time = localize_datetime(naive_start_time, tz_val)
             
             if duration:
                 student_exam.exam_duration = int(duration)
                 
-            if timezone:
-                student_exam.timezone = timezone
+            if timezone_val:
+                student_exam.timezone = timezone_val
+
+            if not student_exam.is_exam_ended and student_exam.start_time and student_exam.exam_duration:
+                student_exam.end_time = student_exam.start_time + timedelta(minutes=student_exam.exam_duration)
             
             student_exam.updated_by = request.user
             student_exam.save()

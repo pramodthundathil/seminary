@@ -492,13 +492,7 @@ def signin(request):
                         
                         if payment:
                             balance_due = float(payment.amount or 0)
-                        else:
-                            course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
-                            subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
-                            total_fee_expected = course_fee + subject_fees
-                            
-                            total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
-                            balance_due = total_fee_expected - total_paid
+                            balance_due = student.get_balance_due()
                             
                             if balance_due > 0:
                                 payment = Payments.objects.create(
@@ -1579,11 +1573,7 @@ def registration_payment(request):
             if payment:
                 balance_due = float(payment.amount or 0)
             else:
-                course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
-                subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
-                total_fee_expected = course_fee + subject_fees
-                total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
-                balance_due = total_fee_expected - total_paid
+                balance_due = student.get_balance_due()
                 
                 if balance_due > 0:
                     payment = Payments.objects.create(

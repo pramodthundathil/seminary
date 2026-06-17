@@ -246,11 +246,38 @@
         }
     };
 
+    let isSubmitting = false;
+
     // Remove warning on submit
     examForm.addEventListener('submit', function () {
+        isSubmitting = true;
         window.onbeforeunload = null;
     });
 
+    // Auto-submit when user navigates away or loses focus
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden' && !isSubmitting && remainingSeconds > 0) {
+            isSubmitting = true;
+            window.onbeforeunload = null;
+            examForm.submit();
+        }
+    });
+
+    window.addEventListener('blur', function () {
+        if (!isSubmitting && remainingSeconds > 0) {
+            isSubmitting = true;
+            window.onbeforeunload = null;
+            examForm.submit();
+        }
+    });
+
+    window.addEventListener('pagehide', function () {
+        if (!isSubmitting && remainingSeconds > 0) {
+            isSubmitting = true;
+            window.onbeforeunload = null;
+            examForm.submit();
+        }
+    });
 </script>
 
 <style>

@@ -1276,6 +1276,51 @@ class Students(models.Model):
             parts.append(self.last_name)
         return ' '.join(parts)
 
+    def get_course_fee_at_registration(self):
+        """Get the frozen course fee at the time of student registration"""
+        p_reg = self.payments.filter(subjects_id__isnull=True, deleted_at__isnull=True).order_by('created_at').first()
+        if p_reg:
+            import re
+            if p_reg.message and "Discount applied:" in p_reg.message:
+                match = re.search(r'Original:\s*\$?([0-9.]+)', p_reg.message)
+                if match:
+                    return float(match.group(1))
+            return float(p_reg.amount or 0)
+        return float(self.course_applied.fees or 0) if self.course_applied else 0.0
+
+    def get_discount(self):
+        """Calculate the total discount applied to this student from payments messages"""
+        import re
+        discount = 0.0
+        payments = self.payments.filter(deleted_at__isnull=True)
+        for p in payments:
+            if p.message and "Discount applied:" in p.message:
+                match = re.search(r'Original:\s*\$?([0-9.]+)', p.message)
+                if match:
+                    original_amount = float(match.group(1))
+                    discount += max(0.0, original_amount - float(p.amount or 0))
+        return discount
+
+    def get_balance_due(self):
+        """Calculate outstanding balance due for this student"""
+        course_fee = self.get_course_fee_at_registration()
+        
+        # Calculate subject fees
+        from home.models import StudentsSubjects
+        subjects = StudentsSubjects.objects.filter(student=self, deleted_at__isnull=True)
+        subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
+        
+        total_fee_expected = course_fee + subject_fees_total
+        discount = self.get_discount()
+        
+        # Calculate paid amount
+        payments = self.payments.filter(deleted_at__isnull=True)
+        total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
+        
+        balance = total_fee_expected - discount - total_paid
+        return max(0.0, balance)
+
+
 class StudentsAssignment(models.Model):
     id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name='assignments')
@@ -1336,6 +1381,19 @@ class StudentsExams(models.Model):
     is_exam_started = models.BooleanField(default=False)
     is_exam_ended = models.BooleanField(default=False)
     show_on_score = models.IntegerField()
+    attempt_number = models.IntegerField(default=1)
+    is_retest = models.BooleanField(default=False)
+    retest_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('none', 'None'),
+            ('pending', 'Pending Approval'),
+            ('approved', 'Approved'),
+            ('rejected', 'Rejected')
+        ],
+        default='none'
+    )
+    retest_requested_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="student_exams_created")
@@ -1390,6 +1448,57 @@ class StudentsSubjects(models.Model):
 
     def __str__(self):
         return f"{self.student or ''} - {self.subject or ''}"
+
+    def save(self, *args, **kwargs):
+        is_approved_changed = False
+        if self.pk:
+            try:
+                old_instance = StudentsSubjects.objects.get(pk=self.pk)
+                if self.is_approved and not old_instance.is_approved:
+                    is_approved_changed = True
+            except StudentsSubjects.DoesNotExist:
+                pass
+        else:
+            if self.is_approved:
+                is_approved_changed = True
+
+        super().save(*args, **kwargs)
+
+        if is_approved_changed:
+            from home.models import BookReferences, StudentsBooks, Assignments, StudentsAssignment
+            from datetime import timedelta
+            from django.utils import timezone
+
+            # Auto-assign Books when subject is approved
+            books = BookReferences.objects.filter(subject=self.subject, status=True)
+            for book in books:
+                assigned_by = self.updated_by or self.created_by or getattr(self.student, 'user', None)
+                if not assigned_by:
+                    assigned_by = Users.objects.filter(is_superuser=True).first() or Users.objects.first()
+                StudentsBooks.objects.get_or_create(
+                    student=self.student,
+                    book=book,
+                    defaults={
+                        'created_by': assigned_by,
+                        'updated_by': assigned_by
+                    }
+                )
+
+            # Auto-assign Assignments when subject is approved
+            assignments = Assignments.objects.filter(subject=self.subject, deleted_at__isnull=True)
+            one_year_span = timezone.now() + timedelta(days=365)
+            for assignment in assignments:
+                if not StudentsAssignment.objects.filter(student=self.student, assignment=assignment, deleted_at__isnull=True).exists():
+                    assigned_by = self.updated_by or self.created_by or getattr(self.student, 'user', None)
+                    if not assigned_by:
+                        assigned_by = Users.objects.filter(is_superuser=True).first() or Users.objects.first()
+                    StudentsAssignment.objects.create(
+                        student=self.student,
+                        assignment=assignment,
+                        submission_date=one_year_span,
+                        created_by=assigned_by,
+                        updated_by=assigned_by
+                    )
 
 class StudentsUploads(models.Model):
     id = models.AutoField(primary_key=True)

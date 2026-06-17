@@ -23,8 +23,63 @@ def student_processor(request):
     except Students.DoesNotExist:
         student = None
 
+    marquee_exam = None
+    if request.user.is_authenticated and student:
+        from datetime import timedelta
+        from django.utils import timezone
+        import pytz
+        from .models import StudentsExams
+
+        now = timezone.now()
+        student_exams = StudentsExams.objects.filter(
+            student=student,
+            is_exam_ended=False,
+            is_exam_started=False,
+            deleted_at__isnull=True
+        ).select_related('exam')
+        
+        for se in student_exams:
+            if se.start_time:
+                duration = se.exam_duration or 120
+                start_window = se.start_time - timedelta(minutes=30)
+                end_window = se.start_time + timedelta(minutes=duration)
+                
+                if start_window <= now <= end_window:
+                    is_ongoing = now >= se.start_time
+                    
+                    local_time_str = ""
+                    try:
+                        tz_str = se.timezone or 'UTC'
+                        if tz_str.startswith("UTC"):
+                            offset_str = tz_str[3:]
+                            if offset_str:
+                                sign = 1 if offset_str[0] == '+' else -1
+                                parts = offset_str[1:].split(':')
+                                hours = int(parts[0])
+                                minutes = int(parts[1]) if len(parts) > 1 else 0
+                                td = timedelta(hours=hours, minutes=minutes)
+                                tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+                            else:
+                                tz = pytz.UTC
+                        else:
+                            tz = pytz.timezone(tz_str)
+                        local_dt = se.start_time.astimezone(tz)
+                        local_time_str = local_dt.strftime("%I:%M %p") + " (" + tz_str + ")"
+                    except Exception:
+                        local_time_str = se.start_time.strftime("%I:%M %p") + " (UTC)"
+
+                    marquee_exam = {
+                        "id": se.id,
+                        "exam_name": se.exam.exam_name if se.exam else "Exam",
+                        "start_time_str": local_time_str,
+                        "is_ongoing": is_ongoing,
+                        "is_approved": se.is_approved
+                    }
+                    break
+
     return {
-        "student": student
+        "student": student,
+        "marquee_exam": marquee_exam
     }
 
 

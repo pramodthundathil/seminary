@@ -1,0 +1,343 @@
+{% extends "student/index.html" %}
+
+{% block title %}My Payments{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+{% block middle %}
+<style>
+    :root {
+        --secondary: #64748B;
+        --success: #10B981;
+        --danger: #EF4444;
+        --border: #E2E8F0;
+
+        --bg-gray: #F8FAFC;
+        --text-dark: #1E293B;
+        --text-light: #64748B;
+        --primary-cyan: #00CED1;
+        --light-cyan: #E0F7F7;
+        --dark-navy: #1B2845;
+        --gradient-primary: linear-gradient(135deg, #00CED1 0%, #008B8B 100%);
+        --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        --gradient-danger: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        --gradient-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .ledger-container {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+    }
+
+    .page-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border);
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    /* STAT CARDS */
+    .stat-card-premium {
+        position: relative;
+        padding: 24px;
+        border-radius: 16px;
+        color: white;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+
+    .stat-card-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
+
+    .stat-card-premium h6 {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        opacity: 0.9;
+    }
+
+    .stat-card-premium h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .stat-card-premium .details {
+        font-size: 0.82rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .stat-card-premium i.bg-icon {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 6rem;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+
+    /* SECTION CARD */
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        background: linear-gradient(to right, var(--light-cyan), var(--bg-gray));
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* PREMIUM TABLE */
+    .premium-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .premium-table th {
+        background: #F8FAFC;
+        padding: 16px 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: left;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .premium-table td {
+        padding: 16px 20px;
+        font-size: 0.92rem;
+        color: #334155;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .premium-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .premium-table tbody tr:hover {
+        background-color: var(--light-cyan);
+    }
+
+    /* BADGES */
+    .pill-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+    }
+
+    .pill-badge-success {
+        background-color: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
+    }
+
+    .pill-badge-warning {
+        background-color: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .empty-state {
+        padding: 48px;
+        text-align: center;
+        color: var(--text-light);
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: var(--text-light);
+        opacity: 0.5;
+        margin-bottom: 16px;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .premium-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="ledger-container">
+    <div class="page-header">
+        <h1><i class="bi bi-wallet2"></i> My Payments & Ledger</h1>
+    </div>
+
+    <!-- Metrics Cards Row -->
+    <div class="row g-4 mb-4">
+        <!-- Total Tuition Expected -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card-premium" style="background: var(--gradient-info);">
+                <h6>Total Tuition Expected</h6>
+                <h2>${{ total_fee_expected|floatformat:2 }}</h2>
+                <div class="details">
+                    Program: ${{ course_fee|floatformat:2 }}<br>
+                    Add-ons: ${{ subject_fees_total|floatformat:2 }}
+                </div>
+                <i class="bi bi-file-earmark-ruled bg-icon"></i>
+            </div>
+        </div>
+
+        <!-- Scholarship / Discount -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card-premium" style="background: var(--gradient-primary);">
+                <h6>Scholarship / Discount</h6>
+                <h2>${{ discount|floatformat:2 }}</h2>
+                <div class="details">
+                    {% if discount > 0 %}
+                    Applied tuition adjustment
+                    {% else %}
+                    No adjustments applied
+                    {% endif %}
+                </div>
+                <i class="bi bi-gift bg-icon"></i>
+            </div>
+        </div>
+
+        <!-- Total Tuition Paid -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card-premium" style="background: var(--gradient-success);">
+                <h6>Total Tuition Paid</h6>
+                <h2>${{ total_paid|floatformat:2 }}</h2>
+                <div class="details">
+                    Log of cleared payments
+                </div>
+                <i class="bi bi-check2-all bg-icon"></i>
+            </div>
+        </div>
+
+        <!-- Outstanding Balance -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card-premium" style="background: {% if balance_due > 0 %}var(--gradient-danger){% else %}var(--gradient-success){% endif %};">
+                <h6>Outstanding Balance</h6>
+                <h2>${{ balance_due|floatformat:2 }}</h2>
+                <div class="details">
+                    {% if balance_due > 0 %}
+                    Remaining payable amount
+                    {% else %}
+                    All balances cleared!
+                    {% endif %}
+                </div>
+                <i class="bi bi-hourglass-split bg-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction History Card -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title"><i class="bi bi-receipt"></i> Tuition & Enrollment Transaction Log</div>
+        </div>
+        <div class="section-content">
+            {% if payments %}
+            <div class="table-responsive">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction Ref</th>
+                            <th>Payment Category</th>
+                            <th>Amount</th>
+                            <th>Collection State</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark border font-weight-bold px-2 py-1" style="font-size: 0.8rem;">
+                                    {{ p.code|default:"N/A" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold text-dark d-block">{{ p.name }}</span>
+                                <span class="text-muted small">
+                                    {% if p.subjects_id %}
+                                    Subject Tuition: <strong>{{ p.subjects_id.subject_name }}</strong>
+                                    {% else %}
+                                    General Program Registration Fees
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="text-dark">${{ p.amount|floatformat:2 }}</strong>
+                            </td>
+                            <td>
+                                {% if p.is_paid %}
+                                <span class="pill-badge pill-badge-success">
+                                    <i class="bi bi-check-circle-fill"></i> Cleared
+                                </span>
+                                {% else %}
+                                <span class="pill-badge pill-badge-warning">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Unpaid Invoice
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-muted small">{{ p.created_at|default:"N/A" }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-receipt-cutoff"></i>
+                <p>No transaction history or logs found for your profile.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

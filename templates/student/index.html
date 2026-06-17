@@ -49,12 +49,94 @@
         .navbar-toggler:focus {
             box-shadow: none;
         }
+
+        /* Marquee Alert Styles */
+        .marquee-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            z-index: 1060;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        body.has-marquee {
+            padding-top: 100px !important;
+        }
+        body.has-marquee .main-nav {
+            top: 40px !important;
+        }
+        @media (max-width: 968px) {
+            body.has-marquee {
+                padding-top: 160px !important;
+            }
+            body.has-marquee .main-nav {
+                top: 80px !important;
+            }
+            body.has-marquee .marquee-alert {
+                height: 40px;
+            }
+        }
+        .marquee-alert.upcoming {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        .marquee-alert.ongoing {
+            background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+            color: white;
+            animation: pulse-bg 2s infinite alternate;
+        }
+        .marquee-link {
+            color: #ffffff !important;
+            text-decoration: underline !important;
+            font-weight: 700;
+            margin: 0 10px;
+            padding: 2px 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            transition: all 0.2s ease-in-out;
+            display: inline-block;
+        }
+        .marquee-link:hover {
+            background: rgba(255,255,255,0.3);
+            color: #fff !important;
+        }
+        @keyframes pulse-bg {
+            0% {
+                opacity: 0.95;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <!-- <body> -->
 
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %} {% if marquee_exam %}has-marquee{% endif %}">
 
+    {% if marquee_exam %}
+        <div class="marquee-alert {% if marquee_exam.is_ongoing %}ongoing{% else %}upcoming{% endif %}">
+            <marquee behavior="scroll" direction="left" scrollamount="6">
+                {% if marquee_exam.is_ongoing %}
+                    ⚠️ ONGOING EXAM ALERT: The exam <strong>"{{ marquee_exam.exam_name }}"</strong> has started! It was scheduled at {{ marquee_exam.start_time_str }}. 
+                    {% if marquee_exam.is_approved %}
+                        <a href="{% url 'take_exam' marquee_exam.id %}" class="marquee-link">CLICK HERE TO START THE EXAM NOW</a>. 
+                    {% else %}
+                        (Waiting for admin approval). 
+                    {% endif %}
+                    Warning: Lateness is automatically deducted from your 2-hour duration! Once you exit the exam, it will auto-submit.
+                {% else %}
+                    ⏰ UPCOMING EXAM NOTICE: <strong>"{{ marquee_exam.exam_name }}"</strong> is scheduled to start at {{ marquee_exam.start_time_str }}. Please prepare and start exactly on time. Lateness will be deducted if you start after the scheduled start time!
+                {% endif %}
+            </marquee>
+        </div>
+    {% endif %}
 
     <!-- Custom Navigation -->
     <nav class="main-nav">
@@ -164,7 +246,9 @@
                 <span class="role-badge"><i class="bi bi-mortarboard-fill"></i> Student</span>
                 <br><br>
                 <a href="{% url role|add:'_payment_input' %}" class="pay-button"
-                    style="text-decoration: none !important;"><i class="bi bi-credit-card"></i> Pay Now</a>
+                    style="text-decoration: none !important; display: block;"><i class="bi bi-credit-card"></i> Pay Now</a>
+                <a href="{% url 'student_my_payments' %}" class="pay-button"
+                    style="text-decoration: none !important; margin-top: 10px; display: block; background: #64748b !important; border-color: #64748b !important;"><i class="bi bi-wallet2"></i> My Payments</a>
                 <div class="stats-wrapper">
                     <div class="stats-grid ">
                         <br><br><br><br><br><br><br><br>

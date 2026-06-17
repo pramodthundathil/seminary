@@ -218,7 +218,7 @@ def church_user_subject_uploads(request, subject_id):
                 "id": exam.id,
                 "se_id": se_id,
                 "name": exam.exam_name,
-                "duration": exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                "duration": 120,
                 "status": status,
                 "can_take": can_take
             })
@@ -586,6 +586,49 @@ def church_submit_assignment(request, pk):
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from datetime import timedelta
+import pytz
+
+def convert_to_timezone(dt, tz_str):
+    if not dt:
+        return None
+    if not tz_str:
+        return dt
+    
+    # If the datetime is naive, make it aware in UTC first
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, pytz.UTC)
+        
+    tz_str = tz_str.strip()
+    if tz_str.startswith("UTC"):
+        # Format: UTC+HH:MM or UTC-HH:MM or UTC
+        offset_str = tz_str[3:] # e.g. "+05:30", "-06:00", or ""
+        if not offset_str:
+            return dt.astimezone(pytz.UTC)
+        try:
+            sign = 1 if offset_str[0] == '+' else -1
+            parts = offset_str[1:].split(':')
+            hours = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            td = timedelta(hours=hours, minutes=minutes)
+            tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+            return dt.astimezone(tz)
+        except Exception as e:
+            logger.error(f"Error parsing UTC offset {tz_str} for astimezone: {e}")
+            return dt
+    else:
+        # It's an IANA timezone like 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_str)
+            return dt.astimezone(tz)
+        except Exception as e:
+            logger.error(f"Error finding timezone {tz_str} for astimezone: {e}")
+            if tz_str == 'Asia/Kolkata':
+                try:
+                    tz = pytz.timezone('Asia/Calcutta')
+                    return dt.astimezone(tz)
+                except Exception:
+                    pass
+            return dt
 
 @login_required
 def church_user_exam_hall(request):
@@ -635,11 +678,22 @@ def church_user_exam_hall(request):
         except Exception as ex:
             continue
 
+        # Localize requested_time for rendering
+        local_time_str = "N/A"
+        if e.start_time:
+            try:
+                local_dt = convert_to_timezone(e.start_time, e.timezone)
+                local_time_str = local_dt.strftime("%b %d, %Y %I:%M %p")
+            except Exception as tz_ex:
+                logger.error(f"Error converting start_time to local tz: {tz_ex}")
+                local_time_str = e.start_time.strftime("%b %d, %Y %I:%M %p")
+
         exam_list.append({
             "id": e.id,
             "exam_name": getattr(exam_obj, "exam_name", "N/A"),
             "subject_name": getattr(subject_obj, "subject_name", "N/A"),
             "requested_time": e.start_time,
+            "requested_time_str": local_time_str,
             "timezone": e.timezone,
             "status": status,
             "can_start": can_start,
@@ -681,7 +735,7 @@ def church_user_start_exam(request, exam_id):
                 'requested_by': request.user,
                 'created_by': request.user,
                 'updated_by': request.user,
-                'exam_duration': exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                'exam_duration': 120,
                 'show_on_score': 0,
             }
         )
@@ -693,7 +747,6 @@ def church_user_start_exam(request, exam_id):
             
             if not student_exam.is_exam_started:
                 student_exam.is_exam_started = True
-                student_exam.start_time = timezone.now()
                 student_exam.is_approved = True
                 student_exam.save()
         
@@ -763,11 +816,9 @@ def church_user_take_exam(request, exam_id):
             defaults={'answer': '', 'mark': 0}
         )
     
-    if student_exam.exam_duration:
-        exam_end_time = student_exam.start_time + timedelta(minutes=student_exam.exam_duration)
-        remaining_seconds = (exam_end_time - now).total_seconds()
-    else:
-        remaining_seconds = 3600
+    duration_mins = student_exam.exam_duration or 120
+    exam_end_time = student_exam.start_time + timedelta(minutes=duration_mins)
+    remaining_seconds = (exam_end_time - now).total_seconds()
         
     if remaining_seconds <= 0:
         student_exam.is_exam_ended = True

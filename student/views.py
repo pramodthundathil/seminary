@@ -66,6 +66,40 @@ from home.permissions import student_only, student_or_church_user
 
 # Set up logger
 logger = logging.getLogger(__name__)
+
+def localize_datetime(naive_dt, tz_str):
+    if not tz_str:
+        return make_aware(naive_dt)
+    
+    tz_str = tz_str.strip()
+    if tz_str.startswith("UTC"):
+        # Format: UTC+HH:MM or UTC-HH:MM or UTC
+        offset_str = tz_str[3:] # e.g. "+05:30", "-06:00", or ""
+        if not offset_str:
+            return pytz.UTC.localize(naive_dt)
+        try:
+            sign = 1 if offset_str[0] == '+' else -1
+            parts = offset_str[1:].split(':')
+            hours = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            td = timedelta(hours=hours, minutes=minutes)
+            tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+            return tz.localize(naive_dt)
+        except Exception as e:
+            logger.error(f"Error parsing UTC offset {tz_str}: {e}")
+            return make_aware(naive_dt)
+    else:
+        # It's an IANA timezone like 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_str)
+            return tz.localize(naive_dt)
+        except Exception as e:
+            logger.error(f"Error finding timezone {tz_str}: {e}")
+            if tz_str == 'Asia/Kolkata':
+                tz = pytz.timezone('Asia/Calcutta')
+                return tz.localize(naive_dt)
+            return make_aware(naive_dt)
+
 from django.db import DatabaseError
 from datetime import timedelta # Added import
 from django.utils import timezone # Added import
@@ -160,12 +194,35 @@ def student_home(request):
         course = None
                
     notifications = list(notifications)
+ 
+    # Check for active exam
+    active_exam = None
+    now = timezone.now()
+    active_exams_qs = StudentsExams.objects.filter(
+        student=student,
+        is_approved=True,
+        is_exam_ended=False,
+        deleted_at__isnull=True
+    ).select_related('exam')
+    
+    for se in active_exams_qs:
+        if se.start_time:
+            expiry_time = se.start_time + timedelta(minutes=se.exam_duration or 120)
+            if se.start_time <= now <= expiry_time:
+                active_exam = {
+                    "id": se.id,
+                    "exam": {
+                        "exam_name": se.exam.exam_name
+                    }
+                }
+                break
 
     context = {
         "notifications": notifications,
         "course": course,
         "instructor_name": instructor_name,
         "language": language,
+        "active_exam": active_exam,
     }
 
     return render(request, "student/home.html", context)
@@ -383,7 +440,8 @@ def student_pending_assignment(request):
     try:
         pending_assignments = StudentsAssignment.objects.filter(
             student_id=student.id,
-            submitted_on__isnull=True
+            submitted_on__isnull=True,
+            deleted_at__isnull=True
         )
     except Exception as e:
         logger.error(f"Failed to fetch pending assignments for student {student.id}: {e}")
@@ -522,6 +580,8 @@ def student_exam_hall(request):
             "is_exam_ended",
             "is_approved",
             "is_rescheduled",
+            "is_retest",
+            "retest_status",
         )
         .order_by('-created_at')  # Order by most recent first
     )
@@ -537,6 +597,27 @@ def student_exam_hall(request):
     now = timezone.now()
     from datetime import timedelta
     
+    # Check for active exam
+    active_exam = None
+    active_exams_qs = StudentsExams.objects.filter(
+        student=student,
+        is_approved=True,
+        is_exam_ended=False,
+        deleted_at__isnull=True
+    ).select_related('exam')
+    
+    for se in active_exams_qs:
+        if se.start_time:
+            expiry_time = se.start_time + timedelta(minutes=se.exam_duration or 120)
+            if se.start_time <= now <= expiry_time:
+                active_exam = {
+                    "id": se.id,
+                    "exam": {
+                        "exam_name": se.exam.exam_name
+                    }
+                }
+                break
+
     for e in exams_page:
         try:
             exam_obj = e.exam
@@ -545,7 +626,7 @@ def student_exam_hall(request):
             # Calculate expiry time: start_time + duration
             is_expired = False
             if e.start_time:
-                expiry_time = e.start_time + timedelta(minutes=e.exam_duration)
+                expiry_time = e.start_time + timedelta(minutes=e.exam_duration or 120)
                 if now > expiry_time:
                     is_expired = True
             
@@ -559,6 +640,15 @@ def student_exam_hall(request):
             elif is_expired:
                 status = "Missed"
                 action = "Reschedule"
+                can_start = False
+            # Retest specific status
+            elif e.is_retest and not e.is_approved:
+                status = "Retest Pending"
+                action = "Wait"
+                can_start = False
+            elif e.is_retest and e.is_approved and e.start_time and e.start_time > now:
+                status = "Retest Approved"
+                action = "Wait"
                 can_start = False
             # 3. Approved and Ready (Within duration window)
             elif e.is_approved and e.start_time and e.start_time <= now:
@@ -586,6 +676,29 @@ def student_exam_hall(request):
                 action = "Wait"
                 can_start = False
                 
+            # Localize requested_time for rendering
+            local_time_str = "N/A"
+            if e.start_time:
+                try:
+                    if e.timezone.startswith("UTC"):
+                        offset_str = e.timezone[3:]
+                        if offset_str:
+                            sign = 1 if offset_str[0] == '+' else -1
+                            parts = offset_str[1:].split(':')
+                            hours = int(parts[0])
+                            minutes = int(parts[1]) if len(parts) > 1 else 0
+                            td = timedelta(hours=hours, minutes=minutes)
+                            tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+                        else:
+                            tz = pytz.UTC
+                    else:
+                        tz = pytz.timezone(e.timezone)
+                    local_dt = e.start_time.astimezone(tz)
+                    local_time_str = local_dt.strftime("%b %d, %Y %I:%M %p")
+                except Exception as tz_ex:
+                    logger.error(f"Error converting start_time to local tz: {tz_ex}")
+                    local_time_str = e.start_time.strftime("%b %d, %Y %I:%M %p")
+
         except Exception as ex:
             logger.error(f"Failed to read exam/subject for exam entry {e.id}: {ex}")
             continue
@@ -594,12 +707,14 @@ def student_exam_hall(request):
             "id": e.id,
             "exam_name": getattr(exam_obj, "exam_name", "N/A"),
             "subject_name": getattr(subject_obj, "subject_name", "N/A"),
-            "requested_time": e.start_time, # Should use start_time which is the scheduled time
+            "requested_time": e.start_time, # Keep raw datetime for any other uses
+            "requested_time_str": local_time_str, # Use this string in template
             "timezone": e.timezone,
             "status": status,
             "is_rescheduled": e.is_rescheduled,
             "is_approved": e.is_approved,
             "is_exam_ended": e.is_exam_ended,
+            "is_retest": e.is_retest,
             "can_start": can_start,
             "action": action
         })
@@ -626,6 +741,7 @@ def student_exam_hall(request):
         "exams_page": exams_page,
         "timezones": common_timezones,
         "request_exam_url": "/student/request-exam/",
+        "active_exam": active_exam,
     })
 
 @login_required
@@ -649,7 +765,7 @@ def student_reschedule_exam(request):
         try:
             datetime_str = f"{exam_date} {start_time}"
             final_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
-            final_datetime = make_aware(final_datetime)
+            final_datetime = localize_datetime(final_datetime, timezone_val)
         except ValueError:
             return JsonResponse({"status": "error", "message": "Invalid date or time format"}, status=400)
 
@@ -720,12 +836,14 @@ def student_score_card(request):
         else: grade = "F"
 
         exam_data.append({
+            "id": se.id,
             "code": exam.code,
             "exam_name": exam.exam_name,
             "total_score": round(total_marks),
             "score": round(obtained_marks),
             "percentage": round(percentage, 2),
-            "grade": grade
+            "grade": grade,
+            "retest_status": se.retest_status,
         })
 
     # ---- Process Assignments ----
@@ -796,10 +914,25 @@ def student_score_card(request):
     elif grand_percentage >= 50: grand_grade = "D"
     else: grand_grade = "F"
 
+    common_timezones = [
+        'UTC',
+        'Asia/Kolkata',        # India Standard Time
+        'Asia/Dubai',          # Gulf Standard Time
+        'Asia/Singapore',      # Singapore Standard Time
+        'Europe/London',       # Western European / Greenwich Mean Time
+        'America/New_York',    # Eastern Standard Time
+        'America/Chicago',     # Central Standard Time
+        'America/Denver',      # Mountain Standard Time
+        'America/Los_Angeles', # Pacific Standard Time
+        'Africa/Nairobi',      # East Africa Time
+        'Australia/Sydney'     # Australian Eastern Standard Time
+    ]
+
     context = {
         "student": student,
         "student_exams": exam_data,
         "assignment_mark": assignment_data,
+        "timezones": common_timezones,
         
         # Summary Data
         "exam_summary": {
@@ -1080,7 +1213,7 @@ def submit_request_exam(request):
         try:
             final_datetime_str = f"{exam_date} {start_time}"   # "2025-12-17 17:56"
             final_datetime = datetime.strptime(final_datetime_str, "%Y-%m-%d %H:%M")
-            final_datetime = make_aware(final_datetime)  # MAKE TZ-aware
+            final_datetime = localize_datetime(final_datetime, timezone_val)  # Localize to chosen timezone
         except ValueError:
             messages.error(request, "Invalid date or time format")
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -1096,7 +1229,7 @@ def submit_request_exam(request):
                 exam=exam,
                 start_time=final_datetime,
                 end_time=None,
-                exam_duration=exam.exam_duration if hasattr(exam, 'exam_duration') else 0,
+                exam_duration=120,  # Configured to 2 hours (120 minutes)
                 timezone=timezone_val,
                 requested_by=request.user,
                 created_by=request.user,
@@ -1181,11 +1314,9 @@ def take_exam(request, exam_id):
     descriptive_questions = exam_obj.descriptive_questions.all()
     
     # 6. Calc Remaining Seconds
-    if student_exam.exam_duration:
-        exam_end_time = student_exam.start_time + timedelta(minutes=student_exam.exam_duration)
-        remaining_seconds = (exam_end_time - now).total_seconds()
-    else:
-        remaining_seconds = 3600 # Default 1 hr if 0?
+    duration_mins = student_exam.exam_duration or 120
+    exam_end_time = student_exam.start_time + timedelta(minutes=duration_mins)
+    remaining_seconds = (exam_end_time - now).total_seconds()
         
     if remaining_seconds <= 0:
         # Time expired logic
@@ -1339,6 +1470,63 @@ def student_confirm_payment(request):
         "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID, 
     }
     return render(request, "student/confirm_payment.html",context)
+
+@login_required
+@student_or_church_user
+def student_my_payments(request):
+    try:
+        student = Students.objects.select_related("course_applied").get(user=request.user)
+    except Students.DoesNotExist:
+        return render(request, "student/my_payments.html", {"error": "Student not found"})
+    
+    # 1. Subjects
+    subjects = StudentsSubjects.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).select_related('subject')
+    
+    # 2. Payments/Fees structure
+    payments = Payments.objects.filter(
+        student=student,
+        deleted_at__isnull=True
+    ).select_related('subjects_id').order_by('-created_at')
+    
+    # Calculate fee totals
+    course_fee = student.get_course_fee_at_registration()
+    subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
+    total_fee_expected = course_fee + subject_fees_total
+    
+    discount = student.get_discount()
+    total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
+    balance_due = max(0.0, total_fee_expected - discount - total_paid)
+    
+    # 3. Notifications & Instructor
+    try:
+        notifications = Notifications.objects.filter(student_id=student.id)
+    except Exception:
+        notifications = []
+        
+    instructor_name = None
+    try:
+        instructor_relation = StudentsInstructor.objects.select_related("instructor").filter(student_id=student.id).first()
+        if instructor_relation:
+            instructor_name = instructor_relation.instructor.staff_name
+    except Exception:
+        pass
+        
+    context = {
+        'student': student,
+        'payments': payments,
+        'course_fee': course_fee,
+        'subject_fees_total': subject_fees_total,
+        'total_fee_expected': total_fee_expected,
+        'discount': discount,
+        'total_paid': total_paid,
+        'balance_due': balance_due,
+        'notifications': list(notifications),
+        'instructor_name': instructor_name,
+    }
+    return render(request, "student/my_payments.html", context)
 
 @login_required
 @student_or_church_user
@@ -2253,11 +2441,7 @@ def student_inactive(request):
         if payment:
             balance_due = float(payment.amount or 0)
         else:
-            course_fee = float(student.course_applied.fees) if (student.course_applied and student.course_applied.fees) else 0.00
-            subject_fees = sum(float(ss.subject.fees or 0) for ss in StudentsSubjects.objects.filter(student=student, deleted_at__isnull=True) if ss.subject)
-            total_fee_expected = course_fee + subject_fees
-            total_paid = sum(float(p.amount or 0) for p in Payments.objects.filter(student=student, is_paid=True, deleted_at__isnull=True))
-            balance_due = total_fee_expected - total_paid
+            balance_due = student.get_balance_due()
             
             if balance_due > 0:
                 payment = Payments.objects.create(
@@ -2503,3 +2687,77 @@ def apply_church_admin(request):
         'packages': packages,
         'page_title': 'Apply for Church Admin'
     })
+
+@login_required
+@student_or_church_user
+@require_POST
+def student_request_retest(request, exam_id):
+    try:
+        student = Students.objects.get(user=request.user)
+        
+        # Fetch the completed StudentsExams record
+        student_exam = get_object_or_404(StudentsExams, id=exam_id, student=student)
+        
+        # Check if they have already requested a retest for this exam that is pending or approved
+        existing_retest = StudentsExams.objects.filter(
+            student=student,
+            exam=student_exam.exam,
+            is_retest=True,
+            retest_status__in=['pending', 'approved'],
+            deleted_at__isnull=True
+        ).exists()
+        
+        if existing_retest:
+            return JsonResponse({"status": "error", "message": "You already have a pending or approved retest for this exam."}, status=400)
+            
+        # Get rescheduling fields from request
+        exam_date = request.POST.get("examDate")
+        start_time_str = request.POST.get("startTime")
+        timezone_val = request.POST.get("timezone")
+        
+        if not all([exam_date, start_time_str, timezone_val]):
+            return JsonResponse({"status": "error", "message": "All scheduling fields (Date, Time, Timezone) are required."}, status=400)
+            
+        # Combine date and time, and localize
+        try:
+            datetime_str = f"{exam_date} {start_time_str}"
+            naive_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+            final_datetime = localize_datetime(naive_datetime, timezone_val)
+        except ValueError:
+            return JsonResponse({"status": "error", "message": "Invalid date or time format."}, status=400)
+            
+        # Find attempt count
+        attempt_count = StudentsExams.objects.filter(
+            student=student,
+            exam=student_exam.exam,
+            deleted_at__isnull=True
+        ).count()
+        
+        # Create a new StudentsExams record for the retest
+        StudentsExams.objects.create(
+            student=student,
+            course=student_exam.course,
+            subject=student_exam.subject,
+            exam=student_exam.exam,
+            start_time=final_datetime,
+            end_time=None,
+            exam_duration=120,  # 2 Hours
+            timezone=timezone_val,
+            requested_by=request.user,
+            created_by=request.user,
+            updated_by=request.user,
+            show_on_score=0,
+            is_approved=False,  # Needs admin approval
+            is_retest=True,
+            retest_status='pending',
+            retest_requested_at=timezone.now(),
+            attempt_number=attempt_count + 1
+        )
+        
+        return JsonResponse({"status": "success", "message": "Retest request submitted successfully! Pending admin approval."})
+        
+    except Students.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Student not found."}, status=404)
+    except Exception as e:
+        logger.error(f"Error requesting retest: {e}")
+        return JsonResponse({"status": "error", "message": f"Failed to request retest: {str(e)}"}, status=500)

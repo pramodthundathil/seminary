@@ -1155,7 +1155,7 @@
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;">Total Fees Expected</h6>
                                 <h2 class="mb-2 font-weight-bold">${{ total_fee_expected|floatformat:2 }}</h2>
                                 <div class="small" style="opacity: 0.85; font-size: 0.78rem;">
-                                    Program: ${{ course_fee|floatformat:2 }} | Add-ons: ${{ subject_fees_total|floatformat:2 }}
+                                    Program: ${{ course_fee|floatformat:2 }} | Add-ons: ${{ subject_fees_total|floatformat:2 }}{% if discount > 0 %} | Discount: ${{ discount|floatformat:2 }}{% endif %}
                                 </div>
                                 <i class="fas fa-file-invoice-dollar stat-card-bg-icon"></i>
                             </div>
