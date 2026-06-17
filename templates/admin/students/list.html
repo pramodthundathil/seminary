@@ -205,7 +205,9 @@
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label>Timezone</label>
-                                    <input type="text" class="form-control" name="timezone" placeholder="UTC">
+                                    <select class="form-control" name="timezone">
+                                        <option value="">Select Timezone</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -353,6 +355,7 @@
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="/static/js/timezone.js"></script>
 <!-- Bootstrap JS (for Tabs and Modals) - assuming base template loads it, but sometimes it doesn't -->
 <!-- If admin/index.html loads bootstrap JS, we are good. -->
 
@@ -486,7 +489,7 @@
                     $('input[name="state"]').val(d.state);
                     $('input[name="zip_code"]').val(d.zip_code);
                     $('select[name="country"]').val(d.country);
-                    $('input[name="timezone"]').val(d.timezone);
+                    $('[name="timezone"]').val(d.timezone).trigger('change');
 
                     // Academic
                     $('select[name="course_applied"]').val(d.course_applied);

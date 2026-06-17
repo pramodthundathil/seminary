@@ -637,21 +637,6 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        if (!window.TIMEZONE_LIST) {
-            console.error("TIMEZONE_LIST not loaded");
-            return;
-        }
-        const timezoneSelect = document.getElementById("timezone");
-        const selected = document.getElementById("selected_timezone").value;
-
-        window.TIMEZONE_LIST.forEach(tz => {
-            const option = document.createElement("option");
-            option.value = tz;
-            option.textContent = tz;
-            if (selected === tz) option.selected = true;
-            timezoneSelect.appendChild(option);
-        });
-
         $('#phone_code').select2({
             placeholder: "Search code or country",
             allowClear: true

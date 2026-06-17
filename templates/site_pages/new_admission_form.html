@@ -209,10 +209,6 @@
                                 <label for="timezone">Timezone</label>
                                 <select id="timezone" name="timezone">
                                     <option value="">Select Timezone</option>
-                                    {% for tz in timezones %}
-                                    <option value="{{ tz }}" {% if request.POST.timezone == tz %}selected{% endif %}>{{ tz
-                                        }}</option>
-                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="form-field">
