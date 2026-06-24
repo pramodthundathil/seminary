@@ -241,18 +241,30 @@ def reference_form(request):
 
                 r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
                 result = r.json()
+                
+                print("--- reCAPTCHA reference_form DEBUG ---")
+                print("Secret Key:", settings.RECAPTCHA_SECRET_KEY)
+                print("Response token in POST:", recaptcha_response)
+                print("Google API verification result:", result)
+                print("---------------------------------------")
 
                 # If Google says "failed"
                 if not result.get('success'):
-                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                    error_msgs = result.get('error-codes', [])
+                    err_str = f" ({', '.join(error_msgs)})" if error_msgs else ""
+                    messages.error(request, f"Invalid reCAPTCHA{err_str}. Please try again.")
                     return render(request, 'site_pages/reference_form.html')
-            except requests.exceptions.RequestException:
-                # Network or API failure
-                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+            except requests.exceptions.RequestException as e:
+                print("--- reCAPTCHA reference_form EXCEPTION ---")
+                print("Request exception:", e)
+                print("-------------------------------------------")
+                messages.error(request, f"reCAPTCHA verification failed due to a network issue: {str(e)}. Please try again.")
                 return render(request, 'site_pages/reference_form.html')
 
-            except ValueError:
-                # JSON decoding failed
+            except ValueError as e:
+                print("--- reCAPTCHA reference_form EXCEPTION ---")
+                print("Value/JSON exception:", e)
+                print("-------------------------------------------")
                 messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
                 return render(request, 'site_pages/reference_form.html')
 
@@ -351,18 +363,30 @@ def payment_options(request):
 
                 r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
                 result = r.json()
+                
+                print("--- reCAPTCHA payment_options DEBUG ---")
+                print("Secret Key:", settings.RECAPTCHA_SECRET_KEY)
+                print("Response token in POST:", recaptcha_response)
+                print("Google API verification result:", result)
+                print("---------------------------------------")
 
                 # If Google says "failed"
                 if not result.get('success'):
-                    messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                    error_msgs = result.get('error-codes', [])
+                    err_str = f" ({', '.join(error_msgs)})" if error_msgs else ""
+                    messages.error(request, f"Invalid reCAPTCHA{err_str}. Please try again.")
                     return render(request, 'site_pages/payment_options.html')
-            except requests.exceptions.RequestException:
-                # Network or API failure
-                messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+            except requests.exceptions.RequestException as e:
+                print("--- reCAPTCHA payment_options EXCEPTION ---")
+                print("Request exception:", e)
+                print("-------------------------------------------")
+                messages.error(request, f"reCAPTCHA verification failed due to a network issue: {str(e)}. Please try again.")
                 return render(request, 'site_pages/payment_options.html')
 
-            except ValueError:
-                # JSON decoding failed
+            except ValueError as e:
+                print("--- reCAPTCHA payment_options EXCEPTION ---")
+                print("Value/JSON exception:", e)
+                print("-------------------------------------------")
                 messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
                 return render(request, 'site_pages/payment_options.html')
 
@@ -912,6 +936,12 @@ def contact(request):
 
         r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
         result = r.json()
+        
+        print("--- reCAPTCHA contact DEBUG ---")
+        print("Secret Key:", settings.RECAPTCHA_SECRET_KEY)
+        print("Response token in POST:", recaptcha_response)
+        print("Google API verification result:", result)
+        print("---------------------------------")
 
         if result.get('success'):
             # Save contact form
@@ -926,7 +956,9 @@ def contact(request):
             messages.success(request, "Your message has been sent successfully!")
             return redirect('contact-us')  # reload same page to show success message
         else:
-            messages.error(request, "reCAPTCHA verification failed. Please try again.")
+            error_msgs = result.get('error-codes', [])
+            err_str = f" ({', '.join(error_msgs)})" if error_msgs else ""
+            messages.error(request, f"reCAPTCHA verification failed{err_str}. Please try again.")
             return redirect('contact-us')
 
     return render(request, "site_pages/contact.html", {
@@ -1089,17 +1121,31 @@ def signup_guest(request):
                                     data=data, timeout=5)
                     result = r.json()
                     
+                    print("--- reCAPTCHA signup_guest DEBUG ---")
+                    print("Secret Key:", settings.RECAPTCHA_SECRET_KEY)
+                    print("Response token in POST:", recaptcha_response)
+                    print("Google API verification result:", result)
+                    print("------------------------------------")
+                    
                     if not result.get('success'):
-                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                        error_msgs = result.get('error-codes', [])
+                        err_str = f" ({', '.join(error_msgs)})" if error_msgs else ""
+                        messages.error(request, f"Invalid reCAPTCHA{err_str}. Please try again.")
                         context = get_guest_context()
                         return render(request, 'site_pages/guest_register.html', context)
                         
-                except requests.exceptions.RequestException:
-                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
+                except requests.exceptions.RequestException as e:
+                    print("--- reCAPTCHA signup_guest EXCEPTION ---")
+                    print("Request exception:", e)
+                    print("----------------------------------------")
+                    messages.error(request, f"reCAPTCHA verification failed due to a network issue: {str(e)}. Please try again.")
                     context = get_guest_context()
                     return render(request, 'site_pages/guest_register.html', context)
                     
-                except ValueError:
+                except ValueError as e:
+                    print("--- reCAPTCHA signup_guest EXCEPTION ---")
+                    print("Value/JSON exception:", e)
+                    print("----------------------------------------")
                     messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
                     context = get_guest_context()
                     return render(request, 'site_pages/guest_register.html', context)
@@ -1311,12 +1357,24 @@ def signup_church_admin(request):
                     }
                     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
                     result = r.json()
+                    
+                    print("--- reCAPTCHA signup_church_admin DEBUG ---")
+                    print("Secret Key:", settings.RECAPTCHA_SECRET_KEY)
+                    print("Response token in POST:", recaptcha_response)
+                    print("Google API verification result:", result)
+                    print("-------------------------------------------")
+                    
                     if not result.get('success'):
-                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
+                        error_msgs = result.get('error-codes', [])
+                        err_str = f" ({', '.join(error_msgs)})" if error_msgs else ""
+                        messages.error(request, f"Invalid reCAPTCHA{err_str}. Please try again.")
                         context = get_church_admin_context()
                         return render(request, 'site_pages/church_admin_register.html', context)
-                except Exception:
-                    messages.error(request, "reCAPTCHA verification failed. Please try again.")
+                except Exception as e:
+                    print("--- reCAPTCHA signup_church_admin EXCEPTION ---")
+                    print("Exception:", e)
+                    print("-----------------------------------------------")
+                    messages.error(request, f"reCAPTCHA verification failed: {str(e)}. Please try again.")
                     context = get_church_admin_context()
                     return render(request, 'site_pages/church_admin_register.html', context)
                 
