@@ -565,6 +565,9 @@ def student_exam_hall(request):
             "error": "Student not found"
         })
 
+    role = request.user.user_roles.first().role.name if request.user.user_roles.exists() else None
+    is_church_user = (role == "Church User")
+
     # ----- Prefetch exams & subjects -----
     exams_queryset = (
         StudentsExams.objects
@@ -582,6 +585,8 @@ def student_exam_hall(request):
             "is_rescheduled",
             "is_retest",
             "retest_status",
+            "retest_fee",
+            "retest_paid",
         )
         .order_by('-created_at')  # Order by most recent first
     )
@@ -715,6 +720,9 @@ def student_exam_hall(request):
             "is_approved": e.is_approved,
             "is_exam_ended": e.is_exam_ended,
             "is_retest": e.is_retest,
+            "retest_status": e.retest_status,
+            "retest_fee": str(e.retest_fee) if e.retest_fee else None,
+            "retest_paid": e.retest_paid,
             "can_start": can_start,
             "action": action
         })
@@ -742,6 +750,8 @@ def student_exam_hall(request):
         "timezones": common_timezones,
         "request_exam_url": "/student/request-exam/",
         "active_exam": active_exam,
+        "is_church_user": is_church_user,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
     })
 
 @login_required
@@ -793,8 +803,6 @@ def student_reschedule_exam(request):
 
 @login_required
 @student_or_church_user
-@login_required
-@student_or_church_user
 def student_score_card(request):
 
     # ---- Get student safely ----
@@ -802,6 +810,9 @@ def student_score_card(request):
         student = Students.objects.get(user=request.user)
     except Students.DoesNotExist:
         return render(request, "student/score_card.html", {"error": "Student not found"})
+
+    role = request.user.user_roles.first().role.name if request.user.user_roles.exists() else None
+    is_church_user = (role == "Church User")
 
     # ---- Process Exams ----
     # Show exams that are ENDED (completed).
@@ -813,16 +824,29 @@ def student_score_card(request):
     )
 
     exam_data = []
+    seen_exams = set()
     
     for se in completed_exams:
         exam = se.exam
+        if exam.id in seen_exams:
+            continue
+        seen_exams.add(exam.id)
         
         # Calculate Total Marks for this Exam
         total_obj_marks = exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
         total_desc_marks = exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
         total_marks = total_obj_marks + total_desc_marks
         
-        obtained_marks = se.show_on_score or 0
+        # Calculate the highest score among all attempts for this exam
+        from django.db.models import Max
+        highest_score = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_exam_ended=True,
+            deleted_at__isnull=True
+        ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
+        
+        obtained_marks = highest_score
         
         # Calculate Percentage
         percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
@@ -835,15 +859,30 @@ def student_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
 
+        # Check for the latest retest attempt (even if not ended)
+        latest_retest = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_retest=True,
+            deleted_at__isnull=True
+        ).order_by('-created_at').first()
+        
+        retest_status = latest_retest.retest_status if latest_retest else 'none'
+        retest_fee = latest_retest.retest_fee if latest_retest else None
+        retest_paid = latest_retest.retest_paid if latest_retest else False
+        retest_id = latest_retest.id if latest_retest else se.id
+
         exam_data.append({
-            "id": se.id,
+            "id": retest_id,
             "code": exam.code,
             "exam_name": exam.exam_name,
             "total_score": round(total_marks),
             "score": round(obtained_marks),
             "percentage": round(percentage, 2),
             "grade": grade,
-            "retest_status": se.retest_status,
+            "retest_status": retest_status,
+            "retest_fee": str(retest_fee) if retest_fee else None,
+            "retest_paid": retest_paid,
         })
 
     # ---- Process Assignments ----
@@ -933,6 +972,8 @@ def student_score_card(request):
         "student_exams": exam_data,
         "assignment_mark": assignment_data,
         "timezones": common_timezones,
+        "is_church_user": is_church_user,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
         
         # Summary Data
         "exam_summary": {
@@ -1474,6 +1515,8 @@ def student_confirm_payment(request):
 @login_required
 @student_or_church_user
 def student_my_payments(request):
+    from menu.views import sync_retest_payments_in_db
+    sync_retest_payments_in_db()
     try:
         student = Students.objects.select_related("course_applied").get(user=request.user)
     except Students.DoesNotExist:
@@ -1494,7 +1537,9 @@ def student_my_payments(request):
     # Calculate fee totals
     course_fee = student.get_course_fee_at_registration()
     subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
-    total_fee_expected = course_fee + subject_fees_total
+    # Fetch all retest exams for this student
+    retest_fees_total = sum(float(se.retest_fee or 0) for se in StudentsExams.objects.filter(student=student, is_retest=True, retest_fee__gt=0, deleted_at__isnull=True))
+    total_fee_expected = course_fee + subject_fees_total + retest_fees_total
     
     discount = student.get_discount()
     total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
@@ -1519,6 +1564,7 @@ def student_my_payments(request):
         'payments': payments,
         'course_fee': course_fee,
         'subject_fees_total': subject_fees_total,
+        'retest_fees_total': retest_fees_total,
         'total_fee_expected': total_fee_expected,
         'discount': discount,
         'total_paid': total_paid,
@@ -1786,6 +1832,94 @@ def capture_paypal_order(request):
         return JsonResponse({"status": "success", "details": capture_json})
 
     return JsonResponse({"status": "failed", "details": capture_json})
+
+
+@csrf_exempt
+@login_required
+def capture_retest_payment(request):
+    if request.method != 'POST':
+        return JsonResponse({"status": "failed", "message": "Method not allowed"}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        order_id = data.get("orderID")
+        student_exam_id = data.get("student_exam_id")
+        
+        if not order_id or not student_exam_id:
+            return JsonResponse({"status": "failed", "message": "Missing orderID or student_exam_id"}, status=400)
+            
+        student_exam = get_object_or_404(StudentsExams, id=student_exam_id)
+        
+        # 1) Get Access Token
+        CLIENT_ID = settings.PAYPAL_CLIENT_ID
+        CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+        
+        token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+        token_headers = {
+            "Accept": "application/json",
+            "Accept-Language": "en_US"
+        }
+        token_data = {"grant_type": "client_credentials"}
+        
+        token_response = requests.post(
+            token_url,
+            headers=token_headers,
+            data=token_data,
+            auth=(CLIENT_ID, CLIENT_SECRET)
+        )
+        access_token = token_response.json()["access_token"]
+        
+        # 2) Capture order
+        capture_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
+        capture_headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        
+        capture_response = requests.post(capture_url, headers=capture_headers)
+        capture_json = capture_response.json()
+        
+        # SUCCESS?
+        status = capture_json.get("status")
+        if status == "COMPLETED":
+            # 1. Update StudentsExams to approved and paid
+            student_exam.retest_paid = True
+            student_exam.is_approved = True
+            student_exam.retest_status = 'approved'
+            student_exam.save()
+            
+            # 2. Log in Payments table
+            from home.models import Payments
+            Payments.objects.create(
+                code=f"RETEST-{student_exam.id}",
+                name=student_exam.student.get_full_name(),
+                email=student_exam.student.email or '',
+                phone=student_exam.student.phone_number or '',
+                person_group="student",
+                amount=student_exam.retest_fee,
+                message=f"Retest payment for exam: {student_exam.exam.exam_name}",
+                is_paid=True,
+                student=student_exam.student,
+            )
+            
+            # 3. Send approval email to student
+            subject = "Retest Exam Request Approved"
+            message = f"Hello {student_exam.student.first_name},\n\nYour payment of ${student_exam.retest_fee} has been received and your retest request for the exam '{student_exam.exam.exam_name}' has been approved.\n\nYou can now take the exam at the scheduled time.\n\nBest regards,\nTrinity Theological Seminary"
+            
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [student_exam.student.email],
+                fail_silently=True
+            )
+            
+            return JsonResponse({"status": "success", "details": capture_json})
+            
+        return JsonResponse({"status": "failed", "details": capture_json}, status=400)
+    except Exception as e:
+        logger.error(f"Error capturing retest payment: {e}")
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 def payment_success(request):

@@ -4312,6 +4312,18 @@
             </div>
         </div>
         {% block content %}
+        
+        <!-- Dashboard Top Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="padding-top: 10px;">
+            <h2 style="color: var(--dark-navy); font-weight: 700; margin: 0; font-size: 28px;">Admin Dashboard</h2>
+            {% if request.user|has_permission:'manage-payments' %}
+            <a href="{% url 'payment_dashboard' %}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style="background: linear-gradient(135deg, var(--primary) 0%, #00b5b8 100%); border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; text-decoration: none; color: white; transition: all 0.3s ease;">
+                <i class="fas fa-chart-pie"></i>
+                <span>Payment Dashboard</span>
+            </a>
+            {% endif %}
+        </div>
+
         {% if request.user|has_permission:'manage-applications' and unpaid_students_count > 0 %}
         <div class="alert alert-warning d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert" style="border-left: 5px solid var(--danger); background-color: #fff9db; color: #856404; padding: 15px 20px; border-radius: 8px;">
             <div class="d-flex align-items-center">
@@ -4703,6 +4715,9 @@
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonExam{{ req.id }}">
                                         <li><a class="dropdown-item" href="#" onclick="openExamActionModal('approve', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}', '{{ req.created_at|date:'M d, Y' }}')"><i class="fas fa-check text-success me-2"></i>Approve</a></li>
+                                        {% if req.is_retest and req.retest_fee and not req.retest_paid %}
+                                        <li><a class="dropdown-item" href="#" onclick="markDashboardRetestPaid({{ req.id }})"><i class="fas fa-hand-holding-usd text-success me-2"></i>Mark Paid Offline</a></li>
+                                        {% endif %}
                                         <li><a class="dropdown-item" href="#" onclick="openExamActionModal('reject', {{ req.id }}, '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}', '{{ req.created_at|date:'M d, Y' }}')"><i class="fas fa-times text-danger me-2"></i>Reject</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="openExamModal({{ req.id }}, '{{ req.start_time|date:'Y-m-d' }}', '{{ req.start_time|time:'H:i' }}', '{{ req.student.first_name|escapejs }}', '{{ req.exam.exam_name|escapejs }}')"><i class="fas fa-edit text-primary me-2"></i>Modify</a></li>
                                     </ul>
@@ -5245,18 +5260,116 @@
         // --- Exam Actions ---
 
         function approveExam(id) {
+            // First fetch the exam details to see if it is a retest for a normal student
+            fetch(`/menu/students/exams/get/${id}/`)
+            .then(res => res.json())
+            .then(response => {
+                if (response.success) {
+                    const data = response.data;
+                    // If it is a retest, not a church user, and not yet approved
+                    if (data.is_retest && !data.is_church_user && !data.is_approved) {
+                        bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                        
+                        Swal.fire({
+                            title: 'Approve Retest Request',
+                            text: 'This is a retest request for a normal student. Please set the exam fee (suggested payment amount):',
+                            input: 'number',
+                            inputAttributes: {
+                                min: 0,
+                                step: 0.01
+                            },
+                            inputValue: data.retest_fee || '0.00',
+                            showCancelButton: true,
+                            confirmButtonText: 'Set Fee & Send Notice',
+                            cancelButtonText: 'Cancel',
+                            inputValidator: (value) => {
+                                if (!value || isNaN(value) || parseFloat(value) < 0) {
+                                    return 'Please enter a valid amount (>= 0)';
+                                }
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const fee = parseFloat(result.value);
+                                // Call update API to save the fee
+                                const formData = new FormData();
+                                formData.append('retest_fee', fee);
+
+                                fetch(`/menu/students/exams/update/${id}/`, {
+                                    method: 'POST',
+                                    headers: {'X-CSRFToken': csrftoken},
+                                    body: formData
+                                })
+                                .then(res => res.json())
+                                .then(updateResponse => {
+                                    if (updateResponse.success) {
+                                        if (fee === 0) {
+                                            // Directly perform approval since fee is 0
+                                            performDashboardApproval(id);
+                                        } else {
+                                            document.getElementById(`exam-row-${id}`).remove();
+                                            Swal.fire('Success', 'Retest fee of $' + fee + ' suggested. Student has been notified via email.', 'success');
+                                        }
+                                    } else {
+                                        Swal.fire('Error', updateResponse.message, 'error');
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        performDashboardApproval(id);
+                    }
+                } else {
+                    performDashboardApproval(id);
+                }
+            });
+        }
+
+        function performDashboardApproval(id) {
             fetch(`/menu/students/exams/toggle-approval/${id}/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': csrftoken},
             })
             .then(response => response.json())
             .then(data => {
-                bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                if (bootstrap.Modal.getInstance(document.getElementById('actionModal'))) {
+                    bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                }
                 if(data.success) {
                     document.getElementById(`exam-row-${id}`).remove();
                     alert('Exam approved successfully');
                 } else {
                     alert('Error: ' + data.message);
+                }
+            });
+        }
+
+        function markDashboardRetestPaid(id) {
+            Swal.fire({
+                title: 'Mark Paid Offline?',
+                text: "This will log the payment of the retest fee and automatically approve this exam.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, mark as paid',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/menu/students/exams/mark-paid/${id}/`, {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrftoken},
+                    })
+                    .then(res => res.json())
+                    .then(response => {
+                        if (response.success) {
+                            document.getElementById(`exam-row-${id}`).remove();
+                            Swal.fire('Success', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire('Error', 'An error occurred while marking payment.', 'error');
+                    });
                 }
             });
         }

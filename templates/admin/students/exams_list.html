@@ -242,6 +242,14 @@
                     </div>
 
                     <div class="row mb-3">
+                        <!-- Exam Fee -->
+                        <div class="col-md-12 form-group">
+                            <label>Exam Fee (USD) - Leave as 0.00 if free</label>
+                            <input type="number" step="0.01" class="form-control" name="retest_fee" value="0.00">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <!-- Exam Date -->
                         <div class="col-md-6 form-group">
                             <label>Exam Date*</label>
@@ -310,6 +318,11 @@
                             <option value="{{ tz }}">{{ tz }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+
+                    <div class="form-group mb-3" id="editRetestFeeContainer" style="display: none;">
+                        <label>Retest Fee (USD)</label>
+                        <input type="number" step="0.01" class="form-control" name="retest_fee" id="editRetestFee">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -476,6 +489,7 @@
     function editExam(id) {
         $('#editExamForm')[0].reset();
         $('#editExamId').val(id);
+        $('#editRetestFeeContainer').hide();
 
         $.get('/menu/students/exams/get/' + id + '/', function (response) {
             if (response.success) {
@@ -484,6 +498,16 @@
                 $('#editStartTime').val(data.start_time);
                 $('#editDuration').val(data.duration);
                 $('#editTimezone').val(data.timezone).trigger('change');
+                
+                // Show/hide retest fee field based on user type and retest state
+                if (data.is_retest && !data.is_church_user) {
+                    $('#editRetestFee').val(data.retest_fee);
+                    $('#editRetestFeeContainer').show();
+                } else {
+                    $('#editRetestFee').val('');
+                    $('#editRetestFeeContainer').hide();
+                }
+                
                 $('#editExamModal').modal('show');
             } else {
                 Swal.fire('Error', response.message, 'error');
@@ -515,6 +539,69 @@
     }
 
     function toggleApproval(id) {
+        // Fetch exam details first to see if it is a retest for a normal student
+        $.get('/menu/students/exams/get/' + id + '/', function (response) {
+            if (response.success) {
+                const data = response.data;
+                // If it is a retest, not a church user, and not yet approved
+                if (data.is_retest && !data.is_church_user && !data.is_approved) {
+                    Swal.fire({
+                        title: 'Approve Retest Request',
+                        text: 'This is a retest request for a normal student. Please set the exam fee (suggested payment amount):',
+                        input: 'number',
+                        inputAttributes: {
+                            min: 0,
+                            step: 0.01
+                        },
+                        inputValue: data.retest_fee || '0.00',
+                        showCancelButton: true,
+                        confirmButtonText: 'Set Fee & Send Notice',
+                        cancelButtonText: 'Cancel',
+                        inputValidator: (value) => {
+                            if (!value || isNaN(value) || parseFloat(value) < 0) {
+                                return 'Please enter a valid amount (>= 0)';
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const fee = parseFloat(result.value);
+                            // Call update API to save the fee
+                            const formData = new FormData();
+                            formData.append('retest_fee', fee);
+                            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                            $.ajax({
+                                url: '/menu/students/exams/update/' + id + '/',
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: function (updateResponse) {
+                                    if (updateResponse.success) {
+                                        if (fee === 0) {
+                                            // Directly toggle approval if fee is 0
+                                            performToggleApproval(id);
+                                        } else {
+                                            examsTable.ajax.reload();
+                                            Swal.fire('Success', 'Retest fee of $' + fee + ' suggested. Student has been notified via email.', 'success');
+                                        }
+                                    } else {
+                                        Swal.fire('Error', updateResponse.message, 'error');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    performToggleApproval(id);
+                }
+            } else {
+                performToggleApproval(id);
+            }
+        });
+    }
+
+    function performToggleApproval(id) {
         $.ajax({
             url: '/menu/students/exams/toggle-approval/' + id + '/',
             type: 'POST',
@@ -527,6 +614,37 @@
                 } else {
                     Swal.fire('Error', response.message, 'error');
                 }
+            }
+        });
+    }
+
+    function markRetestPaid(id) {
+        Swal.fire({
+            title: 'Mark Paid Offline?',
+            text: "This will log the payment of the retest fee and automatically approve this exam.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, mark as paid',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/menu/students/exams/mark-paid/' + id + '/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function (response) {
+                        if (response.success) {
+                            examsTable.ajax.reload();
+                            Swal.fire('Success', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        const err = xhr.responseJSON ? xhr.responseJSON.message : 'Server error occurred.';
+                        Swal.fire('Error', err, 'error');
+                    }
+                });
             }
         });
     }

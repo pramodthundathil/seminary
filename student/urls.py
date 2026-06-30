@@ -27,6 +27,7 @@ urlpatterns = [
     path("payment/save-temp/", views.save_payment_temp, name="save_payment_temp"),
     path("create-paypal-order/", views.create_paypal_order, name="create_paypal_order"),
     path("capture-paypal-order/", views.capture_paypal_order, name="capture_paypal_order"),
+    path("capture-retest-payment/", views.capture_retest_payment, name="capture_retest_payment"),
     path("payment-success/", views.payment_success, name="payment_success"),
     path("payment-failed/", views.payment_failed, name="payment_failed"),
     path("doubts-answers/", views.student_doubts_answers, name="student_doubts_answers"),

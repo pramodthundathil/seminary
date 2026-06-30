@@ -753,7 +753,11 @@
                     </td>
 
                     <td data-label="Action">
-                        {% if e.can_start %}
+                        {% if not is_church_user and e.is_retest and e.retest_status == 'pending' and e.retest_fee and not e.retest_paid %}
+                        <button class="action-btn" style="background:#10b981; color:white; padding:8px 12px; border:none; border-radius:4px; font-weight:600;" onclick="payRetestFee({{ e.id }}, '{{ e.exam_name|escapejs }}', '{{ e.retest_fee }}')" title="Pay Retest Fee">
+                            <i class="bi bi-paypal"></i> Pay Fee: ${{ e.retest_fee }}
+                        </button>
+                        {% elif e.can_start %}
                         <a href="{% url 'take_exam' e.id %}" class="action-btn"
                             style="background:#10b981; color:white; padding:8px 12px; text-decoration:none; display:inline-block;">Start
                             Exam</a>
@@ -936,6 +940,35 @@
 </div>
 
 {% endif %}
+
+<!-- Retest Payment Modal -->
+<div class="modal fade" id="retestPaymentModal" tabindex="-1" aria-labelledby="retestPaymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold" id="retestPaymentModalLabel">Pay Retest Fee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closePaymentModalBtn"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div id="retestPaymentAlert" class="alert d-none" role="alert"></div>
+                
+                <div class="text-center mb-4">
+                    <p class="text-secondary mb-1">Exam Name</p>
+                    <h5 id="retestPaymentExamName" class="fw-bold text-dark mb-3"></h5>
+                    <p class="text-secondary mb-1">Retest Fee Due</p>
+                    <h3 id="retestPaymentAmount" class="fw-bold text-success mb-0"></h3>
+                </div>
+
+                <div id="retest-paypal-button-container" style="min-height: 150px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not is_church_user %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
+{% endif %}
+
 {% endblock %}
 {% block right %}
 
@@ -1025,6 +1058,97 @@
             btn.disabled = false;
             btn.innerText = 'Confirm Reschedule';
         });
+    }
+
+    function payRetestFee(studentExamId, examName, amount) {
+        document.getElementById('retestPaymentExamName').innerText = examName;
+        document.getElementById('retestPaymentAmount').innerText = `$${amount}`;
+        document.getElementById('retestPaymentAlert').classList.add('d-none');
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('retestPaymentModal'));
+        modal.show();
+
+        // Clear existing PayPal buttons if they exist
+        const container = document.getElementById('retest-paypal-button-container');
+        container.innerHTML = '';
+
+        // Render PayPal buttons
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return fetch("/student/create-paypal-order/", {
+                    method: "POST",
+                    body: JSON.stringify({ amount: amount }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to create PayPal order.");
+                    }
+                    return response.json();
+                })
+                .then(orderData => {
+                    return orderData.orderID;
+                })
+                .catch(err => {
+                    console.error("PayPal order error:", err);
+                    const alertEl = document.getElementById('retestPaymentAlert');
+                    alertEl.className = 'alert alert-danger';
+                    alertEl.innerText = 'Could not initiate PayPal checkout. Please try again.';
+                    alertEl.classList.remove('d-none');
+                });
+            },
+            onApprove: function(data, actions) {
+                // Disable close button and show loading state
+                document.getElementById('closePaymentModalBtn').disabled = true;
+                const alertEl = document.getElementById('retestPaymentAlert');
+                alertEl.className = 'alert alert-info';
+                alertEl.innerText = 'Processing payment... Please do not close this window.';
+                alertEl.classList.remove('d-none');
+
+                return fetch("/student/capture-retest-payment/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        student_exam_id: studentExamId
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        alertEl.className = 'alert alert-success';
+                        alertEl.innerText = 'Payment successful! Your retest request has been approved.';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        document.getElementById('closePaymentModalBtn').disabled = false;
+                        alertEl.className = 'alert alert-danger';
+                        alertEl.innerText = 'Payment capture failed. Please contact support.';
+                    }
+                })
+                .catch(err => {
+                    console.error("PayPal capture error:", err);
+                    document.getElementById('closePaymentModalBtn').disabled = false;
+                    alertEl.className = 'alert alert-danger';
+                    alertEl.innerText = 'An error occurred during payment verification. Please try again.';
+                });
+            },
+            onError: function(err) {
+                console.error("PayPal buttons error:", err);
+                const alertEl = document.getElementById('retestPaymentAlert');
+                alertEl.className = 'alert alert-danger';
+                alertEl.innerText = 'A PayPal error occurred. Please try again.';
+                alertEl.classList.remove('d-none');
+            }
+        }).render('#retest-paypal-button-container');
     }
 </script>
 {% endblock %}

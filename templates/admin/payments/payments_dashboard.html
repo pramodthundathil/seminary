@@ -1,0 +1,786 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<!-- Load Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Premium Dashboard Styles */
+    :root {
+        --dashboard-cyan: #00CED1;
+        --dashboard-cyan-hover: #00b5b8;
+        --dashboard-navy: #1B2845;
+        --dashboard-slate: #64748B;
+        --dashboard-emerald: #10B981;
+        --dashboard-rose: #EF4444;
+        --dashboard-amber: #F59E0B;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        --transition-speed: 0.3s;
+    }
+
+    .analytics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .analytics-title {
+        color: var(--dashboard-navy);
+        font-weight: 700;
+        margin: 0;
+        font-size: 26px;
+    }
+
+    /* Filter Bar Styles */
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: var(--card-shadow);
+        transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    .filter-card:hover {
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .preset-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .preset-btn {
+        background: var(--bg-gray);
+        border: 1px solid var(--border);
+        color: var(--text-dark);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+    }
+
+    .preset-btn:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+    }
+
+    .preset-btn.active {
+        background: var(--dashboard-cyan);
+        color: white;
+        border-color: var(--dashboard-cyan);
+        box-shadow: 0 2px 8px rgba(0, 206, 209, 0.3);
+    }
+
+    .date-filter-form {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group-custom label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-input-custom {
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        background: #fff;
+        color: var(--text-dark);
+        outline: none;
+        transition: border-color var(--transition-speed);
+    }
+
+    .form-input-custom:focus {
+        border-color: var(--dashboard-cyan);
+    }
+
+    .btn-apply-filters {
+        background: var(--dashboard-navy);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all var(--transition-speed);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-apply-filters:hover {
+        background: #253860;
+        box-shadow: 0 4px 12px rgba(27, 40, 69, 0.2);
+    }
+
+    /* KPI Card Grid */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .kpi-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+    }
+
+    .kpi-card.cyan::before { background: var(--dashboard-cyan); }
+    .kpi-card.emerald::before { background: var(--dashboard-emerald); }
+    .kpi-card.rose::before { background: var(--dashboard-rose); }
+    .kpi-card.amber::before { background: var(--dashboard-amber); }
+
+    .kpi-info h3 {
+        font-size: 13px;
+        color: var(--text-light);
+        margin: 0 0 6px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .kpi-info .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .kpi-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .kpi-card.cyan .kpi-icon-wrapper { background: rgba(0, 206, 209, 0.1); color: var(--dashboard-cyan); }
+    .kpi-card.emerald .kpi-icon-wrapper { background: rgba(16, 185, 129, 0.1); color: var(--dashboard-emerald); }
+    .kpi-card.rose .kpi-icon-wrapper { background: rgba(239, 68, 68, 0.1); color: var(--dashboard-rose); }
+    .kpi-card.amber .kpi-icon-wrapper { background: rgba(245, 158, 11, 0.1); color: var(--dashboard-amber); }
+
+    /* Chart Layout */
+    .charts-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 992px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dashboard-navy);
+        margin: 0;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 320px;
+    }
+
+    /* Table Sections styling */
+    .tables-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 992px) {
+        .tables-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        border-bottom: 1px solid var(--gray-200);
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--dashboard-navy);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .table-responsive-custom {
+        overflow-x: auto;
+    }
+
+    .table-analytics {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-analytics th {
+        font-size: 12px;
+        color: var(--text-light);
+        text-transform: uppercase;
+        font-weight: 600;
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--gray-200);
+        background: var(--gray-50);
+    }
+
+    .table-analytics td {
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--text-dark);
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .table-analytics tr:hover td {
+        background-color: var(--gray-50);
+    }
+
+    .table-analytics tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* List Card */
+    .payments-list-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+    }
+
+    .status-pill {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-pill.paid {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-pill.pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+</style>
+
+<div class="gallery-container">
+    <!-- Header -->
+    <div class="analytics-header">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'admin_index' %}" class="btn btn-outline-secondary btn-sm px-3" style="text-decoration: none; border: 1px solid var(--border); background: white; color: var(--text-dark); border-radius: 6px;">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <h1 class="analytics-title">Payment Analytics Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Date Range & Preset Filter Card -->
+    <div class="filter-card">
+        <form method="GET" id="filterForm">
+            <!-- Preset Filters -->
+            <div class="preset-buttons">
+                <input type="hidden" name="preset" id="presetInput" value="{{ preset }}">
+                <button type="button" class="preset-btn {% if preset == 'this_month' %}active{% endif %}" onclick="setPreset('this_month')">This Month</button>
+                <button type="button" class="preset-btn {% if preset == 'last_30_days' %}active{% endif %}" onclick="setPreset('last_30_days')">Last 30 Days</button>
+                <button type="button" class="preset-btn {% if preset == 'last_month' %}active{% endif %}" onclick="setPreset('last_month')">Last Month</button>
+                <button type="button" class="preset-btn {% if preset == 'this_year' %}active{% endif %}" onclick="setPreset('this_year')">This Year</button>
+                <button type="button" class="preset-btn {% if preset == 'all_time' %}active{% endif %}" onclick="setPreset('all_time')">All Time</button>
+            </div>
+
+            <!-- Custom Range Date Pickers -->
+            <div class="date-filter-form">
+                <div class="form-group-custom">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" class="form-input-custom" value="{{ start_date }}" onchange="clearPreset()">
+                </div>
+                <div class="form-group-custom">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" class="form-input-custom" value="{{ end_date }}" onchange="clearPreset()">
+                </div>
+                <button type="submit" class="btn-apply-filters">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- KPI Summary Grid -->
+    <div class="kpi-grid">
+        <!-- KPI: Total Collections -->
+        <div class="kpi-card cyan">
+            <div class="kpi-info">
+                <h3>Total Collections</h3>
+                <div class="value">${{ total_paid_amount|floatformat:2 }}</div>
+            </div>
+            <div class="kpi-icon-wrapper">
+                <i class="fas fa-wallet"></i>
+            </div>
+        </div>
+
+        <!-- KPI: Completed Transactions -->
+        <div class="kpi-card emerald">
+            <div class="kpi-info">
+                <h3>Paid Transactions</h3>
+                <div class="value">{{ total_paid_count }}</div>
+            </div>
+            <div class="kpi-icon-wrapper">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+
+        <!-- KPI: Average Ticket Size -->
+        <div class="kpi-card amber">
+            <div class="kpi-info">
+                <h3>Average Payment</h3>
+                <div class="value">${{ avg_payment_value|floatformat:2 }}</div>
+            </div>
+            <div class="kpi-icon-wrapper">
+                <i class="fas fa-calculator"></i>
+            </div>
+        </div>
+
+        <!-- KPI: Pending Payments -->
+        <div class="kpi-card rose">
+            <div class="kpi-info">
+                <h3>Pending Payments</h3>
+                <div class="value">{{ total_pending_count }} <span style="font-size: 13px; font-weight: 500; color: var(--text-light)">(${{ total_pending_amount|floatformat:2 }})</span></div>
+            </div>
+            <div class="kpi-icon-wrapper">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytical Charts -->
+    <div class="charts-row">
+        <!-- Line Chart: Daily Collection Trend & User Activity -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">Date-wise Collections & User Activity Trends</h3>
+                <span class="text-muted" style="font-size: 12px;"><i class="fas fa-calendar-alt"></i> {{ start_date }} to {{ end_date }}</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Doughnut Chart: Course Share -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">Revenue Share by Course</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="courseShareChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables: Course-wise and Church-wise -->
+    <div class="tables-row">
+        <!-- Course-wise payment analysis -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title"><i class="fas fa-graduation-cap text-primary"></i> Course-wise Payments</h3>
+            </div>
+            <div class="table-responsive-custom">
+                <table class="table-analytics">
+                    <thead>
+                        <tr>
+                            <th>Course Name</th>
+                            <th>Code</th>
+                            <th style="text-align: right;">Transactions</th>
+                            <th style="text-align: right;">Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if course_wise %}
+                            {% for item in course_wise %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ item.course_name }}</td>
+                                <td><span class="badge bg-secondary">{{ item.course_code }}</span></td>
+                                <td style="text-align: right;">{{ item.payment_count }}</td>
+                                <td style="text-align: right; font-weight: 700; color: var(--dashboard-navy);">${{ item.total_amount|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No course payments in this range</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Church User wise payment analysis -->
+        <div class="section-card">
+            <div class="section-header">
+                <h3 class="section-title"><i class="fas fa-church text-success"></i> Church-wise / Church User Payments</h3>
+            </div>
+            <div class="table-responsive-custom">
+                <table class="table-analytics">
+                    <thead>
+                        <tr>
+                            <th>Church / Organization</th>
+                            <th>Pastor Name</th>
+                            <th style="text-align: right;">Transactions</th>
+                            <th style="text-align: right;">Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if church_wise %}
+                            {% for item in church_wise %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ item.church_name }}</td>
+                                <td>{{ item.pastor_name }}</td>
+                                <td style="text-align: right;">{{ item.payment_count }}</td>
+                                <td style="text-align: right; font-weight: 700; color: var(--dashboard-emerald);">${{ item.total_amount|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No church payments in this range</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments List card under current selection -->
+    <div class="payments-list-card">
+        <div class="section-header" style="border-bottom: 1px solid var(--gray-200); padding-bottom: 16px; margin-bottom: 20px;">
+            <h3 class="section-title"><i class="fas fa-list text-info"></i> Detailed Payments Registry (Filtered)</h3>
+        </div>
+
+        <div class="table-container">
+            <table id="filteredPaymentsTable" class="table table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Details</th>
+                        <th>Role / Group</th>
+                        <th style="text-align: right;">Amount</th>
+                        <th>Status</th>
+                        <th>Payment Date</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>
+                            <div style="line-height:1.4;">
+                                <div style="font-weight:600;font-size:14px;color:var(--text-dark);">
+                                    {{ p.name }}
+                                </div>
+                                <div style="font-size:12px;color:var(--text-light);">
+                                    {{ p.email }}{% if p.phone %} · {{ p.phone }}{% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge rounded-pill bg-light text-dark border">{{ p.person_group }}</span></td>
+                        <td style="text-align: right; font-weight: 700;">
+                            {% if p.amount %}
+                                ${{ p.amount|floatformat:2 }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.is_paid %}
+                                <span class="status-pill paid"><i class="fas fa-check me-1"></i> Paid</span>
+                            {% else %}
+                                <span class="status-pill pending"><i class="fas fa-clock me-1"></i> Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.is_paid %}
+                                {{ p.updated_at|date:"Y-m-d H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="{% url 'payments_view' p.id %}" class="btn btn-sm btn-outline-primary" style="padding: 4px 10px; font-size: 12px;" title="View Details">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Load JQuery & Datatables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    // Presets setting helper
+    function setPreset(val) {
+        document.getElementById('presetInput').value = val;
+        // clear dates to let views fallback to presets
+        document.getElementById('start_date').value = '';
+        document.getElementById('end_date').value = '';
+        document.getElementById('filterForm').submit();
+    }
+
+    function clearPreset() {
+        document.getElementById('presetInput').value = 'custom';
+    }
+
+    $(document).ready(function() {
+        // Initialize DataTables
+        $('#filteredPaymentsTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            order: [[0, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [1, 6] }
+            ]
+        });
+
+        // Parse Chart Data JSON
+        const rawChartData = JSON.parse('{{ chart_data_json|escapejs }}');
+        
+        // 1. Trend Chart (Line Chart for Date-wise collection and active user trend)
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        
+        // Handle empty trend chart gracefully
+        if (!rawChartData.labels || rawChartData.labels.length === 0) {
+            trendCtx.font = "16px sans-serif";
+            trendCtx.fillStyle = "#888";
+            trendCtx.textAlign = "center";
+            trendCtx.fillText("No transactions in this period to display trends.", trendCtx.canvas.width/2, trendCtx.canvas.height/2);
+        } else {
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: rawChartData.labels,
+                    datasets: [
+                        {
+                            label: 'Collections ($)',
+                            data: rawChartData.amounts,
+                            borderColor: '#00CED1',
+                            backgroundColor: 'rgba(0, 206, 209, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Paying Users',
+                            data: rawChartData.users,
+                            borderColor: '#1B2845',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointStyle: 'circle',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Revenue ($)',
+                                color: '#00CED1'
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Unique Users',
+                                color: '#1B2845'
+                            },
+                            grid: { drawOnChartArea: false } // only want grid lines for left y-axis
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Course Share Chart (Doughnut Chart)
+        const courseCtx = document.getElementById('courseShareChart').getContext('2d');
+        
+        // Prepare Course Data from table
+        const courseLabels = [];
+        const courseData = [];
+        
+        {% for item in course_wise %}
+            courseLabels.push("{{ item.course_name }}");
+            courseData.push({{ item.total_amount }});
+        {% endfor %}
+
+        if (courseData.length === 0) {
+            courseCtx.font = "14px sans-serif";
+            courseCtx.fillStyle = "#888";
+            courseCtx.textAlign = "center";
+            courseCtx.fillText("No course revenue share to display.", courseCtx.canvas.width/2, courseCtx.canvas.height/2);
+        } else {
+            // Colors palette matching UI (Cyan shades, Emerald, Amber, Purple)
+            const colorPalette = [
+                '#00CED1', // cyan
+                '#10B981', // emerald
+                '#F59E0B', // amber
+                '#8B5CF6', // purple
+                '#EF4444', // red
+                '#EC4899', // pink
+                '#3B82F6'  // blue
+            ];
+            
+            new Chart(courseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: courseLabels,
+                    datasets: [{
+                        data: courseData,
+                        backgroundColor: colorPalette.slice(0, courseData.length),
+                        borderWidth: 2,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, weight: '500' }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

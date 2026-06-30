@@ -223,6 +223,7 @@
                 <div class="details">
                     Program: ${{ course_fee|floatformat:2 }}<br>
                     Add-ons: ${{ subject_fees_total|floatformat:2 }}
+                    {% if retest_fees_total > 0 %}<br>Exams/Retests: ${{ retest_fees_total|floatformat:2 }}{% endif %}
                 </div>
                 <i class="bi bi-file-earmark-ruled bg-icon"></i>
             </div>
@@ -304,6 +305,8 @@
                                 <span class="text-muted small">
                                     {% if p.subjects_id %}
                                     Subject Tuition: <strong>{{ p.subjects_id.subject_name }}</strong>
+                                    {% elif p.code and "RETEST" in p.code %}
+                                    Retest Exam: <strong>{{ p.message }}</strong>
                                     {% else %}
                                     General Program Registration Fees
                                     {% endif %}

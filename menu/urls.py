@@ -172,6 +172,7 @@ urlpatterns = [
     path('students/exams/toggle-approval/<int:id>/', views.student_exams_toggle_approval, name='student_exams_toggle_approval'),
     path('students/exams/get/<int:id>/', views.student_exams_get, name='student_exams_get'),
     path('students/exams/update/<int:id>/', views.student_exams_update, name='student_exams_update'),
+    path('students/exams/mark-paid/<int:id>/', views.mark_student_exam_retest_paid, name='mark_student_exam_retest_paid'),
     # Answer Sheet Viewing and Grading
     path('admin/students/exam-answer-sheet/<int:exam_id>/', views.view_answer_sheet, name='view_answer_sheet'),
     path('admin/students/update-answer-marks/', views.update_answer_marks, name='update_answer_marks'),
@@ -307,6 +308,7 @@ urlpatterns = [
     #payments 
 
     path("admin/payments/", views.payments_list, name="payments_list"),
+    path("admin/payments/dashboard/", views.payment_dashboard, name="payment_dashboard"),
     path("payments/<int:id>/view/", views.payments_view, name="payments_view"),
     path("payments/<int:id>/delete/", views.payments_delete, name="payments_delete"),
 

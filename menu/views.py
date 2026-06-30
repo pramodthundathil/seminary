@@ -2830,6 +2830,7 @@ def student_get(request, student_id):
 
 def student_detail(request, student_id):
     """View to show full student details"""
+    sync_retest_payments_in_db()
     from django.db.models import Sum
     
     student = get_object_or_404(
@@ -2895,7 +2896,8 @@ def student_detail(request, student_id):
     # Calculate fee totals
     course_fee = student.get_course_fee_at_registration()
     subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
-    total_fee_expected = course_fee + subject_fees_total
+    retest_fees_total = sum(float(se.retest_fee or 0) for se in exams if se.is_retest and se.retest_fee and se.retest_fee > 0)
+    total_fee_expected = course_fee + subject_fees_total + retest_fees_total
     
     discount = student.get_discount()
     total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
@@ -2909,6 +2911,7 @@ def student_detail(request, student_id):
         'payments': payments,
         'course_fee': course_fee,
         'subject_fees_total': subject_fees_total,
+        'retest_fees_total': retest_fees_total,
         'total_fee_expected': total_fee_expected,
         'discount': discount,
         'total_paid': total_paid,
@@ -2959,8 +2962,35 @@ def manual_mark_payment_paid(request, payment_id):
     payment.is_paid = True
     payment.save()
     
+    # If this was a retest payment, update the exam record as well
+    if payment.code and payment.code.startswith("RETEST-"):
+        try:
+            exam_id = int(payment.code.split("-")[1])
+            from home.models import StudentsExams
+            student_exam = StudentsExams.objects.get(id=exam_id)
+            student_exam.retest_paid = True
+            student_exam.is_approved = True
+            student_exam.retest_status = 'approved'
+            student_exam.save()
+            
+            # Send approval email to student
+            subject = "Retest Exam Request Approved"
+            message = f"Hello {student_exam.student.first_name},\n\nYour payment for the retest fee has been received/marked, and your retest request for the exam '{student_exam.exam.exam_name}' has been approved.\n\nYou can now take the exam at the scheduled time.\n\nBest regards,\nTrinity Theological Seminary"
+            
+            from django.core.mail import send_mail
+            from django.conf import settings
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [student_exam.student.email],
+                fail_silently=True
+            )
+        except Exception as e:
+            logger.error(f"Error updating student exam for retest payment mark paid: {e}")
+            
     # If this was a general/registration payment, also update student status
-    if not payment.subjects_id and payment.student:
+    elif not payment.subjects_id and payment.student:
         student = payment.student
         student.is_paid = True
         student.save()
@@ -4975,8 +5005,207 @@ def uploads_delete(request, id):
 
 # payments 
 
+def sync_retest_payments_in_db():
+    try:
+        from home.models import Payments, StudentsExams
+        retest_exams = StudentsExams.objects.filter(is_retest=True, retest_fee__gt=0, deleted_at__isnull=True).select_related('student', 'exam')
+        for re in retest_exams:
+            payment_code = f"RETEST-{re.id}"
+            payment = Payments.objects.filter(code=payment_code).first()
+            if not payment:
+                Payments.objects.create(
+                    code=payment_code,
+                    name=re.student.get_full_name(),
+                    email=re.student.email or '',
+                    phone=re.student.phone_number or '',
+                    person_group="student",
+                    amount=re.retest_fee,
+                    message=f"Retest payment for exam: {re.exam.exam_name}",
+                    is_paid=re.retest_paid,
+                    student=re.student,
+                )
+            else:
+                # Synchronize if out of sync
+                changed = False
+                if payment.amount != re.retest_fee:
+                    payment.amount = re.retest_fee
+                    changed = True
+                if payment.is_paid != re.retest_paid:
+                    payment.is_paid = re.retest_paid
+                    changed = True
+                if changed:
+                    payment.save()
+    except Exception as e:
+        logger.error(f"Error in sync_retest_payments_in_db: {e}")
+
+@login_required
+def payment_dashboard(request):
+    sync_retest_payments_in_db()
+    today = datetime.now().date()
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    preset = request.GET.get('preset', 'this_month')
+
+    if start_date_str or end_date_str:
+        preset = 'custom'
+        if start_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                start_date = today.replace(day=1)
+        else:
+            start_date = today.replace(day=1)
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                end_date = today
+        else:
+            end_date = today
+    else:
+        if preset == 'last_30_days':
+            start_date = today - timedelta(days=30)
+            end_date = today
+        elif preset == 'last_month':
+            last_month_end = today.replace(day=1) - timedelta(days=1)
+            start_date = last_month_end.replace(day=1)
+            end_date = last_month_end
+        elif preset == 'this_year':
+            start_date = today.replace(month=1, day=1)
+            end_date = today
+        elif preset == 'all_time':
+            first_pay = Payments.objects.filter(deleted_at__isnull=True).order_by('created_at').first()
+            start_date = first_pay.created_at.date() if first_pay and first_pay.created_at else today - timedelta(days=365)
+            end_date = today
+        else:
+            preset = 'this_month'
+            start_date = today.replace(day=1)
+            end_date = today
+
+    payments_query = Payments.objects.filter(
+        deleted_at__isnull=True,
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date
+    )
+
+    # Paid payments
+    paid_payments = payments_query.filter(is_paid=True)
+    total_paid_amount = paid_payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_paid_count = paid_payments.count()
+    
+    # Unpaid/Pending payments
+    unpaid_payments = payments_query.filter(is_paid=False)
+    total_pending_amount = unpaid_payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_pending_count = unpaid_payments.count()
+    
+    # Average payment value
+    avg_payment_value = round(float(total_paid_amount) / total_paid_count, 2) if total_paid_count > 0 else 0
+
+    # Course-wise Payments
+    course_groups = paid_payments.values(
+        'student__course_applied__id',
+        'student__course_applied__course_name',
+        'student__course_applied__course_code'
+    ).annotate(
+        total_amount=Sum('amount'),
+        payment_count=Count('id')
+    ).order_by('-total_amount')
+    
+    course_wise = []
+    for cg in course_groups:
+        c_id = cg['student__course_applied__id']
+        c_name = cg['student__course_applied__course_name'] or "Other / Administrative"
+        c_code = cg['student__course_applied__course_code'] or "N/A"
+        
+        course_wise.append({
+            'course_id': c_id,
+            'course_name': c_name,
+            'course_code': c_code,
+            'total_amount': float(cg['total_amount'] or 0),
+            'payment_count': cg['payment_count']
+        })
+
+    # Church-wise / Church User Payments
+    paid_payments_detail = paid_payments.select_related(
+        'church_admin',
+        'student__user__church_admin'
+    )
+    
+    church_groups = {}
+    for pay in paid_payments_detail:
+        church_obj = None
+        if pay.church_admin:
+            church_obj = pay.church_admin
+        elif pay.student and pay.student.user and pay.student.user.church_admin:
+            church_obj = pay.student.user.church_admin
+        
+        c_id = church_obj.id if church_obj else None
+        c_name = church_obj.name_of_church if church_obj else "Independent Students"
+        c_pastor = church_obj.name_of_paster if church_obj else "N/A"
+        
+        if c_id not in church_groups:
+            church_groups[c_id] = {
+                'church_id': c_id,
+                'church_name': c_name,
+                'pastor_name': c_pastor,
+                'total_amount': 0.0,
+                'payment_count': 0
+            }
+        
+        church_groups[c_id]['total_amount'] += float(pay.amount or 0)
+        church_groups[c_id]['payment_count'] += 1
+        
+    church_wise = sorted(church_groups.values(), key=lambda x: x['total_amount'], reverse=True)
+
+    # Date-wise payments (Daily collection trend & User Trend)
+    daily_payments = paid_payments.values('created_at__date').annotate(
+        total_amount=Sum('amount'),
+        payment_count=Count('id'),
+        unique_users=Count('student', distinct=True)
+    ).order_by('created_at__date')
+    
+    trend_labels = []
+    trend_amounts = []
+    trend_counts = []
+    trend_users = []
+    
+    for dp in daily_payments:
+        date_str = dp['created_at__date'].strftime('%Y-%m-%d')
+        trend_labels.append(date_str)
+        trend_amounts.append(float(dp['total_amount'] or 0))
+        trend_counts.append(dp['payment_count'])
+        trend_users.append(dp['unique_users'])
+
+    chart_data = {
+        'labels': trend_labels,
+        'amounts': trend_amounts,
+        'counts': trend_counts,
+        'users': trend_users
+    }
+    chart_data_json = json.dumps(chart_data)
+    filtered_payments = payments_query.order_by('-id')
+
+    context = {
+        'start_date': start_date.strftime('%Y-%m-%d'),
+        'end_date': end_date.strftime('%Y-%m-%d'),
+        'preset': preset,
+        'total_paid_amount': total_paid_amount,
+        'total_paid_count': total_paid_count,
+        'total_pending_amount': total_pending_amount,
+        'total_pending_count': total_pending_count,
+        'avg_payment_value': avg_payment_value,
+        'course_wise': course_wise,
+        'church_wise': church_wise,
+        'chart_data_json': chart_data_json,
+        'payments': filtered_payments,
+        'page_title': 'Payment Analytics Dashboard'
+    }
+
+    return render(request, "admin/payments/payments_dashboard.html", context)
+
 @login_required
 def payments_list(request):
+    sync_retest_payments_in_db()
     payments = Payments.objects.filter(deleted_at__isnull=True).order_by("-id")
     return render(request, "admin/payments/payments_list.html", {"payments": payments})
 
@@ -6353,6 +6582,16 @@ def student_exams_datatable(request):
             <a class="dropdown-item" href="#" onclick="toggleApproval({item.id}); return false;">
                 <i class="fas fa-{approval_icon} mr-2 {approval_color}"></i> {approval_text}
             </a>
+        '''
+        
+        if item.is_retest and item.retest_fee and item.retest_fee > 0 and not item.retest_paid:
+            dropdown_items += f'''
+                <a class="dropdown-item" href="#" onclick="markRetestPaid({item.id}); return false;">
+                    <i class="fas fa-hand-holding-usd mr-2 text-success"></i> Mark Paid Offline
+                </a>
+            '''
+            
+        dropdown_items += f'''
             <a class="dropdown-item" href="#" onclick="editExam({item.id}); return false;">
                 <i class="fas fa-edit mr-2 text-primary"></i> Reschedule / Edit Time
             </a>
@@ -6454,6 +6693,7 @@ def student_exams_bulk_assign(request):
         start_time_str = request.POST.get('start_time')
         timezone_val = request.POST.get('timezone', 'UTC')
         duration = int(request.POST.get('duration', 60))
+        retest_fee_val = request.POST.get('retest_fee')
         
         if not student_id or not exam_id or not exam_date or not start_time_str:
             return JsonResponse({'success': False, 'message': 'All fields are required'}, status=400)
@@ -6476,8 +6716,27 @@ def student_exams_bulk_assign(request):
         if StudentsExams.objects.filter(student=student, exam_id=exam_id, deleted_at__isnull=True).exists():
             return JsonResponse({'success': False, 'message': 'This exam is already assigned to the student.'}, status=400)
         
+        student_user = student.user
+        role = student_user.user_roles.first().role.name if student_user.user_roles.exists() else None
+        is_church_user = (role == "Church User")
+        
+        is_approved = True
+        is_retest = False
+        retest_status = 'none'
+        retest_fee = 0.00
+        email_sent = False
+        
+        if not is_church_user and retest_fee_val:
+            from decimal import Decimal
+            fee = Decimal(retest_fee_val)
+            if fee > 0:
+                is_approved = False
+                is_retest = True
+                retest_status = 'pending'
+                retest_fee = fee
+        
         with transaction.atomic():
-            StudentsExams.objects.create(
+            student_exam = StudentsExams.objects.create(
                 student=student,
                 course=course,
                 subject=subject,
@@ -6487,11 +6746,37 @@ def student_exams_bulk_assign(request):
                 timezone=timezone_val,
                 exam_duration=duration,
                 show_on_score=1,
+                is_approved=is_approved,
+                is_retest=is_retest,
+                retest_status=retest_status,
+                retest_fee=retest_fee,
                 created_by=request.user,
                 updated_by=request.user
             )
+            
+            if is_retest and retest_fee > 0:
+                subject_email = "Exam Fee Decided"
+                message = (
+                    f"Hello {student.first_name},\n\n"
+                    f"An exam '{student_exam.exam.exam_name}' has been assigned to you.\n"
+                    f"An exam fee of ${retest_fee} has been set.\n\n"
+                    f"Please login to your student portal, go to the scorecard or exam hall page, and pay the fee using PayPal to activate your exam.\n\n"
+                    f"Best regards,\n"
+                    f"Trinity Theological Seminary"
+                )
+                send_mail(
+                    subject_email,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [student.email],
+                    fail_silently=True
+                )
+                email_sent = True
                 
-        return JsonResponse({'success': True, 'message': 'Exam assigned successfully.'})
+        msg = 'Exam assigned successfully.'
+        if email_sent:
+            msg += ' Student has been notified of the exam fee via email.'
+        return JsonResponse({'success': True, 'message': msg})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
 
@@ -7612,6 +7897,18 @@ def student_exams_toggle_approval(request, id):
             student_exam.updated_by = request.user
             student_exam.save()
             
+            if student_exam.is_approved:
+                # Send approval email to student
+                subject = "Retest Exam Request Approved"
+                message = f"Hello {student_exam.student.first_name},\n\nYour retest request for the exam '{student_exam.exam.exam_name}' has been approved.\n\nYou can now take the exam at the scheduled time.\n\nBest regards,\nTrinity Theological Seminary"
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [student_exam.student.email],
+                    fail_silently=True
+                )
+            
             status = 'approved' if student_exam.is_approved else 'revoked'
             return JsonResponse({'success': True, 'message': f'Exam approval {status} successfully'})
         except StudentsExams.DoesNotExist:
@@ -7632,12 +7929,20 @@ def student_exams_get(request, id):
             exam_date = local_dt.strftime('%Y-%m-%d')
             start_time = local_dt.strftime('%H:%M')
 
+        student_user = student_exam.student.user
+        role = student_user.user_roles.first().role.name if student_user.user_roles.exists() else None
+        is_church_user = (role == "Church User")
+
         data = {
             'id': student_exam.id,
             'exam_date': exam_date,
             'start_time': start_time,
             'duration': student_exam.exam_duration,
-            'timezone': student_exam.timezone
+            'timezone': student_exam.timezone,
+            'is_retest': student_exam.is_retest,
+            'retest_fee': str(student_exam.retest_fee or '0.00'),
+            'is_church_user': is_church_user,
+            'is_approved': student_exam.is_approved
         }
         return JsonResponse({'success': True, 'data': data})
     except StudentsExams.DoesNotExist:
@@ -7655,6 +7960,7 @@ def student_exams_update(request, id):
             start_time = request.POST.get('start_time')
             duration = request.POST.get('duration')
             timezone_val = request.POST.get('timezone')
+            retest_fee_val = request.POST.get('retest_fee')
             
             tz_val = timezone_val or student_exam.timezone or 'UTC'
             if start_time and exam_date:
@@ -7672,15 +7978,125 @@ def student_exams_update(request, id):
             if not student_exam.is_exam_ended and student_exam.start_time and student_exam.exam_duration:
                 student_exam.end_time = student_exam.start_time + timedelta(minutes=student_exam.exam_duration)
             
+            # Update retest fee if applicable
+            email_sent = False
+            if student_exam.is_retest:
+                student_user = student_exam.student.user
+                role = student_user.user_roles.first().role.name if student_user.user_roles.exists() else None
+                is_church_user = (role == "Church User")
+                
+                if not is_church_user and retest_fee_val is not None:
+                    from decimal import Decimal
+                    new_fee = Decimal(retest_fee_val) if retest_fee_val else Decimal('0.00')
+                    old_fee = student_exam.retest_fee
+                    student_exam.retest_fee = new_fee
+                    
+                    # Create or update pending Payments record
+                    from home.models import Payments
+                    payment_code = f"RETEST-{student_exam.id}"
+                    
+                    if new_fee > 0:
+                        payment, created = Payments.objects.get_or_create(
+                            code=payment_code,
+                            defaults={
+                                'name': student_exam.student.get_full_name(),
+                                'email': student_exam.student.email or '',
+                                'phone': student_exam.student.phone_number or '',
+                                'person_group': "student",
+                                'amount': new_fee,
+                                'message': f"Retest payment for exam: {student_exam.exam.exam_name}",
+                                'is_paid': False,
+                                'student': student_exam.student,
+                            }
+                        )
+                        if not created:
+                            # Update amount if not paid yet
+                            if not payment.is_paid:
+                                payment.amount = new_fee
+                                payment.save()
+                    else:
+                        # If fee is set to 0, delete any pending unpaid payments
+                        Payments.objects.filter(code=payment_code, is_paid=False).delete()
+                    
+                    # Notify student if the fee is suggested/updated (and greater than 0)
+                    if new_fee > 0 and (old_fee is None or new_fee != old_fee):
+                        subject = "Retest Exam Fee Decided"
+                        message = (
+                            f"Hello {student_exam.student.first_name},\n\n"
+                            f"Your retest request for the exam '{student_exam.exam.exam_name}' has been reviewed.\n"
+                            f"A retest fee of ${new_fee} has been set.\n\n"
+                            f"Please login to your student portal, go to the scorecard page, and pay the fee using PayPal to activate your retest.\n\n"
+                            f"Best regards,\n"
+                            f"Trinity Theological Seminary"
+                        )
+                        send_mail(
+                            subject,
+                            message,
+                            settings.DEFAULT_FROM_EMAIL,
+                            [student_exam.student.email],
+                            fail_silently=True
+                        )
+                        email_sent = True
+            
             student_exam.updated_by = request.user
             student_exam.save()
             
-            return JsonResponse({'success': True, 'message': 'Exam updated successfully'})
+            msg = 'Exam updated successfully.'
+            if email_sent:
+                msg += ' Student has been notified of the fee via email.'
+            return JsonResponse({'success': True, 'message': msg})
         except StudentsExams.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Exam not found'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+def mark_student_exam_retest_paid(request, id):
+    if request.method == 'POST':
+        try:
+            student_exam = StudentsExams.objects.get(id=id)
+            if not student_exam.is_retest or not student_exam.retest_fee or student_exam.retest_paid:
+                return JsonResponse({'success': False, 'message': 'Invalid retest record or already paid.'}, status=400)
+                
+            with transaction.atomic():
+                student_exam.retest_paid = True
+                student_exam.is_approved = True
+                student_exam.retest_status = 'approved'
+                student_exam.updated_by = request.user
+                student_exam.save()
+                
+                # Create corresponding Payments record so it reflects in payment history, dashboard, ledgers, etc.
+                Payments.objects.create(
+                    code=f"RETEST-{student_exam.id}",
+                    name=student_exam.student.get_full_name(),
+                    email=student_exam.student.email or '',
+                    phone=student_exam.student.phone_number or '',
+                    person_group="student",
+                    amount=student_exam.retest_fee,
+                    message=f"Retest payment for exam: {student_exam.exam.exam_name} (Marked paid manually)",
+                    is_paid=True,
+                    student=student_exam.student,
+                )
+                
+                # Send approval email to student
+                subject = "Retest Exam Request Approved"
+                message = f"Hello {student_exam.student.first_name},\n\nYour offline payment for the retest fee has been received and your retest request for the exam '{student_exam.exam.exam_name}' has been approved.\n\nYou can now take the exam at the scheduled time.\n\nBest regards,\nTrinity Theological Seminary"
+                
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [student_exam.student.email],
+                    fail_silently=True
+                )
+                
+            return JsonResponse({'success': True, 'message': 'Retest marked as paid and approved successfully'})
+        except StudentsExams.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Retest record not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
 @login_required
 def student_subjects_update(request, id):

@@ -909,13 +909,28 @@ def church_user_score_card(request):
 
     completed_exams = StudentsExams.objects.filter(student=student, is_exam_ended=True).select_related("exam").order_by('-end_time')
     exam_data = []
+    seen_exams = set()
     
     for se in completed_exams:
         exam = se.exam
+        if exam.id in seen_exams:
+            continue
+        seen_exams.add(exam.id)
+        
         total_obj_marks = exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
         total_desc_marks = exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
         total_marks = total_obj_marks + total_desc_marks
-        obtained_marks = se.show_on_score or 0
+        
+        # Calculate the highest score among all attempts for this exam
+        from django.db.models import Max
+        highest_score = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_exam_ended=True,
+            deleted_at__isnull=True
+        ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
+        
+        obtained_marks = highest_score
         percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
         
         if percentage >= 90: grade = "A+"

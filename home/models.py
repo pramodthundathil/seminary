@@ -1394,6 +1394,8 @@ class StudentsExams(models.Model):
         default='none'
     )
     retest_requested_at = models.DateTimeField(blank=True, null=True)
+    retest_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
+    retest_paid = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True,blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     created_by = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name="student_exams_created")
