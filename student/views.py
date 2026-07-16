@@ -812,7 +812,9 @@ def student_score_card(request):
         return render(request, "student/score_card.html", {"error": "Student not found"})
 
     role = request.user.user_roles.first().role.name if request.user.user_roles.exists() else None
-    is_church_user = (role == "Church User")
+    if role == "Church User":
+        return redirect("church_user_score_card")
+    is_church_user = False
 
     # ---- Process Exams ----
     # Show exams that are ENDED (completed).

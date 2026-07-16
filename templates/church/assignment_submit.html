@@ -56,7 +56,7 @@
                 </div>
 
                 <form method="POST" enctype="multipart/form-data"
-                    action="{% url 'submit_assignment' student_assignment.id %}">
+                    action="{% url 'church_submit_assignment' student_assignment.id %}">
                     {% csrf_token %}
 
                     {% if student_assignment.assignment.assignment_type == 'Paper Upload Type' %}
@@ -92,7 +92,7 @@
                     {% endif %}
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="{% url 'student_pending_assignment' %}" class="btn btn-secondary">Cancel</a>
+                        <a href="{% url 'church_user_assignments' %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-1"></i> Submit
                             Assignment</button>
                     </div>

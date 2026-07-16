@@ -128,7 +128,7 @@
         Time Remaining: <span id="time" style="margin-left:8px;">00:00:00</span>
     </div>
 
-    <form method="POST" action="{% url 'submit_exam' student_exam.id %}" id="examForm" class="exam-content">
+    <form method="POST" action="{% url 'church_user_submit_exam' student_exam.id %}" id="examForm" class="exam-content">
         {% csrf_token %}
 
         <!-- OBJECTIVE QUESTIONS -->

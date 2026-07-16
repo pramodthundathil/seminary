@@ -539,15 +539,15 @@
     }
 
     function toggleApproval(id) {
-        // Fetch exam details first to see if it is a retest for a normal student
+        // Fetch exam details first to see if it is a retest
         $.get('/menu/students/exams/get/' + id + '/', function (response) {
             if (response.success) {
                 const data = response.data;
-                // If it is a retest, not a church user, and not yet approved
-                if (data.is_retest && !data.is_church_user && !data.is_approved) {
+                // If it is a retest and not yet approved
+                if (data.is_retest && !data.is_approved) {
                     Swal.fire({
                         title: 'Approve Retest Request',
-                        text: 'This is a retest request for a normal student. Please set the exam fee (suggested payment amount):',
+                        text: 'Please set the exam fee (suggested payment amount):',
                         input: 'number',
                         inputAttributes: {
                             min: 0,

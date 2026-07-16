@@ -8,6 +8,8 @@ urlpatterns = [
     path('user-dashboard/subjects/', views.church_user_subjects, name='church_user_subjects'),
     path('user-dashboard/assignments/', views.church_user_assignments, name='church_user_assignments'),
     path('user-dashboard/recordings/', views.church_user_recordings, name='church_user_recordings'),
+    path('user-dashboard/class-recordings/', views.church_user_recordings, name='church_user_class_recordings'),
+    path('user-dashboard/payment-input/', views.church_user_payment_input, name='church_user_payment_input'),
     
     # User Expanded Modules
     path('user-dashboard/submitted-assignment/', views.church_user_submitted_assignment, name='church_user_submitted_assignment'),

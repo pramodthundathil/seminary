@@ -940,9 +940,30 @@ def church_user_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
 
+        # Check for the latest retest attempt (even if not ended)
+        latest_retest = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_retest=True,
+            deleted_at__isnull=True
+        ).order_by('-created_at').first()
+        
+        retest_status = latest_retest.retest_status if latest_retest else 'none'
+        retest_fee = latest_retest.retest_fee if latest_retest else None
+        retest_paid = latest_retest.retest_paid if latest_retest else False
+        retest_id = latest_retest.id if latest_retest else se.id
+
         exam_data.append({
-            "code": exam.code, "exam_name": exam.exam_name, "total_score": round(total_marks),
-            "score": round(obtained_marks), "percentage": round(percentage, 2), "grade": grade
+            "id": retest_id,
+            "code": exam.code,
+            "exam_name": exam.exam_name,
+            "total_score": round(total_marks),
+            "score": round(obtained_marks),
+            "percentage": round(percentage, 2),
+            "grade": grade,
+            "retest_status": retest_status,
+            "retest_fee": str(retest_fee) if retest_fee else None,
+            "retest_paid": retest_paid,
         })
 
     student_assignments = StudentsAssignment.objects.filter(student=student, submitted_on__isnull=False).order_by('-submitted_on').select_related("assignment")
@@ -984,12 +1005,33 @@ def church_user_score_card(request):
     grand_total_obtained = total_exam_obtained + total_assign_obtained
     grand_percentage = (grand_total_obtained / grand_total_max * 100) if grand_total_max > 0 else 0
 
+    from django.conf import settings
+    common_timezones = [
+        'UTC',
+        'Asia/Kolkata',        # India Standard Time
+        'Asia/Dubai',          # Gulf Standard Time
+        'Asia/Singapore',      # Singapore Standard Time
+        'Europe/London',       # Western European / Greenwich Mean Time
+        'America/New_York',    # Eastern Standard Time
+        'America/Chicago',     # Central Standard Time
+        'America/Denver',      # Mountain Standard Time
+        'America/Los_Angeles', # Pacific Standard Time
+        'Africa/Nairobi',      # East Africa Time
+        'Australia/Sydney'     # Australian Eastern Standard Time
+    ]
+
     return render(request, "church/score_card.html", {
-        "student": student, "student_exams": exam_data, "assignment_mark": assignment_data,
+        "student": student, 
+        "student_exams": exam_data, 
+        "assignment_mark": assignment_data,
+        "timezones": common_timezones,
+        "is_church_user": True,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
         "exam_summary": { "total": round(total_exam_max), "score": round(total_exam_obtained), "percentage": round(exam_percentage, 2), "grade": calc_grade(exam_percentage) },
         "assignment_summary": { "total": round(total_assign_max), "score": round(total_assign_obtained), "percentage": round(assign_percentage, 2), "grade": calc_grade(assign_percentage) },
         "grand_summary": { "total": round(grand_total_max), "score": round(grand_total_obtained), "percentage": round(grand_percentage, 2), "grade": calc_grade(grand_percentage) }
     })
+
 
 @login_required
 def church_user_profile_view(request):
@@ -1105,25 +1147,25 @@ def church_admin_dashboard(request):
     registered_students = paginator.get_page(page_number)
 
     # 3. Retrieve the Branch mapping using the admin code
-    # We need to look up the ChurchLoginCodeSettings -> Branches
-    # However, let's look at how ChurchAdmins code maps to Branch 
-    from home.models import ChurchLoginCodeSettings # Using correct import based on Phase 2 knowledge
+    from home.models import ChurchLoginCodeSettings, Payments
     
     branch = None
     subjects = []
     
-    # Try linking Admin Code -> Settings -> Branch
-    # ChurchAdmins has a direct ForeignKey to ChurchLoginCodeSettings via 'church_code'
     settings_record = admin.church_code
     if settings_record and hasattr(settings_record, 'branches') and settings_record.branches:
         branch = settings_record.branches
         subjects = Subjects.objects.filter(branches=branch).order_by('subject_name')
+
+    # 4. Fetch Payments Ledger Details
+    payments = Payments.objects.filter(church_admin=admin, deleted_at__isnull=True).order_by('-created_at')
 
     context = {
         'admin': admin,
         'registered_students': registered_students,
         'branch': branch,
         'subjects': subjects,
+        'payments': payments,
     }
 
     return render(request, "church/admin_dashboard.html", context)
@@ -1221,7 +1263,187 @@ def church_student_view(request, id):
         return redirect('signin')
 
     student = get_object_or_404(Students, id=id, user__church_admin=admin)
-    return render(request, "church/student_view.html", {'admin': admin, 'student': student})
+    
+    from django.db.models import Sum, Max
+    
+    # 1. Fetch exam attendance / registration details
+    now = timezone.now()
+    exams_queryset = StudentsExams.objects.filter(
+        student=student, 
+        deleted_at__isnull=True
+    ).select_related("exam", "exam__subject").order_by('-created_at')
+
+    exam_list = []
+    for e in exams_queryset:
+        exam_obj = e.exam
+        subject_obj = exam_obj.subject if exam_obj else None
+        
+        # Calculate total marks for this specific exam
+        total_marks = 0
+        if exam_obj:
+            total_obj_marks = exam_obj.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
+            total_desc_marks = exam_obj.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
+            total_marks = total_obj_marks + total_desc_marks
+
+        # Determine status
+        if e.is_exam_ended:
+            status = "Completed"
+        elif e.is_exam_started:
+            status = "In Progress"
+        elif e.is_approved and e.start_time and e.start_time <= now:
+            status = "Ongoing"
+        elif not e.is_approved and e.start_time:
+            status = "Pending Approval"
+        else:
+            status = "Pending"
+
+        # Percentage and Grade (if ended)
+        percentage = 0
+        grade = "N/A"
+        if e.is_exam_ended and total_marks > 0:
+            obtained = e.show_on_score or 0
+            percentage = (obtained / total_marks * 100)
+            if percentage >= 90: grade = "A+"
+            elif percentage >= 80: grade = "A"
+            elif percentage >= 70: grade = "B"
+            elif percentage >= 60: grade = "C"
+            elif percentage >= 50: grade = "D"
+            else: grade = "F"
+
+        # Format requested/start time
+        local_time_str = "N/A"
+        if e.start_time:
+            try:
+                local_dt = convert_to_timezone(e.start_time, e.timezone)
+                local_time_str = local_dt.strftime("%b %d, %Y %I:%M %p")
+            except Exception:
+                local_time_str = e.start_time.strftime("%b %d, %Y %I:%M %p")
+
+        exam_list.append({
+            "id": e.id,
+            "exam_name": exam_obj.exam_name if exam_obj else "N/A",
+            "subject_name": subject_obj.subject_name if subject_obj else "N/A",
+            "attempt_number": e.attempt_number,
+            "start_time_str": local_time_str,
+            "status": status,
+            "total_score": round(total_marks),
+            "score": round(e.show_on_score) if e.show_on_score is not None else 0,
+            "percentage": round(percentage, 2) if e.is_exam_ended else "N/A",
+            "grade": grade,
+        })
+
+    # 2. Scorecard unique completed exams
+    completed_exams = StudentsExams.objects.filter(
+        student=student, 
+        is_exam_ended=True,
+        deleted_at__isnull=True
+    ).select_related("exam").order_by('-end_time')
+    
+    exam_data = []
+    seen_exams = set()
+    for se in completed_exams:
+        exam = se.exam
+        if exam.id in seen_exams:
+            continue
+        seen_exams.add(exam.id)
+        
+        total_obj_marks = exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
+        total_desc_marks = exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
+        total_marks = total_obj_marks + total_desc_marks
+        
+        highest_score = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_exam_ended=True,
+            deleted_at__isnull=True
+        ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
+        
+        obtained_marks = highest_score
+        percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
+        
+        if percentage >= 90: grade = "A+"
+        elif percentage >= 80: grade = "A"
+        elif percentage >= 70: grade = "B"
+        elif percentage >= 60: grade = "C"
+        elif percentage >= 50: grade = "D"
+        else: grade = "F"
+
+        exam_data.append({
+            "code": exam.code, 
+            "exam_name": exam.exam_name, 
+            "total_score": round(total_marks),
+            "score": round(obtained_marks), 
+            "percentage": round(percentage, 2), 
+            "grade": grade
+        })
+
+    # 3. Scorecard assignments
+    student_assignments = StudentsAssignment.objects.filter(
+        student=student, 
+        submitted_on__isnull=False,
+        deleted_at__isnull=True
+    ).order_by('-submitted_on').select_related("assignment", "assignment__subject")
+    
+    assignment_data = []
+    for sa in student_assignments:
+        assignment = sa.assignment
+        total = assignment.total_score or 0
+        obtained = sa.total_marks or 0
+        percentage = (obtained / total * 100) if total > 0 else 0
+        
+        if percentage >= 90: grade = "A+"
+        elif percentage >= 80: grade = "A"
+        elif percentage >= 70: grade = "B"
+        elif percentage >= 60: grade = "C"
+        elif percentage >= 50: grade = "D"
+        else: grade = "F"
+        
+        assignment_data.append({
+            "code": assignment.code, 
+            "assignment_name": assignment.assignment_name, 
+            "subject_name": assignment.subject.subject_name if assignment.subject else "N/A",
+            "total_score": total,
+            "score": obtained, 
+            "percentage": round(percentage, 2), 
+            "grade": grade,
+            "submitted_on": sa.submitted_on,
+        })
+
+    def calc_grade(p):
+        if p >= 90: return "A+"
+        if p >= 80: return "A"
+        if p >= 70: return "B"
+        if p >= 60: return "C"
+        if p >= 50: return "D"
+        return "F"
+        
+    total_exam_max = sum(item['total_score'] for item in exam_data)
+    total_exam_obtained = sum(item['score'] for item in exam_data)
+    exam_percentage = (total_exam_obtained / total_exam_max * 100) if total_exam_max > 0 else 0
+    
+    total_assign_max = sum(item['total_score'] for item in assignment_data)
+    total_assign_obtained = sum(item['score'] for item in assignment_data)
+    assign_percentage = (total_assign_obtained / total_assign_max * 100) if total_assign_max > 0 else 0
+    
+    grand_total_max = total_exam_max + total_assign_max
+    grand_total_obtained = total_exam_obtained + total_assign_obtained
+    grand_percentage = (grand_total_obtained / grand_total_max * 100) if grand_total_max > 0 else 0
+
+    exam_summary = { "total": round(total_exam_max), "score": round(total_exam_obtained), "percentage": round(exam_percentage, 2), "grade": calc_grade(exam_percentage) }
+    assignment_summary = { "total": round(total_assign_max), "score": round(total_assign_obtained), "percentage": round(assign_percentage, 2), "grade": calc_grade(assign_percentage) }
+    grand_summary = { "total": round(grand_total_max), "score": round(grand_total_obtained), "percentage": round(grand_percentage, 2), "grade": calc_grade(grand_percentage) }
+
+    context = {
+        'admin': admin, 
+        'student': student,
+        'exam_list': exam_list,
+        'student_exams': exam_data,
+        'assignment_mark': assignment_data,
+        'exam_summary': exam_summary,
+        'assignment_summary': assignment_summary,
+        'grand_summary': grand_summary,
+    }
+    return render(request, "church/student_view.html", context)
 
 
 @login_required
@@ -1467,3 +1689,8 @@ def church_subject_view(request, id):
         'subject': subject,
         'uploads': compiled_uploads
     })
+
+@login_required
+def church_user_payment_input(request):
+    return redirect('student_payment_input')
+

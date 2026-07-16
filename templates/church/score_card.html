@@ -719,11 +719,12 @@
             <table class="sc-table" id="examTable" style="table-layout: fixed;">
                 <colgroup>
                     <col style="width:10%">
-                    <col style="width:40%">
+                    <col style="width:30%">
                     <col style="width:15%">
                     <col style="width:10%">
-                    <col style="width:15%">
                     <col style="width:10%">
+                    <col style="width:10%">
+                    <col style="width:15%">
                 </colgroup>
                 <thead>
                     <tr>
@@ -733,6 +734,7 @@
                         <th>Score</th>
                         <th>Percentage</th>
                         <th>Grade</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -746,12 +748,32 @@
                         <td>{{ item.percentage }}%</td>
                         <td><span
                                 class="grade-badge {% if item.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">{{item.grade }}</span></td>
-                                
+                        <td data-label="Action">
+                            {% if item.retest_status == 'pending' %}
+                                {% if item.retest_fee and not item.retest_paid %}
+                                    <div class="d-flex flex-column align-items-start gap-1">
+                                        <span class="badge bg-warning text-dark mb-1" style="padding: 6px 12px; font-weight:600;">Fee: ${{ item.retest_fee }}</span>
+                                        <button class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1" style="font-size: 11px; padding: 4px 8px;" onclick="payRetestFee({{ item.id }}, '{{ item.exam_name|escapejs }}', '{{ item.retest_fee }}')">
+                                            <i class="bi bi-paypal"></i> Pay Fee
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark" style="padding: 6px 12px; font-weight:600;">Retest Pending</span>
+                                {% endif %}
+                            {% elif item.retest_status == 'approved' %}
+                            <span class="badge bg-success" style="padding: 6px 12px; font-weight:600;">Retest Approved</span>
+                            {% elif item.retest_status == 'rejected' %}
+                            <span class="badge bg-danger" style="padding: 6px 12px; font-weight:600; margin-bottom:4px;">Retest Rejected</span>
+                            <button class="btn btn-sm btn-outline-primary" style="font-size: 11px; padding: 4px 8px; font-weight: 600;" onclick="openRetestModal({{ item.id }}, '{{ item.exam_name|escapejs }}', '{{ item.grade }}')">Request Retest</button>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-primary" style="font-size: 11px; padding: 4px 8px; font-weight: 600;" onclick="openRetestModal({{ item.id }}, '{{ item.exam_name|escapejs }}', '{{ item.grade }}')">Request Retest</button>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                     {% else %}
                     <tr class="empty-row">
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state"><i class="bi bi-journal-x"></i> No exam records found</div>
                         </td>
                     </tr>
@@ -873,6 +895,93 @@
         </div>
     </div>
 
+    <!-- Retest Request Modal -->
+    <div class="modal fade" id="retestModal" tabindex="-1" aria-labelledby="retestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title fw-bold" id="retestModalLabel">Request Exam Retest</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div id="retestAlert" class="alert d-none" role="alert"></div>
+                    
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 14px; color: #166534;">
+                        <strong>Retest Policy:</strong> You are scheduling a retest. All retests default to a 2-Hour (120 minutes) duration. Retests require administrator approval before you can start.
+                    </div>
+
+                    <div class="alert alert-info border-0 shadow-sm" style="background-color: #f0f9ff; border-left: 4px solid #0284c7 !important; color: #0369a1; padding: 12px; font-size: 13px; border-radius: 6px; margin-bottom: 20px;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Retest Fee Notice:</strong> A retest fee may apply. The administrator will review your request and set the fee amount, which will be payable securely via PayPal from this scorecard page if set.
+                    </div>
+
+                    <form id="retestForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="exam_id" id="retestExamId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Exam Name</label>
+                            <p id="retestExamName" class="fw-bold mb-0 text-dark"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Previous Grade</label>
+                            <p id="retestPreviousGrade" class="mb-0"></p>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="retestDate" class="form-label small fw-semibold">Retest Date*</label>
+                                <input type="date" class="form-control" name="examDate" id="retestDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="retestTime" class="form-label small fw-semibold">Start Time*</label>
+                                <input type="time" class="form-control" name="startTime" id="retestTime" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label for="retestTimezone" class="form-label small fw-semibold">Timezone*</label>
+                            <select class="form-select" name="timezone" id="retestTimezone" required>
+                                {% for tz in timezones %}
+                                <option value="{{ tz }}" {% if student.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary px-4 fw-semibold" id="confirmRetestBtn" onclick="submitRetestRequest()">Submit Retest Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retest Payment Modal -->
+    <div class="modal fade" id="retestPaymentModal" tabindex="-1" aria-labelledby="retestPaymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title fw-bold" id="retestPaymentModalLabel">Pay Retest Fee</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closePaymentModalBtn"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div id="retestPaymentAlert" class="alert d-none" role="alert"></div>
+                    
+                    <div class="text-center mb-4">
+                        <p class="text-secondary mb-1">Exam Name</p>
+                        <h5 id="retestPaymentExamName" class="fw-bold text-dark mb-3"></h5>
+                        <p class="text-secondary mb-1">Retest Fee Due</p>
+                        <h3 id="retestPaymentAmount" class="fw-bold text-success mb-0"></h3>
+                    </div>
+
+                    <div id="retest-paypal-button-container" style="min-height: 150px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}
@@ -883,11 +992,170 @@
 
 
 {% block extra_js %}
+<script src="/static/js/timezone.js"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
 <script>
     /* ALL your original JS is pasted AS-IS */
 
     let examScores = [];
     let assignmentScores = [];
     // (YOUR FULL JS CODE HERE)
+
+    function openRetestModal(id, name, grade) {
+        document.getElementById('retestExamId').value = id;
+        document.getElementById('retestExamName').innerText = name;
+        
+        const gradeBadge = document.getElementById('retestPreviousGrade');
+        gradeBadge.innerText = grade;
+        gradeBadge.className = 'grade-badge ' + (grade === 'F' ? 'grade-failed' : 'grade-a');
+        
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('retestDate').setAttribute('min', today);
+
+        const modal = new bootstrap.Modal(document.getElementById('retestModal'));
+        modal.show();
+    }
+
+    function submitRetestRequest() {
+        const form = document.getElementById('retestForm');
+        const btn = document.getElementById('confirmRetestBtn');
+        const alertEl = document.getElementById('retestAlert');
+        const examId = document.getElementById('retestExamId').value;
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';
+        
+        const formData = new FormData(form);
+        
+        fetch(`/student/request-retest/${examId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alertEl.className = 'alert alert-success';
+                alertEl.innerText = data.message;
+                alertEl.classList.remove('d-none');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                alertEl.className = 'alert alert-danger';
+                alertEl.innerText = data.message;
+                alertEl.classList.remove('d-none');
+                btn.disabled = false;
+                btn.innerText = 'Submit Retest Request';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alertEl.className = 'alert alert-danger';
+            alertEl.innerText = 'An error occurred. Please try again.';
+            alertEl.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerText = 'Submit Retest Request';
+        });
+    }
+
+    function payRetestFee(studentExamId, examName, amount) {
+        document.getElementById('retestPaymentExamName').innerText = examName;
+        document.getElementById('retestPaymentAmount').innerText = `$${amount}`;
+        document.getElementById('retestPaymentAlert').classList.add('d-none');
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('retestPaymentModal'));
+        modal.show();
+
+        // Clear existing PayPal buttons if they exist
+        const container = document.getElementById('retest-paypal-button-container');
+        container.innerHTML = '';
+
+        // Render PayPal buttons
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return fetch("/student/create-paypal-order/", {
+                    method: "POST",
+                    body: JSON.stringify({ amount: amount }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to create PayPal order.");
+                    }
+                    return response.json();
+                })
+                .then(orderData => {
+                    return orderData.orderID;
+                })
+                .catch(err => {
+                    console.error("PayPal order error:", err);
+                    const alertEl = document.getElementById('retestPaymentAlert');
+                    alertEl.className = 'alert alert-danger';
+                    alertEl.innerText = 'Could not initiate PayPal checkout. Please try again.';
+                    alertEl.classList.remove('d-none');
+                });
+            },
+            onApprove: function(data, actions) {
+                // Disable close button and show loading state
+                document.getElementById('closePaymentModalBtn').disabled = true;
+                const alertEl = document.getElementById('retestPaymentAlert');
+                alertEl.className = 'alert alert-info';
+                alertEl.innerText = 'Processing payment... Please do not close this window.';
+                alertEl.classList.remove('d-none');
+
+                return fetch("/student/capture-retest-payment/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        student_exam_id: studentExamId
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    }
+                })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        alertEl.className = 'alert alert-success';
+                        alertEl.innerText = 'Payment successful! Your retest request has been approved.';
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        document.getElementById('closePaymentModalBtn').disabled = false;
+                        alertEl.className = 'alert alert-danger';
+                        alertEl.innerText = 'Payment capture failed. Please contact support.';
+                    }
+                })
+                .catch(err => {
+                    console.error("PayPal capture error:", err);
+                    document.getElementById('closePaymentModalBtn').disabled = false;
+                    alertEl.className = 'alert alert-danger';
+                    alertEl.innerText = 'An error occurred during payment verification. Please try again.';
+                });
+            },
+            onError: function(err) {
+                console.error("PayPal buttons error:", err);
+                const alertEl = document.getElementById('retestPaymentAlert');
+                alertEl.className = 'alert alert-danger';
+                alertEl.innerText = 'A PayPal error occurred. Please try again.';
+                alertEl.classList.remove('d-none');
+            }
+        }).render('#retest-paypal-button-container');
+    }
 </script>
 {% endblock %}

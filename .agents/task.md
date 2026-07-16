@@ -1,0 +1,5 @@
+- [x] Create bulk_upload.html template with modern design
+- [x] Add URL route in menu/urls.py
+- [x] Implement bulk_upload_church_users view in menu/views.py
+- [x] Add Bulk Upload link to profile dropdown in templates/admin/index.html
+- [x] Verify functionality with test uploads

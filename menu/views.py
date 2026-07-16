@@ -6870,7 +6870,7 @@ def student_exams_bulk_assign(request):
         retest_fee = 0.00
         email_sent = False
         
-        if not is_church_user and retest_fee_val:
+        if retest_fee_val:
             from decimal import Decimal
             fee = Decimal(retest_fee_val)
             if fee > 0:
@@ -8129,7 +8129,7 @@ def student_exams_update(request, id):
                 role = student_user.user_roles.first().role.name if student_user.user_roles.exists() else None
                 is_church_user = (role == "Church User")
                 
-                if not is_church_user and retest_fee_val is not None:
+                if retest_fee_val is not None:
                     from decimal import Decimal
                     new_fee = Decimal(retest_fee_val) if retest_fee_val else Decimal('0.00')
                     old_fee = student_exam.retest_fee
