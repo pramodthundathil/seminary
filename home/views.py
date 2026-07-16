@@ -1499,6 +1499,49 @@ def signup_church_admin(request):
                         else:
                             messages.warning(request, f'{role_display} account created but email could not be sent.')
                             logger.warning(f'Email failed to send to {email}')
+
+                        # Send approval request email to Super Admin
+                        try:
+                            admin_email = 'contact@byteboot.in'
+                            admin_subject = "New Church User Registration - Approval Required"
+                            admin_message = f"""Hello Admin,
+
+A new church user has registered and requires approval.
+
+Details:
+Name: {first_name} {last_name}
+Email: {email}
+Church: {church_admin_obj.name_of_church if church_admin_obj else 'N/A'}
+Church Admin: {church_admin_obj.student.first_name if (church_admin_obj and church_admin_obj.student) else 'N/A'}
+
+Please log in to the admin panel to review and approve this user.
+
+Best regards,
+Trinity Theological Seminary"""
+                            send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, [admin_email], fail_silently=True)
+                        except Exception as admin_err:
+                            logger.error(f"Failed to send admin signup notification: {admin_err}")
+
+                        # Send approval request email to corresponding Church Admin
+                        if church_admin_obj and church_admin_obj.student and church_admin_obj.student.email:
+                            try:
+                                church_admin_email = church_admin_obj.student.email
+                                ca_subject = "New Church User Registration - Approval Required"
+                                ca_message = f"""Hello {church_admin_obj.student.first_name},
+
+A new user has registered under your church code and requires your approval.
+
+Details:
+Name: {first_name} {last_name}
+Email: {email}
+
+Please log in to your Church Admin Dashboard to review and approve this user.
+
+Best regards,
+Trinity Theological Seminary"""
+                                send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [church_admin_email], fail_silently=True)
+                            except Exception as ca_err:
+                                logger.error(f"Failed to send church admin signup notification: {ca_err}")
                             
                     except Exception as e:
                         messages.warning(request, f'{role_display} account created but error sending email: {str(e)}')

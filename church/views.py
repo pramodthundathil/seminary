@@ -1265,6 +1265,18 @@ def church_student_approve(request, id):
             user.updated_at = timezone.now()
             user.save()
 
+            # Ensure proper Role is assigned
+            try:
+                if not RoleUsers.objects.filter(user=user).exists():
+                    role_name = 'Church User' if user.church_admin else 'Student'
+                    role_obj = Roles.objects.filter(name__iexact=role_name).first()
+                    if not role_obj and role_name == 'Church User':
+                        role_obj = Roles.objects.filter(name__iexact='Student').first()
+                    if role_obj:
+                        RoleUsers.objects.create(user=user, role=role_obj)
+            except Exception as role_err:
+                logger.error(f"Failed to assign role on church admin approval: {role_err}")
+
             try:
                 subject = 'Welcome to Trinity Seminary - Registration Approved'
                 message = f'''Dear {student.first_name},\n\nYour registration has been approved by your Church Administrator.\n\nLogin Details:\nURL: https://trinityseminary.in/login\nUsername: {user.email}\nPassword: {password}\n\nIMPORTANT: Please change your password immediately after your first login.\n\nBest regards,\nAdministration'''
@@ -1272,6 +1284,37 @@ def church_student_approve(request, id):
                 send_mail(subject, message, from_email, [user.email])
             except Exception as e:
                 pass # Fail silently for email block
+
+            # Send notification email to Super Admin
+            try:
+                admin_email = 'contact@byteboot.in'
+                admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                admin_message = f"""Hello Admin,
+
+The church user registration for {student.first_name} {student.last_name} ({user.email}) has been approved by their Church Administrator.
+
+Best regards,
+Trinity Theological Seminary"""
+                send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
+            except Exception as admin_err:
+                logger.error(f"Failed to send admin approval notification: {admin_err}")
+
+            # Send notification email to corresponding Church Admin
+            if user.church_admin and user.church_admin.student and user.church_admin.student.email:
+                try:
+                    ca_email = user.church_admin.student.email
+                    ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                    ca_message = f"""Hello {user.church_admin.student.first_name},
+
+You have successfully approved the registration for {student.first_name} {student.last_name} ({user.email}).
+
+An email containing login credentials has been sent to the student.
+
+Best regards,
+Trinity Theological Seminary"""
+                    send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                except Exception as ca_err:
+                    logger.error(f"Failed to send church admin approval notification: {ca_err}")
 
         student.save()
         messages.success(request, f"{student.first_name} has been approved.")

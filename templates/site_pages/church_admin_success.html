@@ -456,7 +456,7 @@
             </p>
 
             <!-- Student ID Display -->
-            {% if admin %}
+            {% if admin and admin.username|slice:":3" == "CHA" %}
             <div class="student-id-box">
                 <div class="student-id-label">Your Admin ID</div>
                 <div class="student-id">{{ admin.username }}</div>

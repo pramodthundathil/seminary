@@ -32,7 +32,9 @@
                     <th>Student ID</th>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Status</th>
                     <th>Registration Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,11 +43,31 @@
                     <td>{{ st.student_id }}</td>
                     <td>{{ st.first_name }} {{ st.last_name }}</td>
                     <td>{{ st.email }}</td>
+                    <td>
+                        {% if st.active %}
+                            <span class="badge bg-success rounded-pill">Active</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark rounded-pill">Pending</span>
+                        {% endif %}
+                    </td>
                     <td>{{ st.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'church_student_view' st.id %}" class="btn btn-sm btn-outline-primary shadow-sm" style="border-radius: 6px;">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                        {% if not st.active %}
+                        <form action="{% url 'church_student_approve' st.id %}" method="POST" class="d-inline ms-1">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success shadow-sm" style="border-radius: 6px;" onclick="return confirm('Are you sure you want to approve this student?')">
+                                <i class="bi bi-check-circle"></i> Approve
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">No registered users have linked your church code yet.</td>
+                    <td colspan="6" class="text-center text-muted py-4">No registered users have linked your church code yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>

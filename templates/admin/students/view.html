@@ -665,6 +665,10 @@
                             {% else %}
                             <span class="pill-badge pill-badge-unpaid"><i class="fas fa-exclamation-circle"></i> Fees Pending</span>
                             {% endif %}
+
+                            {% if student.user.church_admin %}
+                            <span class="pill-badge bg-primary text-white" style="border: 1px solid #0d6efd;"><i class="fas fa-church"></i> Church User</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -740,6 +744,16 @@
                                     <div class="detail-label">Citizenship Country</div>
                                     <div class="detail-value">{{ student.citizenship.name|default:"N/A" }}</div>
                                 </div>
+                                {% if student.user.church_admin %}
+                                <div class="detail-item">
+                                    <div class="detail-label">Church Name</div>
+                                    <div class="detail-value" style="color: #4f46e5; font-weight: 600;">{{ student.user.church_admin.name_of_church }}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Church Branch</div>
+                                    <div class="detail-value" style="color: #4f46e5; font-weight: 600;">{{ student.user.church_admin.church_code.branches.branch_name|default:"N/A" }}</div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

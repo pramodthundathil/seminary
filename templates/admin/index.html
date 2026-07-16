@@ -4519,9 +4519,15 @@
                     <tbody>
                         {% for app in pending_applications %}
                         <tr>
-                            <td><a href="{% url 'student_detail' app.id %}"
-                                    class="fw-bold text-dark text-decoration-none">{{ app.first_name }} {{ app.last_name }}</a></td>
-                                    
+                            <td>
+                                <a href="{% url 'student_detail' app.id %}" class="fw-bold text-dark text-decoration-none">{{ app.first_name }} {{ app.last_name }}</a>
+                                {% if app.user.church_admin %}
+                                <span class="badge bg-primary text-white" style="font-size: 0.65rem; padding: 2px 5px; vertical-align: middle;">Church User</span>
+                                <div style="font-size: 0.75rem; color: #64748b;" class="mt-1">
+                                    <i class="fas fa-church"></i> {{ app.user.church_admin.name_of_church }}
+                                </div>
+                                {% endif %}
+                            </td>
                             <td>{{ app.created_at|date:"M d, Y" }}</td>
                             <td>
                                 <span class="status-badge-sm pending">Pending</span>

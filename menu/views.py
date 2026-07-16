@@ -2497,7 +2497,7 @@ def student_datatable(request):
         payment_status_filter = request.GET.get('payment_status', '')
         
         # Base queryset
-        students = Students.objects.select_related('user', 'language').all()
+        students = Students.objects.select_related('user', 'user__church_admin', 'user__church_admin__church_code', 'user__church_admin__church_code__branches', 'language').all()
 
         # Filter by Type (Student vs Applicant)
         if list_type == 'applicant':
@@ -2588,12 +2588,31 @@ def student_datatable(request):
             elif list_type == 'student':
                  is_approved = True
 
+            # Check if Church User
+            church_badge = ""
+            church_meta = ""
+            if student.user and student.user.church_admin:
+                church_badge = ' <span class="badge bg-primary text-white" style="font-size: 0.65rem; padding: 2px 5px; vertical-align: middle; margin-left: 5px;">Church User</span>'
+                
+                church_name = student.user.church_admin.name_of_church or "N/A"
+                branch_name = "N/A"
+                if student.user.church_admin.church_code and student.user.church_admin.church_code.branches:
+                    branch_name = student.user.church_admin.church_code.branches.branch_name
+                
+                church_meta = f'''
+                    <div class="student-meta mt-1" style="font-size: 0.75rem; color: #64748b; line-height: 1.3;">
+                        <div><i class="fas fa-church"></i> <strong>Church:</strong> {church_name}</div>
+                        <div><i class="fas fa-code-branch"></i> <strong>Branch:</strong> {branch_name}</div>
+                    </div>
+                '''
+
             info_html = f'''
                 <div class="student-info">
-                    <div class="student-name">{full_name}</div>
+                    <div class="student-name">{full_name}{church_badge}</div>
                     <div class="student-meta">
                         <span class="student-badge"><i class="fas fa-id-card"></i> {student.student_id or 'N/A'}</span>
                     </div>
+                    {church_meta}
                 </div>
             '''
             
@@ -3087,6 +3106,18 @@ def student_approve_action(request, student_id):
             user.updated_at = timezone.now()
             user.save()
 
+            # Ensure proper Role is assigned
+            try:
+                if not RoleUsers.objects.filter(user=user).exists():
+                    role_name = 'Church User' if user.church_admin else 'Student'
+                    role_obj = Roles.objects.filter(name__iexact=role_name).first()
+                    if not role_obj and role_name == 'Church User':
+                        role_obj = Roles.objects.filter(name__iexact='Student').first()
+                    if role_obj:
+                        RoleUsers.objects.create(user=user, role=role_obj)
+            except Exception as role_err:
+                print(f"Failed to assign role on superadmin approval: {role_err}")
+
             # Send Approval Email with Credentials
             try:
                 subject = 'Welcome to Trinity Seminary - Registration Approved'
@@ -3108,6 +3139,37 @@ Administration'''
                 send_mail(subject, message, from_email, recipient_list)
             except Exception as e:
                 print(f"Email sending failed: {str(e)}")
+
+            # Notify both Super Admin and Church Admin if it is a church user
+            if user.church_admin:
+                # 1. Notify Super Admin
+                try:
+                    admin_email = 'contact@byteboot.in'
+                    admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                    admin_message = f"""Hello Admin,
+
+You have successfully approved the registration for church user {student.first_name} {student.last_name} ({user.email}).
+
+Best regards,
+Trinity Theological Seminary"""
+                    send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
+                except Exception as admin_err:
+                    print(f"Failed to send admin approval notification: {str(admin_err)}")
+
+                # 2. Notify Corresponding Church Admin
+                if user.church_admin.student and user.church_admin.student.email:
+                    try:
+                        ca_email = user.church_admin.student.email
+                        ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                        ca_message = f"""Hello {user.church_admin.student.first_name},
+
+The registration for {student.first_name} {student.last_name} ({user.email}) under your church code has been approved by the Administration.
+
+Best regards,
+Trinity Theological Seminary"""
+                        send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                    except Exception as ca_err:
+                        print(f"Failed to send church admin approval notification: {str(ca_err)}")
         else:
             print(f"Warning: No user linked or created for student {student.id}")
         # ----------------END APPROVAL LOGIC----------------
@@ -3452,6 +3514,18 @@ def student_toggle_approval(request, student_id):
                     user.updated_at = timezone.now()
                     user.save()
 
+                    # Ensure proper Role is assigned
+                    try:
+                        if not RoleUsers.objects.filter(user=user).exists():
+                            role_name = 'Church User' if user.church_admin else 'Student'
+                            role_obj = Roles.objects.filter(name__iexact=role_name).first()
+                            if not role_obj and role_name == 'Church User':
+                                role_obj = Roles.objects.filter(name__iexact='Student').first()
+                            if role_obj:
+                                RoleUsers.objects.create(user=user, role=role_obj)
+                    except Exception as role_err:
+                        print(f"Failed to assign role on toggle approval: {role_err}")
+
                     # Send Approval Email with Credentials
                     try:
                         subject = 'Welcome to Trinity Seminary - Registration Approved'
@@ -3473,6 +3547,37 @@ Administration'''
                         send_mail(subject, message, from_email, recipient_list)
                     except Exception as e:
                         print(f"Email sending failed: {str(e)}")
+
+                    # Notify both Super Admin and Church Admin if it is a church user
+                    if user.church_admin:
+                        # 1. Notify Super Admin
+                        try:
+                            admin_email = 'contact@byteboot.in'
+                            admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                            admin_message = f"""Hello Admin,
+
+You have successfully approved the registration for church user {student.first_name} {student.last_name} ({user.email}).
+
+Best regards,
+Trinity Theological Seminary"""
+                            send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
+                        except Exception as admin_err:
+                            print(f"Failed to send admin approval notification: {str(admin_err)}")
+
+                        # 2. Notify Corresponding Church Admin
+                        if user.church_admin.student and user.church_admin.student.email:
+                            try:
+                                ca_email = user.church_admin.student.email
+                                ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                                ca_message = f"""Hello {user.church_admin.student.first_name},
+
+The registration for {student.first_name} {student.last_name} ({user.email}) under your church code has been approved by the Administration.
+
+Best regards,
+Trinity Theological Seminary"""
+                                send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                            except Exception as ca_err:
+                                print(f"Failed to send church admin approval notification: {str(ca_err)}")
                 else:
                     print(f"Warning: No user linked or created for student {student.id}")
 
