@@ -358,7 +358,7 @@
                     <select class="form-select input-premium" id="default_package_id" name="default_package_id">
                         {% for pkg in packages %}
                             <option value="{{ pkg.id }}" {% if forloop.first %}selected{% endif %}>
-                                {{ pkg.name }} (Max Users: {{ pkg.max_user_no }}, Price: {{ pkg.amount }})
+                                {{ pkg.name }}
                             </option>
                         {% endfor %}
                     </select>

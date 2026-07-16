@@ -8304,7 +8304,7 @@ def bulk_upload_church_users(request):
     from django.utils.crypto import get_random_string
     from home.models import Users, Roles, RoleUsers, Students, ChurchAdmins, ChurchLoginCodeSettings, Payments, Languages, Countries
 
-    packages = ChurchLoginCodeSettings.objects.all()
+    packages = ChurchLoginCodeSettings.objects.filter(deleted_at__isnull=True).order_by('-id')
     generated_password = get_random_string(10)
     report = None
     selected_upload_type = 'church_admin'
