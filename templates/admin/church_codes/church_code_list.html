@@ -135,6 +135,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Branch</th>
                     <th>Name</th>
                     <th>Max Users</th>
@@ -147,6 +148,7 @@
             <tbody>
                 {% for code in codes %}
                 <tr>
+                    <td>{{ code.id }}</td>
                     <td>{{ code.branches.branch_name }}</td>
                     <td>{{ code.name }}</td>
                     <td>{{ code.max_user_no }}</td>

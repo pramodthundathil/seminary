@@ -1,0 +1,538 @@
+{% extends 'admin/index.html' %}
+{% block content %}
+
+<style>
+    /* Premium Glassmorphic Styling & Animations */
+    .bulk-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        padding: 30px;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+    }
+
+    .bulk-card:hover {
+        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .page-title-gradient {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .nav-pills-custom {
+        background: rgba(0, 0, 0, 0.03);
+        padding: 5px;
+        border-radius: 30px;
+        display: inline-flex;
+    }
+
+    .nav-pills-custom .nav-link {
+        border-radius: 25px;
+        color: var(--text-light);
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+    }
+
+    .nav-pills-custom .nav-link.active {
+        background: linear-gradient(135deg, var(--primary) 0%, #00b5b8 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 206, 209, 0.3);
+    }
+
+    .header-pill {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        margin: 2px;
+        border: 1px solid #cbd5e1;
+    }
+
+    .header-pill.required {
+        background: #fef2f2;
+        color: #ef4444;
+        border-color: #fca5a5;
+    }
+
+    .input-premium {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .input-premium:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(0, 206, 209, 0.15);
+        outline: none;
+    }
+
+    .btn-premium-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, #00b5b8 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 28px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 206, 209, 0.3);
+        transition: all 0.25s ease;
+    }
+
+    .btn-premium-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 206, 209, 0.4);
+        background: linear-gradient(135deg, #00b5b8 0%, var(--primary) 100%);
+    }
+
+    .report-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 700;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .status-badge.success {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-badge.error {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-badge.warning {
+        background: #fef9c3;
+        color: #a16207;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+</style>
+
+<div class="container-fluid py-4 animate-fade-in">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="page-title-gradient mb-1">Bulk Account Creation</h1>
+            <p class="text-muted mb-0">Upload CSV sheets to instantly register & activate Church Admins or Users.</p>
+        </div>
+        <a href="{% url 'users_list' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2" style="border-radius: 10px; font-weight: 600; padding: 10px 18px;">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Users</span>
+        </a>
+    </div>
+
+    <!-- Upload Panel -->
+    <div class="bulk-card">
+        <form method="post" enctype="multipart/form-data" id="bulkUploadForm">
+            {% csrf_token %}
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+                        <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Upload Type Tabs -->
+            <div class="mb-4 text-center">
+                <div class="nav-pills-custom" role="tablist">
+                    <input type="radio" name="upload_type" id="upload_type_admin" value="church_admin" checked style="display:none;">
+                    <input type="radio" name="upload_type" id="upload_type_user" value="church_user" style="display:none;">
+                    <input type="radio" name="upload_type" id="upload_type_assign_exams" value="assign_exams" style="display:none;">
+                    <input type="radio" name="upload_type" id="upload_type_upload_marks" value="upload_marks" style="display:none;">
+                    <input type="radio" name="upload_type" id="upload_type_upload_exams" value="upload_exams" style="display:none;">
+                    <input type="radio" name="upload_type" id="upload_type_upload_questions" value="upload_questions" style="display:none;">
+                    
+                    <button type="button" class="nav-link active" id="tab_admin" onclick="selectUploadType('church_admin')">
+                        <i class="fas fa-church me-2"></i>Church Admins
+                    </button>
+                    <button type="button" class="nav-link" id="tab_user" onclick="selectUploadType('church_user')">
+                        <i class="fas fa-user-friends me-2"></i>Church Users
+                    </button>
+                    <button type="button" class="nav-link" id="tab_upload_exams" onclick="selectUploadType('upload_exams')">
+                        <i class="fas fa-file-invoice me-2"></i>Upload Exams
+                    </button>
+                    <button type="button" class="nav-link" id="tab_upload_questions" onclick="selectUploadType('upload_questions')">
+                        <i class="fas fa-question-circle me-2"></i>Upload Questions
+                    </button>
+                    <button type="button" class="nav-link" id="tab_assign_exams" onclick="selectUploadType('assign_exams')">
+                        <i class="fas fa-book-open me-2"></i>Assign Exams
+                    </button>
+                    <button type="button" class="nav-link" id="tab_upload_marks" onclick="selectUploadType('upload_marks')">
+                        <i class="fas fa-graduation-cap me-2"></i>Upload Marks
+                    </button>
+                </div>
+            </div>
+
+            <!-- Excel & CSV Formatting Guide Card -->
+            <div class="p-3 mb-4 rounded-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-info-circle text-primary me-2"></i>Excel & CSV File Format & Columns Guide</h6>
+                
+                <div id="guide_church_admin">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">first_name*</span>
+                        <span class="header-pill">last_name</span>
+                        <span class="header-pill required">email*</span>
+                        <span class="header-pill required">name_of_church*</span>
+                        <span class="header-pill">name_of_paster</span>
+                        <span class="header-pill">church_address</span>
+                        <span class="header-pill">church_code_id</span>
+                        <span class="header-pill">code</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        first_name,last_name,email,name_of_church,name_of_paster,church_address,church_code_id,code<br>
+                        John,Doe,john@example.com,Grace Church,Pastor Smith,123 Faith Rd,,GRACE01
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'church_admin' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Church Admin Excel Template
+                        </a>
+                    </div>
+                </div>
+
+                <div id="guide_church_user" style="display: none;">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">first_name*</span>
+                        <span class="header-pill">last_name</span>
+                        <span class="header-pill required">email*</span>
+                        <span class="header-pill required">church_code*</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        first_name,last_name,email,church_code<br>
+                        Jane,Smith,jane.smith@example.com,GRACE01
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'church_user' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Church User Excel Template
+                        </a>
+                    </div>
+                </div>
+
+                <div id="guide_upload_exams" style="display: none;">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns to define exams. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">subject_code*</span>
+                        <span class="header-pill required">exam_code*</span>
+                        <span class="header-pill">exam_name</span>
+                        <span class="header-pill required">exam_type* (objective/descriptive)</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        subject_code,exam_code,exam_name,exam_type<br>
+                        SUB01,EXAM01,New Testament Theology,objective
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'upload_exams' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Exams Excel Template
+                        </a>
+                    </div>
+                </div>
+
+                <div id="guide_upload_questions" style="display: none;">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns to add questions mapping to an exam. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">exam_code*</span>
+                        <span class="header-pill required">question_text*</span>
+                        <span class="header-pill">marks</span>
+                        <span class="header-pill">option1</span>
+                        <span class="header-pill">option2</span>
+                        <span class="header-pill">option3</span>
+                        <span class="header-pill">option4</span>
+                        <span class="header-pill">answer_option (1, 2, 3, 4)</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        exam_code,question_text,marks,option1,option2,option3,option4,answer_option<br>
+                        EXAM01,Who was the first king of Israel?,1,Saul,David,Solomon,Samuel,1
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'upload_questions' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Questions Excel Template
+                        </a>
+                    </div>
+                </div>
+
+                <div id="guide_assign_exams" style="display: none;">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns to bulk assign exams. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">student_email*</span>
+                        <span class="header-pill required">exam_code*</span>
+                        <span class="header-pill">start_time</span>
+                        <span class="header-pill">end_time</span>
+                        <span class="header-pill">exam_duration</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        student_email,exam_code,start_time,end_time,exam_duration<br>
+                        jane.smith@example.com,EXAM01,2026-07-16 09:00:00,2026-07-16 12:00:00,180
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'assign_exams' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Assign Exams Excel Template
+                        </a>
+                    </div>
+                </div>
+
+                <div id="guide_upload_marks" style="display: none;">
+                    <p class="small text-muted mb-2">Create an Excel or CSV file with the following columns to bulk upload scores/marks. Headers marked with <span class="text-danger">*</span> are mandatory:</p>
+                    <div class="mb-3">
+                        <span class="header-pill required">student_email*</span>
+                        <span class="header-pill required">exam_code*</span>
+                        <span class="header-pill required">marks_obtained*</span>
+                        <span class="header-pill">start_time</span>
+                        <span class="header-pill">end_time</span>
+                        <span class="header-pill">exam_duration</span>
+                    </div>
+                    <div class="p-2 bg-white rounded border font-monospace small text-muted">
+                        student_email,exam_code,marks_obtained,start_time,end_time,exam_duration<br>
+                        jane.smith@example.com,EXAM01,85,2026-07-16 09:00:00,2026-07-16 12:00:00,180
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'download_bulk_template' 'upload_marks' %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">
+                            <i class="fas fa-file-excel me-1"></i> Download Upload Marks Excel Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Form Inputs -->
+            <div class="row">
+                <!-- File Upload -->
+                <div class="col-md-6 mb-3">
+                    <label for="csv_file" class="form-label fw-bold text-dark">Upload Excel or CSV File <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control input-premium" id="csv_file" name="csv_file" accept=".xlsx, .xls, .csv" required>
+                    <div class="form-text small">Accepts Excel (.xlsx/.xls) spreadsheets or standard CSV format.</div>
+                </div>
+
+                <!-- Common Password -->
+                <div class="col-md-6 mb-3" id="password_config_section">
+                    <label for="common_password" class="form-label fw-bold text-dark">Common Password <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control input-premium" id="common_password" name="common_password" value="{{ generated_password }}">
+                        <button type="button" class="btn btn-outline-secondary" onclick="regeneratePassword()" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px; border: 2px solid #e2e8f0; border-left: none;">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="form-text small">This password will be applied to all uploaded accounts. Users can log in immediately.</div>
+                </div>
+            </div>
+
+            <!-- Admin specific config -->
+            <div class="row mt-2" id="admin_config_section">
+                <!-- Default Package settings -->
+                <div class="col-md-6 mb-3">
+                    <label for="default_package_id" class="form-label fw-bold text-dark">Default Package/Setting <span class="text-danger">*</span></label>
+                    <select class="form-select input-premium" id="default_package_id" name="default_package_id">
+                        {% for pkg in packages %}
+                            <option value="{{ pkg.id }}" {% if forloop.first %}selected{% endif %}>
+                                {{ pkg.name }} (Max Users: {{ pkg.max_user_no }}, Price: {{ pkg.amount }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text small">Used if a row in the CSV does not contain a specific <code>church_code_id</code>.</div>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-3 border-top">
+                <button type="submit" class="btn-premium-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Execute Bulk Upload</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Batch Upload Report -->
+    {% if report %}
+    <div class="bulk-card mt-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="fas fa-file-invoice text-primary me-2"></i>Upload Report Summary</h4>
+        
+        <div class="row mb-4">
+            <div class="col-md-4 mb-2">
+                <div class="p-3 rounded border text-center bg-light">
+                    <div class="small text-muted fw-bold">PROCESSED ROWS</div>
+                    <div class="display-6 fw-bold text-secondary">{{ report.total }}</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="p-3 rounded border text-center" style="background-color:#f0fdf4; border-color:#bbf7d0;">
+                    <div class="small text-success fw-bold">SUCCESSFUL CREATIONS</div>
+                    <div class="display-6 fw-bold text-success">{{ report.success }}</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="p-3 rounded border text-center" style="background-color:#fef2f2; border-color:#fecaca;">
+                    <div class="small text-danger fw-bold">FAILED / SKIPPED ROWS</div>
+                    <div class="display-6 fw-bold text-danger">{{ report.failed }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if report.details %}
+        <div class="table-responsive">
+            <table class="table report-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Row</th>
+                        <th>Email / Account</th>
+                        <th>Name</th>
+                        <th>Type Details</th>
+                        <th style="width: 150px;">Status</th>
+                        <th>Message / Validation Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in report.details %}
+                    <tr>
+                        <td class="fw-bold text-muted">{{ item.row_number }}</td>
+                        <td class="fw-semibold">{{ item.email }}</td>
+                        <td>{{ item.name }}</td>
+                        <td class="small">{{ item.type_info }}</td>
+                        <td>
+                            {% if item.status == 'success' %}
+                                <span class="status-badge success"><i class="fas fa-check-circle me-1"></i>Success</span>
+                            {% elif item.status == 'failed' %}
+                                <span class="status-badge error"><i class="fas fa-times-circle me-1"></i>Failed</span>
+                            {% else %}
+                                <span class="status-badge warning"><i class="fas fa-exclamation-triangle me-1"></i>Warning</span>
+                            {% endif %}
+                        </td>
+                        <td class="small {% if item.status == 'failed' %}text-danger{% else %}text-muted{% endif %}">
+                            {{ item.message }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function selectUploadType(type) {
+        document.getElementById('upload_type_admin').checked = (type === 'church_admin');
+        document.getElementById('upload_type_user').checked = (type === 'church_user');
+        document.getElementById('upload_type_assign_exams').checked = (type === 'assign_exams');
+        document.getElementById('upload_type_upload_marks').checked = (type === 'upload_marks');
+        document.getElementById('upload_type_upload_exams').checked = (type === 'upload_exams');
+        document.getElementById('upload_type_upload_questions').checked = (type === 'upload_questions');
+
+        const tabAdmin = document.getElementById('tab_admin');
+        const tabUser = document.getElementById('tab_user');
+        const tabAssignExams = document.getElementById('tab_assign_exams');
+        const tabUploadMarks = document.getElementById('tab_upload_marks');
+        const tabUploadExams = document.getElementById('tab_upload_exams');
+        const tabUploadQuestions = document.getElementById('tab_upload_questions');
+
+        const guideAdmin = document.getElementById('guide_church_admin');
+        const guideUser = document.getElementById('guide_church_user');
+        const guideAssignExams = document.getElementById('guide_assign_exams');
+        const guideUploadMarks = document.getElementById('guide_upload_marks');
+        const guideUploadExams = document.getElementById('guide_upload_exams');
+        const guideUploadQuestions = document.getElementById('guide_upload_questions');
+
+        const adminConfig = document.getElementById('admin_config_section');
+        const passwordConfig = document.getElementById('password_config_section');
+
+        // Reset active classes
+        tabAdmin.classList.remove('active');
+        tabUser.classList.remove('active');
+        tabAssignExams.classList.remove('active');
+        tabUploadMarks.classList.remove('active');
+        tabUploadExams.classList.remove('active');
+        tabUploadQuestions.classList.remove('active');
+
+        // Hide all guides
+        guideAdmin.style.display = 'none';
+        guideUser.style.display = 'none';
+        guideAssignExams.style.display = 'none';
+        guideUploadMarks.style.display = 'none';
+        guideUploadExams.style.display = 'none';
+        guideUploadQuestions.style.display = 'none';
+
+        if (type === 'church_admin') {
+            tabAdmin.classList.add('active');
+            guideAdmin.style.display = 'block';
+            adminConfig.style.display = 'flex';
+            passwordConfig.style.display = 'block';
+        } else if (type === 'church_user') {
+            tabUser.classList.add('active');
+            guideUser.style.display = 'block';
+            adminConfig.style.display = 'none';
+            passwordConfig.style.display = 'block';
+        } else if (type === 'assign_exams') {
+            tabAssignExams.classList.add('active');
+            guideAssignExams.style.display = 'block';
+            adminConfig.style.display = 'none';
+            passwordConfig.style.display = 'none';
+        } else if (type === 'upload_marks') {
+            tabUploadMarks.classList.add('active');
+            guideUploadMarks.style.display = 'block';
+            adminConfig.style.display = 'none';
+            passwordConfig.style.display = 'none';
+        } else if (type === 'upload_exams') {
+            tabUploadExams.classList.add('active');
+            guideUploadExams.style.display = 'block';
+            adminConfig.style.display = 'none';
+            passwordConfig.style.display = 'none';
+        } else if (type === 'upload_questions') {
+            tabUploadQuestions.classList.add('active');
+            guideUploadQuestions.style.display = 'block';
+            adminConfig.style.display = 'none';
+            passwordConfig.style.display = 'none';
+        }
+    }
+
+    function regeneratePassword() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+        let pass = "";
+        for (let i = 0; i < 10; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('common_password').value = pass;
+    }
+
+    // Set active tab on load depending on form submission values
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectedType = "{{ selected_upload_type|default:'church_admin' }}";
+        selectUploadType(selectedType);
+    });
+</script>
+
+{% endblock %}

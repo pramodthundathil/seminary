@@ -5230,41 +5230,80 @@ def payments_delete(request, id):
 
 @login_required
 def users_list(request):
-    # Queryset (filter as needed)
-    qs = Users.objects.filter(deleted_at__isnull=True).order_by("-id")
+    user_type = request.GET.get('type')
+    if user_type == 'church':
+        from home.models import Students
+        qs = Students.objects.filter(user__church_admin__isnull=False).select_related('user', 'user__church_admin').order_by("-id")
+        
+        try:
+            per_page = int(request.GET.get("per_page", 25))
+        except ValueError:
+            per_page = 25
+        if per_page <= 0:
+            per_page = 25
 
-    # get page size from query param (with sensible defaults)
-    try:
-        per_page = int(request.GET.get("per_page", 25))
-    except ValueError:
-        per_page = 25
-    if per_page <= 0:
-        per_page = 25
+        paginator = Paginator(qs, per_page)
+        page = request.GET.get("page", 1)
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
 
-    paginator = Paginator(qs, per_page)
+        get_params = request.GET.copy()
+        if "page" in get_params:
+            del get_params["page"]
+        querystring = get_params.urlencode()
 
-    page = request.GET.get("page", 1)
-    try:
-        page_obj = paginator.page(page)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+        context = {
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "is_paginated": page_obj.has_other_pages(),
+            "per_page": per_page,
+            "querystring": querystring,
+            "page_title": "Church Users",
+        }
+        return render(request, "admin/users/church_students_list.html", context)
+    else:
+        qs = Users.objects.filter(deleted_at__isnull=True).order_by("-id")
+        if user_type == 'normal':
+            qs = qs.filter(church_admin__isnull=True)
+            page_title = "Normal Users"
+        else:
+            qs = qs.filter(church_admin__isnull=True)
+            page_title = "Normal Users"
 
-    # optional: preserve GET params for pagination links
-    get_params = request.GET.copy()
-    if "page" in get_params:
-        del get_params["page"]
-    querystring = get_params.urlencode()
+        try:
+            per_page = int(request.GET.get("per_page", 25))
+        except ValueError:
+            per_page = 25
+        if per_page <= 0:
+            per_page = 25
 
-    context = {
-        "page_obj": page_obj,
-        "paginator": paginator,
-        "is_paginated": page_obj.has_other_pages(),
-        "per_page": per_page,
-        "querystring": querystring,
-    }
-    return render(request, "admin/users/users_list.html", context)
+        paginator = Paginator(qs, per_page)
+        page = request.GET.get("page", 1)
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
+
+        get_params = request.GET.copy()
+        if "page" in get_params:
+            del get_params["page"]
+        querystring = get_params.urlencode()
+
+        context = {
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "is_paginated": page_obj.has_other_pages(),
+            "per_page": per_page,
+            "querystring": querystring,
+            "page_title": page_title,
+        }
+        return render(request, "admin/users/users_list.html", context)
 
 @login_required
 def users_create(request):
@@ -8242,3 +8281,844 @@ def get_church_admin_application_details(request, application_id):
         return JsonResponse({'success': False, 'message': 'Application not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@login_required
+def bulk_upload_church_users(request):
+    """
+    View for bulk uploading Church Admins and Church Users from the administrator panel.
+    """
+    try:
+        role_user = request.user.user_roles.first()
+        role_name = role_user.role.name if (role_user and role_user.role) else None
+    except Exception:
+        role_name = None
+
+    if not (request.user.is_superuser or request.user.is_staff or role_name == 'Admin'):
+        messages.error(request, "You do not have permission to access the bulk upload page.")
+        return redirect('users_list')
+
+    import csv
+    import io
+    import uuid
+    from django.utils.crypto import get_random_string
+    from home.models import Users, Roles, RoleUsers, Students, ChurchAdmins, ChurchLoginCodeSettings, Payments, Languages, Countries
+
+    packages = ChurchLoginCodeSettings.objects.all()
+    generated_password = get_random_string(10)
+    report = None
+    selected_upload_type = 'church_admin'
+
+    if request.method == 'POST':
+        upload_type = request.POST.get('upload_type', 'church_admin')
+        selected_upload_type = upload_type
+        common_password = request.POST.get('common_password', generated_password)
+        default_package_id = request.POST.get('default_package_id')
+        csv_file = request.FILES.get('csv_file')
+
+        if not csv_file:
+            messages.error(request, "Please upload an Excel or CSV file.")
+        else:
+            filename = csv_file.name.lower()
+            rows_dict = []
+            try:
+                if filename.endswith('.csv'):
+                    # Read CSV data and decode (handle UTF-8 with BOM)
+                    file_data = csv_file.read().decode('utf-8-sig')
+                    io_string = io.StringIO(file_data)
+                    reader = csv.DictReader(io_string)
+                    if reader.fieldnames:
+                        reader.fieldnames = [h.strip() for h in reader.fieldnames if h]
+                    for row in reader:
+                        rows_dict.append(row)
+                elif filename.endswith('.xlsx') or filename.endswith('.xls'):
+                    import openpyxl
+                    wb = openpyxl.load_workbook(csv_file, data_only=True)
+                    ws = wb.active
+                    excel_rows = list(ws.iter_rows(values_only=True))
+                    if len(excel_rows) > 0:
+                        # Clean headers
+                        headers = [str(cell).strip() if cell is not None else '' for cell in excel_rows[0]]
+                        headers = [h for h in headers if h]
+                        
+                        for r in excel_rows[1:]:
+                            row_dict = {}
+                            for idx, cell in enumerate(r):
+                                if idx < len(headers):
+                                    row_dict[headers[idx]] = str(cell).strip() if cell is not None else ''
+                            if any(row_dict.values()):
+                                rows_dict.append(row_dict)
+                else:
+                    messages.error(request, "Unsupported file format. Please upload an Excel (.xlsx/.xls) or CSV file.")
+                    return redirect('bulk_upload_church_users')
+
+                total_rows = 0
+                success_count = 0
+                failed_count = 0
+                details = []
+
+                default_language = Languages.objects.filter(language_name__iexact='English').first() or Languages.objects.first()
+                default_timezone = getattr(settings, 'TIME_ZONE', 'UTC')
+
+                default_package = None
+                if default_package_id:
+                    default_package = ChurchLoginCodeSettings.objects.filter(id=default_package_id).first()
+
+                for row_idx, row in enumerate(rows_dict, start=1):
+                    total_rows += 1
+                    
+                    # Clean the row dict keys and values
+                    row = {k.strip(): (v.strip() if v else '') for k, v in row.items() if k}
+                    
+                    if upload_type in ('church_admin', 'church_user'):
+                        email = row.get('email')
+                        first_name = row.get('first_name')
+                        last_name = row.get('last_name', '')
+                        
+                        row_report = {
+                            'row_number': row_idx,
+                            'email': email or 'N/A',
+                            'name': f"{first_name or ''} {last_name or ''}".strip() or 'N/A',
+                            'type_info': 'Church Admin' if upload_type == 'church_admin' else 'Church User',
+                            'status': 'failed',
+                            'message': ''
+                        }
+
+                        # Row validation
+                        if not email:
+                            row_report['message'] = "Missing email address."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not first_name:
+                            row_report['message'] = "Missing first_name."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Check unique email in Users
+                        if Users.objects.filter(email=email).exists():
+                            row_report['message'] = f"Account with email {email} already registered."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        if upload_type == 'church_admin':
+                            name_of_church = row.get('name_of_church')
+                            if not name_of_church:
+                                row_report['message'] = "Missing name_of_church."
+                                details.append(row_report)
+                                failed_count += 1
+                                continue
+
+                            # Resolve package
+                            package_id = row.get('church_code_id')
+                            package_obj = None
+                            if package_id:
+                                package_obj = ChurchLoginCodeSettings.objects.filter(id=package_id).first()
+                            if not package_obj:
+                                package_obj = default_package
+
+                            if not package_obj:
+                                row_report['message'] = "Could not resolve a valid church settings package."
+                                details.append(row_report)
+                                failed_count += 1
+                                continue
+
+                            # Resolve church code
+                            code = row.get('code')
+                            if code:
+                                if ChurchAdmins.objects.filter(code=code, deleted_at__isnull=True).exists():
+                                    row_report['message'] = f"Church code '{code}' already in use."
+                                    details.append(row_report)
+                                    failed_count += 1
+                                    continue
+                            else:
+                                code = get_random_string(6).upper()
+                                while ChurchAdmins.objects.filter(code=code, deleted_at__isnull=True).exists():
+                                    code = get_random_string(6).upper()
+
+                            name_of_paster = row.get('name_of_paster') or None
+                            church_address = row.get('church_address') or None
+
+                            # DB Insertions inside transaction
+                            try:
+                                with transaction.atomic():
+                                    student_id = f"CHA{uuid.uuid4().hex[:8].upper()}"
+                                    student = Students.objects.create(
+                                        student_id=student_id,
+                                        first_name=first_name,
+                                        last_name=last_name,
+                                        email=email,
+                                        language=default_language,
+                                        timezone=default_timezone,
+                                        status=True,
+                                        active=True,
+                                        is_paid=True,
+                                        approve_date=timezone.now()
+                                    )
+
+                                    church_admin_obj = ChurchAdmins.objects.create(
+                                        student=student,
+                                        name_of_church=name_of_church,
+                                        name_of_paster=name_of_paster,
+                                        church_address=church_address,
+                                        church_code=package_obj,
+                                        code=code,
+                                        amount=package_obj.amount,
+                                        max_user_no=package_obj.max_user_no,
+                                        current_user_no=1,
+                                        is_paid=True,
+                                        created_at=timezone.now(),
+                                        updated_at=timezone.now()
+                                    )
+
+                                    user = Users.objects.create_user(
+                                        email=email,
+                                        username=student_id,
+                                        password=common_password,
+                                        name=f"{first_name} {last_name}".strip(),
+                                        church_admin=church_admin_obj,
+                                        is_active=True,
+                                        created_at=timezone.now(),
+                                        updated_at=timezone.now()
+                                    )
+
+                                    student.user = user
+                                    student.save()
+
+                                row_report['status'] = 'success'
+                                row_report['message'] = f"Created Church Admin. Code: {code}"
+                                success_count += 1
+                            except Exception as inner_ex:
+                                row_report['message'] = f"Database insertion error: {str(inner_ex)}"
+                                failed_count += 1
+
+                        elif upload_type == 'church_user':
+                            church_code = row.get('church_code')
+                            if not church_code:
+                                row_report['message'] = "Missing church_code."
+                                details.append(row_report)
+                                failed_count += 1
+                                continue
+
+                            # Fetch Church Admin
+                            church_admin_obj = ChurchAdmins.objects.filter(code=church_code, deleted_at__isnull=True).first()
+                            if not church_admin_obj:
+                                row_report['message'] = f"Church code '{church_code}' does not exist."
+                                details.append(row_report)
+                                failed_count += 1
+                                continue
+
+                            # Check User Limit
+                            if church_admin_obj.max_user_no > 0 and church_admin_obj.current_user_no >= church_admin_obj.max_user_no:
+                                row_report['message'] = f"User limit ({church_admin_obj.max_user_no}) reached for church code '{church_code}'."
+                                details.append(row_report)
+                                failed_count += 1
+                                continue
+
+                            # DB Insertions inside transaction
+                            try:
+                                with transaction.atomic():
+                                    student_id = f"CHU{uuid.uuid4().hex[:8].upper()}"
+                                    student = Students.objects.create(
+                                        student_id=student_id,
+                                        first_name=first_name,
+                                        last_name=last_name,
+                                        email=email,
+                                        language=default_language,
+                                        timezone=default_timezone,
+                                        status=True,
+                                        active=True,
+                                        is_paid=True,
+                                        approve_date=timezone.now()
+                                    )
+
+                                    user = Users.objects.create_user(
+                                        email=email,
+                                        username=student_id,
+                                        password=common_password,
+                                        name=f"{first_name} {last_name}".strip(),
+                                        church_admin=church_admin_obj,
+                                        is_active=True,
+                                        created_at=timezone.now(),
+                                        updated_at=timezone.now()
+                                    )
+
+                                    student.user = user
+                                    student.save()
+
+                                    # Assign role
+                                    church_user_role = Roles.objects.filter(name="Church User").first()
+                                    if church_user_role:
+                                        RoleUsers.objects.create(user=user, role=church_user_role)
+
+                                    # Increment user count
+                                    church_admin_obj.current_user_no = (church_admin_obj.current_user_no or 0) + 1
+                                    church_admin_obj.save()
+
+                                row_report['status'] = 'success'
+                                row_report['message'] = f"Created Church User under church '{church_admin_obj.name_of_church}'."
+                                success_count += 1
+                            except Exception as inner_ex:
+                                row_report['message'] = f"Database insertion error: {str(inner_ex)}"
+                                failed_count += 1
+
+                        details.append(row_report)
+
+                    elif upload_type == 'assign_exams':
+                        student_email = row.get('student_email')
+                        exam_code = row.get('exam_code')
+                        
+                        row_report = {
+                            'row_number': row_idx,
+                            'email': student_email or 'N/A',
+                            'name': f"Exam Code: {exam_code or 'N/A'}",
+                            'type_info': 'Assign Exam',
+                            'status': 'failed',
+                            'message': ''
+                        }
+
+                        if not student_email:
+                            row_report['message'] = "Missing student_email."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not exam_code:
+                            row_report['message'] = "Missing exam_code."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Student
+                        student = Students.objects.filter(email=student_email).first()
+                        if not student:
+                            row_report['message'] = f"Student with email {student_email} not found."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Exam
+                        from home.models import Exams
+                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        if not exam:
+                            row_report['message'] = f"Exam with code {exam_code} not found."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Check if exam is already assigned to this student
+                        from home.models import StudentsExams
+                        if StudentsExams.objects.filter(student=student, exam=exam, deleted_at__isnull=True).exists():
+                            row_report['message'] = "Exam is already assigned to this student."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Create the assignment
+                        try:
+                            # Parse dates/duration if provided
+                            start_time_str = row.get('start_time')
+                            end_time_str = row.get('end_time')
+                            duration_str = row.get('exam_duration')
+                            
+                            duration = 180
+                            if duration_str:
+                                try:
+                                    duration = int(duration_str)
+                                except ValueError:
+                                    pass
+
+                            start_time_obj = None
+                            if start_time_str:
+                                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y'):
+                                    try:
+                                        from datetime import datetime
+                                        start_time_obj = timezone.make_aware(datetime.strptime(start_time_str, fmt))
+                                        break
+                                    except ValueError:
+                                        continue
+                            if not start_time_obj:
+                                start_time_obj = timezone.now()
+
+                            end_time_obj = None
+                            if end_time_str:
+                                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y'):
+                                    try:
+                                        from datetime import datetime
+                                        end_time_obj = timezone.make_aware(datetime.strptime(end_time_str, fmt))
+                                        break
+                                    except ValueError:
+                                        continue
+                            if not end_time_obj:
+                                from datetime import timedelta
+                                end_time_obj = start_time_obj + timedelta(minutes=duration)
+
+                            with transaction.atomic():
+                                StudentsExams.objects.create(
+                                    student=student,
+                                    course=student.course_applied,
+                                    subject=exam.subject,
+                                    exam=exam,
+                                    start_time=start_time_obj,
+                                    end_time=end_time_obj,
+                                    timezone=default_timezone,
+                                    exam_duration=duration,
+                                    show_on_score=0,
+                                    is_approved=True,
+                                    created_by=request.user,
+                                    updated_by=request.user
+                                )
+                            row_report['status'] = 'success'
+                            row_report['message'] = f"Successfully assigned exam '{exam.exam_name}' to student."
+                            success_count += 1
+                        except Exception as inner_ex:
+                            row_report['message'] = f"Database error during assign: {str(inner_ex)}"
+                            failed_count += 1
+                        
+                        details.append(row_report)
+
+                    elif upload_type == 'upload_marks':
+                        student_email = row.get('student_email')
+                        exam_code = row.get('exam_code')
+                        marks_str = row.get('marks_obtained')
+                        
+                        row_report = {
+                            'row_number': row_idx,
+                            'email': student_email or 'N/A',
+                            'name': f"Exam Code: {exam_code or 'N/A'}, Marks: {marks_str or 'N/A'}",
+                            'type_info': 'Upload Marks',
+                            'status': 'failed',
+                            'message': ''
+                        }
+
+                        if not student_email:
+                            row_report['message'] = "Missing student_email."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not exam_code:
+                            row_report['message'] = "Missing exam_code."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not marks_str:
+                            row_report['message'] = "Missing marks_obtained."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Parse marks
+                        try:
+                            marks = int(float(marks_str))
+                        except ValueError:
+                            row_report['message'] = f"Invalid marks format: '{marks_str}'. Must be a number."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Student
+                        student = Students.objects.filter(email=student_email).first()
+                        if not student:
+                            row_report['message'] = f"Student with email {student_email} not found."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Exam
+                        from home.models import Exams
+                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        if not exam:
+                            row_report['message'] = f"Exam with code '{exam_code}' not found."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Check if exam is already assigned to this student
+                        from home.models import StudentsExams
+                        student_exam = StudentsExams.objects.filter(student=student, exam=exam, deleted_at__isnull=True).first()
+
+                        try:
+                            # Parse dates/duration if provided
+                            start_time_str = row.get('start_time')
+                            end_time_str = row.get('end_time')
+                            duration_str = row.get('exam_duration')
+                            
+                            duration = 180
+                            if duration_str:
+                                try:
+                                    duration = int(duration_str)
+                                except ValueError:
+                                    pass
+
+                            start_time_obj = None
+                            if start_time_str:
+                                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y'):
+                                    try:
+                                        from datetime import datetime
+                                        start_time_obj = timezone.make_aware(datetime.strptime(start_time_str, fmt))
+                                        break
+                                    except ValueError:
+                                        continue
+                            if not start_time_obj:
+                                start_time_obj = timezone.now()
+
+                            end_time_obj = None
+                            if end_time_str:
+                                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y'):
+                                    try:
+                                        from datetime import datetime
+                                        end_time_obj = timezone.make_aware(datetime.strptime(end_time_str, fmt))
+                                        break
+                                    except ValueError:
+                                        continue
+                            if not end_time_obj:
+                                from datetime import timedelta
+                                end_time_obj = start_time_obj + timedelta(minutes=duration)
+
+                            with transaction.atomic():
+                                if not student_exam:
+                                    student_exam = StudentsExams.objects.create(
+                                        student=student,
+                                        course=student.course_applied,
+                                        subject=exam.subject,
+                                        exam=exam,
+                                        start_time=start_time_obj,
+                                        end_time=end_time_obj,
+                                        timezone=default_timezone,
+                                        exam_duration=duration,
+                                        show_on_score=marks,
+                                        is_approved=True,
+                                        is_exam_started=True,
+                                        is_exam_ended=True,
+                                        created_by=request.user,
+                                        updated_by=request.user
+                                    )
+                                    row_report['message'] = f"Assigned exam '{exam.exam_name}' and uploaded score of {marks} marks."
+                                else:
+                                    # Update marks on existing assignment
+                                    student_exam.is_exam_started = True
+                                    student_exam.is_exam_ended = True
+                                    student_exam.show_on_score = marks
+                                    student_exam.is_approved = True
+                                    if start_time_str:
+                                        student_exam.start_time = start_time_obj
+                                    if end_time_str:
+                                        student_exam.end_time = end_time_obj
+                                    if duration_str:
+                                        student_exam.exam_duration = duration
+                                    student_exam.updated_by = request.user
+                                    student_exam.save()
+                                    row_report['message'] = f"Updated exam '{exam.exam_name}' and registered score of {marks} marks."
+                                
+                            row_report['status'] = 'success'
+                            success_count += 1
+                        except Exception as inner_ex:
+                            row_report['message'] = f"Database error during update: {str(inner_ex)}"
+                            failed_count += 1
+
+                        details.append(row_report)
+
+                    elif upload_type == 'upload_exams':
+                        subject_code = row.get('subject_code')
+                        exam_code = row.get('exam_code')
+                        exam_name = row.get('exam_name')
+                        exam_type = row.get('exam_type', '').lower()
+                        
+                        row_report = {
+                            'row_number': row_idx,
+                            'email': 'N/A',
+                            'name': f"Subject: {subject_code or 'N/A'}, Exam: {exam_code or 'N/A'}",
+                            'type_info': 'Upload Exam',
+                            'status': 'failed',
+                            'message': ''
+                        }
+
+                        if not subject_code:
+                            row_report['message'] = "Missing subject_code."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not exam_code:
+                            row_report['message'] = "Missing exam_code."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not exam_type or exam_type not in ('objective', 'descriptive'):
+                            row_report['message'] = f"Invalid or missing exam_type: '{exam_type}'. Must be 'objective' or 'descriptive'."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Subject
+                        subject = Subjects.objects.filter(subject_code=subject_code, deleted_at__isnull=True).first()
+                        if not subject:
+                            row_report['message'] = f"Subject with code '{subject_code}' not found."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Check if exam with exam_code already exists
+                        from home.models import Exams
+                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        
+                        try:
+                            with transaction.atomic():
+                                if exam:
+                                    # Update existing exam
+                                    exam.subject = subject
+                                    if exam_name:
+                                        exam.exam_name = exam_name
+                                    exam.exam_type = exam_type
+                                    exam.updated_by = request.user
+                                    exam.save()
+                                    row_report['message'] = f"Updated existing Exam '{exam.exam_name}' under subject '{subject.subject_name}'."
+                                else:
+                                    # Create new exam
+                                    exam = Exams.objects.create(
+                                        code=exam_code,
+                                        subject=subject,
+                                        exam_name=exam_name or f"Exam {exam_code}",
+                                        exam_type=exam_type,
+                                        status=True,
+                                        created_by=request.user,
+                                        updated_by=request.user
+                                    )
+                                    row_report['message'] = f"Created Exam '{exam.exam_name}' under subject '{subject.subject_name}'."
+
+                            row_report['status'] = 'success'
+                            success_count += 1
+                        except Exception as inner_ex:
+                            row_report['message'] = f"Database error during exam creation: {str(inner_ex)}"
+                            failed_count += 1
+
+                        details.append(row_report)
+
+                    elif upload_type == 'upload_questions':
+                        exam_code = row.get('exam_code')
+                        question_text = row.get('question_text')
+                        marks_str = row.get('marks')
+                        
+                        row_report = {
+                            'row_number': row_idx,
+                            'email': 'N/A',
+                            'name': f"Exam Code: {exam_code or 'N/A'}, Question: {question_text[:30] if question_text else 'N/A'}",
+                            'type_info': 'Upload Question',
+                            'status': 'failed',
+                            'message': ''
+                        }
+
+                        if not exam_code:
+                            row_report['message'] = "Missing exam_code."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+                        if not question_text:
+                            row_report['message'] = "Missing question_text."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        # Resolve Exam
+                        from home.models import Exams
+                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        if not exam:
+                            row_report['message'] = f"Exam with code '{exam_code}' not found. Please upload the Exam definition first."
+                            details.append(row_report)
+                            failed_count += 1
+                            continue
+
+                        try:
+                            with transaction.atomic():
+                                if exam.exam_type == 'descriptive':
+                                    from home.models import DescriptiveQuestions
+                                    # Default marks to 5 if not provided or invalid
+                                    try:
+                                        marks = int(float(marks_str)) if marks_str else 5
+                                    except ValueError:
+                                        marks = 5
+                                    
+                                    DescriptiveQuestions.objects.create(
+                                        exam=exam,
+                                        question=question_text,
+                                        mark=marks,
+                                        created_by=request.user,
+                                        updated_by=request.user
+                                    )
+                                    row_report['message'] = f"Added descriptive question to Exam '{exam.exam_name}' (Marks: {marks})."
+                                
+                                elif exam.exam_type == 'objective':
+                                    from home.models import ObjectiveQuestions
+                                    option1 = row.get('option1')
+                                    option2 = row.get('option2')
+                                    option3 = row.get('option3') or None
+                                    option4 = row.get('option4') or None
+                                    answer_option = row.get('answer_option')
+                                    
+                                    if not option1 or not option2:
+                                        row_report['message'] = "Objective questions require option1 and option2."
+                                        raise ValueError("Missing options")
+                                    if not answer_option or answer_option not in ('1', '2', '3', '4'):
+                                        row_report['message'] = "Objective questions require answer_option (1, 2, 3, or 4)."
+                                        raise ValueError("Missing/invalid answer option")
+
+                                    # Set answer text
+                                    answer = None
+                                    if answer_option == '1':
+                                        answer = option1
+                                    elif answer_option == '2':
+                                        answer = option2
+                                    elif answer_option == '3':
+                                        answer = option3
+                                    elif answer_option == '4':
+                                        answer = option4
+
+                                    # Default marks to 1 if not provided or invalid
+                                    from decimal import Decimal
+                                    try:
+                                        marks = Decimal(marks_str) if marks_str else Decimal('1.00')
+                                    except Exception:
+                                        marks = Decimal('1.00')
+
+                                    ObjectiveQuestions.objects.create(
+                                        exam=exam,
+                                        question=question_text,
+                                        option1=option1,
+                                        option2=option2,
+                                        option3=option3,
+                                        option4=option4,
+                                        answer_option=answer_option,
+                                        answer=answer,
+                                        marks=marks,
+                                        created_by=request.user,
+                                        updated_by=request.user
+                                    )
+                                    row_report['message'] = f"Added objective question to Exam '{exam.exam_name}' (Marks: {marks})."
+
+                            row_report['status'] = 'success'
+                            success_count += 1
+                        except Exception as inner_ex:
+                            if not row_report['message']:
+                                row_report['message'] = f"Database error during question creation: {str(inner_ex)}"
+                            failed_count += 1
+
+                        details.append(row_report)
+
+                report = {
+                    'total': total_rows,
+                    'success': success_count,
+                    'failed': failed_count,
+                    'details': details
+                }
+                messages.success(request, f"Bulk upload completed: {success_count} accounts created, {failed_count} failed.")
+            except Exception as e:
+                messages.error(request, f"Error processing CSV file: {str(e)}")
+
+    context = {
+        'packages': packages,
+        'generated_password': generated_password,
+        'report': report,
+        'selected_upload_type': selected_upload_type,
+        'page_title': 'Bulk Upload Profiles'
+    }
+    return render(request, 'admin/bulk_upload.html', context)
+
+
+@login_required
+def download_bulk_template(request, type_name):
+    """
+    Generate and download sample Excel file for bulk upload templates.
+    """
+    try:
+        role_user = request.user.user_roles.first()
+        role_name = role_user.role.name if (role_user and role_user.role) else None
+    except Exception:
+        role_name = None
+
+    if not (request.user.is_superuser or request.user.is_staff or role_name == 'Admin'):
+        return HttpResponse("Unauthorized", status=403)
+
+    import openpyxl
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Template"
+
+    if type_name == 'church_admin':
+        headers = ['first_name', 'last_name', 'email', 'name_of_church', 'name_of_paster', 'church_address', 'church_code_id', 'code']
+        sample_row = ['John', 'Doe', 'john.doe@example.com', 'Grace Cathedral', 'Pastor John Smith', '123 Faith Road, City', '', 'GRACE01']
+        filename = "church_admin_template.xlsx"
+    elif type_name == 'church_user':
+        headers = ['first_name', 'last_name', 'email', 'church_code']
+        sample_row = ['Jane', 'Smith', 'jane.smith@example.com', 'GRACE01']
+        filename = "church_user_template.xlsx"
+    elif type_name == 'assign_exams':
+        headers = ['student_email', 'exam_code', 'start_time', 'end_time', 'exam_duration']
+        sample_row = ['jane.smith@example.com', 'EXAM01', '2026-07-16 09:00:00', '2026-07-16 12:00:00', '180']
+        filename = "assign_exams_template.xlsx"
+    elif type_name == 'upload_marks':
+        headers = ['student_email', 'exam_code', 'marks_obtained', 'start_time', 'end_time', 'exam_duration']
+        sample_row = ['jane.smith@example.com', 'EXAM01', '85', '2026-07-16 09:00:00', '2026-07-16 12:00:00', '180']
+        filename = "upload_marks_template.xlsx"
+    elif type_name == 'upload_exams':
+        headers = ['subject_code', 'exam_code', 'exam_name', 'exam_type']
+        sample_row = ['SUB01', 'EXAM01', 'New Testament Theology', 'objective']
+        filename = "upload_exams_template.xlsx"
+    elif type_name == 'upload_questions':
+        headers = ['exam_code', 'question_text', 'marks', 'option1', 'option2', 'option3', 'option4', 'answer_option']
+        sample_row = ['EXAM01', 'Who was the first king of Israel?', '1', 'Saul', 'David', 'Solomon', 'Samuel', '1']
+        filename = "upload_questions_template.xlsx"
+    else:
+        from django.http import HttpResponse
+        return HttpResponse("Invalid template type", status=400)
+
+    ws.append(headers)
+    ws.append(sample_row)
+
+    from django.http import HttpResponse
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    wb.save(response)
+    return response
+
+
+@login_required
+def church_students_list(request):
+    """
+    List all students associated with a church (church admins and users under them).
+    """
+    from home.models import Students
+    qs = Students.objects.filter(user__church_admin__isnull=False).select_related('user', 'user__church_admin').order_by("-id")
+    
+    # get page size from query param (with sensible defaults)
+    try:
+        per_page = int(request.GET.get("per_page", 25))
+    except ValueError:
+        per_page = 25
+    if per_page <= 0:
+        per_page = 25
+
+    paginator = Paginator(qs, per_page)
+
+    page = request.GET.get("page", 1)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # optional: preserve GET params for pagination links
+    get_params = request.GET.copy()
+    if "page" in get_params:
+        del get_params["page"]
+    querystring = get_params.urlencode()
+
+    context = {
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "is_paginated": page_obj.has_other_pages(),
+        "per_page": per_page,
+        "querystring": querystring,
+        "page_title": "Church Users",
+    }
+    return render(request, "admin/users/church_students_list.html", context)
