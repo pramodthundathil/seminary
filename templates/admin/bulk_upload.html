@@ -423,6 +423,18 @@
             </div>
         </div>
 
+        {% if report.failed > 0 %}
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 p-3 rounded" style="background-color: #fffbeb; border: 1px solid #fef3c7;">
+            <div class="small text-warning-emphasis fw-medium">
+                <i class="fas fa-exclamation-triangle me-2 text-warning"></i> Some rows failed validation or insertion. Download the failed rows sheet, fix them, and re-upload.
+            </div>
+            <a href="{% url 'download_failed_rows' %}" class="btn btn-sm btn-danger d-flex align-items-center gap-2" style="border-radius: 6px; font-weight: 600; padding: 6px 16px; font-size: 13px;">
+                <i class="fas fa-file-excel"></i>
+                <span>Download Failed Rows (Excel)</span>
+            </a>
+        </div>
+        {% endif %}
+
         {% if report.details %}
         <div class="table-responsive">
             <table class="table report-table align-middle">

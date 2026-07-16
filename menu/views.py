@@ -9006,6 +9006,23 @@ def bulk_upload_church_users(request):
                     'failed': failed_count,
                     'details': details
                 }
+                
+                failed_rows = []
+                for item in details:
+                    if item.get('status') == 'failed':
+                        row_idx = item.get('row_number')
+                        if 1 <= row_idx <= len(rows_dict):
+                            orig_row = rows_dict[row_idx - 1]
+                            failed_row_copy = dict(orig_row)
+                            failed_row_copy['failure_reason'] = item.get('message', '')
+                            failed_rows.append(failed_row_copy)
+                            
+                if failed_count > 0:
+                    request.session['bulk_upload_failed_rows'] = failed_rows
+                    request.session['bulk_upload_failed_type'] = upload_type
+                else:
+                    request.session.pop('bulk_upload_failed_rows', None)
+                    request.session.pop('bulk_upload_failed_type', None)
                 messages.success(request, f"Bulk upload completed: {success_count} accounts created, {failed_count} failed.")
             except Exception as e:
                 messages.error(request, f"Error processing CSV file: {str(e)}")
@@ -9073,6 +9090,64 @@ def download_bulk_template(request, type_name):
     from django.http import HttpResponse
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename={filename}'
+    wb.save(response)
+    return response
+
+
+@login_required
+def download_failed_rows(request):
+    """
+    Download Excel spreadsheet containing only the failed rows from the last bulk upload execution.
+    """
+    try:
+        role_user = request.user.user_roles.first()
+        role_name = role_user.role.name if (role_user and role_user.role) else None
+    except Exception:
+        role_name = None
+
+    if not (request.user.is_superuser or request.user.is_staff or role_name == 'Admin'):
+        return HttpResponse("Unauthorized", status=403)
+
+    failed_rows = request.session.get('bulk_upload_failed_rows')
+    failed_type = request.session.get('bulk_upload_failed_type')
+
+    if not failed_rows or not failed_type:
+        messages.error(request, "No failed rows found to download.")
+        return redirect('bulk_upload_church_users')
+
+    headers_map = {
+        'church_admin': ['first_name', 'last_name', 'email', 'name_of_church', 'name_of_paster', 'church_address', 'church_code_id', 'code'],
+        'church_user': ['first_name', 'last_name', 'email', 'church_code'],
+        'assign_exams': ['student_email', 'exam_code', 'start_time', 'end_time', 'exam_duration'],
+        'upload_marks': ['student_email', 'exam_code', 'marks_obtained', 'start_time', 'end_time', 'exam_duration'],
+        'upload_exams': ['subject_code', 'exam_code', 'exam_name', 'exam_type'],
+        'upload_questions': ['exam_code', 'question_text', 'marks', 'option1', 'option2', 'option3', 'option4', 'answer_option']
+    }
+
+    headers = headers_map.get(failed_type, [])
+    if not headers:
+        messages.error(request, "Invalid uploader type.")
+        return redirect('bulk_upload_church_users')
+
+    import openpyxl
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Failed Rows"
+
+    # Add error_message column
+    file_headers = headers + ['error_message']
+    ws.append(file_headers)
+
+    for row in failed_rows:
+        row_values = []
+        for h in headers:
+            row_values.append(row.get(h, ''))
+        row_values.append(row.get('failure_reason', ''))
+        ws.append(row_values)
+
+    from django.http import HttpResponse
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename=failed_rows_{failed_type}.xlsx'
     wb.save(response)
     return response
 

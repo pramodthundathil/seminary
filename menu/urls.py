@@ -319,6 +319,7 @@ urlpatterns = [
     path("admin/church-users/", views.church_students_list, name="church_students_list"),
     path("admin/users/bulk-upload/", views.bulk_upload_church_users, name="bulk_upload_church_users"),
     path("admin/users/bulk-upload/template/<str:type_name>/", views.download_bulk_template, name="download_bulk_template"),
+    path("admin/users/bulk-upload/download-failed/", views.download_failed_rows, name="download_failed_rows"),
     path("users/create/", views.users_create, name="users_create"),
     path("users/<int:id>/view/", views.users_view, name="users_view"),
     path("users/<int:id>/edit/", views.users_edit, name="users_edit"),
