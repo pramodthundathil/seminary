@@ -8360,9 +8360,7 @@ def bulk_upload_church_users(request):
                 default_language = Languages.objects.filter(language_name__iexact='English').first() or Languages.objects.first()
                 default_timezone = getattr(settings, 'TIME_ZONE', 'UTC')
 
-                default_package = None
-                if default_package_id:
-                    default_package = ChurchLoginCodeSettings.objects.filter(id=default_package_id).first()
+
 
                 for row_idx, row in enumerate(rows_dict, start=1):
                     total_rows += 1
@@ -8412,15 +8410,13 @@ def bulk_upload_church_users(request):
                                 continue
 
                             # Resolve package
-                            package_id = row.get('church_code_id')
+                            package_id = row.get('church_code_id') or row.get('plan_id')
                             package_obj = None
                             if package_id:
-                                package_obj = ChurchLoginCodeSettings.objects.filter(id=package_id).first()
-                            if not package_obj:
-                                package_obj = default_package
+                                package_obj = ChurchLoginCodeSettings.objects.filter(id=package_id, deleted_at__isnull=True).first()
 
                             if not package_obj:
-                                row_report['message'] = "Could not resolve a valid church settings package."
+                                row_report['message'] = "Missing or invalid church_code_id (Plan/Setting ID)."
                                 details.append(row_report)
                                 failed_count += 1
                                 continue
@@ -9045,7 +9041,7 @@ def download_bulk_template(request, type_name):
 
     if type_name == 'church_admin':
         headers = ['first_name', 'last_name', 'email', 'name_of_church', 'name_of_paster', 'church_address', 'church_code_id', 'code']
-        sample_row = ['John', 'Doe', 'john.doe@example.com', 'Grace Cathedral', 'Pastor John Smith', '123 Faith Road, City', '', 'GRACE01']
+        sample_row = ['John', 'Doe', 'john.doe@example.com', 'Grace Cathedral', 'Pastor John Smith', '123 Faith Road, City', '1', 'GRACE01']
         filename = "church_admin_template.xlsx"
     elif type_name == 'church_user':
         headers = ['first_name', 'last_name', 'email', 'church_code']
