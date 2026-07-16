@@ -358,7 +358,7 @@
                     <select class="form-select input-premium" id="default_package_id" name="default_package_id">
                         {% for pkg in packages %}
                             <option value="{{ pkg.id }}" {% if forloop.first %}selected{% endif %}>
-                                {{ pkg.name }}
+                                {{ pkg.name }} (Branch: {{ pkg.branches.branch_name }}, Amount: {{ pkg.amount }})
                             </option>
                         {% endfor %}
                     </select>
