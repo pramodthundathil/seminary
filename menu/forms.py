@@ -425,6 +425,10 @@ class AssignmentForm(forms.ModelForm):
             "total_score",
         ]
 
+        labels = {
+            "assignment_name": "Assignment Question",
+        }
+
         widgets = {
             "code": forms.TextInput(attrs={
                 "class": "form-control",
@@ -433,9 +437,10 @@ class AssignmentForm(forms.ModelForm):
             "subject": forms.Select(attrs={
                 "class": "form-control"
             }),
-            "assignment_name": forms.TextInput(attrs={
+            "assignment_name": forms.Textarea(attrs={
                 "class": "form-control",
-                "placeholder": "Enter assignment name"
+                "placeholder": "Enter assignment question",
+                "rows": 4,
             }),
             "assignment_type": forms.Select(attrs={
                 "class": "form-control",

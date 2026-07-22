@@ -1,4 +1,5 @@
 {% extends 'admin/index.html' %}
+{% load admin_tags %}
 {% block content %}
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -174,11 +175,13 @@
             <i class="fas fa-bars"></i>
             Menu Management
         </h1>
+        {% if request.user|has_permission:'manage-menu' %}
         <div class="header-actions">
             <a href="{% url 'menu_engineer_new' %}" class="btn btn-primary">
                 <i class="fas fa-plus-circle"></i> Create New Menu
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="table-container">

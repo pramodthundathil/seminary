@@ -1,5 +1,37 @@
 {% extends "student/index.html" %}
 
+{% block profile_banner %}
+        <!-- Top Profile Banner -->
+        <div class="profile-banner-column">
+            <div class="profile-card horizontal-profile">
+                <div class="profile-left">
+                    <div class="profile-avatar">
+                        {% if student.photo %}
+                        <img src="/media/{{ student.photo }}" alt="Profile Picture" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                        {% else %}
+                        <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+                    <div class="profile-details">
+                        <h2 class="profile-name">
+                            {% if student.first_name %}{{ student.first_name }}{% endif %}
+                            {% if student.middle_name %} {{ student.middle_name }}{% endif %}
+                            {% if student.last_name %} {{ student.last_name }}{% endif %}
+                        </h2>
+                        <div class="profile-meta">
+                            <span class="profile-id"><i class="bi bi-card-text"></i> {{ student.student_id }}</span>
+                            <span class="role-badge"><i class="bi bi-mortarboard-fill"></i> Student</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <a href="{% url role|add:'_payment_input' %}" class="pay-button"><i class="bi bi-credit-card"></i> Pay Now</a>
+                    <a href="{% url 'student_my_payments' %}" class="pay-button secondary"><i class="bi bi-wallet2"></i> My Payments</a>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
 {% block middle %}
 
 

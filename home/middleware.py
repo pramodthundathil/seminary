@@ -52,11 +52,17 @@ class PermissionAccessMiddleware:
                         'users_view': 'manage-users',
                         'users_edit': 'manage-users',
                         'users_delete': 'manage-users',
+                        'church_students_list': 'manage-users',
+                        'bulk_upload_church_users': 'manage-users',
+                        'download_bulk_template': 'manage-users',
+                        'download_failed_rows': 'manage-users',
                         
                         # Students
                         'student_list': 'list-students',
                         'student_datatable': 'list-students',
                         'student_create': 'create-students',
+                        'student_edit': 'edit-students',
+                        'student_get': 'list-students',
                         'student_update': 'edit-students',
                         'student_delete': 'delete-students',
                         'student_detail': 'list-students',
@@ -104,6 +110,9 @@ class PermissionAccessMiddleware:
                         'student_submitted_exams_datatable': 'manage-exam-assignment',
                         'view_answer_sheet': 'manage-exam-assignment',
                         'update_answer_marks': 'manage-exam-assignment',
+                        'mark_student_exam_retest_paid': 'manage-exam-assignment',
+                        'student_exams_get': 'manage-exam-assignment',
+                        'student_exams_update': 'manage-exam-assignment',
                         
                         # Assignment Assignment
                         'student_assignment_list': 'manage-assignment-assignment',
@@ -113,6 +122,7 @@ class PermissionAccessMiddleware:
                         'student_assignment_edit': 'manage-assignment-assignment',
                         'student_assignment_delete': 'manage-assignment-assignment',
                         'update_assignment_marks': 'manage-assignment-assignment',
+                        'student_assignments_assign': 'manage-assignment-assignment',
                         
                         # Applications
                         'application_list_view': 'manage-applications',
@@ -127,6 +137,8 @@ class PermissionAccessMiddleware:
                         'menu_item_update': 'manage-menu',
                         'menu_item_delete': 'manage-menu',
                         'update_menu_order': 'manage-menu',
+                        'delete_menu': 'manage-menu',
+                        'refresh_menu_urls': 'manage-menu',
                         
                         # Pages
                         'pages_list': 'list-pages',
@@ -139,17 +151,26 @@ class PermissionAccessMiddleware:
                         'news_list': 'list-news',
                         'news_datatable': 'list-news',
                         'news_create': 'create-news',
+                        'news_get': 'list-news',
                         'news_edit': 'edit-news',
                         'news_delete': 'delete-news',
+                        'news_toggle_status': 'edit-news',
                         
                         # Media
                         'media_list': 'manage-media',
                         'media_upload': 'manage-media',
+                        'media_get': 'manage-media',
+                        'media_update': 'manage-media',
+                        'media_delete': 'manage-media',
+                        'media_library_json': 'manage-media',
+                        'media_library_upload_json': 'manage-media',
+                        'media_library_list': 'manage-media',
                         
                         # Photo Gallery
                         'photo_gallery': 'manage-photo-gallery',
                         'photo_datatable': 'manage-photo-gallery',
                         'photo_create': 'manage-photo-gallery',
+                        'photo_get': 'manage-photo-gallery',
                         'photo_update': 'manage-photo-gallery',
                         'photo_delete': 'manage-photo-gallery',
                         
@@ -159,23 +180,37 @@ class PermissionAccessMiddleware:
                         'video_edit': 'manage-video-gallery',
                         'video_view': 'manage-video-gallery',
                         'video_delete': 'manage-video-gallery',
+                        'video_library_json': 'manage-video-gallery',
+                        'video_library_create_json': 'manage-video-gallery',
+                        'youtube_library_json': 'manage-video-gallery',
+                        'youtube_library_create_json': 'manage-video-gallery',
                         
                         # Sliders
                         'slider_list': 'manage-slider',
                         'slider_datatable': 'manage-slider',
                         'slider_create': 'manage-slider',
+                        'slider_get': 'manage-slider',
+                        'slider_update': 'manage-slider',
+                        'slider_delete': 'manage-slider',
                         'slider_photos_list': 'manage-slider',
+                        'slider_photos_datatable': 'manage-slider',
+                        'slider_photo_create': 'manage-slider',
+                        'slider_photo_get': 'manage-slider',
+                        'slider_photo_update': 'manage-slider',
+                        'slider_photo_delete': 'manage-slider',
                         
                         # Categories
                         'category_list': 'list-categories',
                         'category_create': 'create-category',
                         'category_edit': 'edit-category',
+                        'category_view': 'list-categories',
                         'category_delete': 'delete-category',
                         
                         # Courses
                         'course_list': 'list-course',
                         'course_datatable': 'list-course',
                         'course_create': 'create-course',
+                        'course_get': 'list-course',
                         'course_update': 'edit-course',
                         'course_delete': 'delete-course',
                         
@@ -183,11 +218,14 @@ class PermissionAccessMiddleware:
                         'languages_list': 'list-languages',
                         'language_create': 'create-languages',
                         'language_edit': 'edit-languages',
+                        'language_view': 'list-languages',
                         'language_delete': 'delete-languages',
                         
                         # Subjects
                         'subjects_list': 'list-subjects',
+                        'subjects_export': 'list-subjects',
                         'subjects_create': 'create-subjects',
+                        'subjects_view': 'list-subjects',
                         'subjects_edit': 'edit-subjects',
                         'subjects_delete': 'delete-subjects',
                         
@@ -195,35 +233,46 @@ class PermissionAccessMiddleware:
                         'branches_list': 'list-branches',
                         'branches_create': 'create-branches',
                         'branches_edit': 'edit-branches',
+                        'branches_view': 'list-branches',
                         'branches_delete': 'delete-branches',
                         
                         # Contact Requests
                         'contact_list': 'manage-contacts',
                         'contact_view': 'manage-contacts',
                         'contact_delete': 'manage-contacts',
+                        'contact_permanent_delete': 'manage-contacts',
                         
                         # Exams
                         'exams_list': 'list-exams',
-                        'exam_create': 'create-exams',
-                        'exam_view': 'list-exams',
-                        'exam_edit': 'edit-exams',
-                        'exam_delete': 'delete-exams',
+                        'exams_create': 'create-exams',
+                        'exams_view': 'list-exams',
+                        'exams_edit': 'edit-exams',
+                        'exams_delete': 'delete-exams',
+                        'question_descriptive_create': 'edit-exams',
+                        'question_descriptive_edit': 'edit-exams',
+                        'question_descriptive_delete': 'edit-exams',
+                        'question_objective_create': 'edit-exams',
+                        'question_objective_edit': 'edit-exams',
+                        'question_objective_delete': 'edit-exams',
                         
                         # Staffs
                         'staffs_list': 'list-staffs',
                         'staffs_create': 'create-staffs',
-                        'staff_edit': 'edit-staffs',
-                        'staff_delete': 'delete-staffs',
+                        'staffs_view': 'list-staffs',
+                        'staffs_edit': 'edit-staffs',
+                        'staffs_delete': 'delete-staffs',
                         
                         # Assignments
                         'assignments_list': 'list-assignments',
                         'assignments_create': 'create-assignments',
-                        'assignment_edit': 'edit-assignments',
-                        'assignment_delete': 'delete-assignments',
+                        'assignments_view': 'list-assignments',
+                        'assignments_edit': 'edit-assignments',
+                        'assignments_delete': 'delete-assignments',
                         
                         # References
                         'reference_list': 'list-references',
                         'reference_create': 'create-references',
+                        'reference_view': 'list-references',
                         'reference_edit': 'edit-references',
                         'reference_delete': 'delete-references',
                         
@@ -231,6 +280,7 @@ class PermissionAccessMiddleware:
                         'support_list': 'manage-supports',
                         'support_view': 'manage-supports',
                         'support_delete': 'manage-supports',
+                        'support_reply_delete': 'manage-supports',
                         
                         # Uploads
                         'uploads_list': 'list-uploads',
@@ -243,6 +293,7 @@ class PermissionAccessMiddleware:
                         'payments_list': 'manage-payments',
                         'payments_view': 'manage-payments',
                         'payments_delete': 'manage-payments',
+                        'payment_dashboard': 'manage-payments',
                         
                         # Church Codes/Admins
                         'church_code_list': 'list-branches',
@@ -255,6 +306,7 @@ class PermissionAccessMiddleware:
                         'church_codes_usage_list': 'list-branches',
                         'church_codes_usage_view': 'list-branches',
                         'church_codes_usage_delete': 'list-branches',
+                        'church_admin_toggle_payment': 'list-branches',
                         'church_admin_applications_list': 'manage-church-admin-applications',
                         'approve_church_admin': 'manage-church-admin-applications',
                         'reject_church_admin': 'manage-church-admin-applications',

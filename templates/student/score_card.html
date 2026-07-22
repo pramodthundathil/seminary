@@ -813,8 +813,80 @@
             font-size: 14px;
         }
     }
+
+    /* SEARCH BOX CUSTOM STYLES */
+    .search-box-container {
+        background: white;
+        padding: 14px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .search-input-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary);
+        font-size: 16px;
+        transition: color 0.3s;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 46px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        transition: all 0.3s ease;
+        background: var(--bg-gray);
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-cyan);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(0, 206, 209, 0.15);
+    }
+
+    .search-input:focus + i {
+        color: var(--primary-cyan);
+    }
 </style>
 
+
+    <div class="exam-header">
+        <div class="exam-header-content">
+            <div class="exam-header-icon"><i class="bi bi-bar-chart-line"></i></div>
+            <div class="exam-header-text">
+                <h2>My Score Card</h2>
+                <p>View your marks, grades, and detailed reports for courses and exams.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-box-container no-print">
+        <div class="search-input-wrapper">
+            <input type="text" id="dashboardSearch" class="search-input" placeholder="Search by Course, Subject, Exam, or Assignment name..." onkeyup="filterDashboard()">
+            <i class="bi bi-search"></i>
+        </div>
+    </div>
 
     <!-- EXAM SECTION -->
     <div class="sc-section">
@@ -824,17 +896,21 @@
         <div class="sc-section-content">
             <table class="sc-table" id="examTable" style="table-layout: fixed;">
                 <colgroup>
+                    <col style="width:8%">
+                    <col style="width:12%">
+                    <col style="width:16%">
+                    <col style="width:22%">
+                    <col style="width:8%">
+                    <col style="width:8%">
+                    <col style="width:8%">
+                    <col style="width:8%">
                     <col style="width:10%">
-                    <col style="width:30%">
-                    <col style="width:10%">
-                    <col style="width:10%">
-                    <col style="width:10%">
-                    <col style="width:10%">
-                    <col style="width:20%">
                 </colgroup>
                 <thead>
                     <tr>
                         <th>Code</th>
+                        <th>Course</th>
+                        <th>Subject</th>
                         <th>Exam Name</th>
                         <th>Total Score</th>
                         <th>Score</th>
@@ -848,6 +924,8 @@
                     {% for item in student_exams %}
                     <tr>
                         <td data-label="Code">{{ item.code }}</td>
+                        <td data-label="Course">{{ item.course_name }}</td>
+                        <td data-label="Subject">{{ item.subject_name }}</td>
                         <td data-label="Exam Name">{{ item.exam_name }}</td>
                         <td data-label="Total Score">{{ item.total_score }}</td>
                         <td data-label="Score">{{ item.score }}</td>
@@ -880,7 +958,7 @@
                     {% endfor %}
                     {% else %}
                     <tr class="empty-row">
-                        <td colspan="7">
+                        <td colspan="9">
                             <div class="empty-state"><i class="bi bi-journal-x"></i> No exam records found</div>
                         </td>
                     </tr>
@@ -899,16 +977,20 @@
         <div class="sc-section-content">
             <table class="sc-table" id="assignmentTable" style="table-layout: fixed;">
                 <colgroup>
-                    <col style="width:10%">
-                    <col style="width:40%">
+                    <col style="width:8%">
                     <col style="width:15%">
+                    <col style="width:20%">
+                    <col style="width:25%">
                     <col style="width:10%">
-                    <col style="width:15%">
-                    <col style="width:10%">
+                    <col style="width:8%">
+                    <col style="width:8%">
+                    <col style="width:6%">
                 </colgroup>
                 <thead>
                     <tr>
                         <th>Code</th>
+                        <th>Course</th>
+                        <th>Subject</th>
                         <th>Assignment Name</th>
                         <th>Total Score</th>
                         <th>Score</th>
@@ -920,19 +1002,21 @@
                     {% if assignment_mark %}
                     {% for item in assignment_mark %}
                     <tr>
-                        <td>{{ item.code }}</td>
-                        <td>{{ item.assignment_name }}</td>
-                        <td>{{ item.total_score }}</td>
-                        <td>{{ item.score }}</td>
-                        <td>{{ item.percentage }}%</td>
-                        <td><span
+                        <td data-label="Code">{{ item.code }}</td>
+                        <td data-label="Course">{{ item.course_name }}</td>
+                        <td data-label="Subject">{{ item.subject_name }}</td>
+                        <td data-label="Assignment Name">{{ item.assignment_name }}</td>
+                        <td data-label="Total Score">{{ item.total_score }}</td>
+                        <td data-label="Score">{{ item.score }}</td>
+                        <td data-label="Percentage">{{ item.percentage }}%</td>
+                        <td data-label="Grade"><span
                                 class="grade-badge {% if item.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">{{item.grade }}</span></td>
                                 
                     </tr>
                     {% endfor %}
                     {% else %}
                     <tr class="empty-row">
-                        <td colspan="6">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <div class="empty-text"><i class="bi bi-journal-x"></i> No assignment records found
                                 </div>
@@ -1029,15 +1113,19 @@
         <table class="ts-table">
             <thead>
                 <tr>
-                    <th style="width: 15%;">Code</th>
-                    <th style="width: 65%;">Paper Name</th>
-                    <th style="width: 20%;" class="ts-right">Marks</th>
+                    <th style="width: 10%;">Code</th>
+                    <th style="width: 15%;">Course</th>
+                    <th style="width: 20%;">Subject</th>
+                    <th style="width: 40%;">Paper Name</th>
+                    <th style="width: 15%;" class="ts-right">Marks</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in student_exams %}
                 <tr>
                     <td>{{ item.code|default:"-" }}</td>
+                    <td>{{ item.course_name }}</td>
+                    <td>{{ item.subject_name }}</td>
                     <td>{{ item.exam_name }}</td>
                     <td class="ts-right">{{ item.percentage|floatformat:2 }}%</td>
                 </tr>
@@ -1045,6 +1133,8 @@
                 {% for item in assignment_mark %}
                 <tr>
                     <td>{{ item.code|default:"-" }}</td>
+                    <td>{{ item.course_name }}</td>
+                    <td>{{ item.subject_name }}</td>
                     <td>{{ item.assignment_name }}</td>
                     <td class="ts-right">{{ item.percentage|floatformat:2 }}%</td>
                 </tr>
@@ -1158,6 +1248,96 @@
 {% block extra_js %}
 <script src="/static/js/timezone.js"></script>
 <script>
+    /* Dynamic Dashboard search/filter functions */
+    function filterDashboard() {
+        const query = document.getElementById('dashboardSearch').value.toLowerCase().trim();
+        
+        // Filter Exams Table
+        const examRows = document.querySelectorAll('#examTable tbody tr:not(.empty-row)');
+        let visibleExamsCount = 0;
+        examRows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let textContent = '';
+            for (let i = 0; i < cells.length - 1; i++) { // exclude action column
+                textContent += cells[i].textContent.toLowerCase() + ' ';
+            }
+            if (textContent.includes(query)) {
+                row.style.display = '';
+                visibleExamsCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const examEmptyRow = document.querySelector('#examTable tbody tr.empty-row');
+        if (visibleExamsCount === 0) {
+            if (!examEmptyRow) {
+                showNoResultsRow('#examTable', 9, 'No matching exam records found');
+            } else {
+                examEmptyRow.style.display = '';
+                const emptyText = examEmptyRow.querySelector('.empty-state');
+                if (emptyText) emptyText.innerHTML = '<i class="bi bi-journal-x"></i> No matching exam records found';
+            }
+        } else {
+            if (examEmptyRow) examEmptyRow.style.display = 'none';
+            removeDynamicEmptyRow('#examTable');
+        }
+
+        // Filter Assignments Table
+        const assignmentRows = document.querySelectorAll('#assignmentTable tbody tr:not(.empty-row)');
+        let visibleAssignmentsCount = 0;
+        assignmentRows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let textContent = '';
+            for (let i = 0; i < cells.length; i++) {
+                textContent += cells[i].textContent.toLowerCase() + ' ';
+            }
+            if (textContent.includes(query)) {
+                row.style.display = '';
+                visibleAssignmentsCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const assignmentEmptyRow = document.querySelector('#assignmentTable tbody tr.empty-row');
+        if (visibleAssignmentsCount === 0) {
+            if (!assignmentEmptyRow) {
+                showNoResultsRow('#assignmentTable', 8, 'No matching assignment records found');
+            } else {
+                assignmentEmptyRow.style.display = '';
+                const emptyText = assignmentEmptyRow.querySelector('.empty-text');
+                if (emptyText) emptyText.innerHTML = '<i class="bi bi-journal-x"></i> No matching assignment records found';
+            }
+        } else {
+            if (assignmentEmptyRow) assignmentEmptyRow.style.display = 'none';
+            removeDynamicEmptyRow('#assignmentTable');
+        }
+    }
+
+    function showNoResultsRow(tableSelector, colspan, message) {
+        removeDynamicEmptyRow(tableSelector);
+        const tbody = document.querySelector(`${tableSelector} tbody`);
+        if (!tbody) return;
+        const tr = document.createElement('tr');
+        tr.className = 'empty-row dynamic-empty-row';
+        tr.innerHTML = `
+            <td colspan="${colspan}">
+                <div class="empty-state">
+                    <div class="empty-text"><i class="bi bi-search"></i> ${message}</div>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function removeDynamicEmptyRow(tableSelector) {
+        const dynamicRow = document.querySelector(`${tableSelector} tbody tr.dynamic-empty-row`);
+        if (dynamicRow) {
+            dynamicRow.remove();
+        }
+    }
+
     /* ALL your original JS is pasted AS-IS */
 
     let examScores = [];

@@ -821,7 +821,7 @@ def student_score_card(request):
     completed_exams = (
         StudentsExams.objects
         .filter(student=student, is_exam_ended=True)
-        .select_related("exam")
+        .select_related("exam", "exam__subject", "course", "subject", "student", "student__course_applied")
         .order_by('-end_time')
     )
 
@@ -874,10 +874,16 @@ def student_score_card(request):
         retest_paid = latest_retest.retest_paid if latest_retest else False
         retest_id = latest_retest.id if latest_retest else se.id
 
+        # Determine Course Name & Subject Name
+        course_name = se.course.course_name if se.course else (student.course_applied.course_name if student.course_applied else "-")
+        subject_name = se.subject.subject_name if se.subject else (exam.subject.subject_name if (exam and exam.subject) else "-")
+
         exam_data.append({
             "id": retest_id,
             "code": exam.code,
             "exam_name": exam.exam_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
             "total_score": round(total_marks),
             "score": round(obtained_marks),
             "percentage": round(percentage, 2),
@@ -893,7 +899,7 @@ def student_score_card(request):
         StudentsAssignment.objects
         .filter(student=student, submitted_on__isnull=False)  # Filter by submitted_on query
         .order_by('-submitted_on')
-        .select_related("assignment")
+        .select_related("assignment", "assignment__subject", "student", "student__course_applied")
     )
     
     assignment_data = []
@@ -912,9 +918,14 @@ def student_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
         
+        course_name = sa.student.course_applied.course_name if (sa.student and sa.student.course_applied) else "-"
+        subject_name = assignment.subject.subject_name if (assignment and assignment.subject) else "-"
+
         assignment_data.append({
             "code": assignment.code,
             "assignment_name": assignment.assignment_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
             "total_score": total,
             "score": obtained,
             "percentage": round(percentage, 2),
@@ -1034,6 +1045,72 @@ def student_profile_view(request):
             "student/student_profile.html",
             {"error": "Unable to load your profile at the moment."}
         )
+
+    # ---- Handle POST logic ----
+    if request.method == 'POST':
+        # Check if it's a photo upload
+        if 'photo' in request.FILES:
+            photo_file = request.FILES['photo']
+            try:
+                # Generate unique file name
+                file_path = f"uploads/students/{get_random_string(8)}_{photo_file.name}"
+                full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                
+                with open(full_path, "wb+") as destination:
+                    for chunk in photo_file.chunks():
+                        destination.write(chunk)
+                
+                # Delete old photo if it exists
+                if student.photo:
+                    old_path = os.path.join(settings.MEDIA_ROOT, student.photo)
+                    if os.path.exists(old_path) and os.path.isfile(old_path):
+                        try:
+                            os.remove(old_path)
+                        except Exception as delete_err:
+                            logger.error(f"Failed to delete old profile photo: {delete_err}")
+                
+                student.photo = file_path
+                student.save()
+                messages.success(request, "Profile picture updated successfully!")
+            except Exception as e:
+                logger.error(f"Error saving profile picture: {e}")
+                messages.error(request, "Failed to update profile picture.")
+            return redirect('student_profile_view')
+        
+        # Check if it's an AJAX save request
+        elif request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            import json
+            try:
+                data = json.loads(request.body)
+                
+                # Exclude email, DOB, and name as requested
+                allowed_fields = [
+                    'gender', 'phone_number', 'timezone',
+                    'mailing_address', 'city', 'zip_code', 'highest_education',
+                    'ministerial_status', 'church_affiliation', 'scholarship_needed',
+                    'currently_employed', 'income', 'affordable_amount', 'message',
+                    'reference_name1', 'reference_phone1', 'reference_email1',
+                    'reference_name2', 'reference_phone2', 'reference_email2',
+                    'reference_name3', 'reference_phone3', 'reference_email3',
+                    'mrital_status', 'spouse_name', 'children'
+                ]
+                
+                for field in allowed_fields:
+                    if field in data:
+                        val = data[field]
+                        if field == 'children':
+                            try:
+                                val = int(val) if (val and str(val).strip()) else None
+                            except ValueError:
+                                val = None
+                        setattr(student, field, val)
+                
+                student.save()
+                return JsonResponse({'success': True})
+            except Exception as e:
+                logger.error(f"Error saving profile details: {e}")
+                return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     # ---- Check for Church Admin status or application ----
     church_admin = ChurchAdmins.objects.filter(student=student).first()

@@ -278,6 +278,20 @@ def menu_datatable(request):
     # Order and paginate
     menus_query = menus_query.order_by(order_column)[start:start + length]
     
+    # Check manage-menu permission
+    has_manage_menu = False
+    try:
+        role_user = request.user.user_roles.first()
+        role = role_user.role if role_user else None
+        role_name = role.name if role else None
+        if role_name == "Admin":
+            has_manage_menu = True
+        elif role:
+            from home.models import RoleHasPermissions
+            has_manage_menu = RoleHasPermissions.objects.filter(role=role, permission__name='manage-menu').exists()
+    except Exception:
+        pass
+
     # Prepare data
     data = []
     for menu in menus_query:
@@ -285,24 +299,28 @@ def menu_datatable(request):
         
         items_count = MenuItems.objects.filter(menus=menu, deleted_at__isnull=True).count()
         
-        actions = f'''
+        actions = ""
+        if has_manage_menu:
+            actions = f'''
+                <div class="btn-group" role="group">
+            
             <div class="btn-group" role="group">
-        
-        <div class="btn-group" role="group">
-            <button id="btnGroupDrop{menu.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions
-            </button>
-            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{menu.id}">
-                <a href="/menu/menus/engineer/{menu.id}/" class="dropdown-item" title="Edit">
-                    <i class="fas fa-edit mr-2 text-primary"></i> Edit
-                </a>
-                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteMenu({menu.id}, '{menu.name}')" title="Delete">
-                    <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
+                <button id="btnGroupDrop{menu.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Actions
                 </button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupDrop{menu.id}">
+                    <a href="/menu/menus/engineer/{menu.id}/" class="dropdown-item" title="Edit">
+                        <i class="fas fa-edit mr-2 text-primary"></i> Edit
+                    </a>
+                    <button class="dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteMenu({menu.id}, '{menu.name}')" title="Delete">
+                        <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-        '''
+            '''
+        else:
+            actions = '<span class="text-muted" style="font-size:13px;">No actions</span>'
         
         data.append({
             'id': menu.id,
@@ -1763,9 +1781,43 @@ def slider_datatable(request):
         # Apply ordering and pagination
         sliders = sliders.order_by(order_column)[start:start + length]
 
+        # Check manage-slider permission
+        has_manage_slider = False
+        try:
+            role_user = request.user.user_roles.first()
+            role = role_user.role if role_user else None
+            role_name = role.name if role else None
+            if role_name == "Admin":
+                has_manage_slider = True
+            elif role:
+                from home.models import RoleHasPermissions
+                has_manage_slider = RoleHasPermissions.objects.filter(role=role, permission__name='manage-slider').exists()
+        except Exception:
+            pass
+
         # Prepare data
         data = []
         for slider in sliders:
+            actions_html = ""
+            if has_manage_slider:
+                actions_html = f'''
+                    <div class="action-buttons">
+                        <button class="btn-action btn-photos" onclick="managePhotos({slider.id})" title="Manage Photos">
+                            <i class="fas fa-images"></i>
+                        </button>
+                        <button class="btn-action btn-edit" onclick="editSlider({slider.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" 
+                            onclick="deleteSlider({slider.id}, '{slider.slider_name.replace("'", "\\'")}')" 
+                            title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                '''
+            else:
+                actions_html = '<span class="text-muted" style="font-size:13px;">No actions</span>'
+
             data.append({
                 'id': slider.id,
                 'slider_info': f'''
@@ -1789,21 +1841,7 @@ def slider_datatable(request):
                     </span>
                 ''',
                 'created_at': slider.created_at.strftime('%b %d, %Y') if slider.created_at else '-',
-                'actions': f'''
-                    <div class="action-buttons">
-                        <button class="btn-action btn-photos" onclick="managePhotos({slider.id})" title="Manage Photos">
-                            <i class="fas fa-images"></i>
-                        </button>
-                        <button class="btn-action btn-edit" onclick="editSlider({slider.id})" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action btn-delete" 
-                            onclick="deleteSlider({slider.id}, '{slider.slider_name.replace("'", "\\'")}')" 
-                            title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                '''
+                'actions': actions_html
             })
 
         return JsonResponse({
@@ -2277,6 +2315,47 @@ def course_datatable(request):
             # Qualification levels - Dynamic
             qual_text = course.highest_qualification.qualification_name if course.highest_qualification else 'Unknown'
             
+            # Check permissions for edit and delete actions
+            has_edit_perm = False
+            has_delete_perm = False
+            try:
+                role_user = request.user.user_roles.first()
+                role = role_user.role if role_user else None
+                role_name = role.name if role else None
+                if role_name == "Admin":
+                    has_edit_perm = True
+                    has_delete_perm = True
+                elif role:
+                    from home.models import RoleHasPermissions
+                    has_edit_perm = RoleHasPermissions.objects.filter(role=role, permission__name='edit-course').exists()
+                    has_delete_perm = RoleHasPermissions.objects.filter(role=role, permission__name='delete-course').exists()
+            except Exception:
+                pass
+
+            actions_html = f'''<div class="btn-group" role="group">
+        <button class="btn btn-info btn-sm mr-1" onclick="viewCourse({course.id})" title="View">
+                        <i class="fas fa-eye"></i>
+                    </button>'''
+            if has_edit_perm or has_delete_perm:
+                actions_html += f'''<div class="btn-group" role="group">
+            <button id="btnGroupDrop{course.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{course.id}">'''
+                if has_edit_perm:
+                    actions_html += f'''<a href="/menu/courses/update/{course.id}/" class="dropdown-item" title="Edit">
+                        <i class="fas fa-edit mr-2 text-primary"></i> Edit
+                    </a>'''
+                if has_edit_perm and has_delete_perm:
+                    actions_html += '<div class="dropdown-divider"></div>'
+                if has_delete_perm:
+                    actions_html += f'''<button class="dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteCourse({course.id}, '{course.course_name}')" title="Delete">
+                        <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
+                    </button>'''
+                actions_html += '''</div>
+        </div>'''
+            actions_html += '</div>'
+
             data.append({
                 'id': course.id,
                 'preview': media_preview,
@@ -2290,24 +2369,7 @@ def course_datatable(request):
                 </div>''',
                 'status': f'<span class="status-badge {status_class}">{status_text}</span>',
                 'created_at': course.created_at.strftime('%Y-%m-%d') if course.created_at else '-',
-                'actions': f'''<div class="btn-group" role="group">
-        <button class="btn btn-info btn-sm mr-1" onclick="viewCourse({course.id})" title="View">
-                        <i class="fas fa-eye"></i>
-                    </button>
-        <div class="btn-group" role="group">
-            <button id="btnGroupDrop{course.id}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions
-            </button>
-            <div class="dropdown-menu" aria-labelledby="btnGroupDrop{course.id}">
-                <a href="/menu/courses/update/{course.id}/" class="dropdown-item" title="Edit">
-                        <i class="fas fa-edit mr-2 text-primary"></i> Edit
-                    </a>
-                <button class="dropdown-item dropdown-item" style="width:100%; text-align:left; background:none; border:none;" onclick="deleteCourse({course.id}, '{course.course_name}')" title="Delete">
-                        <i class="fas fa-trash mr-2 text-danger"></i> <span class="text-danger">Delete</span>
-                    </button>
-            </div>
-        </div>
-    </div>'''
+                'actions': actions_html
             })
 
         return JsonResponse({
@@ -4430,7 +4492,7 @@ def exam_create(request):
             exam.created_at = timezone.now()
             exam.save()
             messages.success(request, 'Exam created successfully!')
-            return redirect('exams_list')
+            return redirect('exams_edit', exam_id=exam.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -7937,11 +7999,29 @@ def question_descriptive_create(request, exam_id):
             question.updated_by = request.user
             question.created_at = timezone.now()
             question.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Question added successfully!',
+                    'data': {
+                        'id': question.id,
+                        'question': question.question,
+                        'mark': question.mark,
+                        'edit_url': reverse('question_descriptive_edit', args=[question.id]),
+                        'delete_url': reverse('question_descriptive_delete', args=[question.id]),
+                    }
+                })
             messages.success(request, 'Question added successfully!')
             return redirect('exams_edit', exam_id=exam_id)
         else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please correct the errors below.',
+                    'errors': form.errors.get_json_data()
+                })
             messages.error(request, 'Please correct the errors below.')
-            return redirect('exams_edit', exam_id=exam_id) # Redirect back to edit page with errors (ideally handle errors better but for modal simplified)
+            return redirect('exams_edit', exam_id=exam_id)
     
     return redirect('exams_edit', exam_id=exam_id)
 
@@ -7957,8 +8037,25 @@ def question_descriptive_edit(request, question_id):
             question.updated_by = request.user
             question.updated_at = timezone.now()
             question.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Question updated successfully!',
+                    'data': {
+                        'id': question.id,
+                        'question': question.question,
+                        'mark': question.mark,
+                    }
+                })
             messages.success(request, 'Question updated successfully!')
             return redirect('exams_edit', exam_id=question.exam.id)
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please correct the errors below.',
+                    'errors': form.errors.get_json_data()
+                })
     
     return redirect('exams_edit', exam_id=question.exam.id)
 
@@ -7967,14 +8064,12 @@ def question_descriptive_delete(request, question_id):
     """Delete descriptive question"""
     question = get_object_or_404(DescriptiveQuestions, id=question_id)
     exam_id = question.exam.id
-    question.delete() # Hard delete as per model (no deleted_at in DescriptiveQuestions model view earlier, let's check)
-    # Checking model: DescriptiveQuestions does NOT have deleted_at field in my previous read (Wait, let me double check).
-    # Model definition:
-    # class DescriptiveQuestions(models.Model):
-    #     ...
-    #     updated_at = ...
-    #     created_at = ...
-    # No deleted_at. So hard delete.
+    question.delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Question deleted successfully!'
+        })
     messages.success(request, 'Question deleted successfully!')
     return redirect('exams_edit', exam_id=exam_id)
 
@@ -7992,9 +8087,33 @@ def question_objective_create(request, exam_id):
             question.updated_by = request.user
             question.created_at = timezone.now()
             question.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Question added successfully!',
+                    'data': {
+                        'id': question.id,
+                        'question': question.question,
+                        'option1': question.option1,
+                        'option2': question.option2,
+                        'option3': question.option3,
+                        'option4': question.option4,
+                        'answer_option': question.answer_option,
+                        'answer': question.answer,
+                        'marks': float(question.marks),
+                        'edit_url': reverse('question_objective_edit', args=[question.id]),
+                        'delete_url': reverse('question_objective_delete', args=[question.id]),
+                    }
+                })
             messages.success(request, 'Question added successfully!')
             return redirect('exams_edit', exam_id=exam_id)
         else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please correct the errors below.',
+                    'errors': form.errors.get_json_data()
+                })
             messages.error(request, 'Please correct the errors below.')
             return redirect('exams_edit', exam_id=exam_id)
             
@@ -8012,8 +8131,31 @@ def question_objective_edit(request, question_id):
             question.updated_by = request.user
             question.updated_at = timezone.now()
             question.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Question updated successfully!',
+                    'data': {
+                        'id': question.id,
+                        'question': question.question,
+                        'option1': question.option1,
+                        'option2': question.option2,
+                        'option3': question.option3,
+                        'option4': question.option4,
+                        'answer_option': question.answer_option,
+                        'answer': question.answer,
+                        'marks': float(question.marks),
+                    }
+                })
             messages.success(request, 'Question updated successfully!')
             return redirect('exams_edit', exam_id=question.exam.id)
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please correct the errors below.',
+                    'errors': form.errors.get_json_data()
+                })
             
     return redirect('exams_edit', exam_id=question.exam.id)
 
@@ -8022,7 +8164,12 @@ def question_objective_delete(request, question_id):
     """Delete objective question"""
     question = get_object_or_404(ObjectiveQuestions, id=question_id)
     exam_id = question.exam.id
-    question.delete() # Hard delete
+    question.delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Question deleted successfully!'
+        })
     messages.success(request, 'Question deleted successfully!')
     return redirect('exams_edit', exam_id=exam_id)
 

@@ -1,13 +1,16 @@
 {% extends 'admin/index.html' %}
+{% load admin_tags %}
 {% block content %}
 
 <div class="gallery-container">
     <div class="page-header">
         <h1>Subject Details</h1>
         <div>
+            {% if request.user|has_permission:'edit-subjects' %}
             <a href="{% url 'subjects_edit' subject.id %}" class="btn btn-primary">
                 <i class="fas fa-edit"></i> Edit
             </a>
+            {% endif %}
             <a href="{% url 'subjects_list' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to List
             </a>
@@ -101,12 +104,14 @@
             {% endif %}
         </div>
 
+        {% if request.user|has_permission:'delete-subjects' %}
         <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
             <a href="{% url 'subjects_delete' subject.id %}" class="btn btn-danger" 
                onclick="return confirm('Are you sure you want to delete this subject?')">
                 <i class="fas fa-trash"></i> Delete Subject
             </a>
         </div>
+        {% endif %}
     </div>
 </div>
 

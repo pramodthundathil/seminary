@@ -1,4 +1,5 @@
 {% extends 'admin/index.html' %}
+{% load admin_tags %}
 {% block content %}
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -9,12 +10,14 @@
             
             Slider Management
         </h1>
+        {% if request.user|has_permission:'manage-slider' %}
         <div class="header-actions">
             <button class="btn btn-primary" onclick="openCreateModal()">
                 <i class="fas fa-plus-circle"></i>
                 Create Slider
             </button>
         </div>
+        {% endif %}
     </div>
 
     <div class="content-card">

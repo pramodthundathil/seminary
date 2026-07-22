@@ -237,26 +237,8 @@
 
     <!-- Main Container -->
     <div class="container">
-        <!-- Left Column - Profile -->
-        <div>
-            <div class="profile-card">
-                <div class="profile-avatar"><i class="bi bi-person"></i></div>
-                <h2 class="profile-name">{{ student.first_name}}</h2>
-                <p class="profile-id">{{ student.student_id}}</p>
-                <span class="role-badge"><i class="bi bi-mortarboard-fill"></i> Student</span>
-                <br><br>
-                <a href="{% url role|add:'_payment_input' %}" class="pay-button"
-                    style="text-decoration: none !important; display: block;"><i class="bi bi-credit-card"></i> Pay Now</a>
-                <a href="{% url 'student_my_payments' %}" class="pay-button"
-                    style="text-decoration: none !important; margin-top: 10px; display: block; background: #64748b !important; border-color: #64748b !important;"><i class="bi bi-wallet2"></i> My Payments</a>
-                <div class="stats-wrapper">
-                    <div class="stats-grid ">
-                        <br><br><br><br><br><br><br><br>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+        <!-- Top Profile Banner -->
+        {% block profile_banner %}{% endblock %}
 
 
         <!-- Middle Column - Details (template block) -->

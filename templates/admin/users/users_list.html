@@ -1,4 +1,5 @@
 {% extends 'admin/index.html' %}
+{% load admin_tags %}
 {% block content %}
 
 
@@ -16,7 +17,9 @@
 <div class="gallery-container">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
         <h1>{{ page_title }}</h1>
+        {% if request.user|has_permission:'manage-users' %}
         <a href="{% url 'users_create' %}" class="btn btn-primary">Create User</a>
+        {% endif %}
 
         <div style="display:flex;gap:12px;align-items:center;">
             <form method="get" id="perPageForm" style="display:flex;gap:8px;align-items:center;">
@@ -81,6 +84,7 @@
                             <a href="{% url 'users_view' u.id %}" class="btn btn-info btn-sm mr-1" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            {% if request.user|has_permission:'manage-users' %}
                             <div class="btn-group" role="group">
                                 <button id="btnGroupDrop{{ u.id }}" type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Actions
@@ -95,6 +99,7 @@
                                     </a>
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

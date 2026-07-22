@@ -470,15 +470,25 @@ body {
 }
 
 /* Enhanced Main Container */
-.container {
+body .container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
     display: grid;
-    grid-template-columns: 280px 1fr 320px;
+    grid-template-columns: 1fr 320px;
     gap: 2rem;
     width: 100%;
     box-sizing: border-box;
+}
+
+/* Container layout without right column (automatically expands middle column to full width) */
+body .container:not(:has(.right-column > *)) {
+    grid-template-columns: 1fr !important;
+}
+
+/* Make profile banner span full grid width */
+body .container > .profile-banner-column {
+    grid-column: 1 / -1;
 }
 
 /* Enhanced Profile Card */
@@ -496,6 +506,124 @@ body {
 .profile-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
+}
+
+/* Horizontal Profile Card Styling */
+.profile-card.horizontal-profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding: 1.5rem 2.5rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    gap: 2rem;
+}
+
+.profile-card.horizontal-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.profile-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-card.horizontal-profile .profile-avatar {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profile-card.horizontal-profile .profile-name {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+}
+
+.profile-card.horizontal-profile .profile-id {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.profile-meta .profile-id {
+    font-weight: 500;
+}
+
+.profile-meta .role-badge {
+    margin-bottom: 0;
+}
+
+.profile-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-card.horizontal-profile .pay-button {
+    width: auto;
+    padding: 0.75rem 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.profile-card.horizontal-profile .pay-button.secondary {
+    background: #64748b !important;
+    border-color: #64748b !important;
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+}
+
+.profile-card.horizontal-profile .pay-button.secondary:hover {
+    background: #475569 !important;
+    border-color: #475569 !important;
+    box-shadow: 0 6px 16px rgba(100, 116, 139, 0.35);
+}
+
+@media screen and (max-width: 968px) {
+    .profile-card.horizontal-profile {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 2rem 1.5rem;
+        gap: 1.5rem;
+    }
+    
+    .profile-left {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .profile-meta {
+        justify-content: center;
+    }
+    
+    .profile-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .profile-card.horizontal-profile .pay-button {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .profile-avatar {
@@ -891,7 +1019,7 @@ body.no-right .right-column {
 }
 
 body.no-right .container {
-    grid-template-columns: 280px 1fr !important;
+    grid-template-columns: 1fr !important;
 }
 
 @media (max-width: 968px) {
@@ -921,8 +1049,8 @@ body.no-right .container {
 
 /* Responsive Design */
 @media screen and (max-width: 1200px) {
-    .container {
-        grid-template-columns: 260px 1fr 300px;
+    body .container {
+        grid-template-columns: 1fr 300px;
         gap: 1.5rem;
     }
 }
@@ -1081,4 +1209,95 @@ body.no-right .container {
 
 .nav-item.active .dropdown {
     display: block !important;
+}
+
+/* Unified Compact Page Header */
+body .exam-header {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 18px !important;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body .exam-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+body .exam-header-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+body .exam-header-text h2 {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin: 0 0 2px 0 !important;
+}
+
+body .exam-header-text p {
+    font-size: 0.825rem !important;
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+}
+
+body .exam-header button,
+body .exam-header .request-exam-btn,
+body .exam-header .request-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, #00B8BA 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 2px 6px rgba(0, 206, 209, 0.15) !important;
+    height: fit-content;
+    white-space: nowrap;
+}
+
+body .exam-header button:hover,
+body .exam-header .request-exam-btn:hover,
+body .exam-header .request-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 206, 209, 0.25);
+}
+
+@media screen and (max-width: 768px) {
+    body .exam-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 16px !important;
+        gap: 12px;
+    }
+    body .exam-header button,
+    body .exam-header .request-exam-btn,
+    body .exam-header .request-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

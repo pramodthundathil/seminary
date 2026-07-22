@@ -546,7 +546,7 @@
     </h2>
     <div class="info-row">
       <div class="info-label">Full Name</div>
-      <div class="info-value editable">
+      <div class="info-value">
         {% if student.first_name %}{{ student.first_name }}{% endif %}
         {% if student.middle_name %} {{ student.middle_name }}{% endif %}
         {% if student.last_name %} {{ student.last_name }}{% endif %}
@@ -555,33 +555,33 @@
     </div>
     <div class="info-row">
       <div class="info-label">ID Number</div>
-      <div class="info-value editable">{{student.student_id}}</div>
+      <div class="info-value">{{student.student_id}}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Course Applied</div>
-      <div class="info-value editable">
+      <div class="info-value">
         <span class="status-badge status-success">{{student.course_applied.course_name}}</span>
       </div>
     </div>
     <div class="info-row">
       <div class="info-label">Email</div>
-      <div class="info-value editable">{{student.email}}</div>
+      <div class="info-value">{{student.email}}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Phone</div>
-      <div class="info-value editable">{{student.phone_code}} {{student.phone_number}}</div>
+      <div class="info-value">{{student.phone_code}} {{student.phone_number}}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Date of Birth</div>
-      <div class="info-value editable">{{student.date_of_birth}}</div>
+      <div class="info-value">{{student.date_of_birth}}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Gender</div>
-      <div class="info-value editable">{{student.gender}}</div>
+      <div class="info-value">{{student.gender}}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Citizenship</div>
-      <div class="info-value editable">{{student.citizenship.name}}</div>
+      <div class="info-value">{{student.citizenship.name}}</div>
     </div>
 
   </div>
@@ -631,6 +631,32 @@
 
 
   <div class="content-grid">
+    <!-- Profile Picture Upload -->
+    <div class="card full-span">
+      <h2 class="card-title">
+        <span><i class="bi bi-image"></i></span>
+        Profile Picture
+      </h2>
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; background: #e2e8f0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); position: relative; flex-shrink: 0;">
+          {% if student.photo %}
+          <img src="/media/{{ student.photo }}" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+          <i class="bi bi-person" style="font-size: 3rem; color: #94a3b8;"></i>
+          {% endif %}
+        </div>
+        <div>
+          <form method="POST" enctype="multipart/form-data" action="{% url 'student_profile_view' %}">
+            {% csrf_token %}
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <input type="file" name="photo" accept="image/*" required style="max-width: 250px; padding: 0.375rem 0.75rem; font-size: 0.875rem; border: 1px solid var(--border); border-radius: 6px;">
+              <button type="submit" class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem;">Upload Photo</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Personal Information -->
     <div class="card full-span">
       <h2 class="card-title">
@@ -639,7 +665,7 @@
       </h2>
       <div class="info-row">
         <div class="info-label">Full Name</div>
-        <div class="info-value editable">
+        <div class="info-value">
           {% if student.first_name %}{{ student.first_name }}{% endif %}
           {% if student.middle_name %} {{ student.middle_name }}{% endif %}
           {% if student.last_name %} {{ student.last_name }}{% endif %}
@@ -647,19 +673,19 @@
       </div>
       <div class="info-row">
         <div class="info-label">Date of Birth</div>
-        <div class="info-value editable">{{student.date_of_birth}}</div>
+        <div class="info-value">{{student.date_of_birth}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Gender</div>
-        <div class="info-value editable">{{student.gender}}</div>
+        <div class="info-value editable" data-field="gender">{{student.gender}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Citizenship</div>
-        <div class="info-value editable">{{student.citizenship.name}}</div>
+        <div class="info-value">{{student.citizenship.name}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">ID Number</div>
-        <div class="info-value editable">{{student.student_id}}</div>
+        <div class="info-value">{{student.student_id}}</div>
       </div>
     </div>
 
@@ -671,38 +697,38 @@
       </h2>
       <div class="info-row">
         <div class="info-label">Email</div>
-        <div class="info-value editable">{{student.email}}</div>
+        <div class="info-value">{{student.email}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Phone</div>
-        <div class="info-value editable">{{student.phone_code}} {{student.phone_number}}</div>
+        <div class="info-value editable" data-field="phone_number">{{student.phone_number}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Time Zone</div>
-        <div class="info-value editable">{{student.timezone}}</div>
+        <div class="info-value editable" data-field="timezone">{{student.timezone}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Language</div>
-        <div class="info-value editable">{{student.language.language_name}}</div>
+        <div class="info-value">{{student.language.language_name}}</div>
       </div>
 
       <div class="address-section">
         <div class="address-header"><i class="bi bi-geo-alt"></i> Mailing Address</div>
         <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
           <div class="info-label">Address</div>
-          <div class="info-value editable">{{student.mailing_address}}</div>
+          <div class="info-value editable" data-field="mailing_address">{{student.mailing_address}}</div>
         </div>
         <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
           <div class="info-label">City</div>
-          <div class="info-value editable">{{student.city}}</div>
+          <div class="info-value editable" data-field="city">{{student.city}}</div>
         </div>
         <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
           <div class="info-label">Country</div>
-          <div class="info-value editable">{{student.country.name}}</div>
+          <div class="info-value">{{student.country.name}}</div>
         </div>
         <div class="info-row" style="border-bottom: none; padding: 0.5rem 0;">
           <div class="info-label">Zip Code</div>
-          <div class="info-value editable">{{student.zip_code}}</div>
+          <div class="info-value editable" data-field="zip_code">{{student.zip_code}}</div>
         </div>
       </div>
     </div>
@@ -715,29 +741,15 @@
       </h2>
       <div class="info-row">
         <div class="info-label">Highest Education</div>
-        <div class="info-value editable">{{student.highest_education}}</div>
+        <div class="info-value editable" data-field="highest_education">{{student.highest_education}}</div>
       </div>
       <div class="info-row">
         <div class="info-label">Course Applied</div>
-        <div class="info-value editable">
+        <div class="info-value">
           <span class="status-badge status-success">{{student.course_applied.course_name}}</span>
         </div>
       </div>
-      <!-- <div class="info-row">
-          <div class="info-label">Year</div>
-          <div class="info-value editable">3rd Year</div>
-        </div> -->
-      <!-- <div class="info-row">
-          <div class="info-label">Enrollment Date</div>
-          <div class="info-value editable">September 2022</div>
-        </div> -->
-      <!-- <div class="info-row">
-          <div class="info-label">Expected Graduation</div>
-          <div class="info-value editable">May 2026</div>
-        </div> -->
     </div>
-
-
 
     <!-- Enrollment Details -->
     <div class="card full-span">
@@ -747,23 +759,19 @@
       </h2>
       <div class="enrollment-grid">
         <div>
-          <!-- <div class="info-row">
-              <div class="info-label">Starting Year</div>
-              <div class="info-value editable">2026</div>
-            </div> -->
           <div class="info-row">
             <div class="info-label">Ministerial Status</div>
-            <div class="info-value editable">
+            <div class="info-value editable" data-field="ministerial_status">
               <span class="status-badge ">{{student.ministerial_status}}</span>
             </div>
           </div>
           <div class="info-row">
             <div class="info-label">Church Affiliation</div>
-            <div class="info-value editable">{{student.church_affiliation}}</div>
+            <div class="info-value editable" data-field="church_affiliation">{{student.church_affiliation}}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Scholarship Needed</div>
-            <div class="info-value editable">
+            <div class="info-value editable" data-field="scholarship_needed">
               <span class="status-badge status-warning">{{student.scholarship_needed}}</span>
             </div>
           </div>
@@ -771,11 +779,11 @@
         <div>
           <div class="info-row">
             <div class="info-label">Currently Employed</div>
-            <div class="info-value editable">{{student.currently_employed}}</div>
+            <div class="info-value editable" data-field="currently_employed">{{student.currently_employed}}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Monthly Income</div>
-            <div class="info-value editable">
+            <div class="info-value editable" data-field="income">
               {% if student.income|floatformat:"0" == student.income|stringformat:"s" %}
               ${{ student.income }} USD
               {% else %}
@@ -785,16 +793,15 @@
           </div>
           <div class="info-row">
             <div class="info-label">Affordable Amount</div>
-            <div class="info-value editable">{{student.affordable_amount}}</div>
+            <div class="info-value editable" data-field="affordable_amount">{{student.affordable_amount}}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Message</div>
-            <div class="info-value editable">{{student.message}}</div>
+            <div class="info-value editable" data-field="message">{{student.message}}</div>
           </div>
         </div>
       </div>
     </div>
-
 
   </div>
 </div>
@@ -842,29 +849,27 @@
       });
     }
 
-
     // Edit button
     if (btnEdit) {
       btnEdit.addEventListener("click", function () {
-        document.querySelectorAll(".editable").forEach(el => {
-          const current = el.innerText;
-          el.setAttribute("data-original", current);
+        document.querySelectorAll("#fullSection .editable, #referencesSection .editable").forEach(el => {
+          const current = el.innerText.trim();
+          el.setAttribute("data-original", el.innerHTML);
           el.innerHTML = `<input type="text" value="${current}" class="edit-input">`;
         });
 
         btnSave.style.display = "inline-flex";
         btnCancel.style.display = "inline-flex";
         document.getElementById("btnCancel").style.display = "inline-flex";
-
       });
     }
   });
+
   // Cancel button
   const btnCancel = document.getElementById("btnCancel");
   if (btnCancel) {
     btnCancel.addEventListener("click", function () {
-
-      document.querySelectorAll(".editable").forEach(el => {
+      document.querySelectorAll("#fullSection .editable, #referencesSection .editable").forEach(el => {
         const original = el.getAttribute("data-original");
         if (original !== null) {
           el.innerHTML = original;
@@ -876,6 +881,59 @@
     });
   }
 
+  // Save button
+  const btnSave = document.getElementById("btnSave");
+  if (btnSave) {
+    btnSave.addEventListener("click", function () {
+      const data = {};
+      document.querySelectorAll("#fullSection .editable, #referencesSection .editable").forEach(el => {
+        const input = el.querySelector(".edit-input");
+        if (input) {
+          const field = el.getAttribute("data-field");
+          if (field) {
+            data[field] = input.value;
+          }
+        }
+      });
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.success) {
+          window.location.reload();
+        } else {
+          alert('Failed to save changes: ' + (res.error || 'Unknown error'));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('An error occurred while saving changes.');
+      });
+    });
+  }
 </script>
 
 {% endif %}
@@ -1027,40 +1085,40 @@
     </h2>
     {% if student.reference_name1 %}
     <div class="reference-card">
-      <div class="reference-name editable">{{student.reference_name1}}</div>
+      <div class="reference-name editable" data-field="reference_name1">{{student.reference_name1}}</div>
       <div class="reference-detail">
         <span class="reference-label">Phone:</span>
-        <span class="editable">{{student.reference_phone1}}</span>
+        <span class="editable" data-field="reference_phone1">{{student.reference_phone1}}</span>
       </div>
       <div class="reference-detail">
         <span class="reference-label">Email:</span>
-        <span class="editable">{{student.reference_email1}}</span>
+        <span class="editable" data-field="reference_email1">{{student.reference_email1}}</span>
       </div>
     </div>
     {% endif %}
     {% if student.reference_name2 %}
     <div class="reference-card">
-      <div class="reference-name editable">{{student.reference_name2}}</div>
+      <div class="reference-name editable" data-field="reference_name2">{{student.reference_name2}}</div>
       <div class="reference-detail">
         <span class="reference-label">Phone:</span>
-        <span class="editable">{{student.reference_phone2}}</span>
+        <span class="editable" data-field="reference_phone2">{{student.reference_phone2}}</span>
       </div>
       <div class="reference-detail">
         <span class="reference-label">Email:</span>
-        <span class="editable">{{student.reference_email2}}</span>
+        <span class="editable" data-field="reference_email2">{{student.reference_email2}}</span>
       </div>
     </div>
     {% endif %}
     {% if student.reference_name3 %}
     <div class="reference-card">
-      <div class="reference-name editable">{{student.reference_name3}}</div>
+      <div class="reference-name editable" data-field="reference_name3">{{student.reference_name3}}</div>
       <div class="reference-detail">
         <span class="reference-label">Phone:</span>
-        <span class="editable">{{student.reference_phone3}}</span>
+        <span class="editable" data-field="reference_phone3">{{student.reference_phone3}}</span>
       </div>
       <div class="reference-detail">
         <span class="reference-label">Email:</span>
-        <span class="editable">{{student.reference_email3}}</span>
+        <span class="editable" data-field="reference_email3">{{student.reference_email3}}</span>
       </div>
     </div>
     {% endif %}
@@ -1075,15 +1133,15 @@
   </h2>
   <div class="info-row">
     <div class="info-label">Marital Status</div>
-    <div class="info-value editable">{{student.mrital_status}}</div>
+    <div class="info-value editable" data-field="mrital_status">{{student.mrital_status}}</div>
   </div>
   <div class="info-row">
     <div class="info-label">Spouse Name</div>
-    <div class="info-value editable">{{student.spouse_name}}</div>
+    <div class="info-value editable" data-field="spouse_name">{{student.spouse_name}}</div>
   </div>
   <div class="info-row">
     <div class="info-label">Children</div>
-    <div class="info-value editable">{{student.children}}</div>
+    <div class="info-value editable" data-field="children">{{student.children}}</div>
   </div>
 </div>
 
