@@ -1,0 +1,472 @@
+{% extends 'student/index.html' %}
+{% load static %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block body_class %}no-right{% endblock %}
+
+{% block middle %}
+<style>
+    .subject-detail-container {
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+    }
+
+    .upload-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 1.25rem;
+    }
+
+    .upload-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border-color: var(--primary);
+    }
+
+    .upload-icon-wrapper {
+        width: 54px;
+        height: 54px;
+        background: var(--bg-page);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.25rem;
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .upload-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .upload-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .upload-meta {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .format-badge {
+        font-size: 0.75rem;
+        padding: 0.25em 0.75em;
+        border-radius: 4px;
+        background-color: var(--border);
+        color: var(--text-primary);
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .format-badge.material { background-color: #d1e7dd; color: #0f5132; }
+    .format-badge.assignment { background-color: #fff3cd; color: #664d03; }
+    .format-badge.video { background-color: #cfe2ff; color: #084298; }
+    .format-badge.exam { background-color: #f8d7da; color: #842029; }
+    .format-badge.exam-completed { background-color: #d1e7dd; color: #0f5132; }
+    .format-badge.exam-ongoing { background-color: #f8d7da; color: #842029; }
+
+    .action-btn-wrapper {
+        margin-left: 1.25rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-card);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        border: 1px dashed var(--border);
+    }
+
+    .custom-tabs .nav-link {
+        color: var(--text-secondary);
+        font-weight: 600;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 1rem 1.25rem;
+        transition: all 0.2s ease;
+    }
+
+    .custom-tabs .nav-link:hover {
+        color: var(--primary);
+        border-bottom-color: var(--border);
+    }
+
+    .custom-tabs .nav-link.active {
+        color: var(--primary);
+        background: transparent;
+        border-bottom-color: var(--primary);
+    }
+</style>
+
+<div class="subject-detail-container">
+    <!-- PAGE HEADER -->
+    <div class="exam-header">
+        <div class="exam-header-content">
+            <div class="exam-header-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+            <div class="exam-header-text">
+                <h2>{{ subject.subject_name }}</h2>
+                <p>Course Code: {{ subject.subject_code }} | View all materials, assignments, class recordings, and exams.</p>
+            </div>
+        </div>
+        <a href="{% url 'student_subjects' %}" class="request-btn d-flex align-items-center justify-content-center" style="text-decoration:none;">
+            <i class="bi bi-arrow-left me-1"></i> Back to Subjects
+        </a>
+    </div>
+
+    <!-- TABS NAVIGATION -->
+    <div class="card mb-4" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+        <ul class="nav nav-tabs custom-tabs" id="subjectTab" role="tablist" style="background: var(--bg-card); border-bottom: 1px solid var(--border);">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">
+                    <i class="bi bi-book me-2"></i>Study Materials ({{ references.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments" type="button" role="tab" aria-controls="assignments" aria-selected="false">
+                    <i class="bi bi-pencil-square me-2"></i>Assignments ({{ assignments.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recordings-tab" data-bs-toggle="tab" data-bs-target="#recordings" type="button" role="tab" aria-controls="recordings" aria-selected="false">
+                    <i class="bi bi-camera-video me-2"></i>Class Recordings ({{ recordings|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab" aria-controls="exams" aria-selected="false">
+                    <i class="bi bi-clipboard-data me-2"></i>Exams ({{ exams|length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="card-body bg-light-subtle">
+            <div class="tab-content" id="subjectTabContent">
+                
+                <!-- Study Materials Tab -->
+                <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                    {% if references %}
+                        {% for ref in references %}
+                        <div class="upload-card">
+                            <div class="upload-icon-wrapper">
+                                {% if ref.format == 'PDF' %}
+                                <i class="bi bi-file-earmark-pdf-fill fs-3 text-danger"></i>
+                                {% else %}
+                                <i class="bi bi-file-text-fill fs-3 text-primary"></i>
+                                {% endif %}
+                            </div>
+                            <div class="upload-details">
+                                <div class="upload-title">{{ ref.title }}</div>
+                                <div class="upload-meta">
+                                    <span><i class="bi bi-person me-1"></i> {{ ref.auther_name|default:"Unknown Author" }}</span>
+                                    <span class="format-badge material">{{ ref.format|default:"Book" }}</span>
+                                </div>
+                            </div>
+                            <div class="action-btn-wrapper">
+                                {% if ref.reference_file %}
+                                    {% if ref.format == 'PDF' %}
+                                    <button onclick="openPdfModal('{{ ref.reference_file.file_path.url }}', '{{ ref.title|escapejs }}')" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i> View
+                                    </button>
+                                    {% else %}
+                                    <a href="{{ ref.reference_file.file_path.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                        <i class="bi bi-cloud-download me-1"></i> Download
+                                    </a>
+                                    {% endif %}
+                                {% else %}
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>No File</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-journal-x fs-1 mb-3 d-block"></i>
+                            <h4>No Study Materials</h4>
+                            <p>There are currently no study materials assigned to you for this subject.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Assignments Tab -->
+                <div class="tab-pane fade" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+                    {% if assignments %}
+                        {% for sa in assignments %}
+                        <div class="upload-card">
+                            <div class="upload-icon-wrapper" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
+                                <i class="bi bi-pencil-square fs-3"></i>
+                            </div>
+                            <div class="upload-details">
+                                <div class="upload-title">{{ sa.assignment.assignment_name }}</div>
+                                <div class="upload-meta">
+                                    <span><i class="bi bi-calendar me-1"></i> Added: {{ sa.created_at|date:"M d, Y" }}</span>
+                                    <span class="text-muted">|</span>
+                                    <span><i class="bi bi-award me-1"></i> Total Score: {{ sa.assignment.total_score }}</span>
+                                    <span class="format-badge assignment">
+                                        {% if sa.submitted_on %}Submitted{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="action-btn-wrapper">
+                                {% if sa.submitted_on %}
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#viewAnswerModal{{ sa.id }}">
+                                        <i class="bi bi-eye me-1"></i> View Answer
+                                    </button>
+
+                                    <!-- Modal inside the loop for simplicity and layout preservation -->
+                                    <div class="modal fade" id="viewAnswerModal{{ sa.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
+                                                <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                                                    <h5 class="modal-title">Answer: {{ sa.assignment.assignment_name }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <div class="mb-3">
+                                                        <strong>Submitted On:</strong> {{ sa.submitted_on|date:"d M Y, h:i A" }}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Total Marks Obtained:</strong> <span class="badge bg-success text-white">{{ sa.total_marks|default:"0" }}</span> / {{ sa.assignment.total_score }}
+                                                    </div>
+                                                    <hr style="border-top: 1px solid var(--border);">
+
+                                                    {% if sa.submitted_answers %}
+                                                        <div class="answers-list">
+                                                            {% for ans in sa.submitted_answers %}
+                                                                <div class="mb-4 p-3 border rounded bg-body-tertiary shadow-sm text-start" style="border-color: var(--border) !important;">
+                                                                    {% if ans.question %}
+                                                                        <h6 class="fw-bold mb-2 text-primary">Q: {{ ans.question.question }} ({{ ans.question.mark }} Marks)</h6>
+                                                                    {% else %}
+                                                                        <h6 class="fw-bold mb-2 text-primary">Answer Submission:</h6>
+                                                                    {% endif %}
+
+                                                                    {% if ans.answer_text %}
+                                                                        <div class="p-3 bg-light-subtle rounded text-body mb-2 border">
+                                                                            {{ ans.answer_text|safe }}
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    {% if ans.answer_file %}
+                                                                        <div class="mt-2 mb-2">
+                                                                            <a href="{{ ans.answer_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                                <i class="bi bi-download"></i> View / Download File
+                                                                            </a>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    <div class="text-success mt-2">
+                                                                        <strong>Marks Obtained:</strong> {{ ans.marks_optained|default:"Pending Evaluation" }}
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% else %}
+                                                        <p class="text-danger">No submissions found.</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'submit_assignment' sa.id %}" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">
+                                        <i class="bi bi-cloud-upload me-1"></i> Submit
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-list-task fs-1 mb-3 d-block"></i>
+                            <h4>No Assignments</h4>
+                            <p>There are currently no assignments assigned to you for this subject.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Class Recordings Tab -->
+                <div class="tab-pane fade" id="recordings" role="tabpanel" aria-labelledby="recordings-tab">
+                    {% if recordings %}
+                        {% for rec in recordings %}
+                        <div class="upload-card">
+                            <div class="upload-icon-wrapper" style="background: rgba(25, 135, 84, 0.1); color: #198754;">
+                                <i class="bi bi-play-circle-fill fs-3"></i>
+                            </div>
+                            <div class="upload-details">
+                                <div class="upload-title">{{ rec.title }}</div>
+                                <div class="upload-meta">
+                                    <span><i class="bi bi-calendar me-1"></i> Added: {{ rec.date|date:"M d, Y" }}</span>
+                                    <span class="format-badge video">{{ rec.type }}</span>
+                                </div>
+                            </div>
+                            <div class="action-btn-wrapper">
+                                {% if rec.type == 'youtube' and rec.youtube_id %}
+                                    <button onclick="openVideoModal('https://www.youtube.com/embed/{{ rec.youtube_id }}?rel=0&enablejsapi=1', '{{ rec.title|escapejs }}', true)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                        <i class="bi bi-youtube me-1"></i> Watch
+                                    </button>
+                                {% elif rec.url %}
+                                    <button onclick="openVideoModal('{{ rec.url }}', '{{ rec.title|escapejs }}', false)" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                        <i class="bi bi-play-fill me-1"></i> View Video
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled>Unavailable</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-camera-video fs-1 mb-3 d-block"></i>
+                            <h4>No Class Recordings</h4>
+                            <p>There are currently no recordings available for this subject.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Exams Tab -->
+                <div class="tab-pane fade" id="exams" role="tabpanel" aria-labelledby="exams-tab">
+                    {% if exams %}
+                        {% for ex in exams %}
+                        <div class="upload-card">
+                            <div class="upload-icon-wrapper" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                                <i class="bi bi-journal-check fs-3"></i>
+                            </div>
+                            <div class="upload-details">
+                                <div class="upload-title">{{ ex.name }}</div>
+                                <div class="upload-meta">
+                                    <span><i class="bi bi-clock me-1"></i> Duration: {{ ex.duration }} mins</span>
+                                    {% if ex.status != 'Not Requested' %}
+                                        <span class="text-muted">|</span>
+                                        <span><i class="bi bi-calendar3 me-1"></i> Scheduled: {{ ex.start_time_str }}</span>
+                                    {% endif %}
+                                    <span class="format-badge {% if ex.status == 'Completed' %}exam-completed{% elif ex.status == 'Ongoing' %}exam-ongoing{% else %}exam{% endif %}">
+                                        {{ ex.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="action-btn-wrapper">
+                                {% if ex.status == 'Completed' %}
+                                    <a href="{% url 'student_score_card' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                        <i class="bi bi-file-earmark-check me-1"></i> View Score
+                                    </a>
+                                {% elif ex.status == 'Ongoing' %}
+                                    <a href="{% url 'take_exam' ex.se_id %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                                        <i class="bi bi-play-circle me-1"></i> Resume Exam
+                                    </a>
+                                {% elif ex.status == 'Approved' and ex.can_start %}
+                                    <a href="{% url 'take_exam' ex.se_id %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                                        <i class="bi bi-play-circle me-1"></i> Take Exam
+                                    </a>
+                                {% elif ex.status == 'Not Requested' %}
+                                    <a href="{% url 'student_request_exam' %}?subject={{ subject.id }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                        <i class="bi bi-clipboard-plus me-1"></i> Request Exam
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted fs-7">{{ ex.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-clipboard-x fs-1 mb-3 d-block"></i>
+                            <h4>No Exams</h4>
+                            <p>There are currently no exams available for this subject.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Viewer Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" id="pdfModalLabel">Document Viewer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light" style="height: 80vh; padding: 0;">
+                <iframe id="pdfIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Viewer Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                <h5 class="modal-title" id="videoModalLabel">Video Viewer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light" id="videoModalBody" style="height: 70vh; padding: 0;">
+                <!-- Video player will be injected here dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openPdfModal(url, title) {
+        document.getElementById('pdfModalLabel').innerText = title;
+        document.getElementById('pdfIframe').src = url;
+        var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+        pdfModal.show();
+    }
+
+    function openVideoModal(url, title, isYoutube) {
+        document.getElementById('videoModalLabel').innerText = title;
+        var body = document.getElementById('videoModalBody');
+        body.innerHTML = ''; // Clear existing content
+        
+        if (isYoutube) {
+            body.innerHTML = '<iframe src="' + url + '" style="width: 100%; height: 100%; border: none;" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>';
+        } else {
+            body.innerHTML = '<video src="' + url + '" style="width: 100%; height: 100%; background: #000;" controls controlsList="nodownload" oncontextmenu="return false;" autoplay></video>';
+        }
+
+        var videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+        videoModal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('pdfModal');
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('pdfIframe').src = '';
+        });
+
+        var videoModalEl = document.getElementById('videoModal');
+        videoModalEl.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('videoModalBody').innerHTML = ''; // Destroy video instance
+        });
+    });
+</script>
+{% endblock %}

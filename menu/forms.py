@@ -385,7 +385,6 @@ class ExamsForm(forms.ModelForm):
     class Meta:
         model = Exams
         fields = [
-            'code',
             'subject',
             'exam_name',
             'exam_type',
@@ -393,10 +392,6 @@ class ExamsForm(forms.ModelForm):
         ]
 
         widgets = {
-            'code': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter exam code'
-            }),
             'subject': forms.Select(attrs={
                 'class': 'form-control'
             }),
@@ -418,7 +413,6 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignments
         fields = [
-            "code",
             "subject",
             "assignment_name",
             "assignment_type",
@@ -426,21 +420,16 @@ class AssignmentForm(forms.ModelForm):
         ]
 
         labels = {
-            "assignment_name": "Assignment Question",
+            "assignment_name": "Assignment Name",
         }
 
         widgets = {
-            "code": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter assignment code"
-            }),
             "subject": forms.Select(attrs={
                 "class": "form-control"
             }),
-            "assignment_name": forms.Textarea(attrs={
+            "assignment_name": forms.TextInput(attrs={
                 "class": "form-control",
-                "placeholder": "Enter assignment question",
-                "rows": 4,
+                "placeholder": "Enter assignment name",
             }),
             "assignment_type": forms.Select(attrs={
                 "class": "form-control",

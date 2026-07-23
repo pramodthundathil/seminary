@@ -285,16 +285,13 @@ def church_user_view_assignment(request, assignment_id):
         questions = AssignmentQuestions.objects.filter(assignment=assignment).order_by('id')
         
         # Determine if logically assigned and if submitted
-        # We need to know if we've successfully submitted it
-        # Try to find an existing submission link record, or initialize one internally
         student_assignment = StudentsAssignment.objects.filter(student=student, assignment=assignment).first()
-        submission = AssignmentAnswers.objects.filter(student=student, assignment=assignment).first() if student_assignment else None
+        submitted_answers = AssignmentAnswers.objects.filter(student=student, assignment=assignment).select_related('question').order_by('id') if student_assignment else []
+        is_submitted = student_assignment is not None and student_assignment.submitted_on is not None
 
-        
         # If an action to submit was placed on the view
         if request.method == "POST":
-            # Just mimicking the earlier logic for direct submission inside the viewer
-            if submission:
+            if is_submitted:
                 messages.warning(request, "You have already submitted this assignment.")
                 return redirect('church_user_view_assignment', assignment_id=assignment.id)
                 
@@ -309,38 +306,67 @@ def church_user_view_assignment(request, assignment_id):
                     )
 
                 assignment_type = assignment.assignment_type
-                answer_file_path = None
-                answer_text_content = None
+                is_paper_upload = assignment_type in ('paper_upload', 'Paper Upload Type', 'Paper Upload type')
+                is_paper_submit = assignment_type in ('paper_submit', 'Paper Submit Type', 'Paper Submit type')
 
-                if assignment_type in ('paper_upload', 'Paper Upload Type', 'Paper Upload type'):
-                    uploaded_file = request.FILES.get('answer_file')
-                    if not uploaded_file:
-                        messages.error(request, "Please upload a file.")
-                        return redirect('church_user_view_assignment', assignment_id=assignment.id)
-                    answer_file_path = uploaded_file 
-                    
-                elif assignment_type in ('paper_submit', 'Paper Submit Type', 'Paper Submit type'):
+                if is_paper_upload:
                     if questions.exists():
-                        combined_answers = ""
-                        for index, q in enumerate(questions, 1):
-                            ans = request.POST.get(f'answer_text_{q.id}', '').strip()
-                            combined_answers += f"<strong>Q{index}: {q.question}</strong><br>"
-                            combined_answers += f"<p>{ans}</p><hr>"
-                        answer_text_content = combined_answers
+                        for q in questions:
+                            uploaded_file = request.FILES.get(f'answer_file_{q.id}')
+                            if not uploaded_file:
+                                messages.error(request, f"Please upload a file for Question: {q.question[:30]}...")
+                                return redirect('church_user_view_assignment', assignment_id=assignment.id)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=assignment,
+                                student=student,
+                                question=q,
+                                answer_file=uploaded_file,
+                                created_at=timezone.now()
+                            )
                     else:
-                        answer_text_content = request.POST.get('answer_text')
+                        uploaded_file = request.FILES.get('answer_file')
+                        if not uploaded_file:
+                            messages.error(request, "Please upload a file.")
+                            return redirect('church_user_view_assignment', assignment_id=assignment.id)
+                        
+                        AssignmentAnswers.objects.create(
+                            assignment=assignment,
+                            student=student,
+                            answer_file=uploaded_file,
+                            created_at=timezone.now()
+                        )
+                    
+                elif is_paper_submit:
+                    if questions.exists():
+                        for q in questions:
+                            ans_text = request.POST.get(f'answer_text_{q.id}', '').strip()
+                            if not ans_text:
+                                messages.error(request, f"Please provide an answer for Question: {q.question[:30]}...")
+                                return redirect('church_user_view_assignment', assignment_id=assignment.id)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=assignment,
+                                student=student,
+                                question=q,
+                                answer_text=ans_text,
+                                created_at=timezone.now()
+                            )
+                    else:
+                        ans_text = request.POST.get('answer_text', '').strip()
+                        if not ans_text:
+                            messages.error(request, "Please provide an answer.")
+                            return redirect('church_user_view_assignment', assignment_id=assignment.id)
 
-                    if not answer_text_content:
-                        messages.error(request, "Please provide an answer.")
-                        return redirect('church_user_view_assignment', assignment_id=assignment.id)
-
-                AssignmentAnswers.objects.create(
-                    assignment=assignment,
-                    student=student,
-                    answer_file=answer_file_path,
-                    answer_text=answer_text_content,
-                    created_at=timezone.now()
-                )
+                        AssignmentAnswers.objects.create(
+                            assignment=assignment,
+                            student=student,
+                            answer_text=ans_text,
+                            created_at=timezone.now()
+                        )
+                else:
+                    messages.error(request, "Unknown Assignment Type.")
+                    return redirect('church_user_view_assignment', assignment_id=assignment.id)
 
                 student_assignment.submitted_on = timezone.now()
                 student_assignment.save()
@@ -351,8 +377,8 @@ def church_user_view_assignment(request, assignment_id):
         context = {
             "assignment": assignment,
             "questions": questions,
-            "is_submitted": True if submission else False,
-            "submission": submission
+            "is_submitted": is_submitted,
+            "submitted_answers": submitted_answers
         }
         return render(request, "church/view_assignment.html", context)
         
@@ -493,11 +519,11 @@ def church_user_submitted_assignment(request):
         ).select_related('assignment', 'assignment__subject', 'student') 
         
         for sa in submitted_assignments:
-            answer = AssignmentAnswers.objects.filter(
+            answers = AssignmentAnswers.objects.filter(
                 student=student, 
                 assignment=sa.assignment
-            ).last() 
-            sa.submitted_answer = answer 
+            ).select_related('question').order_by('id')
+            sa.submitted_answers = answers 
 
     except Exception as e:
         logger.error(f"Failed to fetch submitted assignments for student {student.id}: {e}")
@@ -517,6 +543,7 @@ def church_submit_assignment(request, pk):
         )
     except StudentsAssignment.DoesNotExist:
         messages.error(request, "Assignment not found.")
+        return redirect('church_user_assignments')
     
     if student_assignment.submitted_on:
         messages.warning(request, "This assignment has already been submitted.")
@@ -524,46 +551,73 @@ def church_submit_assignment(request, pk):
 
     if request.method == "POST":
         assignment_type = student_assignment.assignment.assignment_type
+        is_paper_upload = assignment_type in ('paper_upload', 'Paper Upload Type', 'Paper Upload type')
+        is_paper_submit = assignment_type in ('paper_submit', 'Paper Submit Type', 'Paper Submit type')
         
         try:
             with transaction.atomic():
-                answer_file_path = None
-                answer_text_content = None
-
-                if assignment_type == 'Paper Upload Type':
-                    uploaded_file = request.FILES.get('answer_file')
-                    if not uploaded_file:
-                        messages.error(request, "Please upload a file.")
-                        return redirect('church_submit_assignment', pk=pk)
-                    
-                    answer_file_path = uploaded_file 
-                    
-                elif assignment_type == 'Paper Submit Type':
-                    questions = student_assignment.assignment.questions.all()
-                    
+                questions = student_assignment.assignment.questions.all()
+                
+                if is_paper_upload:
                     if questions.exists():
-                        combined_answers = ""
-                        for index, q in enumerate(questions, 1):
-                            ans = request.POST.get(f'answer_text_{q.id}', '').strip()
-                            combined_answers += f"<strong>Q{index}: {q.question}</strong><br>"
-                            combined_answers += f"<p>{ans}</p><hr>"
-                        
-                        answer_text_content = combined_answers
+                        for q in questions:
+                            uploaded_file = request.FILES.get(f'answer_file_{q.id}')
+                            if not uploaded_file:
+                                messages.error(request, f"Please upload a file for Question: {q.question[:30]}...")
+                                return redirect('church_submit_assignment', pk=pk)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=student_assignment.assignment,
+                                student=student_assignment.student,
+                                question=q,
+                                answer_file=uploaded_file,
+                                created_at=timezone.now()
+                            )
                     else:
-                        answer_text_content = request.POST.get('answer_text')
+                        uploaded_file = request.FILES.get('answer_file')
+                        if not uploaded_file:
+                            messages.error(request, "Please upload a file.")
+                            return redirect('church_submit_assignment', pk=pk)
+                        
+                        AssignmentAnswers.objects.create(
+                            assignment=student_assignment.assignment,
+                            student=student_assignment.student,
+                            answer_file=uploaded_file,
+                            created_at=timezone.now()
+                        )
+                        
+                elif is_paper_submit:
+                    if questions.exists():
+                        for q in questions:
+                            ans_text = request.POST.get(f'answer_text_{q.id}', '').strip()
+                            if not ans_text:
+                                messages.error(request, f"Please provide an answer for Question: {q.question[:30]}...")
+                                return redirect('church_submit_assignment', pk=pk)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=student_assignment.assignment,
+                                student=student_assignment.student,
+                                question=q,
+                                answer_text=ans_text,
+                                created_at=timezone.now()
+                            )
+                    else:
+                        ans_text = request.POST.get('answer_text', '').strip()
+                        if not ans_text:
+                            messages.error(request, "Please provide an answer.")
+                            return redirect('church_submit_assignment', pk=pk)
+                        
+                        AssignmentAnswers.objects.create(
+                            assignment=student_assignment.assignment,
+                            student=student_assignment.student,
+                            answer_text=ans_text,
+                            created_at=timezone.now()
+                        )
+                else:
+                    messages.error(request, "Unknown Assignment Type.")
+                    return redirect('church_submit_assignment', pk=pk)
 
-                    if not answer_text_content:
-                        messages.error(request, "Please provide an answer.")
-                        return redirect('church_submit_assignment', pk=pk)
-
-                AssignmentAnswers.objects.create(
-                    assignment=student_assignment.assignment,
-                    student=student_assignment.student,
-                    answer_file=answer_file_path,
-                    answer_text=answer_text_content,
-                    created_at=timezone.now()
-                )
-
+                # Update StudentsAssignment status
                 student_assignment.submitted_on = timezone.now()
                 student_assignment.save()
                 
@@ -722,29 +776,43 @@ def church_user_start_exam(request, exam_id):
 
         exam = get_object_or_404(Exams, id=exam_id, deleted_at=None)
         
-        # Find or create StudentsExams
-        student_exam, created = StudentsExams.objects.get_or_create(
+        # Find any existing, uncompleted exam record (initial or retest)
+        student_exam = StudentsExams.objects.filter(
             student=student,
             exam=exam,
-            deleted_at=None,
-            defaults={
-                'start_time': timezone.now(),
-                'is_approved': True,
-                'is_exam_started': True,
-                'timezone': 'UTC+05:30', 
-                'requested_by': request.user,
-                'created_by': request.user,
-                'updated_by': request.user,
-                'exam_duration': 120,
-                'show_on_score': 0,
-            }
-        )
+            is_exam_ended=False,
+            deleted_at=None
+        ).order_by('-created_at').first()
         
-        if not created:
-            if student_exam.is_exam_ended:
+        created = False
+        if not student_exam:
+            # Check if they have already completed an attempt
+            if StudentsExams.objects.filter(
+                student=student,
+                exam=exam,
+                is_exam_ended=True,
+                deleted_at=None
+            ).exists():
                 messages.warning(request, "You have already completed this exam.")
                 return redirect('church_user_subject_uploads', subject_id=exam.subject.id)
-            
+                
+            # Create the initial attempt record
+            student_exam = StudentsExams.objects.create(
+                student=student,
+                exam=exam,
+                start_time=timezone.now(),
+                is_approved=True,
+                is_exam_started=True,
+                timezone='UTC+05:30', 
+                requested_by=request.user,
+                created_by=request.user,
+                updated_by=request.user,
+                exam_duration=120,
+                show_on_score=0,
+            )
+            created = True
+        
+        if not created:
             if not student_exam.is_exam_started:
                 student_exam.is_exam_started = True
                 student_exam.is_approved = True
@@ -836,6 +904,7 @@ def church_user_take_exam(request, exam_id):
 
 @login_required
 def church_user_submit_exam(request, exam_id):
+    from home.models import ObjectiveQuestions, ObjectiveAnswers, DescriptiveQuestions, DescriptiveAnswers
     if request.method != "POST":
         return redirect("church_user_exam_hall")
 
@@ -857,19 +926,52 @@ def church_user_submit_exam(request, exam_id):
                     if not q_id.isdigit(): continue
                         
                     question = ObjectiveQuestions.objects.get(id=q_id)
+                    # Auto-grading
                     val_str = str(value).strip()
-                    correct_opt = str(question.answer_option).strip()
-                    is_correct = (val_str == correct_opt)
+                    
+                    # Resolve which option index the student selected (1, 2, 3, or 4)
+                    selected_option_index = None
+                    if val_str in ("1", "2", "3", "4"):
+                        selected_option_index = val_str
+                    elif val_str.lower() in ("option1", "option2", "option3", "option4"):
+                        selected_option_index = val_str.lower().replace("option", "")
+                    else:
+                        # Fallback: check if the value matches any option text
+                        if question.option1 and val_str == str(question.option1).strip():
+                            selected_option_index = "1"
+                        elif question.option2 and val_str == str(question.option2).strip():
+                            selected_option_index = "2"
+                        elif question.option3 and val_str == str(question.option3).strip():
+                            selected_option_index = "3"
+                        elif question.option4 and val_str == str(question.option4).strip():
+                            selected_option_index = "4"
+                    
+                    # Normalize correct option index (e.g., "option1" -> "1")
+                    correct_opt = str(question.answer_option).strip().lower()
+                    correct_option_index = correct_opt.replace("option", "")
+                    
+                    is_correct = False
+                    if selected_option_index and correct_option_index:
+                        is_correct = (selected_option_index == correct_option_index)
+                    else:
+                        is_correct = (val_str.lower() == correct_opt)
                     
                     qm = question.marks if question.marks else 0
                     marks_awarded = qm if is_correct else 0
-                    try: marks_awarded = int(float(marks_awarded))
-                    except: marks_awarded = 0
+                    
+                    # Ensure mark fits decimal_places=0
+                    try:
+                        marks_awarded = int(float(marks_awarded))
+                    except:
+                        marks_awarded = 0
+                    
+                    # Store normalized index (e.g., "1") if found, otherwise raw value
+                    db_answer_val = selected_option_index if selected_option_index else val_str
                     
                     ObjectiveAnswers.objects.update_or_create(
                         assignment=student_exam,
                         question=question,
-                        defaults={'answer': val_str[:250], 'mark': marks_awarded}
+                        defaults={'answer': db_answer_val[:250], 'mark': marks_awarded}
                     )
                 
                 elif key.startswith("desc_q_"):
@@ -886,6 +988,8 @@ def church_user_submit_exam(request, exam_id):
                     )
                     
             except Exception as inner_e:
+                print(f"DEBUG ERROR in church_user_submit_exam: Failed for key {key}: {inner_e}")
+                logger.error(f"Error saving answer for key {key} in exam {exam_id}: {inner_e}")
                 has_errors = True
         
         student_exam.is_exam_ended = True
@@ -907,7 +1011,12 @@ def church_user_score_card(request):
     try: student = Students.objects.get(user=request.user)
     except Students.DoesNotExist: return render(request, "church/score_card.html", {"error": "Student not found"})
 
-    completed_exams = StudentsExams.objects.filter(student=student, is_exam_ended=True).select_related("exam").order_by('-end_time')
+    completed_exams = (
+        StudentsExams.objects
+        .filter(student=student, is_exam_ended=True)
+        .select_related("exam", "exam__subject", "course", "subject", "student", "student__course_applied")
+        .order_by('-end_time')
+    )
     exam_data = []
     seen_exams = set()
     
@@ -940,11 +1049,12 @@ def church_user_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
 
-        # Check for the latest retest attempt (even if not ended)
+        # Check for the latest active retest attempt (not completed)
         latest_retest = StudentsExams.objects.filter(
             student=student,
             exam=exam,
             is_retest=True,
+            is_exam_ended=False,
             deleted_at__isnull=True
         ).order_by('-created_at').first()
         
@@ -953,10 +1063,15 @@ def church_user_score_card(request):
         retest_paid = latest_retest.retest_paid if latest_retest else False
         retest_id = latest_retest.id if latest_retest else se.id
 
+        course_name = se.course.course_name if se.course else (student.course_applied.course_name if student.course_applied else "-")
+        subject_name = se.subject.subject_name if se.subject else (exam.subject.subject_name if (exam and exam.subject) else "-")
+
         exam_data.append({
             "id": retest_id,
             "code": exam.code,
             "exam_name": exam.exam_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
             "total_score": round(total_marks),
             "score": round(obtained_marks),
             "percentage": round(percentage, 2),
@@ -966,7 +1081,12 @@ def church_user_score_card(request):
             "retest_paid": retest_paid,
         })
 
-    student_assignments = StudentsAssignment.objects.filter(student=student, submitted_on__isnull=False).order_by('-submitted_on').select_related("assignment")
+    student_assignments = (
+        StudentsAssignment.objects
+        .filter(student=student, submitted_on__isnull=False)
+        .order_by('-submitted_on')
+        .select_related("assignment", "assignment__subject", "student", "student__course_applied")
+    )
     assignment_data = []
 
     for sa in student_assignments:
@@ -982,9 +1102,18 @@ def church_user_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
         
+        course_name = sa.student.course_applied.course_name if (sa.student and sa.student.course_applied) else "-"
+        subject_name = assignment.subject.subject_name if (assignment and assignment.subject) else "-"
+
         assignment_data.append({
-            "code": assignment.code, "assignment_name": assignment.assignment_name, "total_score": total,
-            "score": obtained, "percentage": round(percentage, 2), "grade": grade
+            "code": assignment.code,
+            "assignment_name": assignment.assignment_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
+            "total_score": total,
+            "score": obtained,
+            "percentage": round(percentage, 2),
+            "grade": grade
         })
 
     def calc_grade(p):

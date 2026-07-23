@@ -4482,17 +4482,77 @@ def exams_list(request):
 
 @login_required
 def exam_create(request):
-    """Create new exam"""
+    """Create new exam with inline questions"""
     if request.method == 'POST':
         form = ExamsForm(request.POST)
         if form.is_valid():
-            exam = form.save(commit=False)
-            exam.created_by = request.user
-            exam.updated_by = request.user
-            exam.created_at = timezone.now()
-            exam.save()
-            messages.success(request, 'Exam created successfully!')
-            return redirect('exams_edit', exam_id=exam.id)
+            try:
+                with transaction.atomic():
+                    exam = form.save(commit=False)
+                    exam.created_by = request.user
+                    exam.updated_by = request.user
+                    exam.created_at = timezone.now()
+                    exam.code = ""  # Let save generate code
+                    exam.save()
+                    
+                    # Process inline questions
+                    question_ids = request.POST.getlist('question_id[]')
+                    question_texts = request.POST.getlist('question_text[]')
+                    question_marks = request.POST.getlist('question_mark[]')
+                    
+                    if exam.exam_type == 'descriptive':
+                        for i in range(len(question_texts)):
+                            q_text = question_texts[i]
+                            q_mark = question_marks[i]
+                            if not q_text:
+                                continue
+                            DescriptiveQuestions.objects.create(
+                                exam=exam,
+                                question=q_text,
+                                mark=int(q_mark) if q_mark else 0,
+                                created_at=timezone.now(),
+                                created_by=request.user,
+                                updated_by=request.user
+                            )
+                    elif exam.exam_type == 'objective':
+                        option1_list = request.POST.getlist('option1[]')
+                        option2_list = request.POST.getlist('option2[]')
+                        option3_list = request.POST.getlist('option3[]')
+                        option4_list = request.POST.getlist('option4[]')
+                        answer_option_list = request.POST.getlist('answer_option[]')
+                        answer_detail_list = request.POST.getlist('answer_detail[]')
+                        
+                        for i in range(len(question_texts)):
+                            q_text = question_texts[i]
+                            q_mark = question_marks[i]
+                            
+                            opt1 = option1_list[i] if i < len(option1_list) else ""
+                            opt2 = option2_list[i] if i < len(option2_list) else ""
+                            opt3 = option3_list[i] if i < len(option3_list) else ""
+                            opt4 = option4_list[i] if i < len(option4_list) else ""
+                            ans_opt = answer_option_list[i] if i < len(answer_option_list) else "option1"
+                            ans_detail = answer_detail_list[i] if i < len(answer_detail_list) else ""
+                            
+                            if not q_text:
+                                continue
+                            ObjectiveQuestions.objects.create(
+                                exam=exam,
+                                question=q_text,
+                                option1=opt1,
+                                option2=opt2,
+                                option3=opt3,
+                                option4=opt4,
+                                answer_option=ans_opt,
+                                answer=ans_detail,
+                                marks=float(q_mark) if q_mark else 0.0,
+                                created_at=timezone.now(),
+                                created_by=request.user,
+                                updated_by=request.user
+                            )
+                messages.success(request, 'Exam and questions created successfully!')
+                return redirect('exams_list')
+            except Exception as e:
+                messages.error(request, f'Failed to create exam: {str(e)}')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -4501,7 +4561,8 @@ def exam_create(request):
     context = {
         'form': form,
         'page_title': 'Create Exam',
-        'action': 'Create'
+        'action': 'Create',
+        'questions': [],
     }
     return render(request, 'admin/exams/exam_form.html', context)
 
@@ -4528,35 +4589,158 @@ def exam_view(request, exam_id):
 
 @login_required
 def exam_edit(request, exam_id):
-    """Edit existing exam"""
+    """Edit existing exam and its inline questions"""
     exam = get_object_or_404(Exams, id=exam_id, deleted_at__isnull=True)
     
     if request.method == 'POST':
         form = ExamsForm(request.POST, instance=exam)
         if form.is_valid():
-            exam = form.save(commit=False)
-            exam.updated_by = request.user
-            exam.save()
-            messages.success(request, 'Exam updated successfully!')
-            return redirect('exams_list')
+            try:
+                with transaction.atomic():
+                    exam = form.save(commit=False)
+                    exam.updated_by = request.user
+                    exam.save()
+                    
+                    # Process inline questions
+                    question_ids = request.POST.getlist('question_id[]')
+                    question_texts = request.POST.getlist('question_text[]')
+                    question_marks = request.POST.getlist('question_mark[]')
+                    
+                    keep_ids = []
+                    
+                    if exam.exam_type == 'descriptive':
+                        for i in range(len(question_texts)):
+                            q_id = question_ids[i] if i < len(question_ids) else ""
+                            q_text = question_texts[i]
+                            q_mark = question_marks[i]
+                            
+                            if not q_text:
+                                continue
+                                
+                            if q_id and q_id != "":
+                                DescriptiveQuestions.objects.filter(id=q_id, exam=exam).update(
+                                    question=q_text,
+                                    mark=int(q_mark) if q_mark else 0,
+                                    updated_at=timezone.now(),
+                                    updated_by=request.user
+                                )
+                                keep_ids.append(int(q_id))
+                            else:
+                                new_q = DescriptiveQuestions.objects.create(
+                                    exam=exam,
+                                    question=q_text,
+                                    mark=int(q_mark) if q_mark else 0,
+                                    created_at=timezone.now(),
+                                    created_by=request.user,
+                                    updated_by=request.user
+                                )
+                                keep_ids.append(new_q.id)
+                                
+                        # Delete removed descriptive questions
+                        DescriptiveQuestions.objects.filter(exam=exam).exclude(id__in=keep_ids).delete()
+                        # Clear objective questions if type changed
+                        ObjectiveQuestions.objects.filter(exam=exam).delete()
+                        
+                    elif exam.exam_type == 'objective':
+                        option1_list = request.POST.getlist('option1[]')
+                        option2_list = request.POST.getlist('option2[]')
+                        option3_list = request.POST.getlist('option3[]')
+                        option4_list = request.POST.getlist('option4[]')
+                        answer_option_list = request.POST.getlist('answer_option[]')
+                        answer_detail_list = request.POST.getlist('answer_detail[]')
+                        
+                        for i in range(len(question_texts)):
+                            q_id = question_ids[i] if i < len(question_ids) else ""
+                            q_text = question_texts[i]
+                            q_mark = question_marks[i]
+                            
+                            opt1 = option1_list[i] if i < len(option1_list) else ""
+                            opt2 = option2_list[i] if i < len(option2_list) else ""
+                            opt3 = option3_list[i] if i < len(option3_list) else ""
+                            opt4 = option4_list[i] if i < len(option4_list) else ""
+                            ans_opt = answer_option_list[i] if i < len(answer_option_list) else "option1"
+                            ans_detail = answer_detail_list[i] if i < len(answer_detail_list) else ""
+                            
+                            if not q_text:
+                                continue
+                                
+                            if q_id and q_id != "":
+                                ObjectiveQuestions.objects.filter(id=q_id, exam=exam).update(
+                                    question=q_text,
+                                    option1=opt1,
+                                    option2=opt2,
+                                    option3=opt3,
+                                    option4=opt4,
+                                    answer_option=ans_opt,
+                                    answer=ans_detail,
+                                    marks=float(q_mark) if q_mark else 0.0,
+                                    updated_at=timezone.now(),
+                                    updated_by=request.user
+                                )
+                                keep_ids.append(int(q_id))
+                            else:
+                                new_q = ObjectiveQuestions.objects.create(
+                                    exam=exam,
+                                    question=q_text,
+                                    option1=opt1,
+                                    option2=opt2,
+                                    option3=opt3,
+                                    option4=opt4,
+                                    answer_option=ans_opt,
+                                    answer=ans_detail,
+                                    marks=float(q_mark) if q_mark else 0.0,
+                                    created_at=timezone.now(),
+                                    created_by=request.user,
+                                    updated_by=request.user
+                                )
+                                keep_ids.append(new_q.id)
+                                
+                        # Delete removed objective questions
+                        ObjectiveQuestions.objects.filter(exam=exam).exclude(id__in=keep_ids).delete()
+                        # Clear descriptive questions if type changed
+                        DescriptiveQuestions.objects.filter(exam=exam).delete()
+                        
+                messages.success(request, 'Exam updated successfully!')
+                return redirect('exams_list')
+            except Exception as e:
+                messages.error(request, f'Failed to update exam: {str(e)}')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ExamsForm(instance=exam)
     
-    # Fetch questions
+    # Fetch questions for editing view context
     descriptive_questions = exam.descriptive_questions.all().order_by('id')
     objective_questions = exam.objective_questions.all().order_by('id')
-
+    
+    questions = []
+    if exam.exam_type == 'descriptive':
+        for q in descriptive_questions:
+            questions.append({
+                'id': q.id,
+                'question': q.question,
+                'mark': q.mark
+            })
+    elif exam.exam_type == 'objective':
+        for q in objective_questions:
+            questions.append({
+                'id': q.id,
+                'question': q.question,
+                'mark': float(q.marks),
+                'option1': q.option1,
+                'option2': q.option2,
+                'option3': q.option3,
+                'option4': q.option4,
+                'answer_option': q.answer_option,
+                'answer_detail': q.answer
+            })
+            
     context = {
         'form': form,
         'exam': exam,
-        'descriptive_questions': descriptive_questions,
-        'objective_questions': objective_questions,
-        'descriptive_form': DescriptiveQuestionsForm(),
-        'objective_form': ObjectiveQuestionsForm(),
         'page_title': 'Edit Exam',
-        'action': 'Update'
+        'action': 'Update',
+        'questions': questions
     }
     return render(request, 'admin/exams/exam_form.html', context)
 
@@ -4782,14 +4966,38 @@ def assignments_list(request):
 @login_required
 def assignment_create(request):
     """Create new assignment"""
+    from home.models import AssignmentQuestions
+    from django.db import transaction
     if request.method == 'POST':
         form = AssignmentForm(request.POST)
         if form.is_valid():
-            assignment = form.save(commit=False)
-            assignment.created_by = request.user
-            assignment.updated_by = request.user
-            assignment.created_at = timezone.now()
-            assignment.save()
+            with transaction.atomic():
+                assignment = form.save(commit=False)
+                assignment.created_by = request.user
+                assignment.updated_by = request.user
+                assignment.created_at = timezone.now()
+                assignment.code = ""  # Initial placeholder
+                assignment.save()
+                
+                # Auto-populate assignment code to ID
+                assignment.code = str(assignment.id)
+                assignment.save(update_fields=['code'])
+                
+                # Process questions
+                q_texts = request.POST.getlist('question_text[]')
+                q_marks = request.POST.getlist('question_mark[]')
+                
+                for text, mark in zip(q_texts, q_marks):
+                    if text.strip():
+                        AssignmentQuestions.objects.create(
+                            assignment=assignment,
+                            question=text.strip(),
+                            mark=int(mark or 0),
+                            created_at=timezone.now(),
+                            created_by=request.user,
+                            updated_by=request.user
+                        )
+                
             messages.success(request, 'Assignment created successfully!')
             return redirect('assignments_list')
         else:
@@ -4818,14 +5026,47 @@ def assignment_view(request, assignment_id):
 @login_required
 def assignment_edit(request, assignment_id):
     """Edit existing assignment"""
+    from home.models import AssignmentQuestions
+    from django.db import transaction
     assignment = get_object_or_404(Assignments, id=assignment_id, deleted_at__isnull=True)
     
     if request.method == 'POST':
         form = AssignmentForm(request.POST, instance=assignment)
         if form.is_valid():
-            assignment = form.save(commit=False)
-            assignment.updated_by = request.user
-            assignment.save()
+            with transaction.atomic():
+                assignment = form.save(commit=False)
+                assignment.updated_by = request.user
+                assignment.save()
+                
+                # Process questions
+                q_ids = request.POST.getlist('question_id[]')
+                q_texts = request.POST.getlist('question_text[]')
+                q_marks = request.POST.getlist('question_mark[]')
+                
+                # Remove questions that were deleted in the UI
+                submitted_q_ids = [int(qid) for qid in q_ids if qid]
+                assignment.questions.exclude(id__in=submitted_q_ids).delete()
+                
+                for qid, text, mark in zip(q_ids, q_texts, q_marks):
+                    if not text.strip():
+                        continue
+                    if qid:  # Update
+                        AssignmentQuestions.objects.filter(id=qid).update(
+                            question=text.strip(),
+                            mark=int(mark or 0),
+                            updated_at=timezone.now(),
+                            updated_by=request.user
+                        )
+                    else:  # Create
+                        AssignmentQuestions.objects.create(
+                            assignment=assignment,
+                            question=text.strip(),
+                            mark=int(mark or 0),
+                            created_at=timezone.now(),
+                            created_by=request.user,
+                            updated_by=request.user
+                        )
+                        
             messages.success(request, 'Assignment updated successfully!')
             return redirect('assignments_list')
         else:
@@ -4833,10 +5074,13 @@ def assignment_edit(request, assignment_id):
     else:
         form = AssignmentForm(instance=assignment)
     
+    questions = assignment.questions.all().order_by('id')
+    
     return render(request, 'admin/assignments/assignment_form.html', {
         'form': form,
         'action': 'Update',
-        'assignment': assignment
+        'assignment': assignment,
+        'questions': questions
     })
 
 @login_required
@@ -6091,9 +6335,9 @@ def student_subjects_datatable(request):
     elif order_column_index == 4:
         order_col = 'updated_by__username'
     else:
-        order_col = '-created_at'
+        order_col = 'created_at'
 
-    if order_direction == 'desc' and not order_col.startswith('-'):
+    if order_direction == 'desc':
         order_col = '-' + order_col
     
     total_records = StudentsSubjects.objects.filter(deleted_at__isnull=True).count()
@@ -6215,6 +6459,7 @@ def student_subjects_bulk_assign(request):
                 StudentsSubjects.objects.create(
                     student=student,
                     subject_id=subject_id,
+                    is_approved=True,
                     created_by=request.user,
                     updated_by=request.user,
                     created_at=timezone.now(),
@@ -7423,16 +7668,20 @@ def student_assignment_datatable(request):
     order_column_index = int(request.GET.get('order[0][column]', 0))
     order_direction = request.GET.get('order[0][dir]', 'desc')
     
-    order_col = '-created_at' # Default
-    if order_column_index == 0:
+    order_col = '-submitted_on' if submitted_only else '-created_at' # Default
+    if order_column_index == 1:
         order_col = 'student__first_name'
-    elif order_column_index == 1:
-        order_col = 'assignment__assignment_name'
     elif order_column_index == 2:
+        order_col = 'assignment__assignment_name'
+    elif order_column_index == 3:
         order_col = 'assignment__subject__subject_name'
 
-    if order_direction == 'desc' and not order_col.startswith('-'):
-        order_col = '-' + order_col
+    if order_direction == 'desc':
+        if not order_col.startswith('-'):
+            order_col = '-' + order_col
+    else:
+        if order_col.startswith('-'):
+            order_col = order_col[1:]
     
     total_records = StudentsAssignment.objects.filter(deleted_at__isnull=True).count()
     filtered_records = query.count()
@@ -7487,7 +7736,7 @@ def view_assignment_answer_sheet(request, id):
     answers = AssignmentAnswers.objects.filter(
         assignment=student_assignment.assignment, 
         student=student_assignment.student
-    ).order_by('id')
+    ).select_related('question').order_by('id')
     
     context = {
         'student_assignment': student_assignment,

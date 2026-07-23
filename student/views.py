@@ -422,6 +422,271 @@ def student_subjects(request):
     return render(request, "student/subjects.html", context)
 
 
+@login_required
+@student_or_church_user
+def student_subject_detail(request, subject_id):
+    try:
+        # 1. Fetch student safely
+        student = Students.objects.select_related("user").filter(user=request.user).first()
+        if student is None:
+            messages.error(request, "Student profile not found.")
+            return redirect('student_subjects')
+
+        # 2. Verify that the subject is approved for the student
+        student_subject = StudentsSubjects.objects.filter(
+            student=student,
+            subject_id=subject_id,
+            is_approved=True,
+            deleted_at=None
+        ).select_related('subject').first()
+
+        if not student_subject:
+            messages.error(request, "Subject is either not approved or not found.")
+            return redirect('student_subjects')
+
+        subject = student_subject.subject
+
+        # 3. Fetch Study Materials (BookReferences) assigned to this student
+        from home.models import StudentsBooks, BookReferences
+        assigned_book_ids = StudentsBooks.objects.filter(
+            student=student,
+            deleted_at=None
+        ).values_list('book_id', flat=True)
+
+        references = BookReferences.objects.filter(
+            id__in=assigned_book_ids,
+            subject=subject,
+            status=True,
+            deleted_at=None
+        ).select_related('reference_file').order_by('-created_at')
+
+        # 4. Fetch Assignments (StudentsAssignment)
+        student_assignments = StudentsAssignment.objects.filter(
+            student=student,
+            assignment__subject=subject,
+            deleted_at=None
+        ).select_related('assignment', 'assignment__subject').order_by('-created_at')
+
+        for sa in student_assignments:
+            if sa.submitted_on:
+                sa.submitted_answers = AssignmentAnswers.objects.filter(
+                    student=student,
+                    assignment=sa.assignment
+                ).select_related('question').order_by('id')
+
+        # 5. Fetch Class Recordings (StudentsUploads)
+        from home.models import StudentsUploads
+        student_uploads_qs = StudentsUploads.objects.filter(
+            student=student,
+            upload__subject=subject
+        ).select_related(
+            'upload',
+            'upload__youtube',
+            'upload__media',
+            'upload__subject',
+            'upload__video_id',
+            'upload__video_id__youtube',
+            'upload__video_id__media'
+        ).order_by('-created_at')
+
+        recordings = []
+        for su in student_uploads_qs:
+            upload = su.upload
+            if not upload:
+                continue
+            
+            import re
+            item = {
+                'id': upload.id,
+                'title': upload.upload_name,
+                'description': upload.description,
+                'date': su.created_at,
+                'type': 'file',
+                'url': '',
+                'thumb': ''
+            }
+
+            if upload.youtube:
+                item['type'] = 'youtube'
+                item['url'] = upload.youtube.file_path
+                regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+                match = re.search(regex, item['url'])
+                item['youtube_id'] = match.group(1) if match else None
+                item['thumb'] = upload.youtube.thumb_file_path if upload.youtube.thumb_file_path else ''
+            
+            elif upload.media:
+                file_url = upload.media.file_path.url if upload.media.file_path else ''
+                ext = upload.media.file_type.lower() if upload.media.file_type else ''
+                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
+                    item['type'] = 'video'
+                    item['url'] = file_url
+                else:
+                    item['type'] = 'file'
+                    item['url'] = file_url
+                    
+            elif upload.aws_url:
+                item['url'] = upload.aws_url
+                ext = upload.aws_url.split('.')[-1].lower() if '.' in upload.aws_url else ''
+                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
+                    item['type'] = 'video'
+                else:
+                    item['type'] = 'file'
+
+            elif upload.video_id:
+                video = upload.video_id
+                if video.youtube:
+                    item['type'] = 'youtube'
+                    item['url'] = video.youtube.file_path
+                    regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+                    match = re.search(regex, item['url'])
+                    item['youtube_id'] = match.group(1) if match else None
+                    item['thumb'] = video.youtube.thumb_file_path if video.youtube.thumb_file_path else ''
+                elif video.media:
+                    file_url = video.media.file_path.url if video.media.file_path else ''
+                    ext = video.media.file_type.lower() if video.media.file_type else ''
+                    if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
+                        item['type'] = 'video'
+                        item['url'] = file_url
+                    else:
+                        item['type'] = 'file'
+                        item['url'] = file_url
+            
+            recordings.append(item)
+
+        # 6. Fetch Exams for the subject
+        from home.models import Exams
+        exams = Exams.objects.filter(subject=subject, deleted_at=None)
+        
+        exam_list = []
+        now = timezone.now()
+        
+        for exam in exams:
+            se = StudentsExams.objects.filter(
+                student=student, 
+                exam=exam, 
+                deleted_at=None
+            ).order_by('-created_at').first()
+            
+            status = "Not Requested"
+            can_start = False
+            action = "Request"
+            se_id = None
+            retest_fee = None
+            retest_paid = False
+            is_retest = False
+            retest_status = None
+            start_time_str = "N/A"
+            duration = 120
+            
+            if se:
+                se_id = se.id
+                duration = se.exam_duration or duration
+                is_retest = se.is_retest
+                retest_fee = str(se.retest_fee) if se.retest_fee else None
+                retest_paid = se.retest_paid
+                retest_status = se.retest_status
+                
+                # Check expiry
+                is_expired = False
+                if se.start_time:
+                    expiry_time = se.start_time + timedelta(minutes=duration)
+                    if now > expiry_time:
+                        is_expired = True
+                
+                # Logic for status
+                if se.is_exam_ended:
+                    status = "Completed"
+                    action = "View"
+                    can_start = False
+                elif is_expired:
+                    status = "Missed"
+                    action = "Reschedule"
+                    can_start = False
+                elif se.is_retest and not se.is_approved:
+                    status = "Retest Pending"
+                    action = "Wait"
+                    can_start = False
+                elif se.is_retest and se.is_approved and se.start_time and se.start_time > now:
+                    status = "Retest Approved"
+                    action = "Wait"
+                    can_start = False
+                elif se.is_approved and se.start_time and se.start_time <= now:
+                    status = "Ongoing"
+                    action = "Start"
+                    can_start = True
+                elif se.is_approved:
+                    status = "Approved"
+                    action = "Wait"
+                    can_start = False
+                elif se.is_rescheduled and not se.is_approved:
+                    status = "Rescheduled"
+                    action = "Wait"
+                    can_start = False
+                elif not se.is_approved and se.start_time and se.start_time <= now:
+                    status = "Pending Approval"
+                    action = "Wait"
+                    can_start = False
+                else:
+                    status = "Pending"
+                    action = "Wait"
+                    can_start = False
+                
+                # Convert start_time to local tz for rendering
+                if se.start_time:
+                    try:
+                        if se.timezone.startswith("UTC"):
+                            offset_str = se.timezone[3:]
+                            if offset_str:
+                                sign = 1 if offset_str[0] == '+' else -1
+                                parts = offset_str[1:].split(':')
+                                hours = int(parts[0])
+                                minutes = int(parts[1]) if len(parts) > 1 else 0
+                                td = timedelta(hours=hours, minutes=minutes)
+                                tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
+                            else:
+                                tz = pytz.UTC
+                        else:
+                            tz = pytz.timezone(se.timezone)
+                        local_dt = se.start_time.astimezone(tz)
+                        start_time_str = local_dt.strftime("%b %d, %Y %I:%M %p")
+                    except Exception as tz_ex:
+                        logger.error(f"Error converting start_time to local tz in subject detail: {tz_ex}")
+                        start_time_str = se.start_time.strftime("%b %d, %Y %I:%M %p")
+            
+            exam_list.append({
+                "id": exam.id,
+                "se_id": se_id,
+                "name": exam.exam_name,
+                "duration": duration,
+                "status": status,
+                "can_start": can_start,
+                "action": action,
+                "start_time_str": start_time_str,
+                "is_retest": is_retest,
+                "retest_fee": retest_fee,
+                "retest_paid": retest_paid,
+                "retest_status": retest_status,
+                "is_exam_ended": se.is_exam_ended if se else False
+            })
+
+        context = {
+            "student": student,
+            "subject": subject,
+            "references": references,
+            "assignments": student_assignments,
+            "recordings": recordings,
+            "exams": exam_list,
+            "page_title": f"Resources - {subject.subject_name}"
+        }
+
+        return render(request, "student/subject_detail.html", context)
+
+    except Exception as e:
+        logger.error(f"Subject detail view error: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while loading subject details.")
+        return redirect('student_subjects')
+
+
 # -----------------------------------------
 #  STUDENT UPLOADED ASSIGNMENT PAGE VIEWS
 # -----------------------------------------
@@ -481,15 +746,15 @@ def student_submitted_assignment(request):
             submitted_on__isnull=False
         ).select_related('assignment', 'assignment__subject', 'student') # Optimize
         
-        # Attach the actual answer to each record
+        # Attach the actual answers to each record
         # Since AssignmentAnswers links to Assignment and Student, not StudentsAssignment directly
         for sa in submitted_assignments:
-            answer = AssignmentAnswers.objects.filter(
+            answers = AssignmentAnswers.objects.filter(
                 student=student, 
                 assignment=sa.assignment
-            ).last() # Get latest answer if multiple (though likely one)
+            ).select_related('question').order_by('id')
             
-            sa.submitted_answer = answer # Attach to object for template
+            sa.submitted_answers = answers # Attach to object for template
 
     except Exception as e:
         logger.error(f"Failed to fetch submitted assignments for student {student_id}: {e}")
@@ -861,11 +1126,12 @@ def student_score_card(request):
         elif percentage >= 50: grade = "D"
         else: grade = "F"
 
-        # Check for the latest retest attempt (even if not ended)
+        # Check for the latest active retest attempt (not completed)
         latest_retest = StudentsExams.objects.filter(
             student=student,
             exam=exam,
             is_retest=True,
+            is_exam_ended=False,
             deleted_at__isnull=True
         ).order_by('-created_at').first()
         
@@ -1296,7 +1562,17 @@ def student_request_exam(request):
 
 
 def get_exams(request, subject_id):
-    exams = Exams.objects.filter(subject_id=subject_id).values("id", "exam_name")
+    student = Students.objects.filter(user=request.user).first()
+    if student:
+        # Get IDs of exams the student has already requested (active or completed, not deleted)
+        requested_exam_ids = StudentsExams.objects.filter(
+            student=student,
+            deleted_at__isnull=True
+        ).values_list("exam_id", flat=True)
+        
+        exams = Exams.objects.filter(subject_id=subject_id).exclude(id__in=requested_exam_ids).values("id", "exam_name")
+    else:
+        exams = Exams.objects.filter(subject_id=subject_id).values("id", "exam_name")
     return JsonResponse(list(exams), safe=False)
 
 
@@ -1325,6 +1601,19 @@ def submit_request_exam(request):
             return redirect("student_request_exam")
 
         exam = Exams.objects.get(id=exam_id)
+
+        # Check if they already requested this exam (active or completed)
+        existing_request = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            deleted_at__isnull=True
+        ).exists()
+        
+        if existing_request:
+            messages.error(request, "You have already requested this exam.")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"status": "error", "message": "You have already requested this exam."}, status=400)
+            return redirect("student_request_exam")
 
         # ---------------------------
         # COMBINE DATE + TIME → DATETIME
@@ -1492,8 +1781,33 @@ def submit_exam(request, exam_id):
                     
                     # Auto-grading
                     val_str = str(value).strip()
-                    correct_opt = str(question.answer_option).strip()
-                    is_correct = (val_str == correct_opt)
+                    
+                    # Resolve which option index the student selected (1, 2, 3, or 4)
+                    selected_option_index = None
+                    if val_str in ("1", "2", "3", "4"):
+                        selected_option_index = val_str
+                    elif val_str.lower() in ("option1", "option2", "option3", "option4"):
+                        selected_option_index = val_str.lower().replace("option", "")
+                    else:
+                        # Fallback: check if the value matches any option text
+                        if question.option1 and val_str == str(question.option1).strip():
+                            selected_option_index = "1"
+                        elif question.option2 and val_str == str(question.option2).strip():
+                            selected_option_index = "2"
+                        elif question.option3 and val_str == str(question.option3).strip():
+                            selected_option_index = "3"
+                        elif question.option4 and val_str == str(question.option4).strip():
+                            selected_option_index = "4"
+                    
+                    # Normalize correct option index (e.g., "option1" -> "1")
+                    correct_opt = str(question.answer_option).strip().lower()
+                    correct_option_index = correct_opt.replace("option", "")
+                    
+                    is_correct = False
+                    if selected_option_index and correct_option_index:
+                        is_correct = (selected_option_index == correct_option_index)
+                    else:
+                        is_correct = (val_str.lower() == correct_opt)
                     
                     qm = question.marks if question.marks else 0
                     marks_awarded = qm if is_correct else 0
@@ -1504,16 +1818,19 @@ def submit_exam(request, exam_id):
                     except:
                         marks_awarded = 0
                     
+                    # Store normalized index (e.g., "1") if found, otherwise raw value
+                    db_answer_val = selected_option_index if selected_option_index else val_str
+                    
                     # Use update_or_create to handle re-submissions or duplicates
                     obj, created = ObjectiveAnswers.objects.update_or_create(
                         assignment=student_exam,
                         question=question,
                         defaults={
-                            'answer': val_str[:250], # Truncate to fit CharField
+                            'answer': db_answer_val[:250], # Truncate to fit CharField
                             'mark': marks_awarded
                         }
                     )
-                    print(f"DEBUG: Saved Objective Q {q_id}: {Created if created else 'Updated'}")
+                    print(f"DEBUG: Saved Objective Q {q_id}: {'Created' if created else 'Updated'}")
                     count_saved += 1
                 
                 elif key.startswith("desc_q_"):
@@ -2746,66 +3063,71 @@ def submit_assignment(request, pk):
 
     if request.method == "POST":
         assignment_type = student_assignment.assignment.assignment_type
+        is_paper_upload = assignment_type in ('paper_upload', 'Paper Upload Type', 'Paper Upload type')
+        is_paper_submit = assignment_type in ('paper_submit', 'Paper Submit Type', 'Paper Submit type')
         
         try:
             with transaction.atomic():
-                # logic for file upload or text submit
-                answer_file_path = None
-                answer_text_content = None
-
-                if assignment_type == 'Paper Upload Type':
-                    # Using the new FileField, we can just pass the file to the create method if we want,
-                    # OR we can manually handle it. Since the model now uses FileField, 
-                    # we should let Django ORM handle it or assign the file object.
-                    uploaded_file = request.FILES.get('answer_file')
-                    if not uploaded_file:
-                        messages.error(request, "Please upload a file.")
-                        return redirect('submit_assignment', pk=pk)
-                    
-                    # Store file object directly (Django FileField handles upload_to)
-                    answer_file_path = uploaded_file 
-                    
-                elif assignment_type == 'Paper Submit Type':
-                    # Check if we have specific questions to answer
-                    questions = student_assignment.assignment.questions.all()
-                    
+                questions = student_assignment.assignment.questions.all()
+                
+                if is_paper_upload:
                     if questions.exists():
-                        # Concatenate answers
-                        combined_answers = ""
-                        for index, q in enumerate(questions, 1):
-                            ans = request.POST.get(f'answer_text_{q.id}', '').strip()
-                            combined_answers += f"<strong>Q{index}: {q.question}</strong><br>"
-                            combined_answers += f"<p>{ans}</p><hr>"
-                        
-                        answer_text_content = combined_answers
+                        for q in questions:
+                            uploaded_file = request.FILES.get(f'answer_file_{q.id}')
+                            if not uploaded_file:
+                                messages.error(request, f"Please upload a file for Question: {q.question[:30]}...")
+                                return redirect('submit_assignment', pk=pk)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=student_assignment.assignment,
+                                student=student_assignment.student,
+                                question=q,
+                                answer_file=uploaded_file,
+                                created_at=timezone.now()
+                            )
                     else:
-                        # Fallback to single text area
-                        answer_text_content = request.POST.get('answer_text')
-
-                    if not answer_text_content:
-                        messages.error(request, "Please provide an answer.")
-                        return redirect('submit_assignment', pk=pk)
-
-                # Create Assignment Answer
-                AssignmentAnswers.objects.create(
-                    # Wait, model expects 'assignment' FK to Assignments? No, 'assignment' FK to Assignments?
-                    # Let's check model definition again: 
-                    # class AssignmentAnswers(models.Model):
-                    #     assignment = models.ForeignKey('Assignments', ...
-                    #     student = models.ForeignKey('Students', ...
-                    
-                    # BUT wait, how do we link to the specific 'StudentsAssignment' if we only link to generic 'Assignments'? 
-                    # The prompt asked for "make submited assignments in a button view assigments with all answers". 
-                    # If I create a new AssignmentAnswers, how do I know which attempt it is? 
-                    # Usually it links to StudentsAssignment OR we just use student + assignment.
-                    # Model definition says: assignment = FK('Assignments')
-                    
-                    assignment=student_assignment.assignment,
-                    student=student_assignment.student,
-                    answer_file=answer_file_path,
-                    answer_text=answer_text_content,
-                    created_at=timezone.now()
-                )
+                        uploaded_file = request.FILES.get('answer_file')
+                        if not uploaded_file:
+                            messages.error(request, "Please upload a file.")
+                            return redirect('submit_assignment', pk=pk)
+                        
+                        AssignmentAnswers.objects.create(
+                            assignment=student_assignment.assignment,
+                            student=student_assignment.student,
+                            answer_file=uploaded_file,
+                            created_at=timezone.now()
+                        )
+                        
+                elif is_paper_submit:
+                    if questions.exists():
+                        for q in questions:
+                            ans_text = request.POST.get(f'answer_text_{q.id}', '').strip()
+                            if not ans_text:
+                                messages.error(request, f"Please provide an answer for Question: {q.question[:30]}...")
+                                return redirect('submit_assignment', pk=pk)
+                            
+                            AssignmentAnswers.objects.create(
+                                assignment=student_assignment.assignment,
+                                student=student_assignment.student,
+                                question=q,
+                                answer_text=ans_text,
+                                created_at=timezone.now()
+                            )
+                    else:
+                        ans_text = request.POST.get('answer_text', '').strip()
+                        if not ans_text:
+                            messages.error(request, "Please provide an answer.")
+                            return redirect('submit_assignment', pk=pk)
+                        
+                        AssignmentAnswers.objects.create(
+                            assignment=student_assignment.assignment,
+                            student=student_assignment.student,
+                            answer_text=ans_text,
+                            created_at=timezone.now()
+                        )
+                else:
+                    messages.error(request, "Unknown Assignment Type.")
+                    return redirect('submit_assignment', pk=pk)
 
                 # Update StudentsAssignment status
                 student_assignment.submitted_on = timezone.now()
@@ -2911,11 +3233,12 @@ def student_request_retest(request, exam_id):
         # Fetch the completed StudentsExams record
         student_exam = get_object_or_404(StudentsExams, id=exam_id, student=student)
         
-        # Check if they have already requested a retest for this exam that is pending or approved
+        # Check if they have already requested a retest for this exam that is pending or approved and not yet completed
         existing_retest = StudentsExams.objects.filter(
             student=student,
             exam=student_exam.exam,
             is_retest=True,
+            is_exam_ended=False,
             retest_status__in=['pending', 'approved'],
             deleted_at__isnull=True
         ).exists()

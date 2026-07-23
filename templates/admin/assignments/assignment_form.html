@@ -50,6 +50,50 @@
                 {% endfor %}
             </div>
 
+            <!-- Questions Builder Section -->
+            <div class="card mt-4 mb-4" id="questions-section" style="border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden;">
+                <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 15px 20px;">
+                    <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-question-circle text-primary"></i> Assignment Questions
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 20px; background: #fff;">
+                    <div id="questions-container">
+                        {% if questions %}
+                            {% for q in questions %}
+                                <div class="question-row border p-3 mb-3 rounded position-relative" data-index="{{ forloop.counter0 }}" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                                    <input type="hidden" name="question_id[]" value="{{ q.id }}">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-9 mb-2 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                                <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter question text..." style="border-radius: 6px;" required>{{ q.question }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mb-2 mb-md-0">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Mark</label>
+                                                <input type="number" class="form-control" name="question_mark[]" value="{{ q.mark }}" placeholder="Marks" style="border-radius: 6px;" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 text-center mt-3 mt-md-0">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="text-start mt-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="add-question-btn" style="border-radius: 6px; padding: 6px 16px; font-weight: 500; min-width: 140px;">
+                            <i class="fas fa-plus"></i> Add Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-actions" style="margin-top:30px;padding-top:20px;border-top:1px solid var(--gray-200);">
                 <button type="submit" class="btn btn-primary" style="min-width:120px;">
                     <i class="fas fa-save"></i> {{ action }}
@@ -62,4 +106,57 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let questionIndex = $('#questions-container .question-row').length;
+
+        function addQuestionRow(id = '', text = '', mark = '') {
+            let rowHtml = `
+                <div class="question-row border p-3 mb-3 rounded position-relative" data-index="${questionIndex}" style="background: #f8fafc; border-color: #cbd5e1 !important; display: none;">
+                    <input type="hidden" name="question_id[]" value="${id}">
+                    <div class="row align-items-center">
+                        <div class="col-md-9 mb-2 mb-md-0">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter question text..." style="border-radius: 6px;" required>${text}</textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Mark</label>
+                                <input type="number" class="form-control" name="question_mark[]" value="${mark}" placeholder="Marks" style="border-radius: 6px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-1 text-center mt-3 mt-md-0">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            let $row = $(rowHtml);
+            $('#questions-container').append($row);
+            $row.fadeIn(200);
+            questionIndex++;
+        }
+
+        $('#add-question-btn').click(function() {
+            addQuestionRow();
+        });
+
+        $(document).on('click', '.remove-question-btn', function() {
+            let $row = $(this).closest('.question-row');
+            $row.fadeOut(200, function() {
+                $row.remove();
+            });
+        });
+
+        // Add an initial row if there are no questions on load
+        if (questionIndex === 0) {
+            addQuestionRow();
+        }
+    });
+</script>
 {% endblock %}

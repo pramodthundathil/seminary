@@ -68,17 +68,39 @@
                     <div class="alert alert-info border-info mt-4">
                         <h5 class="text-info"><i class="bi bi-check-circle-fill me-2"></i> You have already submitted this assignment</h5>
                         <hr class="border-info opacity-50">
-                        <p class="mb-2"><strong>Submitted on:</strong> {{ submission.created_at|date:"M d, Y h:i A" }}</p>
-                        {% if submission.answer_text %}
-                            <h6 class="mt-3">Your Answer:</h6>
-                            <div class="bg-white p-3 border rounded text-dark mt-2">
-                                {{ submission.answer_text|safe }}
+                        
+                        {% if submitted_answers %}
+                            <div class="mt-3">
+                                {% for ans in submitted_answers %}
+                                    <div class="mb-4 p-3 border rounded bg-white text-dark shadow-sm">
+                                        {% if ans.question %}
+                                            <h6 class="fw-bold mb-2 text-primary">Q: {{ ans.question.question }} ({{ ans.question.mark }} Marks)</h6>
+                                        {% else %}
+                                            <h6 class="fw-bold mb-2 text-primary">Answer Submission:</h6>
+                                        {% endif %}
+
+                                        {% if ans.answer_text %}
+                                            <div class="bg-light p-3 border rounded text-dark mt-2">
+                                                {{ ans.answer_text|safe }}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if ans.answer_file %}
+                                            <div class="mt-2">
+                                                <a href="{{ ans.answer_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> View Submitted File
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="text-success mt-2 font-weight-bold">
+                                            <strong>Marks Obtained:</strong> {{ ans.marks_optained|default:"Pending Evaluation" }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endif %}
-                        {% if submission.answer_file %}
-                            <a href="{{ submission.answer_file.url }}" target="_blank" class="btn btn-primary mt-3">
-                                <i class="bi bi-file-earmark-arrow-down me-1"></i> View Submitted File
-                            </a>
+                        {% else %}
+                            <p class="text-danger">No submissions found.</p>
                         {% endif %}
                     </div>
                 {% else %}
@@ -88,33 +110,45 @@
                         {% csrf_token %}
 
                         {% if assignment.assignment_type == 'paper_upload' or assignment.assignment_type == 'Paper Upload Type' or assignment.assignment_type == 'Paper Upload type' %}
-                        <div class="mb-4">
-                            <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
-                            <input type="file" class="form-control" id="answer_file" name="answer_file" required>
-                            <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
-                        </div>
+                            {% if questions %}
+                                <div class="mb-4">
+                                    <p class="text-muted mb-3">Please upload a separate answer file (PDF, DOCX, IMG) for each question below:</p>
+                                    {% for q in questions %}
+                                    <div class="mb-4 p-3 border rounded bg-light">
+                                        <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
+                                        <input type="file" class="form-control" name="answer_file_{{ q.id }}" required>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="mb-4">
+                                    <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
+                                    <input type="file" class="form-control" id="answer_file" name="answer_file" required>
+                                    <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
+                                </div>
+                            {% endif %}
                         
                         {% elif assignment.assignment_type == 'paper_submit' or assignment.assignment_type == 'Paper Submit Type' or assignment.assignment_type == 'Paper Submit type' %}
                             {% if questions %}
-                            <div class="mb-4">
-                                <p class="text-muted mb-2">Please answer the questions below:</p>
-                                {% for q in questions %}
-                                <div class="mb-4 p-3 border rounded bg-light">
-                                    <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
-                                    <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5" placeholder="Type your answer for Question {{ forloop.counter }}..."></textarea>
+                                <div class="mb-4">
+                                    <p class="text-muted mb-2">Please answer the questions below:</p>
+                                    {% for q in questions %}
+                                    <div class="mb-4 p-3 border rounded bg-light">
+                                        <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
+                                        <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5" placeholder="Type your answer for Question {{ forloop.counter }}..." required></textarea>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
-                            </div>
                             {% else %}
-                            <div class="mb-4">
-                                <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
-                                <textarea class="form-control" id="answer_text" name="answer_text" rows="10" placeholder="Type your answer here..." style="width: 100%;"></textarea>
-                            </div>
+                                <div class="mb-4">
+                                    <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
+                                    <textarea class="form-control" id="answer_text" name="answer_text" rows="10" placeholder="Type your answer here..." style="width: 100%;"></textarea>
+                                </div>
                             {% endif %}
                         {% else %}
-                        <div class="alert alert-warning">
-                            Unknown Assignment Type: "{{ assignment.assignment_type }}"
-                        </div>
+                            <div class="alert alert-warning">
+                                Unknown Assignment Type: "{{ assignment.assignment_type }}"
+                            </div>
                         {% endif %}
 
                         <div class="d-flex justify-content-end gap-2 mt-4">

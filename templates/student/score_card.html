@@ -398,6 +398,240 @@
         color: var(--primary-dark);
     }
 
+    /* TRANSCRIPT PDF STYLING */
+    .pdf-hidden-container {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        box-sizing: border-box;
+    }
+
+    #transcript-pdf-template {
+        width: 210mm;
+        min-height: 290mm;
+        height: auto;
+        padding: 12mm;
+        background-color: #fdfbf3;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    #transcript-pdf-template .pdf-border-wrapper {
+        border: 3px double #1b2845;
+        min-height: 266mm;
+        height: auto;
+        width: 100%;
+        padding: 10mm;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    #transcript-pdf-template .pdf-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: auto;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    #transcript-pdf-template .pdf-content {
+        position: relative;
+        z-index: 1;
+        height: auto;
+    }
+
+    #transcript-pdf-template .pdf-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #transcript-pdf-template .pdf-header img {
+        height: 100px;
+        margin-bottom: 8px;
+    }
+
+    #transcript-pdf-template .pdf-title-main {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    #transcript-pdf-template .pdf-title-sub {
+        font-size: 11px;
+        color: #475569;
+        margin-bottom: 2px;
+        line-height: 1.4;
+    }
+
+    #transcript-pdf-template .pdf-title-affil {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 12px;
+    }
+
+    #transcript-pdf-template .pdf-divider {
+        border-top: 2px solid #1b2845;
+        border-bottom: 1px solid #1b2845;
+        height: 3px;
+        margin-bottom: 20px;
+    }
+
+    #transcript-pdf-template .pdf-record-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1b2845;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+    }
+
+    #transcript-pdf-template .pdf-record-subtitle {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: #475569;
+        margin-bottom: 25px;
+    }
+
+    #transcript-pdf-template .pdf-student-info {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+    }
+
+    #transcript-pdf-template .pdf-student-info td {
+        padding: 10px 14px;
+        font-size: 13px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-student-info td strong {
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        font-size: 12px;
+    }
+
+    #transcript-pdf-template .pdf-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    #transcript-pdf-template .pdf-table th {
+        background-color: #1b2845;
+        color: #ffffff;
+        padding: 8px 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        border: 1px solid #1b2845;
+        text-align: left;
+    }
+
+    #transcript-pdf-template .pdf-table td {
+        padding: 8px 10px;
+        border: 1px solid #cbd5e1;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    #transcript-pdf-template .pdf-table .text-center {
+        text-align: center;
+    }
+
+    #transcript-pdf-template .pdf-table .text-right {
+        text-align: right;
+    }
+
+    #transcript-pdf-template .pdf-summary-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    #transcript-pdf-template .pdf-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    #transcript-pdf-template .pdf-summary-card {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 10px 12px;
+        background-color: #f8fafc;
+    }
+
+    #transcript-pdf-template .pdf-summary-card.highlight {
+        background-color: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    #transcript-pdf-template .pdf-summary-card-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+        font-weight: bold;
+    }
+
+    #transcript-pdf-template .pdf-summary-card-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-summary-card.highlight .pdf-summary-card-value {
+        color: #166534;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign {
+        margin-top: 50px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign td {
+        border: none;
+        width: 50%;
+        text-align: center;
+        font-size: 13px;
+        padding-top: 40px;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign-line {
+        border-top: 1px solid #1b2845;
+        width: 80%;
+        margin: 0 auto;
+        padding-top: 6px;
+        font-weight: 700;
+        color: #1b2845;
+    }
+
     /* PRINT STYLES */
     @media screen {
         .transcript-wrap { display: none; }
@@ -412,127 +646,16 @@
             visibility: hidden;
         }
 
-        .transcript-wrap,
-        .transcript-wrap * {
+        .pdf-hidden-container,
+        .pdf-hidden-container * {
             visibility: visible;
         }
 
-        .transcript-wrap {
+        .pdf-hidden-container {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
-            font-family: inherit;
-            color: #2c4c82; /* match image blue color */
-        }
-        
-        .transcript-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .transcript-header-img {
-            max-width: 400px;
-            margin-bottom: 10px;
-        }
-
-        /* If no logo image available, use text */
-        .ts-title-1 {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c4c82;
-            font-family: 'Georgia', serif;
-            margin-bottom: 5px;
-        }
-        .ts-title-2 {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2c4c82;
-            font-family: 'Georgia', serif;
-        }
-        .ts-reg {
-            font-size: 13px;
-            color: #2c4c82;
-            margin-top: 10px;
-        }
-        .ts-affil {
-            font-size: 13px;
-            color: #2c4c82;
-            margin-bottom: 20px;
-        }
-
-        .record-title {
-            text-align: center;
-            font-size: 22px;
-            margin: 20px 0 5px 0;
-            color: #2c4c82;
-            text-transform: uppercase;
-        }
-        .record-subtitle {
-            text-align: center;
-            font-size: 14px;
-            margin-bottom: 30px;
-            color: #2c4c82;
-            text-transform: uppercase;
-        }
-
-        .ts-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-            font-size: 14px;
-            color: #2c4c82;
-        }
-        
-        .ts-info-item {
-            display: flex;
-            align-items: center;
-        }
-        .ts-info-label {
-            width: 150px;
-            text-transform: uppercase;
-        }
-        .ts-info-value {
-            font-weight: normal;
-        }
-
-        .ts-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            color: #2c4c82;
-        }
-        .ts-table th {
-            text-align: left;
-            padding: 10px 5px;
-            font-weight: normal;
-            text-transform: uppercase;
-        }
-        .ts-table td {
-            text-align: left;
-            padding: 8px 5px;
-        }
-        .ts-table .ts-right {
-            text-align: right;
-        }
-        .ts-table th.ts-right {
-            text-align: right;
-        }
-
-        @page {
-            margin: 15mm;
-        }
-
-        header,
-        nav,
-        footer,
-        .navbar,
-        .sidebar,
-        .topbar,
-        .page-header,
-        .breadcrumbs {
-            display: none !important;
         }
     }
 
@@ -878,6 +1001,10 @@
                 <p>View your marks, grades, and detailed reports for courses and exams.</p>
             </div>
         </div>
+        <!-- PRINT / DOWNLOAD BUTTON -->
+        <button class="request-btn no-print" onclick="downloadPDF()" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-file-earmark-pdf"></i> Print Score Card
+        </button>
     </div>
 
     <!-- SEARCH BAR -->
@@ -1088,59 +1215,120 @@
     </div>
     </div>
 
-    <!-- TRANSCRIPT PRINT VIEW -->
-    <div class="transcript-wrap">
-        <div class="transcript-header">
-            <img src="{% static 'img/Trinity_logo.png' %}" alt="Trinity Logo" class="transcript-header-img" style="max-height: 120px;">
-            <div class="ts-reg">(Regd Under Saviour Foundation Inc, CN-13400138, Georgia USA)<br>Affiliated to IATA & ICTA</div>
-        </div>
-        
-        <div class="record-title">Transcript of the Record</div>
-        <div class="record-subtitle">of the {{ student.course_applied.course_name|default:"Associate Degree" }}</div>
+    <!-- TRANSCRIPT PDF TEMPLATE -->
+    <div class="pdf-hidden-container">
+        <div id="transcript-pdf-template">
+            <!-- Semi-transparent Watermark -->
+            <img src="{% static 'img/Trinity_logo.png' %}" alt="Watermark" class="pdf-watermark">
+            
+            <div class="pdf-border-wrapper">
+                <div class="pdf-content">
+                    <!-- Header Section -->
+                    <div class="pdf-header">
+                        <img src="{% static 'img/Trinity_final-nobg.png' %}" alt="Trinity Logo">
+                        <div class="pdf-title-sub">(Regd Under Saviour Foundation Inc, CN-13400138, Georgia USA)</div>
+                        <div class="pdf-title-affil">Affiliated to IATA & ICTA</div>
+                    </div>
 
-        <div class="ts-info-grid">
-            <div>
-                <div class="ts-info-item"><span class="ts-info-label">Name :</span> <span class="ts-info-value">{{ student.first_name }} {{ student.last_name }}</span></div>
-                <div class="ts-info-item"><span class="ts-info-label">Course:</span> <span class="ts-info-value">{{ student.course_applied.course_name|default:"-" }}</span></div>
-                <div class="ts-info-item"><span class="ts-info-label">DOB :</span> <span class="ts-info-value">{{ student.date_of_birth|date:"M d, Y"|default:"-" }}</span></div>
+                    <div class="pdf-divider"></div>
+
+                    <div class="pdf-record-title">Transcript of the Record</div>
+                    <div class="pdf-record-subtitle">of the {{ student.course_applied.course_name|default:"Associate Degree" }}</div>
+
+                    <!-- Student Information Grid -->
+                    <table class="pdf-student-info">
+                        <tr>
+                            <td style="width: 50%;"><strong>Student Name:</strong> {{ student.get_full_name|default:student.first_name }}</td>
+                            <td style="width: 50%;"><strong>Registration No:</strong> {{ student.student_id|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Course Applied:</strong> {{ student.course_applied.course_name|default:"-" }}</td>
+                            <td><strong>Date of Birth:</strong> {{ student.date_of_birth|date:"M d, Y"|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>Date of Joining:</strong> {{ student.created_at|date:"M d, Y"|default:"-" }}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Grades and Paper details Table -->
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Code</th>
+                                <th style="width: 25%;">Subject</th>
+                                <th style="width: 35%;">Paper Name</th>
+                                <th style="width: 10%; text-align: right;">Total Marks</th>
+                                <th style="width: 10%; text-align: right;">Marks Obtained</th>
+                                <th style="width: 10%; text-align: right;">Percentage</th>
+                                <th style="width: 5%; text-align: center;">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if student_exams %}
+                            {% for item in student_exams %}
+                            <tr>
+                                <td>{{ item.code|default:"-" }}</td>
+                                <td>{{ item.subject_name }}</td>
+                                <td>{{ item.exam_name }}</td>
+                                <td class="text-right">{{ item.total_score }}</td>
+                                <td class="text-right">{{ item.score }}</td>
+                                <td class="text-right">{{ item.percentage|floatformat:2 }}%</td>
+                                <td class="text-center"><strong>{{ item.grade }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% if assignment_mark %}
+                            {% for item in assignment_mark %}
+                            <tr>
+                                <td>{{ item.code|default:"-" }}</td>
+                                <td>{{ item.subject_name }}</td>
+                                <td>{{ item.assignment_name }}</td>
+                                <td class="text-right">{{ item.total_score }}</td>
+                                <td class="text-right">{{ item.score }}</td>
+                                <td class="text-right">{{ item.percentage|floatformat:2 }}%</td>
+                                <td class="text-center"><strong>{{ item.grade }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% if not student_exams and not assignment_mark %}
+                            <tr>
+                                <td colspan="7" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                                    No academic records found.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <!-- Summary Section -->
+                    <div class="pdf-summary-title">Academic Summary</div>
+                    <div class="pdf-summary-grid">
+                        <div class="pdf-summary-card">
+                            <div class="pdf-summary-card-title">Exam Score</div>
+                            <div class="pdf-summary-card-value">
+                                {{ exam_summary.score }} / {{ exam_summary.total }} ({{ exam_summary.percentage }}% - {{ exam_summary.grade }})
+                            </div>
+                        </div>
+                        <div class="pdf-summary-card">
+                            <div class="pdf-summary-card-title">Assignment Score</div>
+                            <div class="pdf-summary-card-value">
+                                {{ assignment_summary.score }} / {{ assignment_summary.total }} ({{ assignment_summary.percentage }}% - {{ assignment_summary.grade }})
+                            </div>
+                        </div>
+                        <div class="pdf-summary-card highlight">
+                            <div class="pdf-summary-card-title">Cumulative Grade</div>
+                            <div class="pdf-summary-card-value">
+                                {{ grand_summary.score }} / {{ grand_summary.total }} ({{ grand_summary.percentage }}% - {{ grand_summary.grade }})
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <div>
-                <div class="ts-info-item"><span class="ts-info-label">Reg No:</span> <span class="ts-info-value">{{ student.student_id|default:"-" }}</span></div>
-                <div class="ts-info-item"><span class="ts-info-label">Date of Joining:</span> <span class="ts-info-value">{{ student.created_at|date:"M d, Y"|default:"-" }}</span></div>
             </div>
         </div>
-
-        <table class="ts-table">
-            <thead>
-                <tr>
-                    <th style="width: 10%;">Code</th>
-                    <th style="width: 15%;">Course</th>
-                    <th style="width: 20%;">Subject</th>
-                    <th style="width: 40%;">Paper Name</th>
-                    <th style="width: 15%;" class="ts-right">Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in student_exams %}
-                <tr>
-                    <td>{{ item.code|default:"-" }}</td>
-                    <td>{{ item.course_name }}</td>
-                    <td>{{ item.subject_name }}</td>
-                    <td>{{ item.exam_name }}</td>
-                    <td class="ts-right">{{ item.percentage|floatformat:2 }}%</td>
-                </tr>
-                {% endfor %}
-                {% for item in assignment_mark %}
-                <tr>
-                    <td>{{ item.code|default:"-" }}</td>
-                    <td>{{ item.course_name }}</td>
-                    <td>{{ item.subject_name }}</td>
-                    <td>{{ item.assignment_name }}</td>
-                    <td class="ts-right">{{ item.percentage|floatformat:2 }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 
 </div>
@@ -1246,6 +1434,7 @@
 
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="/static/js/timezone.js"></script>
 <script>
     /* Dynamic Dashboard search/filter functions */
@@ -1499,6 +1688,40 @@
                 alertEl.classList.remove('d-none');
             }
         }).render('#retest-paypal-button-container');
+    }
+
+    function downloadPDF() {
+        const studentName = "{{ student.get_full_name|escapejs }}".trim() || "Student";
+        const element = document.getElementById('transcript-pdf-template');
+        
+        const btn = document.querySelector('.exam-header button.request-btn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Generating PDF...';
+
+        const opt = {
+            margin:       0,
+            filename:     'Trinity_Seminary_Transcript_' + studentName.replace(/\s+/g, '_') + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                logging: false,
+                letterRendering: true
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }).catch(err => {
+            console.error('PDF Generation error:', err);
+            alert('An error occurred while generating the PDF. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
     }
 </script>
 {% endblock %}

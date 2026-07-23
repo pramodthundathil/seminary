@@ -109,12 +109,17 @@
 
             {% for ans in answers %}
             <div class="question-block">
+                {% if ans.question %}
+                <h5 class="fw-bold text-primary" style="margin-bottom: 12px;">Question: {{ ans.question.question }}</h5>
+                <div class="mb-3 text-muted" style="font-size: 0.95rem;"><strong>Max Marks:</strong> {{ ans.question.mark }}</div>
+                {% else %}
                 <h5>Submission #{{ forloop.counter }}</h5>
+                {% endif %}
 
                 {% if ans.answer_text %}
-                <div class="user-answer">
+                <div class="user-answer" style="margin-top: 10px;">
                     <strong>Text Answer:</strong><br>
-                    {{ ans.answer_text|linebreaks }}
+                    {{ ans.answer_text|safe }}
                 </div>
                 {% endif %}
 
@@ -127,7 +132,7 @@
                 </div>
                 {% endif %}
 
-                {% if ans.marks_optained %}
+                {% if ans.marks_optained is not None %}
                 <div class="mt-2 text-success">
                     <strong>Marks Obtained:</strong>
                     <input type="number" class="form-control d-inline-block w-auto marks-input"

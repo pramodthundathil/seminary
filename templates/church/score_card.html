@@ -1,4 +1,5 @@
 {% extends "church/user_index.html" %}
+{% load static %}
 
 {% block title %}Query Management{% endblock %}
 {% block body_class %}no-right{% endblock %}
@@ -378,7 +379,245 @@
         color: var(--primary-dark);
     }
 
+    /* TRANSCRIPT PDF STYLING */
+    .pdf-hidden-container {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        box-sizing: border-box;
+    }
+
+    #transcript-pdf-template {
+        width: 210mm;
+        min-height: 290mm;
+        height: auto;
+        padding: 12mm;
+        background-color: #fdfbf3;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    #transcript-pdf-template .pdf-border-wrapper {
+        border: 3px double #1b2845;
+        min-height: 266mm;
+        height: auto;
+        width: 100%;
+        padding: 10mm;
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    #transcript-pdf-template .pdf-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: auto;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    #transcript-pdf-template .pdf-content {
+        position: relative;
+        z-index: 1;
+        height: auto;
+    }
+
+    #transcript-pdf-template .pdf-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #transcript-pdf-template .pdf-header img {
+        height: 100px;
+        margin-bottom: 8px;
+    }
+
+    #transcript-pdf-template .pdf-title-main {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    #transcript-pdf-template .pdf-title-sub {
+        font-size: 11px;
+        color: #475569;
+        margin-bottom: 2px;
+        line-height: 1.4;
+    }
+
+    #transcript-pdf-template .pdf-title-affil {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 12px;
+    }
+
+    #transcript-pdf-template .pdf-divider {
+        border-top: 2px solid #1b2845;
+        border-bottom: 1px solid #1b2845;
+        height: 3px;
+        margin-bottom: 20px;
+    }
+
+    #transcript-pdf-template .pdf-record-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1b2845;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+    }
+
+    #transcript-pdf-template .pdf-record-subtitle {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: #475569;
+        margin-bottom: 25px;
+    }
+
+    #transcript-pdf-template .pdf-student-info {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+    }
+
+    #transcript-pdf-template .pdf-student-info td {
+        padding: 10px 14px;
+        font-size: 13px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-student-info td strong {
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        font-size: 12px;
+    }
+
+    #transcript-pdf-template .pdf-table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    #transcript-pdf-template .pdf-table th {
+        background-color: #1b2845;
+        color: #ffffff;
+        padding: 8px 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        border: 1px solid #1b2845;
+        text-align: left;
+    }
+
+    #transcript-pdf-template .pdf-table td {
+        padding: 8px 10px;
+        border: 1px solid #cbd5e1;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    #transcript-pdf-template .pdf-table .text-center {
+        text-align: center;
+    }
+
+    #transcript-pdf-template .pdf-table .text-right {
+        text-align: right;
+    }
+
+    #transcript-pdf-template .pdf-summary-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1b2845;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    #transcript-pdf-template .pdf-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    #transcript-pdf-template .pdf-summary-card {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 10px 12px;
+        background-color: #f8fafc;
+    }
+
+    #transcript-pdf-template .pdf-summary-card.highlight {
+        background-color: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    #transcript-pdf-template .pdf-summary-card-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+        font-weight: bold;
+    }
+
+    #transcript-pdf-template .pdf-summary-card-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1b2845;
+    }
+
+    #transcript-pdf-template .pdf-summary-card.highlight .pdf-summary-card-value {
+        color: #166534;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign {
+        margin-top: 50px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign td {
+        border: none;
+        width: 50%;
+        text-align: center;
+        font-size: 13px;
+        padding-top: 40px;
+    }
+
+    #transcript-pdf-template .pdf-footer-sign-line {
+        border-top: 1px solid #1b2845;
+        width: 80%;
+        margin: 0 auto;
+        padding-top: 6px;
+        font-weight: 700;
+        color: #1b2845;
+    }
+
     /* PRINT STYLES */
+    @media screen {
+        .transcript-wrap { display: none; }
+    }
+
     @media print {
         .no-print {
             display: none !important;
@@ -388,37 +627,16 @@
             visibility: hidden;
         }
 
-        .scorecard-container,
-        .scorecard-container * {
+        .pdf-hidden-container,
+        .pdf-hidden-container * {
             visibility: visible;
         }
 
-        .scorecard-container {
+        .pdf-hidden-container {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
-        }
-
-        .sc-section {
-            break-inside: avoid;
-            box-shadow: none;
-            border: 1px solid #ddd;
-        }
-
-        @page {
-            margin: 18mm;
-        }
-
-        header,
-        nav,
-        footer,
-        .navbar,
-        .sidebar,
-        .topbar,
-        .page-header,
-        .breadcrumbs {
-            display: none !important;
         }
     }
 
@@ -705,8 +923,8 @@
 
     <!-- HEADER -->
     <div class="sc-header">
-        <button class="print-btn no-print" onclick="window.print()">
-            <i class="bi bi-printer"></i> PRINT SCORE CARD
+        <button class="print-btn no-print" onclick="downloadPDF()" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-file-earmark-pdf"></i> PRINT SCORE CARD
         </button>
     </div>
 
@@ -980,6 +1198,120 @@
                 </div>
             </div>
         </div>
+    <!-- TRANSCRIPT PDF TEMPLATE -->
+    <div class="pdf-hidden-container">
+        <div id="transcript-pdf-template">
+            <!-- Semi-transparent Watermark -->
+            <img src="{% static 'img/Trinity_logo.png' %}" alt="Watermark" class="pdf-watermark">
+            
+            <div class="pdf-border-wrapper">
+                <div class="pdf-content">
+                    <!-- Header Section -->
+                    <div class="pdf-header">
+                        <img src="{% static 'img/Trinity_final-nobg.png' %}" alt="Trinity Logo">
+                        <div class="pdf-title-sub">(Regd Under Saviour Foundation Inc, CN-13400138, Georgia USA)</div>
+                        <div class="pdf-title-affil">Affiliated to IATA & ICTA</div>
+                    </div>
+
+                    <div class="pdf-divider"></div>
+
+                    <div class="pdf-record-title">Transcript of the Record</div>
+                    <div class="pdf-record-subtitle">of the {{ student.course_applied.course_name|default:"Associate Degree" }}</div>
+
+                    <!-- Student Information Grid -->
+                    <table class="pdf-student-info">
+                        <tr>
+                            <td style="width: 50%;"><strong>Student Name:</strong> {{ student.get_full_name|default:student.first_name }}</td>
+                            <td style="width: 50%;"><strong>Registration No:</strong> {{ student.student_id|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Course Applied:</strong> {{ student.course_applied.course_name|default:"-" }}</td>
+                            <td><strong>Date of Birth:</strong> {{ student.date_of_birth|date:"M d, Y"|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>Date of Joining:</strong> {{ student.created_at|date:"M d, Y"|default:"-" }}</td>
+                        </tr>
+                    </table>
+
+                    <!-- Grades and Paper details Table -->
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Code</th>
+                                <th style="width: 25%;">Subject</th>
+                                <th style="width: 35%;">Paper Name</th>
+                                <th style="width: 10%; text-align: right;">Total Marks</th>
+                                <th style="width: 10%; text-align: right;">Marks Obtained</th>
+                                <th style="width: 10%; text-align: right;">Percentage</th>
+                                <th style="width: 5%; text-align: center;">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if student_exams %}
+                            {% for item in student_exams %}
+                            <tr>
+                                <td>{{ item.code|default:"-" }}</td>
+                                <td>{{ item.subject_name }}</td>
+                                <td>{{ item.exam_name }}</td>
+                                <td class="text-right">{{ item.total_score }}</td>
+                                <td class="text-right">{{ item.score }}</td>
+                                <td class="text-right">{{ item.percentage|floatformat:2 }}%</td>
+                                <td class="text-center"><strong>{{ item.grade }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% if assignment_mark %}
+                            {% for item in assignment_mark %}
+                            <tr>
+                                <td>{{ item.code|default:"-" }}</td>
+                                <td>{{ item.subject_name }}</td>
+                                <td>{{ item.assignment_name }}</td>
+                                <td class="text-right">{{ item.total_score }}</td>
+                                <td class="text-right">{{ item.score }}</td>
+                                <td class="text-right">{{ item.percentage|floatformat:2 }}%</td>
+                                <td class="text-center"><strong>{{ item.grade }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% if not student_exams and not assignment_mark %}
+                            <tr>
+                                <td colspan="7" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                                    No academic records found.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <!-- Summary Section -->
+                    <div class="pdf-summary-title">Academic Summary</div>
+                    <div class="pdf-summary-grid">
+                        <div class="pdf-summary-card">
+                            <div class="pdf-summary-card-title">Exam Score</div>
+                            <div class="pdf-summary-card-value">
+                                {{ exam_summary.score }} / {{ exam_summary.total }} ({{ exam_summary.percentage }}% - {{ exam_summary.grade }})
+                            </div>
+                        </div>
+                        <div class="pdf-summary-card">
+                            <div class="pdf-summary-card-title">Assignment Score</div>
+                            <div class="pdf-summary-card-value">
+                                {{ assignment_summary.score }} / {{ assignment_summary.total }} ({{ assignment_summary.percentage }}% - {{ assignment_summary.grade }})
+                            </div>
+                        </div>
+                        <div class="pdf-summary-card highlight">
+                            <div class="pdf-summary-card-title">Cumulative Grade</div>
+                            <div class="pdf-summary-card-value">
+                                {{ grand_summary.score }} / {{ grand_summary.total }} ({{ grand_summary.percentage }}% - {{ grand_summary.grade }})
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -992,6 +1324,7 @@
 
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="/static/js/timezone.js"></script>
 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
 <script>
@@ -1156,6 +1489,40 @@
                 alertEl.classList.remove('d-none');
             }
         }).render('#retest-paypal-button-container');
+    }
+
+    function downloadPDF() {
+        const studentName = "{{ student.get_full_name|escapejs }}".trim() || "Student";
+        const element = document.getElementById('transcript-pdf-template');
+        
+        const btn = document.querySelector('.sc-header button.print-btn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Generating PDF...';
+
+        const opt = {
+            margin:       0,
+            filename:     'Trinity_Seminary_Transcript_' + studentName.replace(/\s+/g, '_') + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                logging: false,
+                letterRendering: true
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }).catch(err => {
+            console.error('PDF Generation error:', err);
+            alert('An error occurred while generating the PDF. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
     }
 </script>
 {% endblock %}

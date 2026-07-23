@@ -42,6 +42,108 @@
                 {% endfor %}
             </div>
 
+            <!-- Questions Builder Section -->
+            <div class="card mt-4 mb-4" id="questions-section" style="border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden;">
+                <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 15px 20px;">
+                    <h5 class="mb-0 text-dark font-weight-bold" style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-question-circle text-primary"></i> Exam Questions
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 20px; background: #fff;">
+                    <div id="questions-container">
+                        {% if questions %}
+                            {% for q in questions %}
+                                {% if exam.exam_type == 'descriptive' %}
+                                    <div class="question-row descriptive-row border p-3 mb-3 rounded position-relative" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                                        <input type="hidden" name="question_id[]" value="{{ q.id }}">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-9 mb-2 mb-md-0">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                                    <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter descriptive question text..." style="border-radius: 6px;" required>{{ q.question }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mb-2 mb-md-0">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Mark</label>
+                                                    <input type="number" class="form-control" name="question_mark[]" value="{{ q.mark }}" placeholder="Marks" style="border-radius: 6px;" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1 text-center mt-3 mt-md-0">
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% elif exam.exam_type == 'objective' %}
+                                    <div class="question-row objective-row border p-3 mb-3 rounded position-relative" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                                        <input type="hidden" name="question_id[]" value="{{ q.id }}">
+                                        <div class="row mb-3">
+                                            <div class="col-md-9">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                                    <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter objective question text..." style="border-radius: 6px;" required>{{ q.question }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group mb-0">
+                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Marks</label>
+                                                    <input type="number" step="0.01" class="form-control" name="question_mark[]" value="{{ q.mark }}" placeholder="Marks" style="border-radius: 6px;" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="font-size: 0.85rem;">Option 1</label>
+                                                <input type="text" class="form-control" name="option1[]" value="{{ q.option1 }}" placeholder="Option 1" style="border-radius: 6px;" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="font-size: 0.85rem;">Option 2</label>
+                                                <input type="text" class="form-control" name="option2[]" value="{{ q.option2 }}" placeholder="Option 2" style="border-radius: 6px;" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="font-size: 0.85rem;">Option 3</label>
+                                                <input type="text" class="form-control" name="option3[]" value="{{ q.option3|default:'' }}" placeholder="Option 3" style="border-radius: 6px;">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label" style="font-size: 0.85rem;">Option 4</label>
+                                                <input type="text" class="form-control" name="option4[]" value="{{ q.option4|default:'' }}" placeholder="Option 4" style="border-radius: 6px;">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label class="form-label" style="font-size: 0.85rem;">Answer Option</label>
+                                                <select class="form-control" name="answer_option[]" style="border-radius: 6px;" required>
+                                                    <option value="option1" {% if q.answer_option == 'option1' %}selected{% endif %}>Option 1</option>
+                                                    <option value="option2" {% if q.answer_option == 'option2' %}selected{% endif %}>Option 2</option>
+                                                    <option value="option3" {% if q.answer_option == 'option3' %}selected{% endif %}>Option 3</option>
+                                                    <option value="option4" {% if q.answer_option == 'option4' %}selected{% endif %}>Option 4</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" style="font-size: 0.85rem;">Detailed Answer (Optional)</label>
+                                                <input type="text" class="form-control" name="answer_detail[]" value="{{ q.answer_detail|default:'' }}" placeholder="Explanation" style="border-radius: 6px;">
+                                            </div>
+                                            <div class="col-md-2 text-end mt-4">
+                                                <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                                    <i class="fas fa-trash-alt"></i> Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="text-start mt-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="add-question-btn" style="border-radius: 6px; padding: 6px 16px; font-weight: 500; min-width: 140px;">
+                            <i class="fas fa-plus"></i> Add Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-actions" style="margin-top:30px;padding-top:20px;border-top:1px solid var(--gray-200);">
                 <button type="submit" class="btn btn-primary" style="min-width:120px;">
                     <i class="fas fa-save"></i> {{ action }}
@@ -52,709 +154,122 @@
             </div>
         </form>
     </div>
-
-    {% if action == 'Update' %}
-    <div class="questions-section" style="margin-top: 40px;">
-        <div class="row">
-            <!-- Left Column: Add Question Form -->
-            <div class="col-lg-4 col-md-5 mb-4">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;">
-                    <div class="card-header bg-light border-0 py-3">
-                        <h5 class="card-title mb-0 text-dark font-weight-bold" style="font-size: 16px;">
-                            <i class="fas fa-plus-circle text-primary me-2"></i>Add New Question
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% if exam.exam_type == 'descriptive' %}
-                        <form id="ajaxAddQuestionForm" action="{% url 'question_descriptive_create' exam.id %}" method="post">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label class="form-label font-weight-bold" style="font-size: 13px;">Question Text <span class="text-danger">*</span></label>
-                                <textarea name="question" class="form-control" rows="4" placeholder="Enter descriptive question text..." required></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label font-weight-bold" style="font-size: 13px;">Mark <span class="text-danger">*</span></label>
-                                <input type="number" name="mark" class="form-control" placeholder="Marks (e.g., 5)" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-2">
-                                <i class="fas fa-save me-2"></i>Save Question
-                            </button>
-                        </form>
-                        {% elif exam.exam_type == 'objective' %}
-                        <form id="ajaxAddQuestionForm" action="{% url 'question_objective_create' exam.id %}" method="post">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label class="form-label font-weight-bold" style="font-size: 13px;">Question Text <span class="text-danger">*</span></label>
-                                <textarea name="question" class="form-control" rows="2" placeholder="Enter objective question text..." required></textarea>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <label class="form-label" style="font-size: 12px;">Option 1 <span class="text-danger">*</span></label>
-                                    <input type="text" name="option1" class="form-control" placeholder="Option 1" required>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label" style="font-size: 12px;">Option 2 <span class="text-danger">*</span></label>
-                                    <input type="text" name="option2" class="form-control" placeholder="Option 2" required>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label" style="font-size: 12px;">Option 3</label>
-                                    <input type="text" name="option3" class="form-control" placeholder="Option 3">
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label" style="font-size: 12px;">Option 4</label>
-                                    <input type="text" name="option4" class="form-control" placeholder="Option 4">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <label class="form-label font-weight-bold" style="font-size: 12px;">Answer Option <span class="text-danger">*</span></label>
-                                    <select name="answer_option" class="form-control" required>
-                                        <option value="option1">Option 1</option>
-                                        <option value="option2">Option 2</option>
-                                        <option value="option3">Option 3</option>
-                                        <option value="option4">Option 4</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label font-weight-bold" style="font-size: 12px;">Marks <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" name="marks" class="form-control" placeholder="Marks" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" style="font-size: 13px;">Detailed Answer (Optional)</label>
-                                <input type="text" name="answer" class="form-control" placeholder="Detailed Answer/Explanation">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 mt-2">
-                                <i class="fas fa-save me-2"></i>Save Question
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Questions List Table -->
-            <div class="col-lg-8 col-md-7">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;">
-                    <div class="card-header bg-light border-0 py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0 text-dark font-weight-bold" style="font-size: 16px;">
-                            <i class="fas fa-list text-primary me-2"></i>Questions List
-                        </h5>
-                        <span class="badge bg-primary px-3 py-2 rounded-pill" id="questionCountBadge" style="font-size: 13px; font-weight: 500;">
-                            {{ descriptive_questions.count|default:objective_questions.count|default:0 }} Questions
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        {% if exam.exam_type == 'descriptive' %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="questionsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px;">S.No.</th>
-                                        <th>Question</th>
-                                        <th style="width: 100px;">Marks</th>
-                                        <th style="width: 120px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="questionsTableBody">
-                                    {% if descriptive_questions %}
-                                    {% for q in descriptive_questions %}
-                                    <tr id="question-row-{{ q.id }}">
-                                        <td>{{ forloop.counter }}</td>
-                                        <td class="question-text-cell">{{ q.question }}</td>
-                                        <td class="question-mark-cell">{{ q.mark }}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info edit-question-btn text-white me-1" 
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editQuestionModal" 
-                                                data-id="{{ q.id }}"
-                                                data-question="{{ q.question }}" 
-                                                data-mark="{{ q.mark }}" 
-                                                data-type="descriptive">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger delete-question-btn" 
-                                                data-url="{% url 'question_descriptive_delete' q.id %}" 
-                                                data-id="{{ q.id }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr id="noQuestionsRow">
-                                        <td colspan="4" class="text-center text-muted py-4">No questions added yet.</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% elif exam.exam_type == 'objective' %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="questionsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px;">S.No.</th>
-                                        <th>Question</th>
-                                        <th>Answer</th>
-                                        <th style="width: 100px;">Marks</th>
-                                        <th style="width: 120px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="questionsTableBody">
-                                    {% if objective_questions %}
-                                    {% for q in objective_questions %}
-                                    <tr id="question-row-{{ q.id }}">
-                                        <td>{{ forloop.counter }}</td>
-                                        <td class="question-text-cell">{{ q.question }}</td>
-                                        <td class="question-answer-cell">
-                                            <strong>{{ q.answer_option }}</strong> 
-                                            {% if q.answer %}<span class="text-muted">({{ q.answer }})</span>{% endif %}
-                                        </td>
-                                        <td class="question-mark-cell">{{ q.marks }}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info edit-question-btn text-white me-1" 
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editQuestionModal" 
-                                                data-id="{{ q.id }}"
-                                                data-question="{{ q.question }}" 
-                                                data-option1="{{ q.option1 }}"
-                                                data-option2="{{ q.option2 }}" 
-                                                data-option3="{{ q.option3 }}"
-                                                data-option4="{{ q.option4 }}" 
-                                                data-answer_option="{{ q.answer_option }}"
-                                                data-answer="{{ q.answer }}" 
-                                                data-marks="{{ q.marks }}" 
-                                                data-type="objective">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger delete-question-btn" 
-                                                data-url="{% url 'question_objective_delete' q.id %}" 
-                                                data-id="{{ q.id }}">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                    {% else %}
-                                    <tr id="noQuestionsRow">
-                                        <td colspan="5" class="text-center text-muted py-4">No questions added yet.</td>
-                                    </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Question Modal -->
-    <div class="modal fade" id="editQuestionModal" tabindex="-1" aria-hidden="true" style="z-index: 1052;">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0" style="border-radius: 12px;">
-                <div class="modal-header border-0 bg-light py-3">
-                    <h5 class="modal-title text-dark font-weight-bold" style="font-size: 16px;"><i class="fas fa-edit text-info me-2"></i>Edit Question</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {% if exam.exam_type == 'descriptive' %}
-                    <form id="editDescriptiveForm" method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Question</label>
-                            <textarea name="question" id="edit_d_question" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Mark</label>
-                            <input type="number" name="mark" id="edit_d_mark" class="form-control" required>
-                        </div>
-                        <div class="mt-3 text-end">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Question</button>
-                        </div>
-                    </form>
-                    {% elif exam.exam_type == 'objective' %}
-                    <form id="editObjectiveForm" method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Question</label>
-                            <textarea name="question" id="edit_o_question" class="form-control" rows="2" required></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Option 1</label>
-                                <input type="text" name="option1" id="edit_o_option1" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Option 2</label>
-                                <input type="text" name="option2" id="edit_o_option2" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Option 3</label>
-                                <input type="text" name="option3" id="edit_o_option3" class="form-control">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Option 4</label>
-                                <input type="text" name="option4" id="edit_o_option4" class="form-control">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Answer Option</label>
-                                <select name="answer_option" id="edit_o_answer_option" class="form-control" required>
-                                    <option value="option1">Option 1</option>
-                                    <option value="option2">Option 2</option>
-                                    <option value="option3">Option 3</option>
-                                    <option value="option4">Option 4</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label font-weight-bold">Marks</label>
-                                <input type="number" step="0.01" name="marks" id="edit_o_marks" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Detailed Answer (Optional)</label>
-                            <input type="text" name="answer" id="edit_o_answer" class="form-control">
-                        </div>
-
-                        <div class="mt-3 text-end">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Question</button>
-                        </div>
-                    </form>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Helpers
-            function escapeHtml(text) {
-                if (!text) return '';
-                return text
-                    .toString()
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-
-            function showFormErrors(form, errors) {
-                clearFormErrors(form);
-                for (const fieldName in errors) {
-                    const fieldEl = form.querySelector(`[name="${fieldName}"]`);
-                    if (fieldEl) {
-                        fieldEl.classList.add('is-invalid');
-                        const errorMsgs = errors[fieldName].map(err => err.message).join(', ');
-                        let feedbackEl = fieldEl.nextElementSibling;
-                        if (!feedbackEl || !feedbackEl.classList.contains('invalid-feedback')) {
-                            feedbackEl = document.createElement('div');
-                            feedbackEl.className = 'invalid-feedback';
-                            fieldEl.parentNode.appendChild(feedbackEl);
-                        }
-                        feedbackEl.textContent = errorMsgs;
-                    }
-                }
-            }
-
-            function clearFormErrors(form) {
-                form.querySelectorAll('.is-invalid').forEach(el => {
-                    el.classList.remove('is-invalid');
-                });
-                form.querySelectorAll('.invalid-feedback').forEach(el => {
-                    el.remove();
-                });
-            }
-
-            function reindexQuestions() {
-                const rows = document.querySelectorAll('#questionsTableBody tr[id^="question-row-"]');
-                rows.forEach((row, index) => {
-                    const indexCell = row.firstElementChild;
-                    if (indexCell) {
-                        indexCell.textContent = index + 1;
-                    }
-                });
-            }
-
-            function updateQuestionCount() {
-                const tableBody = document.getElementById('questionsTableBody');
-                if (!tableBody) return;
-                const rows = tableBody.querySelectorAll('tr[id^="question-row-"]');
-                const badge = document.getElementById('questionCountBadge');
-                if (badge) {
-                    badge.textContent = rows.length + ' Questions';
-                }
-                
-                // Show/hide empty row
-                const noQuestionsRow = document.getElementById('noQuestionsRow');
-                if (rows.length === 0) {
-                    if (!noQuestionsRow) {
-                        const colspan = '{{ exam.exam_type }}' === 'descriptive' ? 4 : 5;
-                        const emptyRow = `
-                            <tr id="noQuestionsRow">
-                                <td colspan="${colspan}" class="text-center text-muted py-4">No questions added yet.</td>
-                            </tr>
-                        `;
-                        tableBody.insertAdjacentHTML('beforeend', emptyRow);
-                    }
-                } else {
-                    if (noQuestionsRow) {
-                        noQuestionsRow.remove();
-                    }
-                }
-                
-                // Keep serial numbers up-to-date
-                reindexQuestions();
-            }
-
-            function appendQuestionRow(q) {
-                const tableBody = document.getElementById('questionsTableBody');
-                if (!tableBody) return;
-                let rowHtml = '';
-                
-                if ('{{ exam.exam_type }}' === 'descriptive') {
-                    rowHtml = `
-                        <tr id="question-row-${q.id}" style="opacity: 0; transform: translateY(10px); transition: all 0.5s ease;">
-                            <td></td>
-                            <td class="question-text-cell">${escapeHtml(q.question)}</td>
-                            <td class="question-mark-cell">${q.mark}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info edit-question-btn text-white me-1" 
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editQuestionModal" 
-                                    data-id="${q.id}"
-                                    data-question="${escapeHtml(q.question)}" 
-                                    data-mark="${q.mark}" 
-                                    data-type="descriptive">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger delete-question-btn" 
-                                    data-url="${q.delete_url}" 
-                                    data-id="${q.id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    const detailAnswer = q.answer ? `<span class="text-muted">(${escapeHtml(q.answer)})</span>` : '';
-                    rowHtml = `
-                        <tr id="question-row-${q.id}" style="opacity: 0; transform: translateY(10px); transition: all 0.5s ease;">
-                            <td></td>
-                            <td class="question-text-cell">${escapeHtml(q.question)}</td>
-                            <td class="question-answer-cell"><strong>${escapeHtml(q.answer_option)}</strong> ${detailAnswer}</td>
-                            <td class="question-mark-cell">${q.marks}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info edit-question-btn text-white me-1" 
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editQuestionModal" 
-                                    data-id="${q.id}"
-                                    data-question="${escapeHtml(q.question)}" 
-                                    data-option1="${escapeHtml(q.option1)}"
-                                    data-option2="${escapeHtml(q.option2)}" 
-                                    data-option3="${escapeHtml(q.option3 || '')}"
-                                    data-option4="${escapeHtml(q.option4 || '')}" 
-                                    data-answer_option="${escapeHtml(q.answer_option)}"
-                                    data-answer="${escapeHtml(q.answer || '')}" 
-                                    data-marks="${q.marks}" 
-                                    data-type="objective">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger delete-question-btn" 
-                                    data-url="${q.delete_url}" 
-                                    data-id="${q.id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }
-                
-                // Remove empty row
-                const noQuestionsRow = document.getElementById('noQuestionsRow');
-                if (noQuestionsRow) {
-                    noQuestionsRow.remove();
-                }
-                
-                tableBody.insertAdjacentHTML('beforeend', rowHtml);
-                
-                // Trigger animation
-                setTimeout(() => {
-                    const newRow = document.getElementById('question-row-' + q.id);
-                    if (newRow) {
-                        newRow.style.opacity = 1;
-                        newRow.style.transform = 'translateY(0)';
-                    }
-                }, 50);
-                
-                updateQuestionCount();
-            }
-
-            function confirmAndDeleteQuestion(url, id) {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#00CED1',
-                    cancelButtonColor: '#EF4444',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                        
-                        fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRFToken': csrfToken
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const row = document.getElementById('question-row-' + id);
-                                if (row) {
-                                    row.style.transition = 'all 0.5s ease';
-                                    row.style.opacity = 0;
-                                    row.style.transform = 'translateX(-20px)';
-                                    setTimeout(() => {
-                                        row.remove();
-                                        updateQuestionCount();
-                                    }, 500);
-                                }
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Deleted!',
-                                    text: data.message,
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: data.message || 'Something went wrong.'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: 'An unexpected error occurred.'
-                            });
-                        });
-                    }
-                });
-            }
-
-            // Event Delegation for Table Actions (Edit & Delete)
-            document.addEventListener('click', function (e) {
-                const editBtn = e.target.closest('.edit-question-btn');
-                if (editBtn) {
-                    const id = editBtn.getAttribute('data-id');
-                    const type = editBtn.getAttribute('data-type');
-                    
-                    if (type === 'descriptive') {
-                        const question = editBtn.getAttribute('data-question');
-                        const mark = editBtn.getAttribute('data-mark');
-
-                        document.getElementById('edit_d_question').value = question;
-                        document.getElementById('edit_d_mark').value = mark;
-
-                        document.getElementById('editDescriptiveForm').action = "/menu/exams/question/descriptive/" + id + "/edit/";
-                        document.getElementById('editDescriptiveForm').setAttribute('data-current-id', id);
-                    } else if (type === 'objective') {
-                        document.getElementById('edit_o_question').value = editBtn.getAttribute('data-question');
-                        document.getElementById('edit_o_option1').value = editBtn.getAttribute('data-option1');
-                        document.getElementById('edit_o_option2').value = editBtn.getAttribute('data-option2');
-                        document.getElementById('edit_o_option3').value = editBtn.getAttribute('data-option3');
-                        document.getElementById('edit_o_option4').value = editBtn.getAttribute('data-option4');
-                        document.getElementById('edit_o_answer_option').value = editBtn.getAttribute('data-answer_option');
-                        document.getElementById('edit_o_marks').value = editBtn.getAttribute('data-marks');
-                        document.getElementById('edit_o_answer').value = editBtn.getAttribute('data-answer');
-
-                        document.getElementById('editObjectiveForm').action = "/menu/exams/question/objective/" + id + "/edit/";
-                        document.getElementById('editObjectiveForm').setAttribute('data-current-id', id);
-                    }
-                }
-                
-                const deleteBtn = e.target.closest('.delete-question-btn');
-                if (deleteBtn) {
-                    e.preventDefault();
-                    const url = deleteBtn.getAttribute('data-url');
-                    const id = deleteBtn.getAttribute('data-id');
-                    confirmAndDeleteQuestion(url, id);
-                }
-            });
-
-            // AJAX Form Submit for Adding Questions
-            const ajaxAddQuestionForm = document.getElementById('ajaxAddQuestionForm');
-            if (ajaxAddQuestionForm) {
-                ajaxAddQuestionForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    const form = this;
-                    const formData = new FormData(form);
-                    const actionUrl = form.getAttribute('action');
-                    
-                    fetch(actionUrl, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            clearFormErrors(form);
-                            form.reset();
-                            appendQuestionRow(data.data);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Added!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            showFormErrors(form, data.errors);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Validation Failed',
-                                text: data.message || 'Please correct the highlighted fields.'
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'An unexpected error occurred.'
-                        });
-                    });
-                });
-            }
-
-            // AJAX Form Submit for Editing (Modal)
-            function submitEditForm(form, type) {
-                const formData = new FormData(form);
-                const actionUrl = form.getAttribute('action');
-                const currentId = form.getAttribute('data-current-id');
-                
-                fetch(actionUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const modalEl = document.getElementById('editQuestionModal');
-                        const modal = bootstrap.Modal.getInstance(modalEl);
-                        if (modal) {
-                            modal.hide();
-                        }
-                        
-                        const row = document.getElementById('question-row-' + currentId);
-                        if (row) {
-                            // Briefly flash highlighting
-                            row.style.backgroundColor = '#E0F7F7';
-                            setTimeout(() => {
-                                row.style.transition = 'background-color 1s ease';
-                                row.style.backgroundColor = '';
-                            }, 500);
-                            
-                            if (type === 'descriptive') {
-                                row.querySelector('.question-text-cell').textContent = data.data.question;
-                                row.querySelector('.question-mark-cell').textContent = data.data.mark;
-                                
-                                const editBtn = row.querySelector('.edit-question-btn');
-                                if (editBtn) {
-                                    editBtn.setAttribute('data-question', data.data.question);
-                                    editBtn.setAttribute('data-mark', data.data.mark);
-                                }
-                            } else {
-                                row.querySelector('.question-text-cell').textContent = data.data.question;
-                                row.querySelector('.question-mark-cell').textContent = data.data.marks;
-                                
-                                let answerCell = `<strong>${escapeHtml(data.data.answer_option)}</strong>`;
-                                if (data.data.answer) {
-                                    answerCell += ` <span class="text-muted">(${escapeHtml(data.data.answer)})</span>`;
-                                }
-                                row.querySelector('.question-answer-cell').innerHTML = answerCell;
-                                
-                                const editBtn = row.querySelector('.edit-question-btn');
-                                if (editBtn) {
-                                    editBtn.setAttribute('data-question', data.data.question);
-                                    editBtn.setAttribute('data-option1', data.data.option1);
-                                    editBtn.setAttribute('data-option2', data.data.option2);
-                                    editBtn.setAttribute('data-option3', data.data.option3 || '');
-                                    editBtn.setAttribute('data-option4', data.data.option4 || '');
-                                    editBtn.setAttribute('data-answer_option', data.data.answer_option);
-                                    editBtn.setAttribute('data-answer', data.data.answer || '');
-                                    editBtn.setAttribute('data-marks', data.data.marks);
-                                }
-                            }
-                        }
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Updated!',
-                            text: data.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        showFormErrors(form, data.errors);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: data.message || 'Validation failed.'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'An unexpected error occurred.'
-                    });
-                });
-            }
-
-            const editDescriptiveForm = document.getElementById('editDescriptiveForm');
-            if (editDescriptiveForm) {
-                editDescriptiveForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    submitEditForm(this, 'descriptive');
-                });
-            }
-
-            const editObjectiveForm = document.getElementById('editObjectiveForm');
-            if (editObjectiveForm) {
-                editObjectiveForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    submitEditForm(this, 'objective');
-                });
-            }
-        });
-    </script>
-    {% endif %}
-
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let currentExamType = $('#id_exam_type').val() || 'descriptive';
+    
+    $('#id_exam_type').change(function() {
+        let newExamType = $(this).val();
+        let questionsCount = $('#questions-container .question-row').length;
+        
+        if (questionsCount > 0) {
+            if (confirm("Changing the exam type will clear the existing questions in the list. Do you want to proceed?")) {
+                $('#questions-container').empty();
+                currentExamType = newExamType;
+            } else {
+                $(this).val(currentExamType);
+            }
+        } else {
+            currentExamType = newExamType;
+        }
+    });
+
+    $('#add-question-btn').click(function() {
+        let examType = $('#id_exam_type').val();
+        if (examType === 'descriptive') {
+            let rowHtml = `
+                <div class="question-row descriptive-row border p-3 mb-3 rounded position-relative" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                    <input type="hidden" name="question_id[]" value="">
+                    <div class="row align-items-center">
+                        <div class="col-md-9 mb-2 mb-md-0">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter descriptive question text..." style="border-radius: 6px;" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-2 mb-md-0">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Mark</label>
+                                <input type="number" class="form-control" name="question_mark[]" placeholder="Marks" style="border-radius: 6px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-1 text-center mt-3 mt-md-0">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#questions-container').append(rowHtml);
+        } else if (examType === 'objective') {
+            let rowHtml = `
+                <div class="question-row objective-row border p-3 mb-3 rounded position-relative" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                    <input type="hidden" name="question_id[]" value="">
+                    <div class="row mb-3">
+                        <div class="col-md-9">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter objective question text..." style="border-radius: 6px;" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-0">
+                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Marks</label>
+                                <input type="number" step="0.01" class="form-control" name="question_mark[]" placeholder="Marks" style="border-radius: 6px;" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size: 0.85rem;">Option 1</label>
+                            <input type="text" class="form-control" name="option1[]" placeholder="Option 1" style="border-radius: 6px;" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size: 0.85rem;">Option 2</label>
+                            <input type="text" class="form-control" name="option2[]" placeholder="Option 2" style="border-radius: 6px;" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size: 0.85rem;">Option 3</label>
+                            <input type="text" class="form-control" name="option3[]" placeholder="Option 3" style="border-radius: 6px;">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" style="font-size: 0.85rem;">Option 4</label>
+                            <input type="text" class="form-control" name="option4[]" placeholder="Option 4" style="border-radius: 6px;">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label" style="font-size: 0.85rem;">Answer Option</label>
+                            <select class="form-control" name="answer_option[]" style="border-radius: 6px;" required>
+                                <option value="option1">Option 1</option>
+                                <option value="option2">Option 2</option>
+                                <option value="option3">Option 3</option>
+                                <option value="option4">Option 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-size: 0.85rem;">Detailed Answer (Optional)</label>
+                            <input type="text" class="form-control" name="answer_detail[]" placeholder="Explanation" style="border-radius: 6px;">
+                        </div>
+                        <div class="col-md-2 text-end mt-4">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
+                                <i class="fas fa-trash-alt"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#questions-container').append(rowHtml);
+        }
+    });
+
+    $(document).on('click', '.remove-question-btn', function() {
+        $(this).closest('.question-row').remove();
+    });
+});
+</script>
 {% endblock %}

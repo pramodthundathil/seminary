@@ -59,42 +59,50 @@
                     action="{% url 'church_submit_assignment' student_assignment.id %}">
                     {% csrf_token %}
 
-                    {% if student_assignment.assignment.assignment_type == 'Paper Upload Type' %}
-                    <div class="mb-4">
-                        <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
-                        <input type="file" class="form-control" id="answer_file" name="answer_file" required>
-                        <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
-                    </div>
-                    {% elif student_assignment.assignment.assignment_type == 'Paper Submit Type' %}
-                    {% if questions %}
-                    <div class="mb-4">
-                        <p class="text-muted mb-2">Please answer the questions below:</p>
-                        {% for q in questions %}
-                        <div class="mb-4 p-3 border rounded bg-light">
-                            <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }}
-                                Marks)</label>
-                            <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5"
-                                placeholder="Type your answer for Question {{ forloop.counter }}..."></textarea>
+                    {% if student_assignment.assignment.assignment_type == 'Paper Upload Type' or student_assignment.assignment.assignment_type == 'paper_upload' or student_assignment.assignment.assignment_type == 'Paper Upload type' %}
+                        {% if questions %}
+                            <div class="mb-4">
+                                <p class="text-muted mb-3">Please upload a separate answer file (PDF, DOCX, IMG) for each question below:</p>
+                                {% for q in questions %}
+                                <div class="mb-4 p-3 border rounded bg-light">
+                                    <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
+                                    <input type="file" class="form-control" name="answer_file_{{ q.id }}" required>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mb-4">
+                                <label for="answer_file" class="form-label fw-bold">Upload Answer File (PDF, DOCX, IMG)</label>
+                                <input type="file" class="form-control" id="answer_file" name="answer_file" required>
+                                <div class="form-text">Please ensure your file is legible. Max size 5MB.</div>
+                            </div>
+                        {% endif %}
+                    {% elif student_assignment.assignment.assignment_type == 'Paper Submit Type' or student_assignment.assignment.assignment_type == 'paper_submit' or student_assignment.assignment.assignment_type == 'Paper Submit type' %}
+                        {% if questions %}
+                            <div class="mb-4">
+                                <p class="text-muted mb-2">Please answer the questions below:</p>
+                                {% for q in questions %}
+                                <div class="mb-4 p-3 border rounded bg-light">
+                                    <label class="form-label fw-bold">Q{{ forloop.counter }}: {{ q.question }} ({{ q.mark }} Marks)</label>
+                                    <textarea class="form-control" name="answer_text_{{ q.id }}" rows="5" placeholder="Type your answer for Question {{ forloop.counter }}..." required></textarea>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mb-4">
+                                <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
+                                <textarea class="form-control" id="answer_text" name="answer_text" rows="10" placeholder="Type your answer here..." style="width: 100%;"></textarea>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            Unknown Assignment Type: "{{ student_assignment.assignment.assignment_type }}"
                         </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="mb-4">
-                        <label for="answer_text" class="form-label fw-bold">Write Your Answer</label>
-                        <textarea class="form-control" id="answer_text" name="answer_text" rows="10"
-                            placeholder="Type your answer here..." style="width: 100%;"></textarea>
-                    </div>
-                    {% endif %}
-                    {% else %}
-                    <div class="alert alert-warning">
-                        Unknown Assignment Type: "{{ student_assignment.assignment.assignment_type }}"
-                    </div>
                     {% endif %}
 
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'church_user_assignments' %}" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-1"></i> Submit
-                            Assignment</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-1"></i> Submit Assignment</button>
                     </div>
                 </form>
             </div>
@@ -102,16 +110,19 @@
     </div>
 </div>
 
-{% if student_assignment.assignment.assignment_type == 'paper_submit' %}
+{% if student_assignment.assignment.assignment_type == 'paper_submit' or student_assignment.assignment.assignment_type == 'Paper Submit Type' or student_assignment.assignment.assignment_type == 'Paper Submit type' %}
 <!-- Include CKEditor if available or just use simple textarea styling -->
 <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        ClassicEditor
-            .create(document.querySelector('#answer_text'))
-            .catch(error => {
-                console.error(error);
-            });
+        let textarea = document.querySelector('#answer_text');
+        if (textarea) {
+            ClassicEditor
+                .create(textarea)
+                .catch(error => {
+                    console.error(error);
+                });
+        }
     });
 </script>
 {% endif %}

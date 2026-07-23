@@ -218,10 +218,48 @@ class Assignments(models.Model):
     def __str__(self):
         return str(self.assignment_name or "")
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        # Auto-populate assignment code to ID
+        if not self.code or self.code == "":
+            self.code = str(self.id)
+            super().save(update_fields=['code'])
+            
+        if is_new:
+            # Auto-assign to already approved students of the same subject
+            from home.models import StudentsSubjects, StudentsAssignment
+            from datetime import timedelta
+            from django.utils import timezone
+            
+            approved_students = StudentsSubjects.objects.filter(
+                subject=self.subject,
+                is_approved=True,
+                deleted_at__isnull=True
+            ).select_related('student')
+            
+            one_year_span = timezone.now() + timedelta(days=365)
+            
+            for ss in approved_students:
+                if not StudentsAssignment.objects.filter(student=ss.student, assignment=self, deleted_at__isnull=True).exists():
+                    assigned_by = self.updated_by or self.created_by
+                    if not assigned_by:
+                        assigned_by = ss.student.user
+                    
+                    StudentsAssignment.objects.create(
+                        student=ss.student,
+                        assignment=self,
+                        submission_date=one_year_span,
+                        created_by=assigned_by,
+                        updated_by=assigned_by
+                    )
+
 class AssignmentAnswers(models.Model):
     id = models.AutoField(primary_key=True)
     assignment = models.ForeignKey('Assignments', on_delete=models.DO_NOTHING, related_name='answers')
     student = models.ForeignKey('Students', on_delete=models.DO_NOTHING, related_name='assignment_answers')
+    question = models.ForeignKey('AssignmentQuestions', on_delete=models.SET_NULL, blank=True, null=True, related_name='answers')
     answer_file = models.FileField(upload_to="uploads/assignments/", blank=True, null=True)
     answer_text = models.TextField(blank=True, null=True)
     marks_optained = models.FloatField(blank=True, null=True)
@@ -564,6 +602,12 @@ class Exams(models.Model):
 
     def __str__(self):
         return str(self.exam_name or "")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.code or self.code == "":
+            self.code = str(self.id)
+            super().save(update_fields=['code'])
 
 class HomeSettings(models.Model):
     id = models.AutoField(primary_key=True)
