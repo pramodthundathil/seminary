@@ -130,6 +130,12 @@ def index(request):
     )  
     logger.info(f"Page data count: {pages_data.count()}")
 
+    founder_page = Pages.objects.filter(
+        code='message-from-the-founder',
+        status=True,
+        deleted_at__isnull=True
+    ).select_related('media').first()
+
     slider_photos = []
     try:
         # Fetch the slider with code 'home' or 'home-slider'
@@ -145,6 +151,7 @@ def index(request):
     context = {
         "pages_data": pages_data,
         "slider_photos": slider_photos,
+        "founder_page": founder_page,
     }
     return render(request, "site_pages/index.html", context)
 

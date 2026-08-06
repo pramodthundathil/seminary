@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import dotenv
 
 import ssl, certifi
 
@@ -23,35 +24,29 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables
+dotenv.load_dotenv(BASE_DIR / '.env')
 
-PAYPAL_CLIENT_ID = "AbsRgTfQyeWWSpnPN-RFLSw8G0J-2xfNMGxRdKy6C41YDZ9w04KVp948kHDd27WJHT2G0jNYXSr0iW8A"
-PAYPAL_CLIENT_SECRET = "EIKuqztjf9XAIb7cfgwk9XHAfqBB1Cf04sh35HxWBjFwHosgOpKL0KIA4GQKwaii5ZBbYbgrbOjJzBJ-"
+
+
+PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID", "")
+PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET", "")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7cg!gvx@8ej(2wr_8c_oeyv%ecn=km6rvb3cqw@r*3qhwx*v7('
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-7cg!gvx@8ej(2wr_8c_oeyv%ecn=km6rvb3cqw@r*3qhwx*v7(")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
-#for testing
-
-# RECAPTCHA_SITE_KEY = "6LegFxwsAAAAAPuKJ6Fhea_53wqGHMW1gYtXWAJG"
-# RECAPTCHA_SECRET_KEY = "6LegFxwsAAAAAAJiRfIuSh95YkkVSMmPmL0wX_BB"
-RECAPTCHA_SITE_KEY = "6LfJmjQtAAAAAM23nuD1HR4G3RHalBrJgbOj3GrI"
-RECAPTCHA_SECRET_KEY = "6LfJmjQtAAAAAJtH177KYaeBahIIOF_uCWXW7HBc"
-
-#for production
-# RECAPTCHA_SITE_KEY = "6Lfd8kUsAAAAAAcmWQ0K5KO9r6dQGvAcu8PQsrqm"
-# RECAPTCHA_SECRET_KEY = "6Lfd8kUsAAAAANPuFgC3yyKLXKh2P65XVb-xvgTa"
-
-# RECAPTCHA_SITE_KEY = "6LchljQtAAAAAPl5qyqlLQ0rtIEnhHgziDfrq3kA"
-# RECAPTCHA_SECRET_KEY = "6LchljQtAAAAABAg1LxUZfifeLNDKOiKbuTWV4uJ"
+# reCAPTCHA keys loaded from environment
+RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "")
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
 
 # Application definition
 
@@ -222,9 +217,13 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
     },
-    'default': {  # New SQLite database
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'seminary'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '1234'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -314,10 +313,10 @@ LOGIN_URL = '/signin/'
 
 ssl._create_default_https_context = ssl._create_unverified_context
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mytrinitytheologicalseminary@gmail.com'
-EMAIL_HOST_PASSWORD = 'ditrhppeobmxpqzw'
-SITE_URL= "http://127.0.0.1:8000/"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "mytrinitytheologicalseminary@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "ditrhppeobmxpqzw")
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000/")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

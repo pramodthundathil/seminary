@@ -38,47 +38,299 @@
     <!-- Navigation -->
     {% include 'site_pages/navbar.html' %}
     {% block content %}
-    <!-- Hero Section -->
+    <!-- Dynamic Full Screen Hero Carousel -->
+    <style>
+        .hero-section-custom {
+            position: relative;
+            min-height: 100vh;
+            margin-top: -100px; /* Lift behind sticky navbar */
+            background: #1B2845;
+        }
 
-    <div id="trinityCarousel" class="carousel slide" data-bs-ride="carousel">
+        .carousel-item-custom {
+            min-height: 100vh;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* Override active item display to use flexbox centering */
+        .carousel-item-custom.active {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 80px 20px;
+        }
+
+        .hero-overlay-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(27, 40, 69, 0.9) 0%, rgba(0, 206, 209, 0.5) 100%);
+            z-index: 1;
+        }
+
+        .hero-content-custom {
+            position: relative; /* Relative positioning ensures natural height calculation */
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            max-width: 950px;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+
+        .hero-glass-card {
+            background: rgba(27, 40, 69, 0.5); /* Premium dark slate glass overlay */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 2.8rem 2.2rem;
+            box-shadow: 0 35px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Ambient glow behind card */
+        .hero-glass-card::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(0, 206, 209, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 30px;
+        }
+
+        @keyframes heroFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title-custom {
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1.2rem;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            opacity: 0; /* Animated in via JS/active class */
+        }
+
+        .active .hero-title-custom {
+            animation: heroFadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.2s;
+        }
+
+        .hero-subtitle-custom, .hero-subtitle-custom p {
+            font-size: 1.1rem;
+            color: #cbd5e1 !important; /* Soft warm gray for legibility */
+            line-height: 1.65;
+            margin-bottom: 2rem;
+            font-weight: 400;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+        }
+
+        .active .hero-subtitle-custom, .active .hero-subtitle-custom p {
+            animation: heroFadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.5s;
+        }
+
+        .hero-buttons-custom {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+        }
+
+        .active .hero-buttons-custom {
+            animation: heroFadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.8s;
+        }
+
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #00CED1 0%, #00a8a8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.9rem 2.2rem;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 6px 20px rgba(0, 206, 209, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(0, 206, 209, 0.5);
+            background: linear-gradient(135deg, #00ced1 0%, #1b2845 100%);
+            color: #ffffff;
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.9rem 2.2rem;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px) scale(1.02);
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        /* Sleek Indicators */
+        .carousel-indicators [data-bs-target] {
+            width: 10px !important;
+            height: 10px !important;
+            border-radius: 50% !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            border: none !important;
+            margin: 0 6px !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            opacity: 1 !important;
+        }
+
+        .carousel-indicators .active {
+            width: 28px !important;
+            border-radius: 5px !important;
+            background-color: #00CED1 !important;
+        }
+
+        /* Carousel control overrides */
+        .carousel-control-prev-custom,
+        .carousel-control-next-custom {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            position: absolute;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+        }
+
+        .carousel-control-prev-custom:hover,
+        .carousel-control-next-custom:hover {
+            background: #00CED1;
+            border-color: #00CED1;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-control-prev-custom { left: 30px; }
+        .carousel-control-next-custom { right: 30px; }
+
+        @media (max-width: 768px) {
+            .hero-title-custom {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle-custom, .hero-subtitle-custom p {
+                font-size: 1.1rem;
+            }
+            .hero-glass-card {
+                padding: 2.5rem 1.5rem;
+                border-radius: 20px;
+            }
+            .carousel-control-prev-custom,
+            .carousel-control-next-custom {
+                display: none;
+            }
+            .carousel-item-custom.active {
+                padding: 140px 15px 60px 15px;
+            }
+        }
+    </style>
+
+    <div id="trinityCarousel" class="carousel slide hero-section-custom" data-bs-ride="carousel">
         <!-- Indicators -->
-        <div class="carousel-indicators">
+        <div class="carousel-indicators" style="z-index: 5;">
             {% for photo in slider_photos %}
             <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
                 class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}"
                 aria-label="Slide {{ forloop.counter }}"></button>
             {% empty %}
-            <!-- Fallback Indicators -->
             <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#trinityCarousel" data-bs-slide-to="2"></button>
             {% endfor %}
         </div>
 
         <!-- Slides -->
         <div class="carousel-inner">
             {% for photo in slider_photos %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                {% if photo.media %}
-                <img src="{{ photo.media.file_path.url }}" alt="{{ photo.alt_text|default:photo.title }}">
-                {% else %}
-                <img src="{% static 'img/slide1.jpg' %}" alt="Default Slide">
-                {% endif %}
-                <div class="carousel-caption">
-                    <div class="slide-content">
-                        <div class="right-content">
-                            <h2 class="hero-title">
-                                {{ photo.title|safe }}
-                            </h2>
-                            <div class="slide-description">
-                                {{ photo.description|safe }}
-                            </div>
+            <div class="carousel-item {% if forloop.first %}active{% endif %} carousel-item-custom" 
+                 style="background-image: url('{% if photo.media %}{{ photo.media.file_path.url }}{% else %}{% static 'img/slide1.jpg' %}{% endif %}');">
+                <div class="hero-overlay-custom"></div>
+                <div class="hero-content-custom">
+                    <div class="hero-glass-card">
+                        <h2 class="hero-title-custom">
+                            {{ photo.title|safe }}
+                        </h2>
+                        <div class="hero-subtitle-custom">
+                            {{ photo.description|safe }}
+                        </div>
+                        <div class="hero-buttons-custom">
                             {% if photo.button_text and photo.button_link %}
-                            <button class="learn-more-btn"
+                            <button class="btn-hero-primary"
                                 onclick="window.open('{{ photo.button_link|escapejs }}', '{{ photo.button_link_target|default:'_self'|escapejs }}')">
                                 {{ photo.button_text }}
                             </button>
+                            {% else %}
+                            <button class="btn-hero-primary" onclick="window.location.href='{% url 'register' %}'">Apply Now</button>
                             {% endif %}
+                            <button class="btn-hero-secondary" onclick="window.location.href='{% url 'course-list' %}'">Explore Programs</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Fallback Slide -->
+            <div class="carousel-item active carousel-item-custom" style="background-image: url('{% static 'img/hero_seminary_theme.png' %}');">
+                <div class="hero-overlay-custom"></div>
+                <div class="hero-content-custom">
+                    <div class="hero-glass-card">
+                        <h1 class="hero-title-custom">Equipping the World<br>Through God's Word</h1>
+                        <p class="hero-subtitle-custom">Since 2002, Trinity Theological Seminary has been preparing pastors, missionaries, church leaders, and believers through affordable, fully online, biblically faithful theological education.</p>
+                        <div class="hero-buttons-custom">
+                            <button class="btn-hero-primary" onclick="window.location.href='{% url 'register' %}'">Apply Now</button>
+                            <button class="btn-hero-secondary" onclick="window.location.href='{% url 'course-list' %}'">Explore Programs</button>
                         </div>
                     </div>
                 </div>
@@ -87,13 +339,11 @@
         </div>
 
         <!-- Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#trinityCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
+        <button class="carousel-control-prev-custom" type="button" data-bs-target="#trinityCarousel" data-bs-slide="prev">
+            <i class="fas fa-chevron-left"></i>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#trinityCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
+        <button class="carousel-control-next-custom" type="button" data-bs-target="#trinityCarousel" data-bs-slide="next">
+            <i class="fas fa-chevron-right"></i>
         </button>
     </div>
 
@@ -191,6 +441,208 @@
                     </div>
                     <div class="stat-number">35</div>
                     <p class="stat-label">Trainers</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Message from the Founder Section -->
+    <style>
+        .founder-section {
+            padding: 90px 0;
+            background: linear-gradient(180deg, #F8FAFC 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .founder-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .founder-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .founder-image-wrapper {
+            position: relative;
+            border-radius: 24px;
+            width: 100%;
+        }
+
+        .founder-frame-blue {
+            position: absolute;
+            top: 20px;
+            left: -20px;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #00CED1;
+            border-radius: 24px;
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .founder-frame-green {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #1B2845;
+            border-radius: 24px;
+            z-index: 1;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .founder-image-card {
+            position: relative;
+            z-index: 2;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+            background: #fff;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .founder-image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .founder-image-wrapper:hover .founder-image-card {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 206, 209, 0.2);
+        }
+
+        .founder-image-wrapper:hover .founder-frame-blue {
+            transform: translate(-8px, 8px);
+        }
+
+        .founder-image-wrapper:hover .founder-frame-green {
+            transform: translate(8px, -8px);
+        }
+
+        .founder-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .founder-tag {
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #00CED1;
+            letter-spacing: 2.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .founder-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #1B2845;
+            margin-bottom: 1.8rem;
+            line-height: 1.2;
+            font-family: 'Outfit', 'Inter', sans-serif;
+        }
+
+        .founder-quote {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #475569;
+            margin-bottom: 1.8rem;
+            font-style: italic;
+            border-left: 4px solid #00CED1;
+            padding-left: 1.5rem;
+            background: rgba(0, 206, 209, 0.03);
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .founder-text {
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: #475569;
+            margin-bottom: 2.2rem;
+        }
+
+        .btn-founder {
+            align-self: flex-start;
+            background: #1B2845;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.9rem 2.2rem;
+            border-radius: 30px;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(27, 40, 69, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn-founder:hover {
+            background: #00CED1;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 206, 209, 0.3);
+        }
+
+        @media (max-width: 992px) {
+            .founder-grid {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+            .founder-image-wrapper {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            .founder-title {
+                font-size: 2.2rem;
+                text-align: center;
+            }
+            .founder-content {
+                text-align: center;
+            }
+            .founder-quote {
+                text-align: left;
+            }
+            .btn-founder {
+                align-self: center;
+            }
+        }
+    </style>
+
+    <section class="founder-section">
+        <div class="founder-container">
+            <div class="founder-grid">
+                <!-- Left: Photograph with dynamic framing -->
+                <div class="founder-image-wrapper">
+                    <div class="founder-frame-blue"></div>
+                    <div class="founder-frame-green"></div>
+                    <div class="founder-image-card">
+                        <img src="{% if founder_page.media %}{{ founder_page.media.file_path.url }}{% else %}{% static 'img/founder_shibu_thomas.png' %}{% endif %}" alt="Dr. Shibu Thomas">
+                    </div>
+                </div>
+
+                <!-- Right: Message Content -->
+                <div class="founder-content">
+                    <span class="founder-tag">Visionary Leadership</span>
+                    <h2 class="founder-title">A Message from the Founder</h2>
+                    <div class="founder-quote">
+                        "In 2002, while serving as a missionary in India, I met many sincere believers who longed to study God's Word but were unable to attend a Bible college because of financial limitations..."
+                    </div>
+                    <p class="founder-text">
+                        By God's grace, what began as a small ministry has grown into an international theological seminary, equipping pastors, missionaries, church leaders, and believers from around the world through affordable, fully online, and biblically faithful education.
+                    </p>
+                    <button class="btn-founder" onclick="window.location.href='{% url 'page_detail' slug='message-from-the-founder' %}'">Read Full Message</button>
                 </div>
             </div>
         </div>
@@ -345,9 +797,9 @@
             <div class="row g-4">
                 <div class="col-md-3">
                     <h3>Reach Us</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> Trinity Theological Seminary</p>
-                    <p><i class="fas fa-envelope"></i> info@trinityseminary.edu</p>
-                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                    <p><i class="fas fa-map-marker-alt"></i> PO Box 308<br>Buford, GA 30515-0308</p>
+                    <p><i class="fas fa-envelope"></i> trinitytheologicalseminary@gmail.com</p>
+                    <p><i class="fas fa-phone"></i> 678-856-1076</p>
                 </div>
                 <div class="col-md-3">
                     <h3>Company</h3>
@@ -370,7 +822,7 @@
                 </div>
                 <div class="col-md-3">
                     <h3>Contact Us</h3>
-                    <p><i class="fas fa-envelope"></i> info@trinityseminary.edu</p>
+                    <p><i class="fas fa-envelope"></i> trinitytheologicalseminary@gmail.com</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
