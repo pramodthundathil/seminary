@@ -209,14 +209,14 @@ AUTH_USER_MODEL = 'home.Users'
 # }
 
 DATABASES = {
-    'mysql': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mytts_temp',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
+    # 'mysql': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'mytts_temp',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'seminary'),
