@@ -1846,3 +1846,48 @@ Please login to the admin panel to review.'''
     except Exception as e:
         logger.error(f"Error capturing registration payment: {e}")
         return JsonResponse({"status": "failed", "message": str(e)}, status=500)
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from home.ai_service import generate_chat_reply
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def chatbot_api_view(request):
+    """
+    API endpoint for Trinity Theological Seminary AI Chatbot.
+    Accepts JSON body: {'message': '...', 'history': [...]}
+    Returns: JSON {'status': 'success', 'reply': '...', 'model': '...'}
+    """
+    try:
+        if request.content_type == "application/json":
+            data = json.loads(request.body.decode('utf-8'))
+        else:
+            data = request.POST
+
+        user_message = data.get("message", "").strip()
+        history = data.get("history", [])
+
+        if not user_message:
+            return JsonResponse({
+                "status": "error",
+                "message": "Message is required."
+            }, status=400)
+
+        # Generate response using Gemini AI service
+        result = generate_chat_reply(user_message, history=history)
+
+        return JsonResponse({
+            "status": "success" if result.get("success") else "partial",
+            "reply": result.get("reply"),
+            "model": result.get("model", "gemini")
+        })
+
+    except Exception as e:
+        logger.error(f"Error in chatbot_api_view: {e}", exc_info=True)
+        return JsonResponse({
+            "status": "error",
+            "reply": "I encountered an unexpected issue. Please reach out via our [Contact Us](/contact-us/) page or try again in a moment.",
+            "message": str(e)
+        }, status=500)

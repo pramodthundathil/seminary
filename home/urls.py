@@ -75,4 +75,7 @@ urlpatterns = [
     # Registration Payment
     path('register/payment/', views.registration_payment, name='registration_payment'),
     path('register/payment/capture/', views.capture_registration_payment, name='capture_registration_payment'),
+
+    # Trinity AI Chatbot API
+    path('api/chatbot/', views.chatbot_api_view, name='chatbot_api'),
 ]
