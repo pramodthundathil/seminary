@@ -233,26 +233,72 @@
         padding: 0 2rem 4rem;
     }
 
-    /* Featured Image/Video */
-    .featured-media {
-        margin: -5rem auto 3rem;
-        max-width: 1000px;
+    /* New Page Grid Layout */
+    .page-layout-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        margin-top: -5rem;
         position: relative;
         z-index: 2;
     }
 
-    .media-box {
+    @media (min-width: 992px) {
+        .page-layout-grid.has-sidebar-image {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+    }
+
+    /* Side Image Styling */
+    .featured-media-side {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .media-box-side {
         background: white;
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
         border: 1px solid rgba(0, 206, 209, 0.1);
+        display: inline-flex;
+        max-width: 100%;
     }
 
-    .media-box img {
-        width: 100%;
+    .media-box-side img {
+        max-width: 100%;
+        max-height: 480px;
+        width: auto;
         height: auto;
+        object-fit: contain;
         display: block;
+    }
+
+    /* Top Video Styling (original layout behavior) */
+    .featured-media-top {
+        margin-bottom: 2.5rem;
+        width: 100%;
+    }
+
+    .media-box-top {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(0, 206, 209, 0.1);
+        width: 100%;
+    }
+
+    /* If it contains a video, we keep the original max-width constraints */
+    .featured-media-top .media-box-top {
+        max-width: 800px;
+        margin: 0 auto;
     }
 
     .video-container {
@@ -785,8 +831,18 @@
             font-size: 1rem;
         }
 
-        .featured-media {
-            margin: -3rem 1rem 2rem;
+        .page-layout-grid {
+            margin-top: -3rem;
+            gap: 1.5rem;
+        }
+
+        .featured-media-side {
+            position: relative;
+            top: 0;
+        }
+
+        .media-box-side img {
+            max-height: 350px;
         }
 
         .content-container {
@@ -862,57 +918,68 @@
         </div>
     </section>
 
-    <!-- Featured Media -->
-    {% if page.media or page.video or page.youtube %}
-    <div class="featured-media">
-        <div class="media-box">
-            {% if page.youtube %}
-            <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/{{ page.youtube.video_id }}"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-            </div>
-            {% elif page.video %}
-            <div class="video-container">
-                <video controls>
-                    <source src="{{ page.video.file_path.url }}" type="video/mp4">
-                </video>
-            </div>
-            {% elif page.media %}
-            <img src="{{ page.media.file_path.url }}" alt="{{ page.title }}">
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
     <!-- Main Content -->
     <div class="content-container">
-        <article class="main-content">
-            {% if page.apply_button_top %}
-            <div class="apply-cta">
-                <p class="apply-cta-text">Ready to start your journey with us?</p>
-                <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
+        <div class="page-layout-grid {% if page.media and not page.video and not page.youtube %}has-sidebar-image{% endif %}">
+            
+            {% if page.media and not page.video and not page.youtube %}
+            <!-- Side Image -->
+            <div class="featured-media-side">
+                <div class="media-box-side">
+                    <img src="{{ page.media.file_path.url }}" alt="{{ page.title }}">
+                </div>
             </div>
             {% endif %}
 
-            {% if page.description %}
-            <div class="content-body">
-                {{ page.description|safe }}
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">📄</div>
-                <p>Content coming soon...</p>
-            </div>
-            {% endif %}
+            <article class="main-content">
+                {% if page.youtube or page.video %}
+                <!-- Featured Video/Media Top -->
+                <div class="featured-media-top">
+                    <div class="media-box-top">
+                        {% if page.youtube %}
+                        <div class="video-container">
+                            <iframe src="https://www.youtube.com/embed/{{ page.youtube.video_id }}"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+                        </div>
+                        {% elif page.video %}
+                        <div class="video-container">
+                            <video controls>
+                                <source src="{{ page.video.file_path.url }}" type="video/mp4">
+                            </video>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
 
-            {% if page.apply_button_bottom %}
-            <div class="apply-cta">
-                <p class="apply-cta-text">Ready to start your journey with us?</p>
-                <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
-            </div>
-            {% endif %}
-        </article>
+                {% if page.apply_button_top %}
+                <div class="apply-cta">
+                    <p class="apply-cta-text">Ready to start your journey with us?</p>
+                    <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
+                </div>
+                {% endif %}
+
+                {% if page.description %}
+                <div class="content-body">
+                    {{ page.description|safe }}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📄</div>
+                    <p>Content coming soon...</p>
+                </div>
+                {% endif %}
+
+                {% if page.apply_button_bottom %}
+                <div class="apply-cta">
+                    <p class="apply-cta-text">Ready to start your journey with us?</p>
+                    <a href="{% url 'apply' %}" class="btn-apply">Apply Now</a>
+                </div>
+                {% endif %}
+            </article>
+        </div>
+    </div>
 
         <!-- Related Pages -->
         {% if child_pages %}

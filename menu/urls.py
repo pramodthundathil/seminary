@@ -287,6 +287,8 @@ urlpatterns = [
     path('references/<int:reference_id>/view/', views.reference_view, name='reference_view'),
     path('references/<int:reference_id>/edit/', views.reference_edit, name='reference_edit'),
     path('references/<int:reference_id>/delete/', views.reference_delete, name='reference_delete'),
+    path('admin/get-media-pdfs/', views.get_media_library_pdfs, name='get_media_pdfs'),
+
     
 
     #support 

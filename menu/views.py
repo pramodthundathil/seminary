@@ -5233,10 +5233,18 @@ def reference_edit(request, reference_id):
     else:
         form = BookReferenceForm(instance=reference)
     
+    file_exists = False
+    if reference.reference_file and reference.reference_file.file_path:
+        try:
+            file_exists = reference.reference_file.file_path.storage.exists(reference.reference_file.file_path.name)
+        except Exception:
+            file_exists = False
+    
     return render(request, 'admin/references/reference_form.html', {
         'form': form,
         'action': 'Update',
-        'reference': reference
+        'reference': reference,
+        'file_exists': file_exists
     })
 
 @login_required
@@ -5253,19 +5261,43 @@ def reference_view(request, reference_id):
         deleted_at__isnull=True
     )
     
+    file_exists = False
+    if reference.reference_file and reference.reference_file.file_path:
+        try:
+            file_exists = reference.reference_file.file_path.storage.exists(reference.reference_file.file_path.name)
+        except Exception:
+            file_exists = False
+            
     return render(request, 'admin/references/reference_view.html', {
-        'reference': reference
+        'reference': reference,
+        'file_exists': file_exists
     })
 
 def get_media_library_pdfs(request):
     """AJAX endpoint to get all PDFs from media library"""
-    pdfs = MediaLibrary.objects.filter(
-        file_type='application/pdf',
+    media_list = MediaLibrary.objects.filter(
+        file_type__in=['application/pdf', 'pdf'],
         deleted_at__isnull=True
-    ).values('id', 'file_name', 'title', 'file_size', 'created_at')
+    ).order_by('-created_at')
     
+    pdfs = []
+    for media in media_list:
+        try:
+            exists = media.file_path.storage.exists(media.file_path.name)
+        except Exception:
+            exists = False
+            
+        pdfs.append({
+            'id': media.id,
+            'file_name': media.file_name,
+            'title': media.title,
+            'file_size': media.file_size,
+            'url': media.file_path.url if (media.file_path and exists) else '',
+            'exists': exists
+        })
+        
     return JsonResponse({
-        'pdfs': list(pdfs)
+        'pdfs': pdfs
     })
 
 @login_required

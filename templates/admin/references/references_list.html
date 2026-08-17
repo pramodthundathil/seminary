@@ -58,7 +58,7 @@
                             <span class="status-badge status-active">PDF</span>
                             {% if ref.reference_file %}
                                 <div style="font-size:12px;margin-top:4px;">
-                                    File: {{ ref.reference_file }}
+                                    File: <a href="{{ ref.reference_file.file_path.url }}" target="_blank" style="color: #007bff; text-decoration: underline;" title="Click to view file">{{ ref.reference_file.file_name }}</a>
                                 </div>
                             {% endif %}
                         {% elif ref.format == "note" %}

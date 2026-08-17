@@ -471,6 +471,8 @@
             position: relative;
             border-radius: 24px;
             width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
         }
 
         .founder-frame-blue {
@@ -507,11 +509,14 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
             background: #fff;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            aspect-ratio: 4 / 5;
         }
 
         .founder-image-card img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
             display: block;
         }
 

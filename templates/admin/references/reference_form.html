@@ -316,8 +316,16 @@
                         <div id="pdfDisplayArea">
                             {% if reference.reference_file %}
                             <div class="current-pdf-display">
-                                <i class="fas fa-file-pdf"></i>
-                                <h5>{{ reference.reference_file.file_name }}</h5>
+                                {% if file_exists %}
+                                    <a href="{{ reference.reference_file.file_path.url }}" target="_blank" style="text-decoration: none;" title="Click to view file">
+                                        <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc3545; cursor: pointer;"></i>
+                                        <h5 style="color: #007bff; text-decoration: underline; margin-top: 10px; cursor: pointer;">{{ reference.reference_file.file_name }}</h5>
+                                    </a>
+                                {% else %}
+                                    <i class="fas fa-file-pdf" style="font-size: 48px; color: #6c757d; opacity: 0.6;"></i>
+                                    <h5 class="text-muted" style="margin-top: 10px;">{{ reference.reference_file.file_name }}</h5>
+                                    <p class="text-danger fw-bold" style="margin-top: 5px;"><i class="fas fa-exclamation-triangle"></i> File not available on server</p>
+                                {% endif %}
                                 <p class="text-muted">{{ reference.reference_file.file_size }} bytes</p>
                                 <button type="button" class="btn-change-pdf" onclick="openPdfModal()">
                                     <i class="fas fa-edit"></i> Change PDF
@@ -465,9 +473,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             if (this.files.length > 0) {
-                const fileName = this.files[0].name;
+                const file = this.files[0];
+                const fileName = file.name;
                 document.getElementById('uploadFileName').textContent = 'Selected: ' + fileName;
-                updatePdfDisplay(fileName, null, 'upload');
+                
+                if (window.fileObjectUrl) {
+                    URL.revokeObjectURL(window.fileObjectUrl);
+                }
+                window.fileObjectUrl = URL.createObjectURL(file);
+                
+                updatePdfDisplay(fileName, null, 'upload', window.fileObjectUrl);
                 closePdfModal();
             }
         });
@@ -540,7 +555,7 @@ function loadMediaLibrary() {
             data.pdfs.forEach(pdf => {
                 const item = document.createElement('div');
                 item.className = 'media-item';
-                item.onclick = () => selectMedia(pdf.id, pdf.file_name, item);
+                item.onclick = () => selectMedia(pdf.id, pdf.file_name, pdf.url, item);
                 item.innerHTML = `
                     <i class="fas fa-file-pdf"></i>
                     <div class="file-name">${pdf.file_name}</div>
@@ -555,7 +570,7 @@ function loadMediaLibrary() {
         });
 }
 
-function selectMedia(mediaId, fileName, element) {
+function selectMedia(mediaId, fileName, fileUrl, element) {
     // Remove previous selection
     document.querySelectorAll('.media-item').forEach(item => {
         item.classList.remove('selected');
@@ -569,7 +584,7 @@ function selectMedia(mediaId, fileName, element) {
     document.getElementById('selected_media_id').value = mediaId;
     
     // Update display
-    updatePdfDisplay(fileName, mediaId, 'library');
+    updatePdfDisplay(fileName, mediaId, 'library', fileUrl);
     
     // Close modal
     setTimeout(() => {
@@ -577,13 +592,28 @@ function selectMedia(mediaId, fileName, element) {
     }, 300);
 }
 
-function updatePdfDisplay(fileName, mediaId, source) {
+function updatePdfDisplay(fileName, mediaId, source, fileUrl) {
     const displayArea = document.getElementById('pdfDisplayArea');
+    
+    let linkOpen = '';
+    let linkClose = '';
+    let cursorStyle = '';
+    
+    if (fileUrl) {
+        linkOpen = `<a href="${fileUrl}" target="_blank" style="text-decoration: none;" title="Click to view file">`;
+        linkClose = `</a>`;
+        cursorStyle = 'color: #007bff; text-decoration: underline; cursor: pointer;';
+    } else {
+        cursorStyle = 'color: #333;';
+    }
+    
     displayArea.innerHTML = `
         <div class="current-pdf-display">
-            <i class="fas fa-file-pdf"></i>
-            <h5>${fileName}</h5>
-            <p class="text-muted">${source === 'upload' ? 'New upload' : 'From media library'}</p>
+            ${linkOpen}
+            <i class="fas fa-file-pdf" style="font-size: 48px; color: #dc3545; ${fileUrl ? 'cursor: pointer;' : ''}"></i>
+            <h5 style="margin-top: 10px; ${cursorStyle}">${fileName}</h5>
+            ${linkClose}
+            <p class="text-muted">${source === 'upload' ? 'New upload (pending save)' : 'From media library (pending save)'}</p>
             <button type="button" class="btn-change-pdf" onclick="openPdfModal()">
                 <i class="fas fa-edit"></i> Change PDF
             </button>
@@ -598,6 +628,11 @@ function removePdf() {
     document.getElementById('selected_media_id').value = '';
     document.getElementById('id_new_pdf_file').value = '';
     selectedMediaId = null;
+    
+    if (window.fileObjectUrl) {
+        URL.revokeObjectURL(window.fileObjectUrl);
+        window.fileObjectUrl = null;
+    }
     
     const displayArea = document.getElementById('pdfDisplayArea');
     displayArea.innerHTML = `
