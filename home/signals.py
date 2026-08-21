@@ -10,6 +10,10 @@ def update_exam_score(sender, instance, **kwargs):
     Signal to update the total exam score (show_on_score) 
     whenever an objective or descriptive answer is saved or deleted.
     """
+    # Skip during fixture loading (loaddata) to prevent DoNotExist and DB errors
+    if kwargs.get('raw'):
+        return
+
     student_exam = instance.assignment
     
     # Calculate sum of marks
