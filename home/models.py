@@ -304,7 +304,7 @@ class Bans(models.Model):
     updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'bans'
 
     def __str__(self):
@@ -739,7 +739,7 @@ class Migrations(models.Model):
     batch = models.IntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'migrations'
 
 class ModelHasPermissions(models.Model):
@@ -748,7 +748,7 @@ class ModelHasPermissions(models.Model):
     model_id = models.PositiveBigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'model_has_permissions'
         unique_together = (('permission_id', 'model_id', 'model_type'),)
 
@@ -758,7 +758,7 @@ class ModelHasRoles(models.Model):
     model_id = models.PositiveBigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'model_has_roles'
         unique_together = (('role_id', 'model_id', 'model_type'),)
 
@@ -1715,7 +1715,7 @@ class WpDb7Forms(models.Model):
     form_date = models.DateTimeField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'wp_db7_forms'
 
     def __str__(self):
@@ -1747,7 +1747,7 @@ class WpPosts(models.Model):
     comment_count = models.BigIntegerField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'wp_posts'
 
     def __str__(self):

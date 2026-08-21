@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'bans',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'migrations',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'model_has_permissions',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'model_has_roles',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'wp_db7_forms',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'wp_posts',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
