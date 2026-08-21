@@ -1013,7 +1013,8 @@ def church_user_score_card(request):
 
     completed_exams = (
         StudentsExams.objects
-        .filter(student=student, is_exam_ended=True)
+        .filter(student=student, is_exam_ended=True, deleted_at__isnull=True)
+        .exclude(is_exam_started=False, show_on_score=0)
         .select_related("exam", "exam__subject", "course", "subject", "student", "student__course_applied")
         .order_by('-end_time')
     )
@@ -1040,7 +1041,7 @@ def church_user_score_card(request):
         ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
         
         obtained_marks = highest_score
-        percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
+        percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
         if percentage >= 90: grade = "A+"
         elif percentage >= 80: grade = "A"
@@ -1083,7 +1084,7 @@ def church_user_score_card(request):
 
     student_assignments = (
         StudentsAssignment.objects
-        .filter(student=student, submitted_on__isnull=False)
+        .filter(student=student, submitted_on__isnull=False, total_marks__isnull=False, deleted_at__isnull=True)
         .order_by('-submitted_on')
         .select_related("assignment", "assignment__subject", "student", "student__course_applied")
     )
@@ -1431,7 +1432,7 @@ def church_student_view(request, id):
         grade = "N/A"
         if e.is_exam_ended and total_marks > 0:
             obtained = e.show_on_score or 0
-            percentage = (obtained / total_marks * 100)
+            percentage = (obtained / float(total_marks) * 100)
             if percentage >= 90: grade = "A+"
             elif percentage >= 80: grade = "A"
             elif percentage >= 70: grade = "B"
@@ -1488,7 +1489,7 @@ def church_student_view(request, id):
         ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
         
         obtained_marks = highest_score
-        percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
+        percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
         if percentage >= 90: grade = "A+"
         elif percentage >= 80: grade = "A"

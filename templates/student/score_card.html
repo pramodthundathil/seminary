@@ -6,6 +6,34 @@
 {% block body_class %}no-right{% endblock %}
 
 {% block middle %}
+{% if is_admin_view %}
+<style>
+    /* Hide dashboard wrappers in screen mode for admin view */
+    .dashboard-wrap, .no-print, header, nav, .sidebar, .student-sidebar, .header-container {
+        display: none !important;
+    }
+    body, html, #middle-content, .content-area {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #f1f5f9 !important;
+        width: 100% !important;
+    }
+    #transcript-pdf-template {
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
+        margin: 20px auto !important;
+        background: #fffacd !important;
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+</style>
+<div class="admin-pdf-bar no-print" style="background: #1e293b; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; font-family: system-ui, -apple-system, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 9999;">
+    <span style="font-weight: 600; font-size: 0.95rem;">Score Card PDF Generator - {{ student.first_name }} {{ student.last_name }}</span>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="downloadPDF()" class="btn btn-primary btn-sm" style="background-color: #2563eb; border-color: #2563eb; color: white; font-weight: 600; border-radius: 6px; padding: 6px 16px; font-size: 0.85rem; cursor: pointer;"><i class="fas fa-file-pdf"></i> Download PDF</button>
+        <button onclick="window.close()" class="btn btn-secondary btn-sm" style="background-color: #475569; border-color: #475569; color: white; font-weight: 600; border-radius: 6px; padding: 6px 16px; font-size: 0.85rem; cursor: pointer;"><i class="fas fa-times"></i> Close Window</button>
+    </div>
+</div>
+{% endif %}
 <style>
         :root {
         --secondary: #64748B;
@@ -412,7 +440,13 @@
         min-height: 290mm;
         height: auto;
         padding: 12mm;
-        background-color: #fdfbf3;
+        background-color: #fffacd;
+        {% if not is_admin_view %}
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27160%27%3E%3Ctext%20x%3D%2720%27%20y%3D%27110%27%20fill%3D%27rgba%2827%2C%2040%2C%2069%2C%200.08%29%27%20font-size%3D%2716%27%20font-family%3D%27Arial%2C%20sans-serif%27%20font-weight%3D%27bold%27%20transform%3D%27rotate%28-45%2020%20110%29%27%3EDUPLICATE%3C%2Ftext%3E%3C%2Fsvg%3E");
+        background-repeat: repeat;
+        {% endif %}
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
         box-sizing: border-box;
         position: relative;
     }
@@ -1023,9 +1057,8 @@
         <div class="sc-section-content">
             <table class="sc-table" id="examTable" style="table-layout: fixed;">
                 <colgroup>
-                    <col style="width:8%">
-                    <col style="width:12%">
                     <col style="width:16%">
+                    <col style="width:20%">
                     <col style="width:22%">
                     <col style="width:8%">
                     <col style="width:8%">
@@ -1035,7 +1068,6 @@
                 </colgroup>
                 <thead>
                     <tr>
-                        <th>Code</th>
                         <th>Course</th>
                         <th>Subject</th>
                         <th>Exam Name</th>
@@ -1050,7 +1082,6 @@
                     {% if student_exams %}
                     {% for item in student_exams %}
                     <tr>
-                        <td data-label="Code">{{ item.code }}</td>
                         <td data-label="Course">{{ item.course_name }}</td>
                         <td data-label="Subject">{{ item.subject_name }}</td>
                         <td data-label="Exam Name">{{ item.exam_name }}</td>
@@ -1104,9 +1135,8 @@
         <div class="sc-section-content">
             <table class="sc-table" id="assignmentTable" style="table-layout: fixed;">
                 <colgroup>
-                    <col style="width:8%">
-                    <col style="width:15%">
-                    <col style="width:20%">
+                    <col style="width:18%">
+                    <col style="width:25%">
                     <col style="width:25%">
                     <col style="width:10%">
                     <col style="width:8%">
@@ -1115,7 +1145,6 @@
                 </colgroup>
                 <thead>
                     <tr>
-                        <th>Code</th>
                         <th>Course</th>
                         <th>Subject</th>
                         <th>Assignment Name</th>
@@ -1129,7 +1158,6 @@
                     {% if assignment_mark %}
                     {% for item in assignment_mark %}
                     <tr>
-                        <td data-label="Code">{{ item.code }}</td>
                         <td data-label="Course">{{ item.course_name }}</td>
                         <td data-label="Subject">{{ item.subject_name }}</td>
                         <td data-label="Assignment Name">{{ item.assignment_name }}</td>
@@ -1254,9 +1282,8 @@
                     <table class="pdf-table">
                         <thead>
                             <tr>
-                                <th style="width: 10%;">Code</th>
-                                <th style="width: 25%;">Subject</th>
-                                <th style="width: 35%;">Paper Name</th>
+                                <th style="width: 30%;">Subject</th>
+                                <th style="width: 40%;">Paper Name</th>
                                 <th style="width: 10%; text-align: right;">Total Marks</th>
                                 <th style="width: 10%; text-align: right;">Marks Obtained</th>
                                 <th style="width: 10%; text-align: right;">Percentage</th>
@@ -1267,7 +1294,6 @@
                             {% if student_exams %}
                             {% for item in student_exams %}
                             <tr>
-                                <td>{{ item.code|default:"-" }}</td>
                                 <td>{{ item.subject_name }}</td>
                                 <td>{{ item.exam_name }}</td>
                                 <td class="text-right">{{ item.total_score }}</td>
@@ -1281,7 +1307,6 @@
                             {% if assignment_mark %}
                             {% for item in assignment_mark %}
                             <tr>
-                                <td>{{ item.code|default:"-" }}</td>
                                 <td>{{ item.subject_name }}</td>
                                 <td>{{ item.assignment_name }}</td>
                                 <td class="text-right">{{ item.total_score }}</td>
@@ -1294,7 +1319,7 @@
                             
                             {% if not student_exams and not assignment_mark %}
                             <tr>
-                                <td colspan="7" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                                <td colspan="6" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
                                     No academic records found.
                                 </td>
                             </tr>
@@ -1716,12 +1741,32 @@
         html2pdf().set(opt).from(element).save().then(() => {
             btn.disabled = false;
             btn.innerHTML = originalText;
+            {% if is_admin_view %}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'PDF_DOWNLOAD_COMPLETE', success: true }, '*');
+            }
+            {% endif %}
         }).catch(err => {
             console.error('PDF Generation error:', err);
             alert('An error occurred while generating the PDF. Please try again.');
             btn.disabled = false;
             btn.innerHTML = originalText;
+            {% if is_admin_view %}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'PDF_DOWNLOAD_COMPLETE', success: false }, '*');
+            }
+            {% endif %}
         });
     }
 </script>
+{% if is_admin_view %}
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        // Wait for styles/images to be ready, then trigger download
+        setTimeout(() => {
+            downloadPDF();
+        }, 1000);
+    });
+</script>
+{% endif %}
 {% endblock %}

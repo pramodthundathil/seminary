@@ -59,7 +59,7 @@
                                         <div class="row align-items-center">
                                             <div class="col-md-9 mb-2 mb-md-0">
                                                 <div class="form-group mb-0">
-                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                                    <label class="form-label font-weight-semibold question-number-label" style="font-size: 0.9rem; color: #4f46e5; margin-bottom: 6px; display: block; font-weight: bold;">Question {{ forloop.counter }}</label>
                                                     <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter descriptive question text..." style="border-radius: 6px;" required>{{ q.question }}</textarea>
                                                 </div>
                                             </div>
@@ -82,7 +82,7 @@
                                         <div class="row mb-3">
                                             <div class="col-md-9">
                                                 <div class="form-group mb-0">
-                                                    <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                                    <label class="form-label font-weight-semibold question-number-label" style="font-size: 0.9rem; color: #4f46e5; margin-bottom: 6px; display: block; font-weight: bold;">Question {{ forloop.counter }}</label>
                                                     <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter objective question text..." style="border-radius: 6px;" required>{{ q.question }}</textarea>
                                                 </div>
                                             </div>
@@ -111,8 +111,8 @@
                                                 <input type="text" class="form-control" name="option4[]" value="{{ q.option4|default:'' }}" placeholder="Option 4" style="border-radius: 6px;">
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-10">
                                                 <label class="form-label" style="font-size: 0.85rem;">Answer Option</label>
                                                 <select class="form-control" name="answer_option[]" style="border-radius: 6px;" required>
                                                     <option value="option1" {% if q.answer_option == 'option1' %}selected{% endif %}>Option 1</option>
@@ -120,10 +120,6 @@
                                                     <option value="option3" {% if q.answer_option == 'option3' %}selected{% endif %}>Option 3</option>
                                                     <option value="option4" {% if q.answer_option == 'option4' %}selected{% endif %}>Option 4</option>
                                                 </select>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label" style="font-size: 0.85rem;">Detailed Answer (Optional)</label>
-                                                <input type="text" class="form-control" name="answer_detail[]" value="{{ q.answer_detail|default:'' }}" placeholder="Explanation" style="border-radius: 6px;">
                                             </div>
                                             <div class="col-md-2 text-end mt-4">
                                                 <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
@@ -158,7 +154,14 @@
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
+function updateQuestionNumbers() {
+    $('#questions-container .question-row').each(function(index) {
+        $(this).find('.question-number-label').text('Question ' + (index + 1));
+    });
+}
+
 $(document).ready(function() {
+    updateQuestionNumbers();
     let currentExamType = $('#id_exam_type').val() || 'descriptive';
     
     $('#id_exam_type').change(function() {
@@ -169,6 +172,7 @@ $(document).ready(function() {
             if (confirm("Changing the exam type will clear the existing questions in the list. Do you want to proceed?")) {
                 $('#questions-container').empty();
                 currentExamType = newExamType;
+                updateQuestionNumbers();
             } else {
                 $(this).val(currentExamType);
             }
@@ -186,7 +190,7 @@ $(document).ready(function() {
                     <div class="row align-items-center">
                         <div class="col-md-9 mb-2 mb-md-0">
                             <div class="form-group mb-0">
-                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                <label class="form-label font-weight-semibold question-number-label" style="font-size: 0.9rem; color: #4f46e5; margin-bottom: 6px; display: block; font-weight: bold;">Question Text</label>
                                 <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter descriptive question text..." style="border-radius: 6px;" required></textarea>
                             </div>
                         </div>
@@ -205,6 +209,7 @@ $(document).ready(function() {
                 </div>
             `;
             $('#questions-container').append(rowHtml);
+            updateQuestionNumbers();
         } else if (examType === 'objective') {
             let rowHtml = `
                 <div class="question-row objective-row border p-3 mb-3 rounded position-relative" style="background: #f8fafc; border-color: #cbd5e1 !important;">
@@ -212,7 +217,7 @@ $(document).ready(function() {
                     <div class="row mb-3">
                         <div class="col-md-9">
                             <div class="form-group mb-0">
-                                <label class="form-label font-weight-semibold" style="font-size: 0.9rem; color: #475569; margin-bottom: 6px; display: block;">Question Text</label>
+                                <label class="form-label font-weight-semibold question-number-label" style="font-size: 0.9rem; color: #4f46e5; margin-bottom: 6px; display: block; font-weight: bold;">Question Text</label>
                                 <textarea class="form-control" name="question_text[]" rows="2" placeholder="Enter objective question text..." style="border-radius: 6px;" required></textarea>
                             </div>
                         </div>
@@ -241,8 +246,8 @@ $(document).ready(function() {
                             <input type="text" class="form-control" name="option4[]" placeholder="Option 4" style="border-radius: 6px;">
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-10">
                             <label class="form-label" style="font-size: 0.85rem;">Answer Option</label>
                             <select class="form-control" name="answer_option[]" style="border-radius: 6px;" required>
                                 <option value="option1">Option 1</option>
@@ -250,10 +255,6 @@ $(document).ready(function() {
                                 <option value="option3">Option 3</option>
                                 <option value="option4">Option 4</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" style="font-size: 0.85rem;">Detailed Answer (Optional)</label>
-                            <input type="text" class="form-control" name="answer_detail[]" placeholder="Explanation" style="border-radius: 6px;">
                         </div>
                         <div class="col-md-2 text-end mt-4">
                             <button type="button" class="btn btn-outline-danger btn-sm remove-question-btn" style="border-radius: 6px; padding: 8px 10px;">
@@ -264,11 +265,13 @@ $(document).ready(function() {
                 </div>
             `;
             $('#questions-container').append(rowHtml);
+            updateQuestionNumbers();
         }
     });
 
     $(document).on('click', '.remove-question-btn', function() {
         $(this).closest('.question-row').remove();
+        updateQuestionNumbers();
     });
 });
 </script>

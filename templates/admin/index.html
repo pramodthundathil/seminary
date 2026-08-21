@@ -4079,14 +4079,14 @@
             {% if page.children %}
             <!-- Parent item with dropdown -->
             <div class="nav-item has-children" onclick="toggleSubmenu(this)">
-                <i class="fas fa-{{ page.icon }}"></i>
+                <i class="{% if ' ' in page.icon %}{{ page.icon }}{% else %}fas fa-{{ page.icon }}{% endif %}"></i>
                 <span class="nav-item-text">{{ page.title }}</span>
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
             </div>
             <div class="nav-submenu">
                 {% for child in page.children %}
                 <a href="/menu/{{ child.slug }}" class="nav-item">
-                    <i class="fas fa-{{ child.icon }}"></i>
+                    <i class="{% if ' ' in child.icon %}{{ child.icon }}{% else %}fas fa-{{ child.icon }}{% endif %}"></i>
                     <span class="nav-item-text">{{ child.title }}</span>
                 </a>
                 {% endfor %}
@@ -4094,7 +4094,7 @@
             {% else %}
             <!-- Regular nav item -->
             <a href="/menu/{{ page.slug }}" class="nav-item">
-                <i class="fas fa-{{ page.icon }}"></i>
+                <i class="{% if ' ' in page.icon %}{{ page.icon }}{% else %}fas fa-{{ page.icon }}{% endif %}"></i>
                 <span class="nav-item-text">{{ page.title }}</span>
             </a>
             {% endif %}

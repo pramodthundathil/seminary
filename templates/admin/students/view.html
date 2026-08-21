@@ -589,6 +589,143 @@
         color: #0f172a;
         border-color: #94a3b8;
     }
+
+    /* Horizontal Actions Bar */
+    .student-actions-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px 20px;
+        margin-bottom: 24px;
+        box-shadow: var(--card-shadow-sm);
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .actions-group-left, .actions-group-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+        text-decoration: none !important;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: transparent;
+    }
+
+    .action-btn i {
+        font-size: 0.9rem;
+    }
+
+    .action-btn-edit {
+        background-color: #f5f3ff;
+        color: #6d28d9;
+        border: 1px solid #ddd6fe;
+    }
+
+    .action-btn-edit:hover {
+        background-color: #ede9fe;
+        color: #5b21b6;
+    }
+
+    .action-btn-approve {
+        background-color: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .action-btn-approve:hover {
+        background-color: #dcfce7;
+        color: #14532d;
+    }
+
+    .action-btn-revoke {
+        background-color: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
+    .action-btn-revoke:hover {
+        background-color: #fef3c7;
+        color: #78350f;
+    }
+
+    .action-btn-suspend {
+        background-color: #fff5f5;
+        color: #b91c1c;
+        border: 1px solid #fca5a5;
+    }
+
+    .action-btn-suspend:hover {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .action-btn-grant {
+        background-color: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #86efac;
+    }
+
+    .action-btn-grant:hover {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .action-btn-danger {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecdd3;
+    }
+
+    .action-btn-danger:hover {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .action-btn-secondary {
+        background-color: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+    }
+
+    .action-btn-secondary:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+
+    .action-btn-scorecard {
+        background-color: #ecfeff;
+        color: #0891b2;
+        border: 1px solid #c5f6fa;
+    }
+
+    .action-btn-scorecard:hover {
+        background-color: #cffafe;
+        color: #0e7490;
+    }
+
+    .transition-icon {
+        transition: transform 0.25s ease;
+    }
+    .card-header[aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
 </style>
 
 <div class="view-content-wrapper">
@@ -610,15 +747,9 @@
     <!-- Top Action/Title Row -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h3 class="font-weight-extrabold text-dark mb-1" style="font-weight: 800; letter-spacing: -0.02em;">Student Profile Management</h3>
-                    <p class="text-muted mb-0">Review comprehensive registration details, personal profiles, course syllabi, exam reports, and fee collection states.</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{% url 'student_edit' student.id %}" class="btn-custom btn-custom-primary text-white" style="text-decoration: none;"><i class="fas fa-edit"></i> Edit Profile</a>
-                    <a href="{% url 'student_list' %}" class="back-btn-custom"><i class="fas fa-arrow-left"></i> Back to List</a>
-                </div>
+            <div>
+                <h3 class="font-weight-extrabold text-dark mb-1" style="font-weight: 800; letter-spacing: -0.02em;">Student Profile Management</h3>
+                <p class="text-muted mb-0">Review comprehensive registration details, personal profiles, course syllabi, exam reports, and fee collection states.</p>
             </div>
         </div>
     </div>
@@ -676,10 +807,132 @@
         </div>
     </div>
 
+    <!-- Student Actions Bar -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="student-actions-bar">
+                <div class="actions-group-left">
+                    <!-- Edit Profile -->
+                    <a href="{% url 'student_edit' student.id %}" class="action-btn action-btn-edit">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    
+                    <!-- View/Download Score Card -->
+                    <a href="#" onclick="downloadScoreCard(event, this)" class="action-btn action-btn-scorecard">
+                        <i class="fas fa-file-pdf"></i> Download Score Card
+                    </a>
+                    
+                    <!-- Application Status Approve/Disapprove Action -->
+                    {% if not student.status %}
+                    <form action="{% url 'student_approve_action' student.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn action-btn-approve">
+                            <i class="fas fa-check-circle"></i> Approve Registration
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'student_disapprove_action' student.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn action-btn-revoke">
+                            <i class="fas fa-times-circle"></i> Revoke Approval
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Portal Access Suspension/Activation Action -->
+                    {% if student.active %}
+                    <form action="{% url 'student_deactivate_action' student.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn action-btn-suspend">
+                            <i class="fas fa-user-slash"></i> Suspend Access
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'student_activate_action' student.id %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn action-btn-grant">
+                            <i class="fas fa-user-check"></i> Grant Access
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                
+                <div class="actions-group-right">
+                    <!-- Date Created Info -->
+                    <span class="text-muted small d-none d-sm-inline-block me-2" style="font-weight: 500;">
+                        <i class="far fa-calendar-alt"></i> Created: {{ student.created_at|date:"Y-m-d" }}
+                    </span>
+                    
+                    <!-- Delete Profile Action -->
+                    <button onclick="deleteStudent({{ student.id }})" class="action-btn action-btn-danger">
+                        <i class="fas fa-trash-alt"></i> Delete Record
+                    </button>
+                    
+                    <!-- Back Link -->
+                    <a href="{% url 'student_list' %}" class="action-btn action-btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collapsible Academic & Personal References -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="profile-card mb-0" style="border-radius: 16px;">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center gap-2" style="cursor: pointer; padding: 14px 20px;" data-bs-toggle="collapse" data-bs-target="#referencesCollapse" aria-expanded="false" aria-controls="referencesCollapse">
+                    <h5 class="mb-0 font-weight-bold text-secondary" style="font-size: 0.95rem;">
+                        <i class="fas fa-address-book text-muted me-2"></i> Academic & Personal References
+                    </h5>
+                    <i class="fas fa-chevron-down text-muted transition-icon" id="refChevron"></i>
+                </div>
+                <div class="collapse" id="referencesCollapse">
+                    <div class="card-body p-4" style="background-color: #ffffff;">
+                        <div class="row">
+                            {% if student.reference_name1 %}
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; height: 100%;">
+                                    <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name1 }}</h6>
+                                    <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email1 }}</span>
+                                    <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone1 }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if student.reference_name2 %}
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; height: 100%;">
+                                    <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name2 }}</h6>
+                                    <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email2 }}</span>
+                                    <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone2 }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if student.reference_name3 %}
+                            <div class="col-md-4">
+                                <div class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; height: 100%;">
+                                    <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name3 }}</h6>
+                                    <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email3 }}</span>
+                                    <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone3 }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if not student.reference_name1 and not student.reference_name2 and not student.reference_name3 %}
+                            <div class="col-12 text-muted text-center py-2" style="font-size: 0.88rem;">
+                                <i class="fas fa-user-friends d-block mb-2 text-muted" style="font-size: 1.8rem; opacity: 0.5;"></i> No personal references listed.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Grid Dashboard Area -->
     <div class="row">
         <!-- Left Panel: Navigation Tabs & Tab Content Panels -->
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <ul class="nav nav-tabs student-profile-tabs" id="studentTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true">
@@ -1066,7 +1319,12 @@
 
                 <!-- Tab: Marks -->
                 <div class="tab-pane fade" id="marks" role="tabpanel" aria-labelledby="marks-tab">
-                    <h6 class="section-title-modern mb-4">Exam Results & Academic Transcripts</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="section-title-modern mb-0">Exam Results & Academic Transcripts</h6>
+                        <a href="#" onclick="downloadScoreCard(event, this)" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2" style="border-radius: 8px; padding: 6px 16px; font-weight: 600;">
+                            <i class="fas fa-file-pdf"></i> Download Student Score Card
+                        </a>
+                    </div>
                     {% if exams %}
                     <div class="table-responsive premium-table mb-5">
                         <table class="table mb-0">
@@ -1131,7 +1389,7 @@
                             <tbody>
                                 {% for sa in assignments %}
                                 <tr>
-                                    <td><span class="font-weight-bold text-dark">{{ sa.assignment.title|default:"Class Homework / Term Paper" }}</span></td>
+                                    <td><span class="font-weight-bold text-dark">{{ sa.assignment.assignment_name|default:"Class Homework / Term Paper" }}</span></td>
                                     <td>{{ sa.submitted_on|default:"Not Submitted Yet" }}</td>
                                     <td>{{ sa.assignment.total_score|default:"--" }}</td>
                                     <td>
@@ -1333,120 +1591,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Right Panel: Actions Sidebar & References -->
-        <div class="col-lg-4">
-            <!-- Sidebar: Account Status & Actions -->
-            <div class="profile-card">
-                <div class="card-header bg-dark text-white d-flex align-items-center gap-2">
-                    <h5 class="mb-0 font-weight-bold" style="font-size: 1rem;"><i class="fas fa-sliders-h me-1 text-cyan" style="color: var(--theme-cyan);"></i> Registration Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3 p-3 bg-light rounded-4 border" style="border-radius: 12px;">
-                        <label class="form-label-custom mb-2">Application Approval Status</label>
-                        {% if student.status %}
-                        <span class="pill-badge pill-badge-approved py-2 w-100 justify-content-center" style="font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Approved Application</span>
-                        {% else %}
-                        <span class="pill-badge pill-badge-pending py-2 w-100 justify-content-center" style="font-size: 0.85rem;"><i class="fas fa-clock"></i> Pending Review</span>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3 p-3 bg-light rounded-4 border" style="border-radius: 12px;">
-                        <label class="form-label-custom mb-2">Portal Access Security</label>
-                        {% if student.active %}
-                        <span class="pill-badge pill-badge-active py-2 w-100 justify-content-center" style="font-size: 0.85rem;"><i class="fas fa-unlock"></i> Access Enabled</span>
-                        {% else %}
-                        <span class="pill-badge pill-badge-inactive py-2 w-100 justify-content-center" style="font-size: 0.85rem;"><i class="fas fa-lock"></i> Access Suspended</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-4 text-center">
-                        <span class="text-muted small d-block">Record Date Created:</span>
-                        <span class="text-dark font-weight-bold" style="font-size: 0.9rem;">{{ student.created_at }}</span>
-                    </div>
-
-                    <hr class="my-3" style="opacity: 0.1;">
-
-                    <div class="d-flex flex-column gap-2">
-                        <!-- Application Status Approve/Disapprove Action -->
-                        {% if not student.status %}
-                        <form action="{% url 'student_approve_action' student.id %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-custom btn-custom-success w-100 py-3" style="font-size: 0.92rem;">
-                                <i class="fas fa-check-circle"></i> Approve Registration
-                            </button>
-                        </form>
-                        {% else %}
-                        <form action="{% url 'student_disapprove_action' student.id %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-custom btn-custom-warning w-100 py-3" style="font-size: 0.92rem;">
-                                <i class="fas fa-times-circle"></i> Revoke Registration Approval
-                            </button>
-                        </form>
-                        {% endif %}
-
-                        <!-- Portal Access Suspension/Activation Action -->
-                        {% if student.active %}
-                        <form action="{% url 'student_deactivate_action' student.id %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-custom btn-custom-secondary w-100 py-2" style="font-size: 0.88rem; border-color: #fca5a5; color: #b91c1c; background-color: #fff5f5;">
-                                <i class="fas fa-user-slash"></i> Suspend Portal Access
-                            </button>
-                        </form>
-                        {% else %}
-                        <form action="{% url 'student_activate_action' student.id %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-custom btn-custom-secondary w-100 py-2" style="font-size: 0.88rem; border-color: #86efac; color: #15803d; background-color: #f0fdf4;">
-                                <i class="fas fa-user-check"></i> Grant Portal Access
-                            </button>
-                        </form>
-                        {% endif %}
-
-                        <!-- Delete profile Action -->
-                        <button onclick="deleteStudent({{ student.id }})" class="btn-custom btn-custom-danger w-100 py-3 mt-3" style="font-size: 0.9rem;">
-                            <i class="fas fa-trash-alt"></i> Delete Student Record
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sidebar: Reference Contacts -->
-            <div class="profile-card">
-                <div class="card-header bg-light d-flex align-items-center gap-2">
-                    <h5 class="mb-0 font-weight-bold text-secondary" style="font-size: 0.95rem;"><i class="fas fa-address-book text-muted"></i> Academic & Personal References</h5>
-                </div>
-                <div class="card-body p-3">
-                    <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
-                        {% if student.reference_name1 %}
-                        <li class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; transition: var(--transition-smooth);">
-                            <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name1 }}</h6>
-                            <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email1 }}</span>
-                            <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone1 }}</span>
-                        </li>
-                        {% endif %}
-                        {% if student.reference_name2 %}
-                        <li class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; transition: var(--transition-smooth);">
-                            <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name2 }}</h6>
-                            <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email2 }}</span>
-                            <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone2 }}</span>
-                        </li>
-                        {% endif %}
-                        {% if student.reference_name3 %}
-                        <li class="p-3 bg-light rounded-4 border" style="border-radius: 12px !important; transition: var(--transition-smooth);">
-                            <h6 class="mb-2 font-weight-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-user me-2 text-indigo" style="color: var(--theme-indigo);"></i> {{ student.reference_name3 }}</h6>
-                            <span class="text-muted d-block small mb-1"><i class="fas fa-envelope me-2"></i> {{ student.reference_email3 }}</span>
-                            <span class="text-muted d-block small"><i class="fas fa-phone me-2"></i> {{ student.reference_phone3 }}</span>
-                        </li>
-                        {% endif %}
-                        {% if not student.reference_name1 and not student.reference_name2 and not student.reference_name3 %}
-                        <li class="text-muted text-center py-3" style="font-size: 0.88rem;">
-                            <i class="fas fa-user-friends d-block mb-2 text-muted" style="font-size: 1.8rem; opacity: 0.5;"></i> No personal references listed.
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -1468,6 +1612,52 @@
                     }
                 });
         }
+    }
+
+    let isGeneratingPDF = false;
+    function downloadScoreCard(event, element) {
+        event.preventDefault();
+        if (isGeneratingPDF) return;
+        isGeneratingPDF = true;
+        
+        const originalContent = element.innerHTML;
+        element.style.pointerEvents = 'none';
+        element.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating PDF...';
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '-9999px';
+        iframe.style.width = '1200px';
+        iframe.style.height = '1600px';
+        iframe.src = "{% url 'admin_student_score_card' student.id %}";
+        document.body.appendChild(iframe);
+        
+        const messageHandler = function(e) {
+            if (e.data && e.data.type === 'PDF_DOWNLOAD_COMPLETE') {
+                element.style.pointerEvents = 'auto';
+                element.innerHTML = originalContent;
+                isGeneratingPDF = false;
+                
+                window.removeEventListener('message', messageHandler);
+                document.body.removeChild(iframe);
+            }
+        };
+        
+        window.addEventListener('message', messageHandler);
+        
+        // Timeout backup (30s)
+        setTimeout(() => {
+            if (isGeneratingPDF) {
+                element.style.pointerEvents = 'auto';
+                element.innerHTML = originalContent;
+                isGeneratingPDF = false;
+                window.removeEventListener('message', messageHandler);
+                if (iframe.parentNode) {
+                    document.body.removeChild(iframe);
+                }
+            }
+        }, 30000);
     }
 </script>
 {% endblock %}

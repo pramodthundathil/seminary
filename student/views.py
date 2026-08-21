@@ -1082,10 +1082,11 @@ def student_score_card(request):
     is_church_user = False
 
     # ---- Process Exams ----
-    # Show exams that are ENDED (completed).
+    # Show exams that are ENDED (completed), excluding missed ones.
     completed_exams = (
         StudentsExams.objects
-        .filter(student=student, is_exam_ended=True)
+        .filter(student=student, is_exam_ended=True, deleted_at__isnull=True)
+        .exclude(is_exam_started=False, show_on_score=0)
         .select_related("exam", "exam__subject", "course", "subject", "student", "student__course_applied")
         .order_by('-end_time')
     )
@@ -1116,7 +1117,7 @@ def student_score_card(request):
         obtained_marks = highest_score
         
         # Calculate Percentage
-        percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
+        percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
         # Determine Grade
         if percentage >= 90: grade = "A+"
@@ -1160,10 +1161,10 @@ def student_score_card(request):
         })
 
     # ---- Process Assignments ----
-    # Ensure totals are calculated correctly
+    # Ensure totals are calculated correctly, filtering by submitted, marked and not deleted
     student_assignments = (
         StudentsAssignment.objects
-        .filter(student=student, submitted_on__isnull=False)  # Filter by submitted_on query
+        .filter(student=student, submitted_on__isnull=False, total_marks__isnull=False, deleted_at__isnull=True)  # Filter by submitted and marked query
         .order_by('-submitted_on')
         .select_related("assignment", "assignment__subject", "student", "student__course_applied")
     )

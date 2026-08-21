@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -855,11 +855,12 @@ def news_datatable(request):
     for news in news_query:
         status_badge = f'<span class="badge-enabled">Active</span>' if news.status == 1 else f'<span class="badge-disabled">Inactive</span>'
         
-        media_preview = ''
-        if news.media:
-            media_preview = f'<img src="{news.media.path}" alt="thumbnail" class="table-thumbnail">'
-        else:
-            media_preview = '<div class="no-image">No Image</div>'
+        media_preview = '<div class="no-image">No Image</div>'
+        try:
+            if news.media:
+                media_preview = f'<img src="{news.media.path}" alt="thumbnail" class="table-thumbnail">'
+        except Exception:
+            pass
         
         actions = f'''
             <div class="btn-group" role="group">
@@ -980,10 +981,16 @@ def news_get(request, news_id):
             'browser_title': news.browser_title,
             'meta_description': news.meta_description,
             'meta_keywords': news.meta_keywords,
-            'media_id': news.media.id if news.media else None,
-            'media_url': news.media.path if news.media else None,
+            'media_id': None,
+            'media_url': None,
             'status': news.status
         }
+        try:
+            if news.media:
+                data['media_id'] = news.media.id
+                data['media_url'] = news.media.path
+        except Exception:
+            pass
         
         return JsonResponse({
             'success': True,
@@ -1411,16 +1418,17 @@ def photo_datatable(request):
     # Prepare data
     data = []
     for photo in photos:
-        # Preview
-        if photo.media and photo.media.file_path:
-            preview = f'''
-                <img src="{photo.media.file_path.url}" 
-                     class="photo-preview-img" 
-                     alt="{photo.alt_text or photo.title or 'Photo'}"
-                     onclick="viewPhoto({photo.id})">
-            '''
-        else:
-            preview = '<div class="no-preview">No Image</div>'
+        preview = '<div class="no-preview">No Image</div>'
+        try:
+            if photo.media and photo.media.file_path:
+                preview = f'''
+                    <img src="{photo.media.file_path.url}" 
+                         class="photo-preview-img" 
+                         alt="{photo.alt_text or photo.title or 'Photo'}"
+                         onclick="viewPhoto({photo.id})">
+                '''
+        except Exception:
+            pass
         
         # Info
         category_name = photo.categories.name if photo.categories else 'Uncategorized'
@@ -1585,18 +1593,21 @@ def photo_get(request, photo_id):
         
         # Get media library data
         media_data = {}
-        if photo.media:
-            media_data = {
-                'id': photo.media.id,
-                'file_path': photo.media.file_path.url if photo.media.file_path else '',
-                'file_name': photo.media.file_name,
-                'file_size': photo.media.file_size,
-                'file_type': photo.media.file_type,
-                'dimensions': photo.media.dimensions or '',
-                'media_type': photo.media.media_type,
-                'thumb_path': photo.media.thumb_file_path or (photo.media.file_path.url if photo.media.file_path else ''),
-                'slider_path': photo.media.slider_file_path or '',
-            }
+        try:
+            if photo.media:
+                media_data = {
+                    'id': photo.media.id,
+                    'file_path': photo.media.file_path.url if photo.media.file_path else '',
+                    'file_name': photo.media.file_name,
+                    'file_size': photo.media.file_size,
+                    'file_type': photo.media.file_type,
+                    'dimensions': photo.media.dimensions or '',
+                    'media_type': photo.media.media_type,
+                    'thumb_path': photo.media.thumb_file_path or (photo.media.file_path.url if photo.media.file_path else ''),
+                    'slider_path': photo.media.slider_file_path or '',
+                }
+        except Exception:
+            pass
         
         data = {
             'id': photo.id,
@@ -2298,15 +2309,13 @@ def course_datatable(request):
         data = []
         for course in courses:
             # Get media thumbnail
-            media_preview = ''
-            if course.media:
-                try:
+            media_preview = '<div class="course-thumb-placeholder"><i class="fas fa-graduation-cap"></i></div>'
+            try:
+                if course.media:
                     media_url = course.media.file_path.url
                     media_preview = f'<img src="{media_url}" class="course-thumb" alt="{course.course_name}">'
-                except:
-                    media_preview = '<div class="course-thumb-placeholder"><i class="fas fa-graduation-cap"></i></div>'
-            else:
-                media_preview = '<div class="course-thumb-placeholder"><i class="fas fa-graduation-cap"></i></div>'
+            except Exception:
+                pass
             
             # Status badge
             status_text = 'Active' if course.status == 1 else 'Inactive'
@@ -2428,15 +2437,15 @@ def course_get(request, course_id):
         
         # Get media info
         media_data = None
-        if course.media:
-            try:
+        try:
+            if course.media:
                 media_data = {
                     'id': course.media.id,
                     'url': course.media.file_path.url,
                     'title': course.media.title or course.media.file_name
                 }
-            except:
-                pass
+        except Exception:
+            pass
         
         return JsonResponse({
             'success': True,
@@ -2634,7 +2643,7 @@ def student_datatable(request):
             # Student info - responsive
             # Photo preview - responsive
             if student.photo:
-                preview = f'<img src="{student.photo}" class="student-photo rounded-circle" alt="{full_name}" style="width: 40px; height: 40px; object-fit: cover;">'
+                preview = f'<img src="/media/{student.photo}" class="student-photo rounded-circle" alt="{full_name}" style="width: 40px; height: 40px; object-fit: cover;">'
             else:
                 first_initial = student.first_name[0].upper() if student.first_name else ''
                 # last_initial = student.last_name[0].upper() if student.last_name else ''
@@ -2925,11 +2934,13 @@ def student_detail(request, student_id):
         deleted_at__isnull=True
     ).select_related('subject')
     
-    # 2. Exams & Marks
-    exams = StudentsExams.objects.filter(
-        student=student, 
-        deleted_at__isnull=True
-    ).select_related('exam', 'subject', 'course')
+    # 2. Exams & Marks (only display completed/attended exams, excluding missed ones)
+    exams = (
+        StudentsExams.objects
+        .filter(student=student, is_exam_ended=True, deleted_at__isnull=True)
+        .exclude(is_exam_started=False, show_on_score=0)
+        .select_related('exam', 'subject', 'course')
+    )
     
     for se in exams:
         total_obtained = 0
@@ -2943,6 +2954,7 @@ def student_detail(request, student_id):
                 for ans in obj_ans:
                     if ans.mark:
                         total_obtained += float(ans.mark)
+
                 # Possible objective marks
                 total_possible += float(exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0)
                 
@@ -2954,6 +2966,9 @@ def student_detail(request, student_id):
                         total_obtained += float(ans.mark)
                 # Possible descriptive marks
                 total_possible += float(exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0)
+                
+            if exam.exam_type == 'objective' and total_possible == 0:
+                total_possible = 50
         
         se.total_obtained = total_obtained
         se.total_possible = total_possible
@@ -2962,10 +2977,11 @@ def student_detail(request, student_id):
         else:
             se.percentage = 0.0
 
-    # 3. Assignments
+    # 3. Assignments (only display mark given assignments)
     assignments = StudentsAssignment.objects.filter(
         student=student,
-        deleted_at__isnull=True
+        deleted_at__isnull=True,
+        total_marks__isnull=False
     ).select_related('assignment')
     
     # 4. Payments/Fees structure
@@ -2999,6 +3015,232 @@ def student_detail(request, student_id):
         'balance_due': balance_due,
     }
     return render(request, 'admin/students/view.html', context)
+
+
+@login_required
+def admin_student_score_card(request, student_id):
+    """View to show student scorecard inside admin panel, for PDF generation/printing"""
+    from home.models import Students, StudentsExams, StudentsAssignment
+    from django.db.models import Sum, Max
+    from django.conf import settings
+    
+    student = get_object_or_404(Students, id=student_id)
+    is_church_user = False
+
+    # ---- Process Exams ----
+    completed_exams = (
+        StudentsExams.objects
+        .filter(student=student, is_exam_ended=True, deleted_at__isnull=True)
+        .exclude(is_exam_started=False, show_on_score=0)
+        .select_related("exam", "exam__subject", "course", "subject", "student", "student__course_applied")
+        .order_by('-end_time')
+    )
+
+    exam_data = []
+    seen_exams = set()
+    
+    for se in completed_exams:
+        exam = se.exam
+        if not exam:
+            continue
+        if exam.id in seen_exams:
+            continue
+        seen_exams.add(exam.id)
+        
+        # Calculate Total Marks for this Exam
+        total_obj_marks = exam.objective_questions.aggregate(total=Sum('marks'))['total'] or 0
+        total_desc_marks = exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
+        total_marks = total_obj_marks + total_desc_marks
+        if exam.exam_type == 'objective' and total_marks == 0:
+            total_marks = 50
+        
+        # Calculate the highest score among all attempts for this exam dynamically
+        from home.models import ObjectiveAnswers, DescriptiveAnswers
+        attempts = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_exam_ended=True,
+            deleted_at__isnull=True
+        )
+        highest_score = 0
+        for attempt in attempts:
+            attempt_obtained = 0
+            if exam.exam_type == 'objective' or exam.exam_type == 'both':
+                obj_ans = ObjectiveAnswers.objects.filter(assignment=attempt)
+                for ans in obj_ans:
+                    if ans.mark:
+                        attempt_obtained += float(ans.mark)
+            if exam.exam_type == 'descriptive' or exam.exam_type == 'both':
+                desc_ans = DescriptiveAnswers.objects.filter(assignment=attempt)
+                for ans in desc_ans:
+                    if ans.mark:
+                        attempt_obtained += float(ans.mark)
+            if attempt_obtained > highest_score:
+                highest_score = attempt_obtained
+                
+        obtained_marks = highest_score
+        
+        # Calculate Percentage
+        percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
+        
+        # Determine Grade
+        if percentage >= 90: grade = "A+"
+        elif percentage >= 80: grade = "A"
+        elif percentage >= 70: grade = "B"
+        elif percentage >= 60: grade = "C"
+        elif percentage >= 50: grade = "D"
+        else: grade = "F"
+
+        # Check for the latest active retest attempt (not completed)
+        latest_retest = StudentsExams.objects.filter(
+            student=student,
+            exam=exam,
+            is_retest=True,
+            is_exam_ended=False,
+            deleted_at__isnull=True
+        ).order_by('-created_at').first()
+        
+        retest_status = latest_retest.retest_status if latest_retest else 'none'
+        retest_fee = latest_retest.retest_fee if latest_retest else None
+        retest_paid = latest_retest.retest_paid if latest_retest else False
+        retest_id = latest_retest.id if latest_retest else se.id
+
+        # Determine Course Name & Subject Name
+        course_name = se.course.course_name if se.course else (student.course_applied.course_name if student.course_applied else "-")
+        subject_name = se.subject.subject_name if se.subject else (exam.subject.subject_name if (exam and exam.subject) else "-")
+
+        exam_data.append({
+            "id": retest_id,
+            "code": exam.code,
+            "exam_name": exam.exam_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
+            "total_score": round(total_marks),
+            "score": round(obtained_marks),
+            "percentage": round(percentage, 2),
+            "grade": grade,
+            "retest_status": retest_status,
+            "retest_fee": str(retest_fee) if retest_fee else None,
+            "retest_paid": retest_paid,
+        })
+
+    # ---- Process Assignments ----
+    student_assignments = (
+        StudentsAssignment.objects
+        .filter(student=student, submitted_on__isnull=False, total_marks__isnull=False, deleted_at__isnull=True)
+        .order_by('-submitted_on')
+        .select_related("assignment", "assignment__subject", "student", "student__course_applied")
+    )
+    
+    assignment_data = []
+
+    for sa in student_assignments:
+        assignment = sa.assignment
+        total = assignment.total_score or 0
+        obtained = sa.total_marks or 0
+        
+        percentage = (obtained / total * 100) if total > 0 else 0
+        
+        if percentage >= 90: grade = "A+"
+        elif percentage >= 80: grade = "A"
+        elif percentage >= 70: grade = "B"
+        elif percentage >= 60: grade = "C"
+        elif percentage >= 50: grade = "D"
+        else: grade = "F"
+        
+        course_name = sa.student.course_applied.course_name if (sa.student and sa.student.course_applied) else "-"
+        subject_name = assignment.subject.subject_name if (assignment and assignment.subject) else "-"
+
+        assignment_data.append({
+            "code": assignment.code,
+            "assignment_name": assignment.assignment_name,
+            "course_name": course_name,
+            "subject_name": subject_name,
+            "total_score": total,
+            "score": obtained,
+            "percentage": round(percentage, 2),
+            "grade": grade
+        })
+
+    # ---- Final Score Calculation ----
+    total_exam_max = sum(item['total_score'] for item in exam_data)
+    total_exam_obtained = sum(item['score'] for item in exam_data)
+    exam_percentage = (total_exam_obtained / total_exam_max * 100) if total_exam_max > 0 else 0
+    
+    if exam_percentage >= 90: exam_grade = "A+"
+    elif exam_percentage >= 80: exam_grade = "A"
+    elif exam_percentage >= 70: exam_grade = "B"
+    elif exam_percentage >= 60: exam_grade = "C"
+    elif exam_percentage >= 50: exam_grade = "D"
+    else: exam_grade = "F"
+
+    total_assign_max = sum(item['total_score'] for item in assignment_data)
+    total_assign_obtained = sum(item['score'] for item in assignment_data)
+    assign_percentage = (total_assign_obtained / total_assign_max * 100) if total_assign_max > 0 else 0
+
+    if assign_percentage >= 90: assign_grade = "A+"
+    elif assign_percentage >= 80: assign_grade = "A"
+    elif assign_percentage >= 70: assign_grade = "B"
+    elif assign_percentage >= 60: assign_grade = "C"
+    elif assign_percentage >= 50: assign_grade = "D"
+    else: assign_grade = "F"
+
+    grand_total_max = total_exam_max + total_assign_max
+    grand_total_obtained = total_exam_obtained + total_assign_obtained
+    grand_percentage = (grand_total_obtained / grand_total_max * 100) if grand_total_max > 0 else 0
+    
+    if grand_percentage >= 90: grand_grade = "A+"
+    elif grand_percentage >= 80: grand_grade = "A"
+    elif grand_percentage >= 70: grand_grade = "B"
+    elif grand_percentage >= 60: grand_grade = "C"
+    elif grand_percentage >= 50: grand_grade = "D"
+    else: grand_grade = "F"
+
+    common_timezones = [
+        'UTC',
+        'Asia/Kolkata',
+        'Asia/Dubai',
+        'Asia/Singapore',
+        'Europe/London',
+        'America/New_York',
+        'America/Chicago',
+        'America/Denver',
+        'America/Los_Angeles',
+        'Africa/Nairobi',
+        'Australia/Sydney'
+    ]
+
+    context = {
+        "student": student,
+        "student_exams": exam_data,
+        "assignment_mark": assignment_data,
+        "timezones": common_timezones,
+        "is_church_user": is_church_user,
+        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
+        "is_admin_view": True,
+        "role": "student",
+        
+        # Summary Data
+        "exam_summary": {
+            "total": round(total_exam_max),
+            "score": round(total_exam_obtained),
+            "percentage": round(exam_percentage, 2),
+            "grade": exam_grade
+        },
+        "assignment_summary": {
+            "total": round(total_assign_max),
+            "score": round(total_assign_obtained),
+            "percentage": round(assign_percentage, 2),
+            "grade": assign_grade
+        },
+        "grand_summary": {
+            "total": round(grand_total_max),
+            "score": round(grand_total_obtained),
+            "percentage": round(grand_percentage, 2),
+            "grade": grand_grade
+        }
+    }
+    return render(request, "student/score_card.html", context)
 
 
 @login_required
@@ -4522,9 +4764,25 @@ def exam_create(request):
                         answer_option_list = request.POST.getlist('answer_option[]')
                         answer_detail_list = request.POST.getlist('answer_detail[]')
                         
+                        valid_count = 0
+                        has_any_mark = False
+                        for i in range(len(question_texts)):
+                            if i < len(question_texts) and question_texts[i].strip():
+                                valid_count += 1
+                                q_mark = question_marks[i] if i < len(question_marks) else ""
+                                try:
+                                    if q_mark and float(q_mark) > 0:
+                                        has_any_mark = True
+                                except ValueError:
+                                    pass
+
+                        default_mark = 0.0
+                        if not has_any_mark and valid_count > 0:
+                            default_mark = 50.0 / valid_count
+
                         for i in range(len(question_texts)):
                             q_text = question_texts[i]
-                            q_mark = question_marks[i]
+                            q_mark = question_marks[i] if i < len(question_marks) else ""
                             
                             opt1 = option1_list[i] if i < len(option1_list) else ""
                             opt2 = option2_list[i] if i < len(option2_list) else ""
@@ -4535,6 +4793,15 @@ def exam_create(request):
                             
                             if not q_text:
                                 continue
+
+                            if not has_any_mark:
+                                final_mark = default_mark
+                            else:
+                                try:
+                                    final_mark = float(q_mark) if q_mark else 0.0
+                                except ValueError:
+                                    final_mark = 0.0
+
                             ObjectiveQuestions.objects.create(
                                 exam=exam,
                                 question=q_text,
@@ -4544,7 +4811,7 @@ def exam_create(request):
                                 option4=opt4,
                                 answer_option=ans_opt,
                                 answer=ans_detail,
-                                marks=float(q_mark) if q_mark else 0.0,
+                                marks=final_mark,
                                 created_at=timezone.now(),
                                 created_by=request.user,
                                 updated_by=request.user
@@ -4568,24 +4835,9 @@ def exam_create(request):
 
 @login_required
 def exam_view(request, exam_id):
-    """View exam details"""
-    exam = get_object_or_404(
-        Exams.objects.select_related('created_by', 'updated_by'),
-        id=exam_id,
-        deleted_at__isnull=True
-    )
-    
-    # Fetch questions
-    descriptive_questions = exam.descriptive_questions.all().order_by('id')
-    objective_questions = exam.objective_questions.all().order_by('id')
-
-    context = {
-        'exam': exam,
-        'descriptive_questions': descriptive_questions,
-        'objective_questions': objective_questions,
-        'page_title': 'View Exam'
-    }
-    return render(request, 'admin/exams/exam_view.html', context)
+    """View exam details redirects to edit page"""
+    exam = get_object_or_404(Exams, id=exam_id, deleted_at__isnull=True)
+    return redirect('exams_edit', exam_id=exam.id)
 
 @login_required
 def exam_edit(request, exam_id):
@@ -4649,10 +4901,26 @@ def exam_edit(request, exam_id):
                         answer_option_list = request.POST.getlist('answer_option[]')
                         answer_detail_list = request.POST.getlist('answer_detail[]')
                         
+                        valid_count = 0
+                        has_any_mark = False
+                        for i in range(len(question_texts)):
+                            if i < len(question_texts) and question_texts[i].strip():
+                                valid_count += 1
+                                q_mark = question_marks[i] if i < len(question_marks) else ""
+                                try:
+                                    if q_mark and float(q_mark) > 0:
+                                        has_any_mark = True
+                                except ValueError:
+                                    pass
+
+                        default_mark = 0.0
+                        if not has_any_mark and valid_count > 0:
+                            default_mark = 50.0 / valid_count
+
                         for i in range(len(question_texts)):
                             q_id = question_ids[i] if i < len(question_ids) else ""
                             q_text = question_texts[i]
-                            q_mark = question_marks[i]
+                            q_mark = question_marks[i] if i < len(question_marks) else ""
                             
                             opt1 = option1_list[i] if i < len(option1_list) else ""
                             opt2 = option2_list[i] if i < len(option2_list) else ""
@@ -4663,6 +4931,14 @@ def exam_edit(request, exam_id):
                             
                             if not q_text:
                                 continue
+
+                            if not has_any_mark:
+                                final_mark = default_mark
+                            else:
+                                try:
+                                    final_mark = float(q_mark) if q_mark else 0.0
+                                except ValueError:
+                                    final_mark = 0.0
                                 
                             if q_id and q_id != "":
                                 ObjectiveQuestions.objects.filter(id=q_id, exam=exam).update(
@@ -4673,7 +4949,7 @@ def exam_edit(request, exam_id):
                                     option4=opt4,
                                     answer_option=ans_opt,
                                     answer=ans_detail,
-                                    marks=float(q_mark) if q_mark else 0.0,
+                                    marks=final_mark,
                                     updated_at=timezone.now(),
                                     updated_by=request.user
                                 )
@@ -4688,7 +4964,7 @@ def exam_edit(request, exam_id):
                                     option4=opt4,
                                     answer_option=ans_opt,
                                     answer=ans_detail,
-                                    marks=float(q_mark) if q_mark else 0.0,
+                                    marks=final_mark,
                                     created_at=timezone.now(),
                                     created_by=request.user,
                                     updated_by=request.user
@@ -7126,6 +7402,9 @@ def student_exams_datatable(request):
                 # Possible
                 total_possible += item.exam.descriptive_questions.aggregate(total=Sum('mark'))['total'] or 0
                 
+            if item.exam.exam_type == 'objective' and total_possible == 0:
+                total_possible = 50
+                
             marks_display = f'{total_obtained}/{total_possible}'
 
         data.append({
@@ -8009,6 +8288,10 @@ def media_library_upload_json(request):
             else:
                 media.media_type = 'file'
                 
+            # Set required thumbnail and slider paths
+            media.thumb_file_path = media.file_path.url if hasattr(media.file_path, 'url') else ''
+            media.slider_file_path = ''
+            
             media.save()
             
             # Return the new media object data

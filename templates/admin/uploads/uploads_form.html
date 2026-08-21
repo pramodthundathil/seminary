@@ -574,15 +574,19 @@
                 <div class="media-thumb"><img src="${item.thumb}" alt="thumb"></div>
                 <div class="media-name">${item.title || item.name}</div>
             `;
-            el.onclick = () => selectItem(item);
+            el.onclick = (e) => selectItem(item, e.currentTarget);
             grid.appendChild(el);
         });
     }
 
-    function selectItem(item) {
+    function selectItem(item, element) {
         selectedItem = item;
         document.querySelectorAll('.media-item').forEach(el => el.classList.remove('selected'));
-        event.currentTarget.classList.add('selected');
+        if (element) {
+            element.classList.add('selected');
+        } else if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add('selected');
+        }
         updateSelectedInfo();
     }
 

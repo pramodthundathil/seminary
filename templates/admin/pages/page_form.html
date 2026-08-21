@@ -78,9 +78,9 @@
                                 onclick="openMediaLibrary()">
                                 <i class="fas fa-image"></i> Select Image
                             </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="clearMedia()"
-                                style="{% if not page.media %}display:none;{% endif %} width: 100%;">
-                                <i class="fas fa-trash"></i> Remove Image
+                            <button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="clearMedia(this)"
+                                style="{% if not page.media_lib %}display: none;{% endif %}">
+                                <i class="fas fa-trash-alt"></i> Remove Image
                             </button>
                         </div>
                     </div>
@@ -174,9 +174,9 @@
         </div>
         <div class="modal-body" style="padding: 0;">
             <div class="media-tabs">
-                <button type="button" class="media-tab active" onclick="switchMediaTab('library')">Media
+                <button type="button" id="libraryTabBtn" class="media-tab active" onclick="switchMediaTab('library')">Media
                     Library</button>
-                <button type="button" class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
+                <button type="button" id="uploadTabBtn" class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
             </div>
 
             <!-- Library Tab -->
@@ -431,7 +431,10 @@
 
     function switchMediaTab(tabName) {
         document.querySelectorAll('.media-tab').forEach(tab => tab.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        const activeTabBtn = document.getElementById(tabName + 'TabBtn');
+        if (activeTabBtn) {
+            activeTabBtn.classList.add('active');
+        }
         document.querySelectorAll('.media-tab-content').forEach(content => content.classList.remove('active'));
         document.getElementById(tabName + 'Tab').classList.add('active');
     }
@@ -468,7 +471,7 @@
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = `media-item ${selectedMediaId === item.id ? 'selected' : ''}`;
-            div.onclick = () => selectMedia(item.id, item.url, item.name);
+            div.onclick = (e) => selectMedia(item.id, item.url, item.name, e.currentTarget);
             div.innerHTML = `
                 <div class="media-thumb"><img src="${item.thumb}" alt="${item.name}"></div>
                 <div class="media-name">${item.name}</div>
@@ -477,11 +480,15 @@
         });
     }
 
-    function selectMedia(id, url, name) {
+    function selectMedia(id, url, name, element) {
         selectedMediaId = id;
         selectedMediaUrl = url;
         document.querySelectorAll('.media-item').forEach(item => item.classList.remove('selected'));
-        event.currentTarget.classList.add('selected');
+        if (element) {
+            element.classList.add('selected');
+        } else if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add('selected');
+        }
         document.getElementById('selectedMediaInfo').style.display = 'block';
         document.getElementById('selectedMediaName').textContent = name;
         document.getElementById('useMediaBtn').disabled = false;
@@ -499,10 +506,15 @@
         closeMediaLibrary();
     }
 
-    function clearMedia() {
+    function clearMedia(button) {
         document.getElementById('id_media_lib').value = '';
         document.getElementById('pageMediaPreview').innerHTML = '<p class="text-muted mb-0">No image selected</p>';
-        event.currentTarget.style.display = 'none';
+        if (button) {
+            button.style.display = 'none';
+        } else {
+            const removeBtn = document.querySelector('button[onclick^="clearMedia"]');
+            if (removeBtn) removeBtn.style.display = 'none';
+        }
     }
 
     function updatePagination(hasNext, nextPage) {

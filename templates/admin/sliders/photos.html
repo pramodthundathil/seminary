@@ -132,8 +132,8 @@
         </div>
         <div class="modal-body" style="padding: 0;">
             <div class="media-tabs">
-                <button class="media-tab active" onclick="switchMediaTab('library')">Media Library</button>
-                <button class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
+                <button id="libraryTabBtn" class="media-tab active" onclick="switchMediaTab('library')">Media Library</button>
+                <button id="uploadTabBtn" class="media-tab" onclick="switchMediaTab('upload')">Upload New</button>
             </div>
 
             <!-- Library Tab -->
@@ -329,7 +329,10 @@
     function switchMediaTab(tabName) {
         // Update tabs
         document.querySelectorAll('.media-tab').forEach(tab => tab.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        const activeTabBtn = document.getElementById(tabName + 'TabBtn');
+        if (activeTabBtn) {
+            activeTabBtn.classList.add('active');
+        }
 
         // Update content
         document.querySelectorAll('.media-tab-content').forEach(content => content.classList.remove('active'));
@@ -371,7 +374,7 @@
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = `media-item ${selectedMediaId === item.id ? 'selected' : ''}`;
-            div.onclick = () => selectMedia(item.id, item.url, item.name);
+            div.onclick = (e) => selectMedia(item.id, item.url, item.name, e.currentTarget);
 
             div.innerHTML = `
                 <div class="media-thumb">
@@ -383,13 +386,17 @@
         });
     }
 
-    function selectMedia(id, url, name) {
+    function selectMedia(id, url, name, element) {
         selectedMediaId = id;
         selectedMediaUrl = url;
 
         // Update UI selection
         document.querySelectorAll('.media-item').forEach(item => item.classList.remove('selected'));
-        event.currentTarget.classList.add('selected');
+        if (element) {
+            element.classList.add('selected');
+        } else if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add('selected');
+        }
 
         // Update footer info
         document.getElementById('selectedMediaInfo').style.display = 'block';
