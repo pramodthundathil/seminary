@@ -5,14 +5,14 @@
 
 <div id="trinity-chatbot-root">
     <!-- Floating Trigger Launcher -->
-    <button id="trinity-chat-launcher" class="trinity-chat-launcher" aria-label="Open Trinity AI Assistant" title="Chat with Trinity AI">
+    <button id="trinity-chat-launcher" class="trinity-chat-launcher" aria-label="Open Trinity Representative" title="Chat with Trinity Representative">
         <div class="launcher-pulse"></div>
         <div class="launcher-avatar">
-            <img src="{% static 'img/Trinity_logo.png' %}" alt="Trinity AI" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712038.png'">
+            <img src="{% static 'img/Trinity_logo.png' %}" alt="Trinity Representative" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712038.png'">
             <span class="online-indicator"></span>
         </div>
         <div class="launcher-text">
-            <span class="launcher-title">Ask Trinity AI</span>
+            <span class="launcher-title">Ask Trinity Representative</span>
             <span class="launcher-subtitle">Courses, Admissions & FAQs</span>
         </div>
         <div class="launcher-close-icon">
@@ -30,9 +30,9 @@
                     <span class="status-pulse-dot"></span>
                 </div>
                 <div class="header-text-details">
-                    <h5 id="chat-header-title" class="header-title">Trinity AI Assistant</h5>
+                    <h5 id="chat-header-title" class="header-title">Trinity Representative</h5>
                     <p class="header-status">
-                        <span class="live-dot"></span> Available Now • Byteboot Powered
+                        <span class="live-dot"></span> Available Now
                     </p>
                 </div>
             </div>
@@ -82,7 +82,7 @@
                     <img src="{% static 'img/Trinity_logo.png' %}" alt="AI" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712038.png'">
                 </div>
                 <div class="msg-content-wrapper">
-                    <div class="msg-sender-name">Trinity AI Assistant</div>
+                    <div class="msg-sender-name">Trinity Representative</div>
                     <div class="msg-bubble bot-bubble">
                         <p>Grace and peace to you! 🙏</p>
                         <p>Welcome to <strong>Trinity Theological Seminary</strong>. I am your 24/7 AI guide to help you explore:</p>
@@ -108,7 +108,7 @@
                 <span class="dot"></span>
                 <span class="dot"></span>
                 <span class="dot"></span>
-                <span class="typing-text">Trinity AI is preparing your response...</span>
+                <span class="typing-text">Trinity Representative is preparing your response...</span>
             </div>
         </div>
 
@@ -128,7 +128,7 @@
                     </button>
                 </div>
                 <div class="chat-footer-note">
-                    <span>Trinity Theological Seminary • Byteboot Powered</span>
+                    <span>Trinity Theological Seminary</span>
                 </div>
             </form>
         </div>
@@ -991,7 +991,7 @@
             ? `<div class="msg-avatar user-avatar"><i class="fa-solid fa-user"></i></div>`
             : `<div class="msg-avatar"><img src="${logoUrl}" alt="AI" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712038.png'"></div>`;
 
-        const senderName = isUser ? 'You' : 'Trinity AI Assistant';
+        const senderName = isUser ? 'You' : 'Trinity Representative';
         const formattedHtml = isUser 
             ? `<p>${rawText.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>`
             : formatMarkdown(rawText);

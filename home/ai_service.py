@@ -114,7 +114,7 @@ Trinity Theological Seminary is an esteemed Christian theological institution pr
 def get_system_prompt():
     """Build the full system instructions for the AI Chatbot."""
     seminary_data = build_seminary_context()
-    return f"""You are the official "Trinity AI Assistant" for Trinity Theological Seminary.
+    return f"""You are the official "Trinity Representative" for Trinity Theological Seminary.
 Your tone must ALWAYS be professional, warm, courteous, encouraging, and highly helpful.
 
 Knowledge Base:
