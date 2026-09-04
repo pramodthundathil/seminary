@@ -14,11 +14,19 @@
     </div>
 {% endif %}
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;600;700;800&display=swap" rel="stylesheet">
+
 <div class="details-card mt-4" style="background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 0;">
     <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
         <h3 class="card-title" style="margin: 0; font-size: 1.1rem; color: #1e293b;"><i class="bi bi-person-lines-fill text-primary"></i> Student Information</h3>
         
-        <div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="viewScoreCardModal(event)">
+                <i class="bi bi-file-earmark-pdf"></i> Preview Scorecard
+            </button>
+
             {% if not student.active %}
             <form action="{% url 'church_student_approve' student.id %}" method="POST" class="d-inline">
                 {% csrf_token %}
@@ -118,6 +126,9 @@
 <div class="details-card mt-4" style="background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 0;">
     <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
         <h3 class="card-title" style="margin: 0; font-size: 1.1rem; color: #1e293b;"><i class="bi bi-trophy text-primary"></i> Academic Performance Summary</h3>
+        <button type="button" class="btn btn-primary btn-sm fw-semibold" onclick="viewScoreCardModal(event)">
+            <i class="bi bi-file-earmark-pdf"></i> View / Download Scorecard
+        </button>
     </div>
     <div class="p-4">
         <div class="table-responsive">
@@ -332,6 +343,440 @@
                 });
             }
         })
+    }
+</script>
+
+<!-- SCORECARD PREVIEW MODAL -->
+<div class="modal fade" id="scoreCardModal" tabindex="-1" aria-labelledby="scoreCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 950px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: #f8fafc;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #1b2845 0%, #2e3d5e 100%); padding: 16px 24px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-pdf fs-4 text-cyan" style="color: #00ced1;"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="scoreCardModalLabel" style="font-size: 1.1rem; color: #ffffff;">
+                        Student Transcript Preview — {{ student.get_full_name|upper|default:student.first_name|upper }}
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-cyan fw-bold text-dark d-flex align-items-center gap-2" onclick="downloadScorecardPDF()" style="background: #00ced1; border: none; border-radius: 8px; padding: 7px 18px;">
+                        <i class="bi bi-download"></i> Download PDF
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-4" style="background: #e2e8f0; overflow-y: auto; max-height: 80vh;">
+                <div id="scoreCardContentContainer" class="d-flex flex-column align-items-center gap-4" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=UnifrakturCook:wght@700&family=MedievalSharp&family=Cinzel:wght@500;600;700;800&display=swap');
+
+    #scoreCardContentContainer .pdf-page {
+        width: 210mm;
+        height: 296mm;
+        min-height: 296mm;
+        max-height: 296mm;
+        padding: 8mm;
+        background-color: #ffffff;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        margin: 0 auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    #scoreCardContentContainer .pdf-border-wrapper {
+        border: 2px solid #2b3a55;
+        outline: 2px solid #2b3a55;
+        outline-offset: -6px;
+        height: 100%;
+        width: 100%;
+        padding: 8mm 10mm;
+        box-sizing: border-box;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #ffffff;
+    }
+
+    #scoreCardContentContainer .pdf-watermark {
+        position: absolute;
+        top: 52%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 320px;
+        width: 55%;
+        height: auto;
+        opacity: 0.09;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    #scoreCardContentContainer .pdf-content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+    }
+
+    #scoreCardContentContainer .pdf-header {
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 5px !important;
+        margin-bottom: 12px !important;
+    }
+
+    #scoreCardContentContainer .pdf-header img.header-logo {
+        max-height: 55px !important;
+        height: auto !important;
+        width: auto !important;
+        max-width: 240px !important;
+        object-fit: contain !important;
+        margin: 0 auto 4px auto !important;
+        display: block !important;
+    }
+
+    #scoreCardContentContainer .pdf-institution-name {
+        font-family: 'UnifrakturMaguntia', 'UnifrakturCook', 'MedievalSharp', serif !important;
+        font-size: 32px !important;
+        font-weight: 700 !important;
+        color: #1b2845 !important;
+        text-align: center !important;
+        margin-top: 2px !important;
+        margin-bottom: 4px !important;
+        line-height: 1.1 !important;
+        letter-spacing: 0.5px !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    #scoreCardContentContainer .pdf-title-sub,
+    #scoreCardContentContainer .pdf-title-affil,
+    #scoreCardContentContainer .pdf-record-title,
+    #scoreCardContentContainer .pdf-record-subtitle,
+    #scoreCardContentContainer .pdf-student-info-grid,
+    #scoreCardContentContainer .pdf-marks-table,
+    #scoreCardContentContainer .pdf-summary-block,
+    #scoreCardContentContainer .pdf-footer-page-num {
+        font-family: 'Cinzel', 'Georgia', serif !important;
+    }
+
+    #scoreCardContentContainer .pdf-title-sub {
+        font-size: 10px;
+        font-weight: 600;
+        color: #2b3a55;
+        text-align: center;
+        margin-bottom: 2px;
+    }
+
+    #scoreCardContentContainer .pdf-title-affil {
+        font-size: 10px;
+        font-weight: 700;
+        color: #2b3a55;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    #scoreCardContentContainer .pdf-record-title {
+        font-size: 19px;
+        font-weight: 700;
+        color: #2b3a55;
+        text-align: center;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-top: 8px;
+        margin-bottom: 3px;
+    }
+
+    #scoreCardContentContainer .pdf-record-subtitle {
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+        letter-spacing: 1px;
+    }
+
+    #scoreCardContentContainer .pdf-student-info-grid {
+        width: 100%;
+        margin-bottom: 22px;
+        font-size: 12px;
+        color: #2b3a55;
+        line-height: 1.8;
+    }
+
+    #scoreCardContentContainer .pdf-student-info-grid .info-row {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 3px;
+    }
+
+    #scoreCardContentContainer .pdf-student-info-grid .info-left { width: 55%; }
+    #scoreCardContentContainer .pdf-student-info-grid .info-right { width: 45%; }
+    #scoreCardContentContainer .pdf-student-info-grid strong { font-weight: 700; color: #2b3a55; }
+
+    #scoreCardContentContainer .pdf-marks-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    #scoreCardContentContainer .pdf-marks-table th {
+        font-weight: 700;
+        font-size: 13px;
+        color: #2b3a55;
+        text-transform: uppercase;
+        padding: 8px 6px;
+        letter-spacing: 1px;
+        border: none;
+    }
+
+    #scoreCardContentContainer .pdf-marks-table td {
+        font-size: 12px;
+        color: #2b3a55;
+        padding: 5px 6px;
+        border: none;
+    }
+
+    #scoreCardContentContainer .pdf-summary-block {
+        margin-top: 35px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 14px;
+        color: #2b3a55;
+    }
+
+    #scoreCardContentContainer .pdf-summary-row {
+        display: flex;
+        justify-content: space-between;
+        width: 240px;
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+
+    #scoreCardContentContainer .pdf-footer-page-num {
+        font-size: 9px;
+        color: #64748b;
+        text-align: right;
+        width: 100%;
+        margin-top: auto;
+    }
+</style>
+
+<script>
+    let scoreCardModalInst = null;
+
+    function buildTranscriptHTML() {
+        const papers = [
+            {% if student_exams %}
+            {% for item in student_exams %}
+            {
+                code: "{{ item.code|default:''|escapejs }}",
+                paperName: "{{ item.exam_name|default:item.subject_name|upper|escapejs }}",
+                marks: "{{ item.percentage|floatformat:2 }}%"
+            },
+            {% endfor %}
+            {% endif %}
+            {% if assignment_mark %}
+            {% for item in assignment_mark %}
+            {
+                code: "{{ item.code|default:''|escapejs }}",
+                paperName: "{{ item.assignment_name|default:item.subject_name|upper|escapejs }}",
+                marks: "{{ item.percentage|floatformat:2 }}%"
+            },
+            {% endfor %}
+            {% endif %}
+        ];
+
+        const studentInfo = {
+            name: "{{ student.get_full_name|upper|default:student.first_name|upper|escapejs }}",
+            regNo: "{{ student.student_id|upper|default:'XXXX'|escapejs }}",
+            course: "{{ student.course_applied.course_name|upper|default:'ASSOCIATE DEGREE'|escapejs }}",
+            dateOfJoining: "{{ student.created_at|date:'M d, Y'|upper|default:'XXXX'|escapejs }}",
+            dob: "{{ student.date_of_birth|date:'M d, Y'|upper|default:'XXX'|escapejs }}"
+        };
+
+        const grandSummary = {
+            percentage: "{{ grand_summary.percentage }}%",
+            grade: "{{ grand_summary.grade }}"
+        };
+
+        const PAGE_1_CAPACITY = 10;
+        const PAGE_N_CAPACITY = 15;
+
+        let pages = [];
+        if (papers.length === 0) {
+            pages.push([]);
+        } else {
+            let remaining = [...papers];
+            let p1 = remaining.splice(0, PAGE_1_CAPACITY);
+            pages.push(p1);
+
+            while (remaining.length > 0) {
+                let pN = remaining.splice(0, PAGE_N_CAPACITY);
+                pages.push(pN);
+            }
+        }
+
+        const totalPages = pages.length;
+        let html = '';
+
+        pages.forEach((pageItems, pageIdx) => {
+            const pageNum = pageIdx + 1;
+            const isFirstPage = pageNum === 1;
+            const isLastPage = pageNum === totalPages;
+
+            html += `
+            <div class="pdf-page">
+                <img src="{% static 'img/Trinity_logo.png' %}" alt="Watermark" class="pdf-watermark">
+                <div class="pdf-border-wrapper">
+                    <div class="pdf-content">
+                        <!-- Top Letterhead Header -->
+                        <div class="pdf-header">
+                            <img src="{% static 'img/Trinity_final-nobg.png' %}" alt="Trinity Logo" class="header-logo">
+                            <div class="pdf-institution-name">Trinity Theological Seminary</div>
+                            <div class="pdf-title-sub">(Regd Under Saviour Foundation Inc, CN-13400138, Georgia USA)</div>
+                            <div class="pdf-title-affil">Affiliated to IATA & ICTA</div>
+                        </div>
+
+                        ${isFirstPage ? `
+                        <div class="pdf-record-title">TRANSCRIPT OF THE RECORD</div>
+                        <div class="pdf-record-subtitle">OF THE ${studentInfo.course}</div>
+
+                        <div class="pdf-student-info-grid">
+                            <div class="info-row">
+                                <div class="info-left"><strong>NAME :</strong> ${studentInfo.name}</div>
+                                <div class="info-right"><strong>REG NO:</strong> ${studentInfo.regNo}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-left"><strong>COURSE:</strong> ${studentInfo.course}</div>
+                                <div class="info-right"><strong>DATE OF JOINING:</strong> ${studentInfo.dateOfJoining}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-left"><strong>DOB :</strong> ${studentInfo.dob}</div>
+                                <div class="info-right"></div>
+                            </div>
+                        </div>
+                        ` : `
+                        <div class="pdf-record-title" style="font-size: 16px;">TRANSCRIPT OF THE RECORD (CONTINUED)</div>
+                        <div class="pdf-student-info-grid" style="margin-bottom: 15px;">
+                            <div class="info-row">
+                                <div class="info-left"><strong>NAME :</strong> ${studentInfo.name}</div>
+                                <div class="info-right"><strong>REG NO:</strong> ${studentInfo.regNo}</div>
+                            </div>
+                        </div>
+                        `}
+
+                        <!-- Marks Table -->
+                        <table class="pdf-marks-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%; text-align: left;">CODE</th>
+                                    <th style="width: 55%; text-align: left;">PAPER NAME</th>
+                                    <th style="width: 25%; text-align: right;">MARKS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pageItems.length > 0 ? pageItems.map(item => `
+                                    <tr>
+                                        <td style="text-align: left;">${item.code || '-'}</td>
+                                        <td style="text-align: left;">${item.paperName}</td>
+                                        <td style="text-align: right;">${item.marks}</td>
+                                    </tr>
+                                `).join('') : `
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; padding: 20px; font-style: italic; color: #64748b;">
+                                            No academic records found.
+                                        </td>
+                                    </tr>
+                                `}
+                            </tbody>
+                        </table>
+
+                        ${isLastPage ? `
+                        <div class="pdf-summary-block">
+                            <div class="pdf-summary-row">
+                                <span class="summary-label">TOTAL</span>
+                                <span class="summary-val">${grandSummary.percentage}</span>
+                            </div>
+                            <div class="pdf-summary-row">
+                                <span class="summary-label">GRADE</span>
+                                <span class="summary-val">${grandSummary.grade}</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="pdf-footer-page-num">Page ${pageNum} of ${totalPages}</div>
+                </div>
+            </div>
+            `;
+        });
+
+        return html;
+    }
+
+    function viewScoreCardModal(event) {
+        if (event) event.preventDefault();
+        const modalEl = document.getElementById('scoreCardModal');
+        const container = document.getElementById('scoreCardContentContainer');
+        
+        if (modalEl && modalEl.parentNode !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+
+        if (!scoreCardModalInst) {
+            scoreCardModalInst = new bootstrap.Modal(modalEl);
+        }
+
+        container.innerHTML = buildTranscriptHTML();
+        scoreCardModalInst.show();
+    }
+
+    async function downloadScorecardPDF() {
+        if (document.fonts) {
+            await document.fonts.ready;
+        }
+
+        const container = document.getElementById('scoreCardContentContainer');
+        const studentName = "{{ student.get_full_name|escapejs }}".trim() || "Student";
+        
+        const opt = {
+            margin:       0,
+            filename:     'Trinity_Seminary_Transcript_' + studentName.replace(/\s+/g, '_') + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                letterRendering: true,
+                backgroundColor: '#ffffff',
+                windowWidth: 1200,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['css', 'legacy'], before: '.pdf-page' }
+        };
+
+        html2pdf().set(opt).from(container).save().catch(err => {
+            console.error('PDF Generation error:', err);
+            alert('An error occurred while generating the PDF. Please try again.');
+        });
     }
 </script>
 {% endblock %}

@@ -818,8 +818,8 @@
                     </a>
                     
                     <!-- View/Download Score Card -->
-                    <a href="#" onclick="downloadScoreCard(event, this)" class="action-btn action-btn-scorecard">
-                        <i class="fas fa-file-pdf"></i> Download Score Card
+                    <a href="#" onclick="viewScoreCardModal(event)" class="action-btn action-btn-scorecard">
+                        <i class="fas fa-file-pdf"></i> View / Download Score Card
                     </a>
                     
                     <!-- Application Status Approve/Disapprove Action -->
@@ -1321,8 +1321,8 @@
                 <div class="tab-pane fade" id="marks" role="tabpanel" aria-labelledby="marks-tab">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="section-title-modern mb-0">Exam Results & Academic Transcripts</h6>
-                        <a href="#" onclick="downloadScoreCard(event, this)" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2" style="border-radius: 8px; padding: 6px 16px; font-weight: 600;">
-                            <i class="fas fa-file-pdf"></i> Download Student Score Card
+                        <a href="#" onclick="viewScoreCardModal(event)" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2" style="border-radius: 8px; padding: 6px 16px; font-weight: 600;">
+                            <i class="fas fa-file-pdf"></i> View / Download Score Card
                         </a>
                     </div>
                     {% if exams %}
@@ -1594,6 +1594,96 @@
     </div>
 </div>
 
+<!-- Score Card Preview Modal -->
+<div class="modal fade" id="scoreCardModal" tabindex="-1" aria-labelledby="scoreCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 960px; width: 92vw; margin: 1rem auto;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden; max-height: 92vh;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-file-invoice text-info fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="scoreCardModalLabel" style="font-size: 1.1rem; color: #ffffff;">
+                        Student Score Card — {{ student.first_name }} {{ student.last_name }} {% if student.reg_no %}({{ student.reg_no }}){% endif %}
+                    </h5>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2 font-weight-600 px-3" id="modalDownloadBtn" onclick="triggerScoreCardDownload()" style="border-radius: 8px; font-size: 0.875rem; background-color: #2563eb; border-color: #2563eb;">
+                        <i class="fas fa-file-pdf"></i> Download Score Card
+                    </button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 position-relative" style="background-color: #f1f5f9; min-height: 400px; max-height: calc(92vh - 65px); overflow-y: auto; overflow-x: auto;">
+                <div id="scoreCardSpinner" class="flex-column align-items-center justify-content-center d-none" style="position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(241, 245, 249, 0.95); z-index: 10;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted fw-semibold mb-0">Loading Student Score Card...</p>
+                </div>
+                <div id="scoreCardContentContainer" style="padding: 15px 10px; width: 100%; box-sizing: border-box; overflow-x: auto; text-align: center;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #scoreCardModal {
+        z-index: 1065 !important;
+    }
+    .modal-backdrop {
+        z-index: 1055 !important;
+    }
+    #scoreCardContentContainer {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #scoreCardContentContainer .pdf-hidden-container {
+        position: static !important;
+        left: 0 !important;
+        top: 0 !important;
+        margin: 0 auto !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 210mm !important;
+        box-sizing: border-box !important;
+    }
+    #scoreCardContentContainer #transcript-pdf-template {
+        margin: 0 auto !important;
+        background-color: transparent !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #scoreCardContentContainer .pdf-page {
+        margin: 0 auto 20px auto !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        background-color: #ffffff !important;
+        max-width: 210mm !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #scoreCardContentContainer #transcript-pdf-template .pdf-header img {
+        height: 55px !important;
+        width: auto !important;
+        max-height: 55px !important;
+        max-width: 240px !important;
+        object-fit: contain !important;
+        margin: 0 auto 4px auto !important;
+        display: block !important;
+    }
+    #scoreCardContentContainer #transcript-pdf-template .pdf-watermark {
+        max-width: 320px !important;
+        width: 55% !important;
+        height: auto !important;
+        opacity: 0.09 !important;
+    }
+    @media (max-width: 850px) {
+        #scoreCardContentContainer {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     function deleteStudent(id) {
         if (confirm('Are you sure you want to delete this student? This cannot be undone.')) {
@@ -1614,50 +1704,133 @@
         }
     }
 
-    let isGeneratingPDF = false;
+    let scoreCardModalInstance = null;
+    let scoreCardLoaded = false;
+
+    function showScoreCardSpinner() {
+        const spinner = document.getElementById('scoreCardSpinner');
+        if (spinner) {
+            spinner.classList.remove('d-none');
+            spinner.style.setProperty('display', 'flex', 'important');
+            spinner.style.setProperty('pointer-events', 'auto', 'important');
+            spinner.style.setProperty('z-index', '10', 'important');
+        }
+    }
+
+    function hideScoreCardSpinner() {
+        const spinner = document.getElementById('scoreCardSpinner');
+        if (spinner) {
+            spinner.classList.add('d-none');
+            spinner.style.setProperty('display', 'none', 'important');
+            spinner.style.setProperty('pointer-events', 'none', 'important');
+            spinner.style.setProperty('z-index', '-1', 'important');
+        }
+    }
+
+    function viewScoreCardModal(event) {
+        if (event) event.preventDefault();
+        
+        const modalEl = document.getElementById('scoreCardModal');
+        const container = document.getElementById('scoreCardContentContainer');
+        const scorecardUrl = "{% url 'admin_student_score_card' student.id %}";
+
+        // Move modal to body so it is never trapped behind container stacking context or backdrop
+        if (modalEl && modalEl.parentNode !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+
+        if (!scoreCardModalInstance) {
+            scoreCardModalInstance = new bootstrap.Modal(modalEl);
+        }
+        scoreCardModalInstance.show();
+
+        const iframe = document.getElementById('scoreCardIframe');
+        if (!scoreCardLoaded || !iframe) {
+            showScoreCardSpinner();
+            container.innerHTML = `<iframe id="scoreCardIframe" src="${scorecardUrl}" style="width: 100%; max-width: 100%; height: 78vh; border: none; background: #f1f5f9; border-radius: 8px; display: block; margin: 0 auto;" onload="hideScoreCardSpinner()"></iframe>`;
+            scoreCardLoaded = true;
+        } else {
+            hideScoreCardSpinner();
+        }
+    }
+
     function downloadScoreCard(event, element) {
-        event.preventDefault();
-        if (isGeneratingPDF) return;
-        isGeneratingPDF = true;
-        
-        const originalContent = element.innerHTML;
-        element.style.pointerEvents = 'none';
-        element.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generating PDF...';
-        
-        const iframe = document.createElement('iframe');
-        iframe.style.position = 'absolute';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '-9999px';
-        iframe.style.width = '1200px';
-        iframe.style.height = '1600px';
-        iframe.src = "{% url 'admin_student_score_card' student.id %}";
-        document.body.appendChild(iframe);
-        
-        const messageHandler = function(e) {
-            if (e.data && e.data.type === 'PDF_DOWNLOAD_COMPLETE') {
-                element.style.pointerEvents = 'auto';
-                element.innerHTML = originalContent;
-                isGeneratingPDF = false;
-                
-                window.removeEventListener('message', messageHandler);
-                document.body.removeChild(iframe);
+        viewScoreCardModal(event);
+    }
+
+    async function triggerScoreCardDownload() {
+        const iframe = document.getElementById('scoreCardIframe');
+        if (iframe && iframe.contentWindow && typeof iframe.contentWindow.downloadPDF === 'function') {
+            const btn = document.getElementById('modalDownloadBtn');
+            const originalContent = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Generating PDF...';
             }
-        };
-        
-        window.addEventListener('message', messageHandler);
-        
-        // Timeout backup (30s)
-        setTimeout(() => {
-            if (isGeneratingPDF) {
-                element.style.pointerEvents = 'auto';
-                element.innerHTML = originalContent;
-                isGeneratingPDF = false;
-                window.removeEventListener('message', messageHandler);
-                if (iframe.parentNode) {
-                    document.body.removeChild(iframe);
+            try {
+                await iframe.contentWindow.downloadPDF();
+            } catch(e) {
+                console.error('Iframe PDF generation error:', e);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
                 }
             }
-        }, 30000);
+            return;
+        }
+
+        const element = document.getElementById('transcript-pdf-template');
+        if (!element) {
+            alert('Score card content is still loading. Please wait.');
+            return;
+        }
+        if (typeof renderTranscriptPages === 'function') {
+            renderTranscriptPages();
+        }
+        if (document.fonts) {
+            await document.fonts.ready;
+        }
+
+        const btn = document.getElementById('modalDownloadBtn');
+        const originalContent = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Generating PDF...';
+        }
+
+        const studentName = "{{ student.get_full_name|escapejs }}".trim() || "Student";
+        const opt = {
+            margin:       0,
+            filename:     'Trinity_Seminary_Transcript_' + studentName.replace(/\s+/g, '_') + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                letterRendering: true,
+                backgroundColor: '#ffffff',
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }).catch(err => {
+            console.error('PDF Generation error:', err);
+            alert('An error occurred while generating the PDF.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        });
     }
 </script>
 {% endblock %}
