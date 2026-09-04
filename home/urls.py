@@ -36,8 +36,8 @@ urlpatterns = [
 
 
 # Dynamic page URL (keep this last)
-    path('courses/<slug:slug>/', views.course_detail, name='course_detail'),
-    path('page/<slug:slug>/', views.page_detail, name='page_detail'),
+    path('courses/<str:slug>/', views.course_detail, name='course_detail'),
+    path('page/<str:slug>/', views.page_detail, name='page_detail'),
    
 
 

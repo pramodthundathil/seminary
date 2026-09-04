@@ -896,6 +896,13 @@ class MenuItemsForm(forms.ModelForm):
         self.fields['pages'].queryset = Pages.objects.filter(deleted_at__isnull=True).order_by('title')
         # Ensure courses field is available in form
         self.fields['courses'].queryset = Courses.objects.filter(deleted_at__isnull=True).order_by('course_name')
+        if self.instance and self.instance.pk and self.instance.url:
+            url_str = self.instance.url.lstrip('/')
+            if url_str.startswith('courses/'):
+                code = url_str.replace('courses/', '', 1)
+                course_obj = Courses.objects.filter(course_code=code, deleted_at__isnull=True).first()
+                if course_obj:
+                    self.initial['courses'] = course_obj.id
 
 
 class CourseForm(forms.ModelForm):

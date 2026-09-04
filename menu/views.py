@@ -408,7 +408,7 @@ def menu_item_create(request):
         elif menu_type == 'course':
             course_obj = form.cleaned_data.get('courses')
             if course_obj:
-                item.url = f"courses/{course_obj.course_code}"
+                item.url = f"/courses/{course_obj.course_code}"
         elif menu_type == 'custom':
             if item.url and not (item.url.startswith('http://') or item.url.startswith('https://')):
                  item.url = 'http://' + item.url
@@ -453,13 +453,13 @@ def menu_item_update(request, pk):
         elif menu_type == 'course':
              course_obj = form.cleaned_data.get('courses')
              if course_obj:
-                 updated_item.url = f"courses/{course_obj.course_code}"
+                 updated_item.url = f"/courses/{course_obj.course_code}"
         elif menu_type == 'custom':
             if updated_item.url and not (updated_item.url.startswith('http://') or updated_item.url.startswith('https://')):
                  updated_item.url = 'http://' + updated_item.url
         elif menu_type == 'internal':
              if updated_item.url and not updated_item.url.startswith('/'):
-                 updated_item.url = '' + updated_item.url # Logic check? User code used '' + url
+                 updated_item.url = '/' + updated_item.url
         elif menu_type == 'no_link':
             updated_item.url = '#'
             
@@ -2480,6 +2480,7 @@ def course_get(request, course_id):
 def course_update(request, course_id):
     """Update course"""
     course = get_object_or_404(Courses, id=course_id)
+    old_code = course.course_code
     
     if request.method == 'POST':
         form = CourseForm(request.POST, instance=course)
@@ -2494,6 +2495,14 @@ def course_update(request, course_id):
                     return render(request, 'admin/courses/form.html', {'form': form, 'course': course})
                 
                 course.save()
+
+                # Sync any menu items referencing the old course code to the new code
+                if old_code and old_code != course.course_code:
+                    MenuItems.objects.filter(
+                        menu_type='course',
+                        url__in=[f"courses/{old_code}", f"/courses/{old_code}"]
+                    ).update(url=f"/courses/{course.course_code}")
+
                 messages.success(request, 'Course updated successfully')
                 return redirect('course_list')
             except Exception as e:

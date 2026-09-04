@@ -117,7 +117,12 @@ def get_menu_item_url(menu_item):
     
     # Second, check if url field has a value
     elif menu_item.url:
-        return f"/{menu_item.url}"
+        url_str = str(menu_item.url).strip()
+        if url_str.startswith(('http://', 'https://', '#', 'tel:', 'mailto:')):
+            return url_str
+        if not url_str.startswith('/'):
+            return f"/{url_str}"
+        return url_str
     
     # Third, check if url field has a '' it will redirect to Home
     elif menu_item.url == '':
