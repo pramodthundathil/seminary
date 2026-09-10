@@ -38,7 +38,7 @@
                     {% endif %}
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Format</label>
                     {{ form.format }}
                     {% if form.format.errors %}
@@ -46,19 +46,11 @@
                     {% endif %}
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Subject</label>
                     {{ form.subject }}
                     {% if form.subject.errors %}
                     <div class="text-danger small">{{ form.subject.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">AWS URL</label>
-                    {{ form.aws_url }}
-                    {% if form.aws_url.errors %}
-                    <div class="text-danger small">{{ form.aws_url.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -70,22 +62,34 @@
                         <div style="display:none;">{{ form.media }}</div>
 
                         <div id="mediaPreview" class="media-preview-box p-2 border rounded text-center mb-2"
-                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            style="min-height: 130px; display: flex; align-items: center; justify-content: center; background: #fafafa;">
                             {% if form.instance.media %}
-                            <a href="{{ form.instance.media.file_path.url }}" target="_blank"
-                                class="w-100 text-decoration-none text-dark d-block">
-                                {% if form.instance.media.media_type == 'image' %}
-                                <img src="{{ form.instance.media.thumb_file_path }}"
-                                    style="max-height: 100px; max-width: 100%;">
+                                {% if form.instance.media.media_type == 'image' or 'jpg' in form.instance.media.file_type|lower or 'png' in form.instance.media.file_type|lower or 'jpeg' in form.instance.media.file_type|lower or 'webp' in form.instance.media.file_type|lower %}
+                                <a href="{{ form.instance.media.file_path.url }}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                                    <img src="{{ form.instance.media.file_path.url }}" style="max-height: 110px; max-width: 100%; border-radius: 6px; object-fit: contain;">
+                                    <div class="small mt-1 text-break font-weight-bold">{{ form.instance.media.file_name }}</div>
+                                </a>
+                                {% elif form.instance.media.media_type == 'video' or 'mp4' in form.instance.media.file_type|lower or 'webm' in form.instance.media.file_type|lower or 'mov' in form.instance.media.file_type|lower %}
+                                <div class="w-100">
+                                    <video src="{{ form.instance.media.file_path.url }}" controls style="max-height: 120px; max-width: 100%; border-radius: 6px;"></video>
+                                    <div class="small mt-1 text-break font-weight-bold">{{ form.instance.media.file_name }}</div>
+                                </div>
                                 {% elif 'pdf' in form.instance.media.file_name|lower or 'pdf' in form.instance.media.file_type|lower %}
-                                <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                <a href="{{ form.instance.media.file_path.url }}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                    <div class="small mt-1 text-break font-weight-bold">{{ form.instance.media.file_name }}</div>
+                                </a>
                                 {% else %}
-                                <i class="fas fa-file fa-3x text-muted"></i>
+                                <a href="{{ form.instance.media.file_path.url }}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                                    <i class="fas fa-file fa-3x text-muted"></i>
+                                    <div class="small mt-1 text-break font-weight-bold">{{ form.instance.media.file_name }}</div>
+                                </a>
                                 {% endif %}
-                                <div class="small mt-1 text-break">{{ form.instance.media.file_name }}</div>
-                            </a>
                             {% else %}
-                            <p class="text-muted mb-0">No media selected</p>
+                            <div class="text-center text-muted">
+                                <i class="fas fa-photo-video fa-2x mb-1 text-secondary" style="opacity: 0.5;"></i>
+                                <p class="mb-0 small">No media selected</p>
+                            </div>
                             {% endif %}
                         </div>
                         <button type="button" class="btn btn-outline-primary w-100" onclick="openModal('media')">
@@ -109,30 +113,30 @@
                         <div style="display:none;">{{ form.video_id }}</div>
 
                         <div id="videoPreview" class="media-preview-box p-2 border rounded text-center mb-2"
-                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            style="min-height: 130px; display: flex; align-items: center; justify-content: center; background: #fafafa;">
                             {% if form.instance.video_id %}
                             <div class="w-100">
-                                {% if form.instance.video_id.media.thumb_file_path %}
-                                <a href="{{ form.instance.video_id.media.file_path.url }}" target="_blank"
-                                    class="text-decoration-none text-dark">
-                                    <img src="{{ form.instance.video_id.media.thumb_file_path }}"
-                                        style="max-height: 100px; max-width: 100%;">
-                                    <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
-                                </a>
-                                {% elif form.instance.video_id.youtube.thumb_file_path %}
+                                {% if form.instance.video_id.media and form.instance.video_id.media.file_path %}
+                                <video src="{{ form.instance.video_id.media.file_path.url }}" controls style="max-height: 120px; max-width: 100%; border-radius: 6px;"></video>
+                                <div class="small mt-1 text-break font-weight-bold">{{ form.instance.video_id.title }}</div>
+                                {% elif form.instance.video_id.youtube %}
                                 <a href="{{ form.instance.video_id.youtube.file_path }}" target="_blank"
-                                    class="text-decoration-none text-dark">
+                                    class="text-decoration-none text-dark d-block">
                                     <img src="{{ form.instance.video_id.youtube.thumb_file_path }}"
-                                        style="max-height: 100px; max-width: 100%;">
-                                    <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
+                                        style="max-height: 110px; max-width: 100%; border-radius: 6px;"
+                                        onerror="this.onerror=null; this.src='https://img.youtube.com/vi/placeholder/hqdefault.jpg';">
+                                    <div class="small mt-1 text-break font-weight-bold">{{ form.instance.video_id.title }}</div>
                                 </a>
                                 {% else %}
                                 <i class="fas fa-video fa-2x text-muted"></i>
-                                <div class="small mt-1 text-break">{{ form.instance.video_id.title }}</div>
+                                <div class="small mt-1 text-break font-weight-bold">{{ form.instance.video_id.title }}</div>
                                 {% endif %}
                             </div>
                             {% else %}
-                            <p class="text-muted mb-0">No video selected</p>
+                            <div class="text-center text-muted">
+                                <i class="fas fa-video fa-2x mb-1 text-secondary" style="opacity: 0.5;"></i>
+                                <p class="mb-0 small">No video selected</p>
+                            </div>
                             {% endif %}
                         </div>
                         <button type="button" class="btn btn-outline-primary w-100" onclick="openModal('video')">
@@ -156,20 +160,24 @@
                         <div style="display:none;">{{ form.youtube }}</div>
 
                         <div id="youtubePreview" class="media-preview-box p-2 border rounded text-center mb-2"
-                            style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            style="min-height: 130px; display: flex; align-items: center; justify-content: center; background: #fafafa;">
                             {% if form.instance.youtube %}
                             <div class="w-100">
                                 <a href="{{ form.instance.youtube.file_path }}" target="_blank"
-                                    class="text-decoration-none text-dark">
+                                    class="text-decoration-none text-dark d-block">
                                     <img src="{{ form.instance.youtube.thumb_file_path }}"
-                                        style="max-height: 100px; max-width: 100%;">
-                                    <div class="small mt-1 text-break">
-                                        {{ form.instance.youtube.file_path|truncatechars:30 }}
+                                        style="max-height: 110px; max-width: 100%; border-radius: 6px;"
+                                        onerror="this.onerror=null; this.src='https://img.youtube.com/vi/placeholder/hqdefault.jpg';">
+                                    <div class="small mt-1 text-break font-weight-bold">
+                                        {{ form.instance.youtube.file_path|truncatechars:35 }}
                                     </div>
                                 </a>
                             </div>
                             {% else %}
-                            <p class="text-muted mb-0">No YouTube video selected</p>
+                            <div class="text-center text-muted">
+                                <i class="fab fa-youtube fa-2x mb-1 text-danger" style="opacity: 0.5;"></i>
+                                <p class="mb-0 small">No YouTube video selected</p>
+                            </div>
                             {% endif %}
                         </div>
                         <button type="button" class="btn btn-outline-danger w-100" onclick="openModal('youtube')">
@@ -389,54 +397,96 @@
 
     .media-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 15px;
-        max-height: 400px;
+        max-height: 450px;
         overflow-y: auto;
     }
 
     .media-item {
-        border: 2px solid #eee;
-        border-radius: 6px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
         cursor: pointer;
         overflow: hidden;
-        transition: all 0.2s;
+        transition: all 0.2s ease-in-out;
         position: relative;
+        background: #fff;
     }
 
     .media-item:hover {
         transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        border-color: #007bff;
     }
 
     .media-item.selected {
-        border-color: var(--primary-color, #007bff);
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
     }
 
-    .media-thumb {
+    .media-thumb-box {
         width: 100%;
-        aspect-ratio: 16/9;
+        height: 110px;
         background: #f8f9fa;
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
+        overflow: hidden;
     }
 
-    .media-thumb img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
+    .media-thumb-box img, .media-thumb-box video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .blank-thumb-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f3f5;
+    }
+
+    .blank-thumb-fallback.dark-fallback {
+        background: #1a1e21;
+    }
+
+    .video-thumb-box .play-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 38px;
+        height: 38px;
+        background: rgba(0, 0, 0, 0.65);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+    }
+
+    .video-thumb-box .play-badge.youtube-badge {
+        background: rgba(220, 53, 69, 0.9);
     }
 
     .media-name {
-        padding: 8px;
-        font-size: 0.85rem;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         background: #fff;
         text-align: center;
+        color: #333;
+        border-top: 1px solid #f0f0f0;
     }
 
     .upload-area {
@@ -562,19 +612,83 @@
     function renderGrid(items) {
         const grid = document.getElementById('itemsGrid');
         grid.innerHTML = '';
-        if (items.length === 0) {
-            grid.innerHTML = '<p class="text-center w-100">No items found.</p>';
+        if (!items || items.length === 0) {
+            grid.innerHTML = '<p class="text-center w-100 text-muted p-4">No items found.</p>';
             return;
         }
 
         items.forEach(item => {
             const el = document.createElement('div');
-            el.className = `media-item ${selectedItem && selectedItem.id === item.id ? 'selected' : ''}`;
+            const isSelected = selectedItem && selectedItem.id === item.id;
+            el.className = `media-item ${isSelected ? 'selected' : ''}`;
+            
+            const titleOrName = item.title || item.name || 'Untitled';
+            const itemUrl = item.url || '';
+            const thumbUrl = item.thumb || '';
+            
+            // Detect type
+            let isVideo = item.type === 'video' || (item.name && /\.(mp4|webm|mov|avi|mkv)$/i.test(item.name)) || (itemUrl && /\.(mp4|webm|mov|avi|mkv)$/i.test(itemUrl));
+            let isImage = item.type === 'image' || (item.name && /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name)) || (itemUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(itemUrl));
+            let isYoutube = item.type === 'youtube' || /youtube\.com|youtu\.be/i.test(itemUrl);
+            let isPdf = (item.name && /\.(pdf)$/i.test(item.name)) || (itemUrl && /\.(pdf)$/i.test(itemUrl));
+
+            let thumbContent = '';
+
+            if (isImage) {
+                if (thumbUrl || itemUrl) {
+                    thumbContent = `
+                        <div class="media-thumb-box">
+                            <img src="${thumbUrl || itemUrl}" alt="${titleOrName}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'blank-thumb-fallback\\'><i class=\\'fas fa-image fa-2x text-muted\\'></i></div>';">
+                        </div>`;
+                } else {
+                    thumbContent = `
+                        <div class="media-thumb-box">
+                            <div class="blank-thumb-fallback"><i class="fas fa-image fa-2x text-muted"></i></div>
+                        </div>`;
+                }
+            } else if (isVideo) {
+                if (thumbUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(thumbUrl)) {
+                    thumbContent = `
+                        <div class="media-thumb-box video-thumb-box">
+                            <img src="${thumbUrl}" alt="${titleOrName}" onerror="this.onerror=null; this.parentElement.innerHTML='<video src=\\'${itemUrl}#t=0.5\\' preload=\\'metadata\\' muted style=\\'width:100%;height:100%;object-fit:cover;\\'></video>';">
+                            <div class="play-badge"><i class="fas fa-play"></i></div>
+                        </div>`;
+                } else if (itemUrl && itemUrl !== '#') {
+                    thumbContent = `
+                        <div class="media-thumb-box video-thumb-box">
+                            <video src="${itemUrl}#t=0.5" preload="metadata" muted style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>
+                            <div class="play-badge"><i class="fas fa-play"></i></div>
+                        </div>`;
+                } else {
+                    thumbContent = `
+                        <div class="media-thumb-box video-thumb-box">
+                            <div class="blank-thumb-fallback dark-fallback"><i class="fas fa-video fa-2x text-light"></i></div>
+                            <div class="play-badge"><i class="fas fa-play"></i></div>
+                        </div>`;
+                }
+            } else if (isYoutube) {
+                thumbContent = `
+                    <div class="media-thumb-box video-thumb-box">
+                        <img src="${thumbUrl || 'https://img.youtube.com/vi/placeholder/hqdefault.jpg'}" alt="${titleOrName}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'blank-thumb-fallback dark-fallback\\'><i class=\\'fab fa-youtube fa-2x text-danger\\'></i></div>';">
+                        <div class="play-badge youtube-badge"><i class="fab fa-youtube"></i></div>
+                    </div>`;
+            } else if (isPdf) {
+                thumbContent = `
+                    <div class="media-thumb-box">
+                        <div class="blank-thumb-fallback"><i class="fas fa-file-pdf fa-3x text-danger"></i></div>
+                    </div>`;
+            } else {
+                thumbContent = `
+                    <div class="media-thumb-box">
+                        <div class="blank-thumb-fallback"><i class="fas fa-file fa-3x text-muted"></i></div>
+                    </div>`;
+            }
+
             el.innerHTML = `
-                <div class="media-thumb"><img src="${item.thumb}" alt="thumb"></div>
-                <div class="media-name">${item.title || item.name}</div>
+                ${thumbContent}
+                <div class="media-name" title="${titleOrName}">${titleOrName}</div>
             `;
-            el.onclick = (e) => selectItem(item, e.currentTarget);
+            el.onclick = (e) => selectItem(item, el);
             grid.appendChild(el);
         });
     }
@@ -584,8 +698,6 @@
         document.querySelectorAll('.media-item').forEach(el => el.classList.remove('selected'));
         if (element) {
             element.classList.add('selected');
-        } else if (window.event && window.event.currentTarget) {
-            window.event.currentTarget.classList.add('selected');
         }
         updateSelectedInfo();
     }
@@ -607,58 +719,71 @@
         if (!selectedItem) return;
 
         const input = document.getElementById(config[currentMode].inputId);
-        // Set the value. For Django forms using ModelChoiceField, it expects ID.
         input.value = selectedItem.id;
 
-        // Update Preview
         const preview = document.getElementById(config[currentMode].previewId);
         let previewHtml = '';
-        const titleOrName = selectedItem.title || selectedItem.name;
+        const titleOrName = selectedItem.title || selectedItem.name || 'Selected Item';
         const itemUrl = selectedItem.url || '#';
+        const thumbUrl = selectedItem.thumb || '';
+
+        const isVideo = selectedItem.type === 'video' || (selectedItem.name && /\.(mp4|webm|mov|avi|mkv)$/i.test(selectedItem.name)) || (itemUrl && /\.(mp4|webm|mov|avi|mkv)$/i.test(itemUrl));
+        const isImage = selectedItem.type === 'image' || (selectedItem.name && /\.(jpg|jpeg|png|gif|webp)$/i.test(selectedItem.name)) || (itemUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(itemUrl));
+        const isYoutube = selectedItem.type === 'youtube' || /youtube\.com|youtu\.be/i.test(itemUrl);
+        const isPdf = (selectedItem.name && /\.(pdf)$/i.test(selectedItem.name)) || (itemUrl && /\.(pdf)$/i.test(itemUrl));
 
         if (currentMode === 'media') {
-            let innerContent = '';
-            // Check for image type or extension
-            const isImage = selectedItem.type === 'image' || (selectedItem.name && /\.(jpeg|jpg|gif|png|webp)$/i.test(selectedItem.name));
-            const isPdf = selectedItem.name && /\.pdf$/i.test(selectedItem.name);
-
             if (isImage) {
-                innerContent = `<img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">`;
+                previewHtml = `
+                <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                    <img src="${thumbUrl || itemUrl}" style="max-height: 110px; max-width: 100%; border-radius: 6px; object-fit: contain;">
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </a>`;
+            } else if (isVideo) {
+                previewHtml = `
+                <div class="w-100">
+                    <video src="${itemUrl}" controls style="max-height: 120px; max-width: 100%; border-radius: 6px;"></video>
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </div>`;
             } else if (isPdf) {
-                innerContent = `<i class="fas fa-file-pdf fa-3x text-danger"></i>`;
+                previewHtml = `
+                <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </a>`;
             } else {
-                innerContent = `<i class="fas fa-file fa-3x text-muted"></i>`;
+                previewHtml = `
+                <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                    <i class="fas fa-file fa-3x text-muted"></i>
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </a>`;
             }
-
-            previewHtml = `
-            <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
-                ${innerContent}
-                <div class="small mt-1 text-break">${titleOrName}</div>
-            </a>`;
-
+        } else if (currentMode === 'video') {
+            if (isVideo && itemUrl && itemUrl !== '#') {
+                previewHtml = `
+                <div class="w-100">
+                    <video src="${itemUrl}" controls style="max-height: 120px; max-width: 100%; border-radius: 6px;"></video>
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </div>`;
+            } else {
+                previewHtml = `
+                <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
+                    <img src="${thumbUrl || 'https://img.youtube.com/vi/placeholder/hqdefault.jpg'}" style="max-height: 110px; max-width: 100%; border-radius: 6px;" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/placeholder/hqdefault.jpg';">
+                    <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
+                </a>`;
+            }
         } else if (currentMode === 'youtube') {
             previewHtml = `
             <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
-                <img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">
-                <div class="small mt-1 text-break">${titleOrName}</div>
-            </a>`;
-
-        } else {
-            // Video
-            previewHtml = `
-            <a href="${itemUrl}" target="_blank" class="w-100 text-decoration-none text-dark d-block">
-                <img src="${selectedItem.thumb}" style="max-height: 100px; max-width: 100%;">
-                <div class="small mt-1 text-break">${titleOrName}</div>
+                <img src="${thumbUrl}" style="max-height: 110px; max-width: 100%; border-radius: 6px;" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/placeholder/hqdefault.jpg';">
+                <div class="small mt-1 text-break font-weight-bold">${titleOrName}</div>
             </a>`;
         }
-        preview.innerHTML = previewHtml;
 
-        // Show Remove Button
+        preview.innerHTML = previewHtml;
         document.getElementById(config[currentMode].clearBtnId).style.display = 'block';
 
-        // Auto-detect format
         autoDetectFormat(selectedItem);
-
         closeModal();
     }
 

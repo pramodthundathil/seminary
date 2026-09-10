@@ -8236,24 +8236,28 @@ def media_library_json(request):
 
     if page_obj:
         for media in page_obj:
-            # Determine thumbnail URL
-            thumb_url = ''
-            if media.media_type == 'image' and media.file_path:
+            media_url = ''
+            if media.file_path:
                 try:
-                    thumb_url = media.file_path.url
+                    media_url = media.file_path.url
                 except:
-                    thumb_url = ''
-            elif media.media_type == 'video':
-                 thumb_url = '/static/admin/img/video-icon.png' # Placeholder
-            else:
-                 thumb_url = '/static/admin/img/file-icon.png' # Placeholder
+                    media_url = ''
+
+            thumb_url = ''
+            if media.thumb_file_path:
+                thumb_url = media.thumb_file_path
+            elif media.media_type == 'image' and media_url:
+                thumb_url = media_url
+            elif media.media_type == 'video' and media_url:
+                thumb_url = media_url
 
             data.append({
                 'id': media.id,
-                'name': media.file_name,
-                'url': media.file_path.url if media.file_path else '',
+                'name': media.file_name or media.title or f"Media #{media.id}",
+                'url': media_url,
                 'thumb': thumb_url,
-                'type': media.media_type,
+                'type': media.media_type or ('video' if media.file_type in ['mp4', 'webm', 'mov', 'avi'] else 'image'),
+                'file_type': media.file_type or '',
                 'dimensions': media.dimensions,
                 'size': media.file_size
             })
@@ -8353,26 +8357,41 @@ def video_library_json(request):
 
     if page_obj:
         for video in page_obj:
-            thumb_url = '/static/admin/img/video-icon.png'
+            thumb_url = ''
             video_url = '#'
+            vtype = 'video'
             
             if video.media:
-                 if video.media.thumb_file_path:
+                if video.media.thumb_file_path:
                     thumb_url = video.media.thumb_file_path
-                 if video.media.file_path:
+                elif video.media.file_path:
+                    try:
+                        thumb_url = video.media.file_path.url
+                    except:
+                        pass
+                if video.media.file_path:
                     try:
                         video_url = video.media.file_path.url
                     except:
                         pass
+                vtype = 'video'
             elif video.youtube:
-                 thumb_url = video.youtube.thumb_file_path or '/static/admin/img/youtube-icon.png'
-                 video_url = video.youtube.file_path
+                video_url = video.youtube.file_path or ''
+                vtype = 'youtube'
+                if video.youtube.thumb_file_path:
+                    thumb_url = video.youtube.thumb_file_path
+                elif video_url:
+                    import re
+                    yt_match = re.search(r'(?:v=|\/embed\/|\/1\/|\/v\/|https:\/\/youtu\.be\/|\/e\/)([^"&?\/\s]{11})', video_url)
+                    if yt_match:
+                        thumb_url = f"https://img.youtube.com/vi/{yt_match.group(1)}/hqdefault.jpg"
 
             data.append({
                 'id': video.id,
-                'title': video.title,
+                'title': video.title or f"Video #{video.id}",
                 'thumb': thumb_url,
                 'url': video_url,
+                'type': vtype,
                 'description': video.description or ''
             })
             
@@ -8501,11 +8520,20 @@ def youtube_library_json(request):
 
     if page_obj:
         for yt in page_obj:
+            yt_url = yt.file_path or ''
+            thumb_url = yt.thumb_file_path or ''
+            if not thumb_url and yt_url:
+                import re
+                yt_match = re.search(r'(?:v=|\/embed\/|\/1\/|\/v\/|https:\/\/youtu\.be\/|\/e\/)([^"&?\/\s]{11})', yt_url)
+                if yt_match:
+                    thumb_url = f"https://img.youtube.com/vi/{yt_match.group(1)}/hqdefault.jpg"
+
             data.append({
                 'id': yt.id,
-                'url': yt.file_path,
-                'thumb': yt.thumb_file_path or '/static/admin/img/youtube-icon.png',
-                'name': yt.file_path
+                'url': yt_url,
+                'thumb': thumb_url,
+                'name': yt_url,
+                'type': 'youtube'
             })
             
     return JsonResponse({

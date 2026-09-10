@@ -659,7 +659,6 @@ class UploadForm(forms.ModelForm):
             "format",
             "video_id",
             "youtube",
-            "aws_url",
             "subject",
             "media",
             "status",
@@ -688,10 +687,6 @@ class UploadForm(forms.ModelForm):
             }),
             "youtube": forms.Select(attrs={
                 "class": "form-control"
-            }),
-            "aws_url": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "AWS file URL (optional)"
             }),
             "subject": forms.Select(attrs={
                 "class": "form-control"
