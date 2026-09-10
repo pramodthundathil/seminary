@@ -168,7 +168,7 @@ MIDDLEWARE = [
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 ROOT_URLCONF = 'seminary.urls'
 
@@ -321,7 +321,7 @@ if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
             },
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
 else:
