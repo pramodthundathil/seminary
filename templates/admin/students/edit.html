@@ -664,10 +664,10 @@
                                         <input type="file" class="form-control-custom" name="photo" accept="image/*">
                                         {% if student.photo %}
                                         <div class="file-preview-box">
-                                            <img src="/media/{{ student.photo }}" class="file-preview-avatar" alt="Current Photo">
+                                            <img src="{{ student.get_photo_url }}" class="file-preview-avatar" alt="Current Photo">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current Photo:</span>
-                                                <a href="/media/{{ student.photo }}" target="_blank" class="small text-primary text-decoration-underline">View current photo</a>
+                                                <a href="{{ student.get_photo_url }}" target="_blank" class="small text-primary text-decoration-underline">View current photo</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_photo" value="1" id="clearPhoto">
@@ -693,7 +693,7 @@
                                         <div class="file-preview-box">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current File:</span>
-                                                <a href="/media/{{ student.certificate1 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate1 }}</a>
+                                                <a href="{{ student.get_certificate1_url }}" target="_blank" class="small text-primary text-decoration-underline">View Certificate 1</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_certificate1" value="1" id="clearCert1">
@@ -711,7 +711,7 @@
                                         <div class="file-preview-box">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current File:</span>
-                                                <a href="/media/{{ student.certificate2 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate2 }}</a>
+                                                <a href="{{ student.get_certificate2_url }}" target="_blank" class="small text-primary text-decoration-underline">View Certificate 2</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_certificate2" value="1" id="clearCert2">
@@ -731,7 +731,7 @@
                                         <div class="file-preview-box">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current File:</span>
-                                                <a href="/media/{{ student.certificate3 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate3 }}</a>
+                                                <a href="{{ student.get_certificate3_url }}" target="_blank" class="small text-primary text-decoration-underline">View Certificate 3</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_certificate3" value="1" id="clearCert3">
@@ -749,7 +749,7 @@
                                         <div class="file-preview-box">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current File:</span>
-                                                <a href="/media/{{ student.certificate4 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate4 }}</a>
+                                                <a href="{{ student.get_certificate4_url }}" target="_blank" class="small text-primary text-decoration-underline">View Certificate 4</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_certificate4" value="1" id="clearCert4">
@@ -769,7 +769,7 @@
                                         <div class="file-preview-box">
                                             <div class="file-preview-info">
                                                 <span class="d-block font-weight-bold">Current File:</span>
-                                                <a href="/media/{{ student.certificate5 }}" target="_blank" class="small text-primary text-decoration-underline">{{ student.certificate5 }}</a>
+                                                <a href="{{ student.get_certificate5_url }}" target="_blank" class="small text-primary text-decoration-underline">View Certificate 5</a>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="clear_certificate5" value="1" id="clearCert5">

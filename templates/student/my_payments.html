@@ -271,6 +271,11 @@
                 <div class="details">
                     {% if balance_due > 0 %}
                     Remaining payable amount
+                    <div class="mt-2">
+                        <a href="{% url 'student_payment_input' %}" class="btn btn-sm btn-light text-danger font-weight-bold px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" style="border-radius: 20px; font-size: 0.78rem; text-decoration: none;">
+                            <i class="bi bi-credit-card-fill"></i> Pay Balance
+                        </a>
+                    </div>
                     {% else %}
                     All balances cleared!
                     {% endif %}
@@ -296,6 +301,7 @@
                             <th>Amount</th>
                             <th>Collection State</th>
                             <th>Timestamp</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -334,6 +340,17 @@
                             </td>
                             <td>
                                 <span class="text-muted small">{{ p.created_at|default:"N/A" }}</span>
+                            </td>
+                            <td>
+                                {% if not p.is_paid %}
+                                <a href="{% url 'student_repay_invoice' p.id %}" class="btn btn-sm text-white font-weight-bold px-3 py-1 d-inline-flex align-items-center gap-1 shadow-sm" style="background: var(--gradient-primary); border-radius: 20px; font-size: 0.8rem; border: none; text-decoration: none;">
+                                    <i class="bi bi-arrow-repeat"></i> Pay Again
+                                </a>
+                                {% else %}
+                                <span class="text-muted small d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-check-circle-fill text-success"></i> Paid
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

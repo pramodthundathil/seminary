@@ -187,14 +187,15 @@
 <style>
     .payment-card {
         background: white;
-        padding: 20px;
+        padding: 24px;
         border: 1px solid var(--gray-200);
-        border-radius: 8px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .payment-info-title {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 700;
         color: var(--text-dark);
         margin-bottom: 6px;
     }
@@ -202,91 +203,139 @@
     .payment-info-text {
         font-size: 13px;
         color: var(--text-light);
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
 
-    .button-group {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 11px 20px;
-        border-radius: 5px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
+    .btn-direct-pay {
+        width: 100%;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
         border: none;
+        border-radius: 8px;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-direct-pay:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        color: white;
     }
 
     .btn-secondary {
+        width: 100%;
+        padding: 10px 16px;
         background: white;
         border: 1px solid var(--gray-300);
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-100);
-    }
-
-    .btn-paypal {
-        background: #FFC439;
-        color: #003087;
-        font-weight: 600;
-        border: 1px solid #F0B429;
-    }
-
-    .btn-paypal:hover {
-        background: #F0B429;
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--text-dark);
+        cursor: pointer;
+        margin-top: 10px;
     }
 
     .security-note {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         background: var(--light-cyan);
         padding: 10px;
-        border-radius: 4px;
-        margin-top: 14px;
+        border-radius: 6px;
+        margin-top: 16px;
         font-size: 12px;
+        color: var(--dark-navy);
+        font-weight: 500;
     }
 </style>
 
 <div class="payment-card">
 
-    <div class="payment-info-title">Payment Method</div>
+    <div class="payment-info-title">Complete Payment</div>
     <div class="payment-info-text">
-        Complete your payment securely using PayPal or go back to edit details.
+        Click below to process and confirm your payment directly on this screen.
     </div>
 
-    <div class="button-group">
-        <button class="btn btn-secondary" onclick="goBack()">
-            ⬅ Back
-        </button>
+    <!-- Direct Same-Screen Payment Button -->
+    <button class="btn-direct-pay" id="payNowBtn" onclick="processDirectPayment()">
+        <i class="bi bi-shield-lock-fill"></i> Pay ${{ payment.amount|default:'0.00' }} USD Now
+    </button>
 
+    <div class="text-center mt-3">
+        <a href="javascript:void(0)" onclick="togglePaypalContainer()" style="font-size: 0.82rem; color: var(--primary-dark); text-decoration: underline; font-weight: 500;">
+            <i class="bi bi-paypal"></i> Or Pay via PayPal Express
+        </a>
     </div>
-    <div id="paypal-button-container" style="margin-top: 15px; min-height: 50px;"></div>
 
+    <!-- Collapsible PayPal Container -->
+    <div id="paypal-button-wrapper" style="display: none; margin-top: 15px; min-height: 50px;">
+        <div id="paypal-button-container"></div>
+    </div>
+
+    <button class="btn-secondary" onclick="goBack()">
+        ⬅ Back to My Payments
+    </button>
 
     <div class="security-note">
-        🔒 Your payment is secured with 256-bit SSL encryption
+        🔒 Secured with 256-bit SSL Encryption
     </div>
 
-
 </div>
-<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
+
+<script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID|default:'sb' }}&currency=USD"></script>
 
 <script>
+    function processDirectPayment() {
+        const btn = document.getElementById("payNowBtn");
+        if (btn) btn.disabled = true;
+        
+        document.getElementById("loadingOverlay").style.display = "flex";
+
+        fetch("{% url 'process_direct_payment' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                amount: "{{ payment.amount }}"
+            })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === "success") {
+                window.location.href = result.redirect_url || "/student/payment-success/";
+            } else {
+                document.getElementById("loadingOverlay").style.display = "none";
+                if (btn) btn.disabled = false;
+                alert("Payment processing failed: " + (result.message || "Unknown error"));
+            }
+        })
+        .catch(err => {
+            console.error("Direct payment error:", err);
+            document.getElementById("loadingOverlay").style.display = "none";
+            if (btn) btn.disabled = false;
+            alert("Error processing payment. Please try again.");
+        });
+    }
+
+    function togglePaypalContainer() {
+        const wrapper = document.getElementById("paypal-button-wrapper");
+        if (wrapper) {
+            wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
+        }
+    }
 
     paypal.Buttons({
-
-        // STEP A — Ask Django backend to CREATE order
-        createOrder: function () {
-            document.getElementById("loadingOverlay").style.display = "flex";
+        createOrder: function (data, actions) {
             return fetch("/student/create-paypal-order/", {
                 method: "POST",
                 headers: {
@@ -294,24 +343,30 @@
                     "X-CSRFToken": "{{ csrf_token }}"
                 },
                 body: JSON.stringify({
-                    amount: "{{ payment.amount }}"
+                    amount: "{{ payment.amount|default:'10.00' }}"
                 })
             })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error("Failed to create order");
+            .then(res => {
+                return res.json().then(orderData => {
+                    if (!res.ok || orderData.error || !orderData.orderID) {
+                        var msg = (orderData && orderData.details) ? 
+                            (typeof orderData.details === 'object' ? JSON.stringify(orderData.details) : orderData.details) 
+                            : "Failed to create order";
+                        throw new Error(msg);
                     }
-                    return res.json();
-                })
-                .then(data => data.orderID)
-                .catch(err => {
-                    console.error(err);
-                    document.getElementById("loadingOverlay").style.display = "none";
-                    alert("Error initiating PayPal checkout. Please try again.");
+                    return orderData.orderID;
                 });
+            })
+            .catch(err => {
+                console.error("PayPal order error:", err);
+                alert("Error initiating PayPal checkout: " + (err.message || err));
+                if (actions && typeof actions.reject === 'function') {
+                    return actions.reject(err);
+                }
+                throw err;
+            });
         },
 
-        // STEP B — After PayPal approves payment
         onApprove: function (data) {
             document.getElementById("loadingOverlay").style.display = "flex";
             return fetch("/student/capture-paypal-order/", {
@@ -324,25 +379,25 @@
                     orderID: data.orderID
                 })
             })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error("Capture failed");
-                    }
-                    return res.json();
-                })
-                .then(result => {
-                    if (result.status === "success") {
-                        window.location.href = "/student/payment-success/";
-                    } else {
-                        document.getElementById("loadingOverlay").style.display = "none";
-                        alert("Payment capture failed!");
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Capture failed");
+                }
+                return res.json();
+            })
+            .then(result => {
+                if (result.status === "success") {
+                    window.location.href = "/student/payment-success/";
+                } else {
                     document.getElementById("loadingOverlay").style.display = "none";
-                    alert("Error capturing payment. Please contact support.");
-                });
+                    alert("Payment capture failed!");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("loadingOverlay").style.display = "none";
+                alert("Error capturing payment. Please contact support.");
+            });
         },
 
         onCancel: function (data) {
@@ -356,16 +411,8 @@
 
     }).render('#paypal-button-container');
 
-
-
     function goBack() {
-        if (confirm("Go back and edit payment details?")) {
-            window.history.back();
-        }
-    }
-
-    function proceedPayment() {
-        alert("Redirecting to PayPal...");
+        window.location.href = "{% url 'student_my_payments' %}";
     }
 </script>
 

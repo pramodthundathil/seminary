@@ -1,5 +1,5 @@
-{# templates/admin/uploads/uploads_view.html #}
 {% extends 'admin/index.html' %}
+{% load custom_filters %}
 {% block content %}
 
 <div class="gallery-container">
@@ -9,7 +9,7 @@
             <i class="fas fa-arrow-left"></i> Back to Uploads
         </a>
         <a href="{% url 'uploads_edit' upload.id %}" class="btn btn-primary">
-            <i class="fas fa-edit"></i> Edit
+            <i class="fas fa-edit"></i> Edit Upload
         </a>
     </div>
 
@@ -27,17 +27,19 @@
                     <dd class="col-md-9">{{ upload.description|default:"-" }}</dd>
 
                     <dt class="col-md-3">Format</dt>
-                    <dd class="col-md-9">{{ upload.format|upper }}</dd>
+                    <dd class="col-md-9"><span class="badge bg-info text-dark" style="font-size: 0.9rem;">{{ upload.format|upper }}</span></dd>
 
                     <dt class="col-md-3">Subject</dt>
                     <dd class="col-md-9">{{ upload.subject|default:"-" }}</dd>
 
-                    <dt class="col-md-3">AWS URL</dt>
+                    <dt class="col-md-3">AWS / File URL</dt>
                     <dd class="col-md-9">
                         {% if upload.aws_url %}
-                        <a href="{{ upload.aws_url }}" target="_blank">{{ upload.aws_url }}</a>
+                        <a href="{{ upload.aws_url|media_url }}" target="_blank" class="text-break"><i class="fas fa-external-link-alt me-1"></i> {{ upload.aws_url|media_url }}</a>
+                        {% elif upload.media %}
+                        <a href="{{ upload.media.file_path|media_url }}" target="_blank" class="text-break"><i class="fas fa-external-link-alt me-1"></i> {{ upload.media.file_path|media_url }}</a>
                         {% else %}
-                        -
+                        <span class="text-muted">No URL set</span>
                         {% endif %}
                     </dd>
 
@@ -59,36 +61,60 @@
             </div>
 
             <div class="col-md-4">
-                <div class="card p-3 bg-light">
-                    <h5 class="mb-3">Preview</h5>
-                    <div
-                        style="background: #000; min-height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden;">
+                <div class="card p-3 bg-light border-0 shadow-sm">
+                    <h5 class="mb-3 fw-bold"><i class="fas fa-play-circle text-primary me-2"></i> Media Preview</h5>
+                    <div style="background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; position: relative;">
+                        
+                        {# 1. Direct Media File attached to Upload #}
                         {% if upload.media %}
-                        {% if upload.media.media_type == 'image' %}
-                        <img src="{{ upload.media.file_path.url }}" style="max-width: 100%; max-height: 300px;">
-                        {% else %}
-                        <div class="text-center text-white">
-                            <i class="fas fa-file fa-4x mb-2"></i><br>
-                            {{ upload.media.file_name }}
-                        </div>
-                        {% endif %}
+                            {% if upload.media.media_type == 'image' or upload.format in 'jpg,jpeg,png,gif,webp' %}
+                                <img src="{{ upload.media.file_path|media_url }}" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                            {% else %}
+                                <video controls style="width: 100%; max-height: 300px;" preload="metadata">
+                                    <source src="{{ upload.media.file_path|media_url }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+
+                        {# 2. AWS / S3 Video URL #}
+                        {% elif upload.aws_url %}
+                            {% if upload.format in 'jpg,jpeg,png,gif,webp' %}
+                                <img src="{{ upload.aws_url|media_url }}" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                            {% else %}
+                                <video controls style="width: 100%; max-height: 300px;" preload="metadata">
+                                    <source src="{{ upload.aws_url|media_url }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+
+                        {# 3. Linked Video Object #}
                         {% elif upload.video_id %}
-                        {% if upload.video_id.media %}
-                        <video controls style="max-width: 100%; max-height: 300px;">
-                            <source src="{{ upload.video_id.media.file_path.url }}">
-                            Your browser does not support the video tag.
-                        </video>
-                        {% elif upload.video_id.youtube %}
-                        <iframe width="100%" height="250"
-                            src="https://www.youtube.com/embed/{{ upload.video_id.youtube.file_path|slice:'-11:' }}"
-                            frameborder="0" allowfullscreen></iframe>
-                        {% endif %}
+                            {% if upload.video_id.media %}
+                                <video controls style="width: 100%; max-height: 300px;" preload="metadata">
+                                    <source src="{{ upload.video_id.media.file_path|media_url }}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% elif upload.video_id.youtube %}
+                                <iframe width="100%" height="250"
+                                    src="https://www.youtube.com/embed/{{ upload.video_id.youtube.file_path|youtube_id }}"
+                                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            {% endif %}
+
+                        {# 4. Linked YouTube Video #}
                         {% elif upload.youtube %}
-                        <iframe width="100%" height="250"
-                            src="https://www.youtube.com/embed/{{ upload.youtube.file_path|slice:'-11:' }}"
-                            frameborder="0" allowfullscreen></iframe>
+                            <iframe width="100%" height="250"
+                                src="https://www.youtube.com/embed/{{ upload.youtube.file_path|youtube_id }}"
+                                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+                        {# 5. No Media Attached State #}
                         {% else %}
-                        <p class="text-white-50 mb-0">No Preview Available</p>
+                            <div class="text-center text-white p-4">
+                                <i class="fas fa-video-slash fa-3x mb-3 text-secondary"></i>
+                                <p class="text-white-50 mb-3 small">No video or media file attached to this record yet.</p>
+                                <a href="{% url 'uploads_edit' upload.id %}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <i class="fas fa-plus me-1"></i> Attach Video / Media
+                                </a>
+                            </div>
                         {% endif %}
                     </div>
                 </div>

@@ -1311,6 +1311,77 @@ class Students(models.Model):
     def __str__(self):
         return f"{self.first_name or ''} {self.last_name or ''}"
 
+    def _resolve_media_url(self, val):
+        if not val:
+            return ''
+        val_str = str(val).strip()
+        if 'homesreekanthkylmpublic' in val_str or 'cwamp64wwwtrinity' in val_str:
+            return ''
+        if val_str.isdigit():
+            try:
+                from home.models import MediaLibrary
+                ml = MediaLibrary.objects.filter(id=int(val_str)).first()
+                if ml and ml.file_path:
+                    val_str = str(ml.file_path)
+            except Exception:
+                pass
+        if val_str.startswith('http://') or val_str.startswith('https://'):
+            return val_str
+        clean_path = val_str.lstrip('/')
+        if clean_path.startswith('media/'):
+            clean_path = clean_path[6:]
+
+        import os
+        from django.conf import settings
+
+        prefixes = [
+            '',
+            'uploads/students/',
+            'uploads/certificates/1/',
+            'uploads/certificates/2/',
+            'uploads/certificates/3/',
+            'uploads/certificates/4/',
+            'uploads/certificates/5/',
+            'uploads/',
+            'student_photos/',
+            'student_certificates/'
+        ]
+        
+        media_root = getattr(settings, 'MEDIA_ROOT', os.path.join(settings.BASE_DIR, 'media'))
+        matched_path = clean_path
+        for p in prefixes:
+            candidate = p + clean_path
+            if os.path.exists(os.path.join(media_root, candidate)):
+                matched_path = candidate
+                break
+
+        base_url = settings.MEDIA_URL if settings.MEDIA_URL.endswith('/') else settings.MEDIA_URL + '/'
+        return base_url + matched_path
+
+    @property
+    def get_photo_url(self):
+        return self._resolve_media_url(self.photo)
+
+    @property
+    def get_certificate1_url(self):
+        return self._resolve_media_url(self.certificate1)
+
+    @property
+    def get_certificate2_url(self):
+        return self._resolve_media_url(self.certificate2)
+
+    @property
+    def get_certificate3_url(self):
+        return self._resolve_media_url(self.certificate3)
+
+    @property
+    def get_certificate4_url(self):
+        return self._resolve_media_url(self.certificate4)
+
+    @property
+    def get_certificate5_url(self):
+        return self._resolve_media_url(self.certificate5)
+
     def get_full_name(self):
         """Returns the student's full name"""
         parts = [self.first_name]

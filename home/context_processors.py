@@ -87,7 +87,7 @@ def role_context(request):
     role = ""
     if request.user.is_authenticated:
         user_role = request.user.user_roles.first()
-        if user_role:
+        if user_role and user_role.role and user_role.role.name:
             role = user_role.role.name.lower().replace(" ", "_")  
 
     return {

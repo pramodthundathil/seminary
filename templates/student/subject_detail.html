@@ -1,5 +1,6 @@
 {% extends 'student/index.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block body_class %}no-right{% endblock %}
 
@@ -185,11 +186,11 @@
                             <div class="action-btn-wrapper">
                                 {% if ref.reference_file %}
                                     {% if ref.format == 'PDF' %}
-                                    <button onclick="openPdfModal('{{ ref.reference_file.file_path.url }}', '{{ ref.title|escapejs }}')" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    <button onclick="openPdfModal('{{ ref.reference_file.file_path|media_url }}', '{{ ref.title|escapejs }}')" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                                         <i class="bi bi-eye me-1"></i> View
                                     </button>
                                     {% else %}
-                                    <a href="{{ ref.reference_file.file_path.url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    <a href="{{ ref.reference_file.file_path|media_url }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                                         <i class="bi bi-cloud-download me-1"></i> Download
                                     </a>
                                     {% endif %}

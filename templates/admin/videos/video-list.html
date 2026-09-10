@@ -1,4 +1,5 @@
 {% extends 'admin/index.html' %}
+{% load custom_filters %}
 {% block content %}
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -29,10 +30,9 @@
                     <td>{{ video.id }}</td>
                     <td>
                         {% if video.youtube %}
-                            {% load custom_filters %}
                             {% with video_id=video.youtube.file_path|youtube_id %}
-                                {% if video.youtube.thumb_file_path %}
-                                    <img src="{{ video.youtube.thumb_file_path }}" 
+                                {% if video.youtube.thumb_file_path and not video.youtube.thumb_file_path|is_video %}
+                                    <img src="{{ video.youtube.thumb_file_path|media_url }}" 
                                          style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
                                          alt="{{ video.title }}">
                                 {% elif video_id %}
@@ -49,10 +49,33 @@
                                     </div>
                                 {% endif %}
                             {% endwith %}
-                        {% elif video.media and video.media.thumb_file_path %}
-                            <img src="{{ video.media.thumb_file_path }}" 
-                                 style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
-                                 alt="{{ video.title }}">
+                        {% elif video.media %}
+                            {% with thumb_path=video.media.thumb_file_path|default:video.media.file_path %}
+                                {% if thumb_path %}
+                                    {% with full_url=thumb_path|media_url %}
+                                        {% if thumb_path|is_video or video.media.media_type == 'video' %}
+                                            <video src="{{ full_url }}#t=0.5" 
+                                                   preload="metadata" 
+                                                   muted 
+                                                   playsinline 
+                                                   style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);background:#000;">
+                                            </video>
+                                        {% else %}
+                                            <img src="{{ full_url }}" 
+                                                 style="width:120px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--gray-200);" 
+                                                 alt="{{ video.title }}"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div style="width:120px;height:80px;background:var(--gray-100);display:none;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                                <i class="fas fa-video" style="font-size:32px;color:var(--gray-400);"></i>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <div style="width:120px;height:80px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
+                                        <i class="fas fa-video" style="font-size:32px;color:var(--gray-400);"></i>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
                         {% else %}
                             <div style="width:120px;height:80px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;border-radius:8px;border:2px solid var(--gray-200);">
                                 <i class="fas fa-video" style="font-size:32px;color:var(--gray-400);"></i>

@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
+from home.views import media_fallback_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('home.urls')),
@@ -26,7 +28,8 @@ urlpatterns = [
     path('student/', include('student.urls')),
     path('church/', include('church.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('media/<path:media_path>', media_fallback_view, name='media_fallback'),
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

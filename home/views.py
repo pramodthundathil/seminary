@@ -18,7 +18,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.utils.crypto import get_random_string
 from django.db.models import Q, Count
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
@@ -625,9 +625,8 @@ def signup_student(request):
                         messages.error(request, 'Photo must be in JPG, PNG, or GIF format.')
                         return render(request, 'site_pages/student_register.html')
                     
-                    fs = FileSystemStorage(location='media/student_photos/')
-                    filename = fs.save(f"{student_id}_{photo.name}", photo)
-                    photo_path = f"student_photos/{filename}"
+                    filename = default_storage.save(f"student_photos/{student_id}_{photo.name}", photo)
+                    photo_path = filename
                 
                 # Upload certificates
                 for i in range(1, 6):
@@ -646,9 +645,8 @@ def signup_student(request):
                             messages.error(request, f'Certificate {i} must be in PDF, JPG, PNG, DOC, or DOCX format.')
                             return render(request, 'site_pages/student_register.html')
                         
-                        fs = FileSystemStorage(location='media/student_certificates/')
-                        filename = fs.save(f"{student_id}_cert{i}_{cert.name}", cert)
-                        certificate_paths[i-1] = f"student_certificates/{filename}"
+                        filename = default_storage.save(f"student_certificates/{student_id}_cert{i}_{cert.name}", cert)
+                        certificate_paths[i-1] = filename
                 
                 # Get language instance
                 language_id = request.POST.get('language')
@@ -1891,3 +1889,50 @@ def chatbot_api_view(request):
             "reply": "I encountered an unexpected issue. Please reach out via our [Contact Us](/contact-us/) page or try again in a moment.",
             "message": str(e)
         }, status=500)
+
+
+def media_fallback_view(request, media_path):
+    """
+    Catch-all view for legacy /media/<media_path> requests.
+    Resolves numeric IDs (e.g. 3783) and relative file paths directly to S3 URLs.
+    """
+    from django.conf import settings
+    from django.http import Http404
+    clean_path = str(media_path).strip('/')
+    if 'homesreekanthkylmpublic' in clean_path or 'cwamp64wwwtrinity' in clean_path:
+        raise Http404("Invalid legacy file reference")
+    if clean_path.isdigit():
+        from home.models import MediaLibrary
+        ml = MediaLibrary.objects.filter(id=int(clean_path)).first()
+        if ml and ml.file_path:
+            clean_path = str(ml.file_path).lstrip('/')
+
+    if clean_path.startswith('media/'):
+        clean_path = clean_path[6:]
+
+    prefixes = [
+        '',
+        'uploads/students/',
+        'uploads/certificates/1/',
+        'uploads/certificates/2/',
+        'uploads/certificates/3/',
+        'uploads/certificates/4/',
+        'uploads/certificates/5/',
+        'uploads/',
+        'student_photos/',
+        'student_certificates/'
+    ]
+    
+    media_root = getattr(settings, 'MEDIA_ROOT', os.path.join(settings.BASE_DIR, 'media'))
+    matched_path = clean_path
+    for p in prefixes:
+        candidate = p + clean_path
+        if os.path.exists(os.path.join(media_root, candidate)):
+            matched_path = candidate
+            break
+
+    s3_domain = getattr(settings, 'AWS_S3_CUSTOM_DOMAIN', None)
+    if s3_domain:
+        return redirect(f"https://{s3_domain}/{matched_path}")
+
+    return redirect(f"{settings.MEDIA_URL}{matched_path}")

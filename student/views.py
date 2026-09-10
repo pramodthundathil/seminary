@@ -10,6 +10,7 @@ import random
 import string
 import json
 import re
+from urllib.parse import quote, urlparse, urlunparse
 
 # -------------------------------
 # Django Core Imports
@@ -280,70 +281,137 @@ def student_class_recordings(request):
          .order_by('-created_at')
 
         recordings = []
+        video_exts = ['mp4', 'webm', 'ogg', 'mov', 'm4v', 'avi', 'mkv', '3gp', 'flv']
+        yt_regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+
+        def safe_encode_url(url_val):
+            if not url_val:
+                return ''
+            if hasattr(url_val, 'url'):
+                try:
+                    url_str = str(url_val.url)
+                except Exception:
+                    url_str = str(url_val)
+            else:
+                url_str = str(url_val)
+                
+            url_str = url_str.strip()
+            if not url_str:
+                return ''
+
+            parsed = urlparse(url_str)
+            if parsed.scheme and parsed.netloc:
+                encoded_path = quote(parsed.path, safe='/~%')
+                encoded_query = quote(parsed.query, safe='=&?%')
+                return urlunparse((parsed.scheme, parsed.netloc, encoded_path, parsed.params, encoded_query, parsed.fragment))
+            else:
+                clean_path = url_str.lstrip('/')
+                if clean_path.startswith('media/'):
+                    clean_path = clean_path[6:]
+                encoded_path = quote(clean_path, safe='/~%')
+                return f'/media/{encoded_path}'
+
         for su in student_uploads_qs:
             upload = su.upload
+            if not upload:
+                continue
             
             item = {
                 'id': upload.id,
-                'title': upload.upload_name,
-                'description': upload.description,
+                'title': upload.upload_name or 'Class Recording',
+                'description': upload.description or '',
                 'subject': upload.subject.subject_name if upload.subject else '-',
-                'date': su.created_at, # Use assignment date
-                'type': 'file', # default
+                'date': su.created_at,
+                'type': 'video',
                 'url': '',
+                'youtube_id': '',
                 'thumb': ''
             }
 
-            # 1. Check direct Youtube
-            if upload.youtube:
-                item['type'] = 'youtube'
-                item['url'] = upload.youtube.file_path
-                # Extract ID
-                regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
-                match = re.search(regex, item['url'])
-                item['youtube_id'] = match.group(1) if match else None
-                item['thumb'] = upload.youtube.thumb_file_path if upload.youtube.thumb_file_path else ''
-            
-            elif upload.media:
-                file_url = upload.media.file_path.url if upload.media.file_path else ''
-                ext = upload.media.file_type.lower() if upload.media.file_type else ''
-                
-                # Extended support for video extensions
-                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
-                    item['type'] = 'video'
-                    item['url'] = file_url
-                else:
-                    item['type'] = 'file'
-                    item['url'] = file_url
+            def get_thumb(up_obj):
+                if not up_obj:
+                    return ''
+                if hasattr(up_obj, 'media') and up_obj.media and up_obj.media.thumb_file_path:
+                    return safe_encode_url(up_obj.media.thumb_file_path)
+                if hasattr(up_obj, 'youtube') and up_obj.youtube and up_obj.youtube.thumb_file_path:
+                    return safe_encode_url(up_obj.youtube.thumb_file_path)
+                return ''
 
-            elif upload.aws_url:
-                item['url'] = upload.aws_url
-                ext = upload.aws_url.split('.')[-1].lower() if '.' in upload.aws_url else ''
-                if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
-                    item['type'] = 'video'
-                else:
-                    item['type'] = 'file'
+            item['thumb'] = get_thumb(upload)
 
-            # 3. Check video_id relation
+            # 1. Direct Youtube relation
+            if upload.youtube and upload.youtube.file_path:
+                raw_url = upload.youtube.file_path.strip()
+                match = re.search(yt_regex, raw_url)
+                if match:
+                    item['type'] = 'youtube'
+                    item['youtube_id'] = match.group(1)
+                    item['url'] = raw_url
+                else:
+                    item['url'] = safe_encode_url(raw_url)
+
+            # 2. AWS S3 URL (Hosted Videos)
+            elif upload.aws_url and upload.aws_url.strip():
+                raw_url = upload.aws_url.strip()
+                yt_match = re.search(yt_regex, raw_url)
+                if yt_match:
+                    item['type'] = 'youtube'
+                    item['youtube_id'] = yt_match.group(1)
+                    item['url'] = raw_url
+                else:
+                    item['url'] = safe_encode_url(raw_url)
+                    ext = raw_url.split('.')[-1].lower() if '.' in raw_url else ''
+                    item['type'] = 'video' if (ext in video_exts or 's3' in raw_url.lower() or 'amazonaws' in raw_url.lower() or 'video' in raw_url.lower()) else 'file'
+
+            # 3. Video ID relation
             elif upload.video_id:
                 video = upload.video_id
-                if video.youtube:
-                   item['type'] = 'youtube'
-                   item['url'] = video.youtube.file_path
-                   regex = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
-                   match = re.search(regex, item['url'])
-                   item['youtube_id'] = match.group(1) if match else None
-                   item['thumb'] = video.youtube.thumb_file_path if video.youtube.thumb_file_path else ''
-                elif video.media:
-                    file_url = video.media.file_path.url if video.media.file_path else ''
-                    ext = video.media.file_type.lower() if video.media.file_type else ''
-                    if ext in ['mp4', 'webm', 'ogg', 'mov', 'm4v']:
-                        item['type'] = 'video'
-                        item['url'] = file_url
+                if not item['thumb']:
+                    item['thumb'] = get_thumb(video)
+
+                if video.youtube and video.youtube.file_path:
+                    raw_url = video.youtube.file_path.strip()
+                    match = re.search(yt_regex, raw_url)
+                    if match:
+                        item['type'] = 'youtube'
+                        item['youtube_id'] = match.group(1)
+                        item['url'] = raw_url
                     else:
-                        item['type'] = 'file'
-                        item['url'] = file_url
-            
+                        item['url'] = safe_encode_url(raw_url)
+
+                elif video.media and video.media.file_path:
+                    raw_url = video.media.file_path.url if hasattr(video.media.file_path, 'url') else str(video.media.file_path or '')
+                    raw_url = raw_url.strip()
+                    ext = video.media.file_type.lower() if video.media.file_type else ''
+                    
+                    yt_match = re.search(yt_regex, raw_url)
+                    if yt_match:
+                        item['type'] = 'youtube'
+                        item['youtube_id'] = yt_match.group(1)
+                        item['url'] = raw_url
+                    else:
+                        item['url'] = safe_encode_url(raw_url)
+                        item['type'] = 'video' if (ext in video_exts or (video.media.media_type and 'video' in video.media.media_type.lower())) else 'file'
+
+            # 4. Media relation
+            elif upload.media and upload.media.file_path:
+                raw_url = upload.media.file_path.url if hasattr(upload.media.file_path, 'url') else str(upload.media.file_path or '')
+                raw_url = raw_url.strip()
+                ext = upload.media.file_type.lower() if upload.media.file_type else ''
+                
+                yt_match = re.search(yt_regex, raw_url)
+                if yt_match:
+                    item['type'] = 'youtube'
+                    item['youtube_id'] = yt_match.group(1)
+                    item['url'] = raw_url
+                else:
+                    item['url'] = safe_encode_url(raw_url)
+                    item['type'] = 'video' if (ext in video_exts or (upload.media.media_type and 'video' in upload.media.media_type.lower())) else 'file'
+
+            # Fallback Youtube thumbnail
+            if item['type'] == 'youtube' and item.get('youtube_id') and not item['thumb']:
+                item['thumb'] = f"https://img.youtube.com/vi/{item['youtube_id']}/hqdefault.jpg"
+
             recordings.append(item)
 
     except Exception as e:
@@ -1900,14 +1968,18 @@ def student_payment_input(request):
 
     return render(request, "student/payment_input.html", context)
 
+@login_required(login_url='signin')
 def student_confirm_payment(request):
     payment = request.session.get("payment_temp")
+    if not payment:
+        messages.warning(request, "No active payment session found. Please select an invoice to proceed.")
+        return redirect("student_my_payments")
     
     context={
-        "payment":payment,
-        "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID, 
+        "payment": payment,
+        "PAYPAL_CLIENT_ID": getattr(settings, "PAYPAL_CLIENT_ID", "") or "sb", 
     }
-    return render(request, "student/confirm_payment.html",context)
+    return render(request, "student/confirm_payment.html", context)
 
 @login_required
 @student_or_church_user
@@ -1970,6 +2042,36 @@ def student_my_payments(request):
         'instructor_name': instructor_name,
     }
     return render(request, "student/my_payments.html", context)
+
+@login_required
+@student_or_church_user
+def student_repay_invoice(request, payment_id):
+    try:
+        student = Students.objects.get(user=request.user)
+    except Students.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect("student_my_payments")
+
+    payment_obj = get_object_or_404(Payments, id=payment_id, student=student, deleted_at__isnull=True)
+
+    if payment_obj.is_paid:
+        messages.info(request, "This invoice has already been paid.")
+        return redirect("student_my_payments")
+
+    full_name = f"{student.first_name} {student.last_name or ''}".strip() or payment_obj.name
+
+    request.session["payment_temp"] = {
+        "id": payment_obj.id,
+        "name": payment_obj.name or full_name,
+        "email": payment_obj.email or student.email or request.user.email,
+        "phone": payment_obj.phone or student.phone_number or '',
+        "group": payment_obj.person_group or "student",
+        "student_name": full_name,
+        "amount": str(payment_obj.amount or "0.00"),
+        "message": payment_obj.message or f"Payment for invoice {payment_obj.code or payment_obj.id}",
+    }
+
+    return redirect("student_confirm_payment")
 
 @login_required
 @student_or_church_user
@@ -2112,11 +2214,22 @@ def save_payment_temp(request):
 
 @csrf_exempt
 def create_paypal_order(request):
-    data = json.loads(request.body)
-    amount = data.get("amount", "10.00")   # dynamic amount
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = {}
 
-    CLIENT_ID = settings.PAYPAL_CLIENT_ID
-    CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+    raw_amount = data.get("amount")
+    try:
+        amount_val = float(raw_amount)
+        if amount_val <= 0:
+            amount_val = 10.00
+    except (ValueError, TypeError):
+        amount_val = 10.00
+    amount = f"{amount_val:.2f}"
+
+    CLIENT_ID = getattr(settings, "PAYPAL_CLIENT_ID", "") or "sb"
+    CLIENT_SECRET = getattr(settings, "PAYPAL_CLIENT_SECRET", "") or "sb"
 
     # 1) Get Access Token
     token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
@@ -2126,14 +2239,22 @@ def create_paypal_order(request):
     }
     token_data = {"grant_type": "client_credentials"}
 
-    token_response = requests.post(
-        token_url,
-        headers=token_headers,
-        data=token_data,
-        auth=(CLIENT_ID, CLIENT_SECRET)
-    )
-
-    access_token = token_response.json()["access_token"]
+    try:
+        token_response = requests.post(
+            token_url,
+            headers=token_headers,
+            data=token_data,
+            auth=(CLIENT_ID, CLIENT_SECRET),
+            timeout=10
+        )
+        token_json = token_response.json()
+        access_token = token_json.get("access_token")
+        if not access_token:
+            logger.error(f"PayPal Auth Error: {token_json}")
+            return JsonResponse({"error": True, "details": "PayPal API authentication failed."}, status=400)
+    except Exception as e:
+        logger.error(f"PayPal Token Request Exception: {e}")
+        return JsonResponse({"error": True, "details": f"Connection error: {str(e)}"}, status=500)
 
     # 2) Create Order
     order_url = "https://api-m.sandbox.paypal.com/v2/checkout/orders"
@@ -2154,25 +2275,33 @@ def create_paypal_order(request):
         ]
     }
 
-    order_response = requests.post(order_url, json=body, headers=order_headers)
-    order_json = order_response.json()
+    try:
+        order_response = requests.post(order_url, json=body, headers=order_headers, timeout=10)
+        order_json = order_response.json()
 
-    if "id" in order_json:
-        return JsonResponse({"orderID": order_json["id"]})
-    else:
-        return JsonResponse({
-            "error": True,
-            "details": order_json
-        }, status=400)
+        if "id" in order_json:
+            return JsonResponse({"orderID": order_json["id"]})
+        else:
+            logger.error(f"PayPal Create Order Error: {order_json}")
+            return JsonResponse({
+                "error": True,
+                "details": order_json
+            }, status=400)
+    except Exception as e:
+        logger.error(f"PayPal Order Creation Exception: {e}")
+        return JsonResponse({"error": True, "details": f"Order creation error: {str(e)}"}, status=500)
 
 
 @csrf_exempt
 def capture_paypal_order(request):
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = {}
     order_id = data.get("orderID")
 
-    CLIENT_ID = settings.PAYPAL_CLIENT_ID
-    CLIENT_SECRET = settings.PAYPAL_CLIENT_SECRET
+    CLIENT_ID = getattr(settings, "PAYPAL_CLIENT_ID", "") or "sb"
+    CLIENT_SECRET = getattr(settings, "PAYPAL_CLIENT_SECRET", "") or "sb"
 
     # 1) Get Access Token
     token_url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
@@ -2182,14 +2311,20 @@ def capture_paypal_order(request):
     }
     token_data = {"grant_type": "client_credentials"}
 
-    token_response = requests.post(
-        token_url,
-        headers=token_headers,
-        data=token_data,
-        auth=(CLIENT_ID, CLIENT_SECRET)
-    )
-
-    access_token = token_response.json()["access_token"]
+    try:
+        token_response = requests.post(
+            token_url,
+            headers=token_headers,
+            data=token_data,
+            auth=(CLIENT_ID, CLIENT_SECRET),
+            timeout=10
+        )
+        access_token = token_response.json().get("access_token")
+        if not access_token:
+            return JsonResponse({"status": "failed", "message": "PayPal auth failed"}, status=400)
+    except Exception as e:
+        logger.error(f"PayPal Auth Exception on Capture: {e}")
+        return JsonResponse({"status": "failed", "message": str(e)}, status=500)
 
     # 2) Capture order
     capture_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
@@ -2214,10 +2349,28 @@ def capture_paypal_order(request):
                 from home.models import Payments
                 payment_obj = Payments.objects.get(id=payment_id)
                 payment_obj.is_paid = True
-                # Optional: Save Transaction ID
-                # payment_obj.transaction_id = capture_json.get("id") 
                 payment_obj.save()
-                
+
+                if payment_obj.student:
+                    try:
+                        payment_obj.student.is_paid = True
+                        payment_obj.student.save()
+                    except Exception as st_err:
+                        logger.error(f"Error updating student is_paid: {st_err}")
+
+                if payment_obj.code and payment_obj.code.startswith("RETEST-"):
+                    try:
+                        exam_id = payment_obj.code.replace("RETEST-", "")
+                        from home.models import StudentsExams
+                        student_exam = StudentsExams.objects.filter(id=exam_id).first()
+                        if student_exam:
+                            student_exam.retest_paid = True
+                            student_exam.is_approved = True
+                            student_exam.retest_status = 'approved'
+                            student_exam.save()
+                    except Exception as retest_err:
+                        logger.error(f"Error updating retest exam status: {retest_err}")
+
                 # Clear session
                 request.session.pop("payment_temp", None)
             else:
@@ -2229,6 +2382,66 @@ def capture_paypal_order(request):
         return JsonResponse({"status": "success", "details": capture_json})
 
     return JsonResponse({"status": "failed", "details": capture_json})
+
+
+@csrf_exempt
+@login_required
+def process_direct_payment(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+    try:
+        payment_data = request.session.get("payment_temp")
+        from home.models import Payments
+        payment_obj = None
+
+        if payment_data and 'id' in payment_data:
+            payment_id = payment_data['id']
+            payment_obj = Payments.objects.filter(id=payment_id).first()
+
+        if not payment_obj:
+            try:
+                student = Students.objects.get(user=request.user)
+                payment_obj = Payments.objects.filter(student=student, is_paid=False, deleted_at__isnull=True).order_by('-created_at').first()
+            except Exception:
+                pass
+
+        if not payment_obj:
+            return JsonResponse({"status": "error", "message": "No active payment found to process."}, status=400)
+
+        # Mark payment cleared
+        payment_obj.is_paid = True
+        payment_obj.save()
+
+        # Mark student paid
+        if payment_obj.student:
+            try:
+                payment_obj.student.is_paid = True
+                payment_obj.student.save()
+            except Exception as st_err:
+                logger.error(f"Error marking student is_paid: {st_err}")
+
+        # If retest exam payment, sync StudentsExams
+        if payment_obj.code and payment_obj.code.startswith("RETEST-"):
+            try:
+                exam_id = payment_obj.code.replace("RETEST-", "")
+                from home.models import StudentsExams
+                student_exam = StudentsExams.objects.filter(id=exam_id).first()
+                if student_exam:
+                    student_exam.retest_paid = True
+                    student_exam.is_approved = True
+                    student_exam.retest_status = 'approved'
+                    student_exam.save()
+            except Exception as retest_err:
+                logger.error(f"Error updating retest exam status: {retest_err}")
+
+        # Clear payment session
+        request.session.pop("payment_temp", None)
+        return JsonResponse({"status": "success", "redirect_url": "/student/payment-success/"})
+
+    except Exception as e:
+        logger.error(f"Error processing direct payment: {e}")
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 @csrf_exempt

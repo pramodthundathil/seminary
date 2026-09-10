@@ -762,7 +762,7 @@
                 <div class="profile-header-content">
                     <div class="profile-avatar-wrapper">
                         {% if student.photo %}
-                        <img src="/media/{{ student.photo }}" alt="Student Photo" class="profile-avatar">
+                        <img src="{{ student.get_photo_url }}" alt="Student Photo" class="profile-avatar">
                         {% else %}
                         <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&size=140&background=eff6ff&color=4f46e5&bold=true" alt="Placeholder" class="profile-avatar">
                         {% endif %}
@@ -1101,7 +1101,7 @@
                                         <div class="card-body text-center p-4">
                                             <div class="doc-icon-container mb-3"><i class="far fa-file-pdf fa-3x"></i></div>
                                             <h6 class="font-weight-bold text-dark mb-3" style="font-size: 0.92rem;">Certificate 1</h6>
-                                            <a href="/media/{{ student.certificate1 }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
+                                            <a href="{{ student.get_certificate1_url }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
                                         </div>
                                     </div>
                                 </div>
@@ -1112,7 +1112,7 @@
                                         <div class="card-body text-center p-4">
                                             <div class="doc-icon-container mb-3"><i class="far fa-file-pdf fa-3x"></i></div>
                                             <h6 class="font-weight-bold text-dark mb-3" style="font-size: 0.92rem;">Certificate 2</h6>
-                                            <a href="/media/{{ student.certificate2 }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
+                                            <a href="{{ student.get_certificate2_url }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
                                         </div>
                                     </div>
                                 </div>
@@ -1123,7 +1123,7 @@
                                         <div class="card-body text-center p-4">
                                             <div class="doc-icon-container mb-3"><i class="far fa-file-pdf fa-3x"></i></div>
                                             <h6 class="font-weight-bold text-dark mb-3" style="font-size: 0.92rem;">Certificate 3</h6>
-                                            <a href="/media/{{ student.certificate3 }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
+                                            <a href="{{ student.get_certificate3_url }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
                                         </div>
                                     </div>
                                 </div>
@@ -1134,7 +1134,7 @@
                                         <div class="card-body text-center p-4">
                                             <div class="doc-icon-container mb-3"><i class="far fa-file-pdf fa-3x"></i></div>
                                             <h6 class="font-weight-bold text-dark mb-3" style="font-size: 0.92rem;">Certificate 4</h6>
-                                            <a href="/media/{{ student.certificate4 }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
+                                            <a href="{{ student.get_certificate4_url }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
                                         </div>
                                     </div>
                                 </div>
@@ -1145,7 +1145,7 @@
                                         <div class="card-body text-center p-4">
                                             <div class="doc-icon-container mb-3"><i class="far fa-file-pdf fa-3x"></i></div>
                                             <h6 class="font-weight-bold text-dark mb-3" style="font-size: 0.92rem;">Certificate 5</h6>
-                                            <a href="/media/{{ student.certificate5 }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
+                                            <a href="{{ student.get_certificate5_url }}" target="_blank" class="btn btn-sm btn-custom btn-custom-secondary w-100">View File</a>
                                         </div>
                                     </div>
                                 </div>

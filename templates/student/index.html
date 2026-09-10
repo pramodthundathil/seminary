@@ -153,7 +153,7 @@
 
             <ul class="nav-links" id="navLinks">
                 <li class="nav-item">
-                    <a href="{% url role|add:'_home' %}" class="nav-link">
+                    <a href="{% url role|default:'student'|add:'_home' %}" class="nav-link">
                         <i class="bi bi-house-door"></i> Home
                     </a>
                 </li>
@@ -165,7 +165,7 @@
                             style="font-size: 0.8em; margin-left:auto;"></i>
                     </a>
                     <div class="dropdown">
-                        <a href="{% url role|add:'_subjects' %}"><i class="bi bi-book"></i> Subjects</a>
+                        <a href="{% url role|default:'student'|add:'_subjects' %}"><i class="bi bi-book"></i> Subjects</a>
                         <div class="sub-parent">
                             <a onclick="toggleSubmenu(event, this)">
                                 <span><i class="bi bi-pencil-square"></i> Assignment</span>
@@ -187,7 +187,7 @@
                             style="font-size: 0.8em; margin-left:auto;"></i>
                     </a>
                     <div class="dropdown">
-                        <a href="{% url role|add:'_subjects' %}"><i class="bi bi-book"></i> Subjects</a>
+                        <a href="{% url role|default:'student'|add:'_subjects' %}"><i class="bi bi-book"></i> Subjects</a>
                     </div>
                 </li>
                 {% endif %}
@@ -198,8 +198,8 @@
                             style="font-size: 0.8em; margin-left:auto;"></i>
                     </a>
                     <div class="dropdown">
-                        <a href="{% url role|add:'_exam_hall' %}"><i class="bi bi-pen"></i> Exam Hall</a>
-                        <a href="{% url role|add:'_score_card' %}"><i class="bi bi-bar-chart-fill"></i> Score Card</a>
+                        <a href="{% url role|default:'student'|add:'_exam_hall' %}"><i class="bi bi-pen"></i> Exam Hall</a>
+                        <a href="{% url role|default:'student'|add:'_score_card' %}"><i class="bi bi-bar-chart-fill"></i> Score Card</a>
                     </div>
                 </li>
 
@@ -210,7 +210,7 @@
                     </a>
                     <div class="dropdown">
                         <a href="{% url 'student_references' %}"><i class="bi bi-journals"></i> References</a>
-                        <a href="{% url role|add:'_class_recordings' %}"><i class="bi bi-play-circle"></i> Class
+                        <a href="{% url role|default:'student'|add:'_class_recordings' %}"><i class="bi bi-play-circle"></i> Class
                             Recordings</a>
                     </div>
                 </li>
@@ -223,8 +223,8 @@
                         <span style="font-weight: 600; font-size: 0.9rem;">My Account</span>
                     </div>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="{% url role|add:'_profile_view' %}"><i class="bi bi-person"></i> My Profile</a>
-                        <a href="{% url role|add:'_change_password' %}"><i class="bi bi-key"></i> Change Password</a>
+                        <a href="{% url role|default:'student'|add:'_profile_view' %}"><i class="bi bi-person"></i> My Profile</a>
+                        <a href="{% url role|default:'student'|add:'_change_password' %}"><i class="bi bi-key"></i> Change Password</a>
                         <div class="divider"></div>
                         <a href="{% url 'signout' %}" style="color: var(--danger)"><i class="bi bi-box-arrow-right"></i>
                             Logout</a>

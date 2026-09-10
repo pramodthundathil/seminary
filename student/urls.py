@@ -28,6 +28,7 @@ urlpatterns = [
     path("payment/save-temp/", views.save_payment_temp, name="save_payment_temp"),
     path("create-paypal-order/", views.create_paypal_order, name="create_paypal_order"),
     path("capture-paypal-order/", views.capture_paypal_order, name="capture_paypal_order"),
+    path("process-direct-payment/", views.process_direct_payment, name="process_direct_payment"),
     path("capture-retest-payment/", views.capture_retest_payment, name="capture_retest_payment"),
     path("payment-success/", views.payment_success, name="payment_success"),
     path("payment-failed/", views.payment_failed, name="payment_failed"),
@@ -38,6 +39,7 @@ urlpatterns = [
     path("reschedule-exam/", views.student_reschedule_exam, name="student_reschedule_exam"),
     path("payment-input/", views.student_payment_input, name="student_payment_input"),
     path("my-payments/", views.student_my_payments, name="student_my_payments"),
+    path("repay-invoice/<int:payment_id>/", views.student_repay_invoice, name="student_repay_invoice"),
 
     path("confirm-payment/", views.student_confirm_payment, name="student_confirm_payment"),
     path("register/", views.signup_student, name="signup_student"),

@@ -7,13 +7,14 @@
         border-radius: 12px;
         overflow: hidden;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         background: #fff;
     }
 
     .recording-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     }
 
     .media-container {
@@ -25,8 +26,10 @@
     .video-wrapper {
         position: relative;
         padding-bottom: 56.25%;
-        /* 16:9 */
+        /* 16:9 aspect ratio */
         height: 0;
+        overflow: hidden;
+        background: #111;
     }
 
     .video-wrapper iframe,
@@ -61,21 +64,6 @@
         color: #777;
     }
 
-    .file-icon {
-        font-size: 3em;
-        color: #ffc107;
-        margin-bottom: 15px;
-    }
-
-    .file-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 200px;
-        background: #f8f9fa;
-    }
-
     .video-facade {
         position: absolute;
         top: 0;
@@ -87,43 +75,47 @@
         align-items: center;
         justify-content: center;
         background: #000;
+        overflow: hidden;
     }
 
     .video-thumb {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.8;
-        transition: opacity 0.3s;
+        opacity: 0.85;
+        transition: opacity 0.3s, transform 0.3s;
     }
 
     .video-facade:hover .video-thumb {
-        opacity: 0.6;
+        opacity: 0.7;
+        transform: scale(1.03);
     }
 
     .play-button {
         position: absolute;
         width: 60px;
         height: 60px;
-        background: rgba(255, 0, 0, 0.8);
+        background: rgba(220, 53, 69, 0.9);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-size: 24px;
-        transition: transform 0.2s;
+        transition: transform 0.2s, background-color 0.2s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        z-index: 2;
     }
 
     .video-facade:hover .play-button {
-        transform: scale(1.1);
-        background: red;
+        transform: scale(1.15);
+        background: #ff0000;
     }
 </style>
 
 <div class="row mb-4">
     <div class="col-12">
-        <h2 class="mb-3"><i class="fas fa-video me-2"></i> {{ page_title }}</h2>
+        <h2 class="mb-3"><i class="fas fa-video me-2 text-danger"></i> {{ page_title }}</h2>
     </div>
 </div>
 
@@ -133,41 +125,47 @@
     <div class="col-lg-4 col-md-6">
         <div class="recording-card">
             <div class="media-container">
-                {% if rec.type == 'youtube' %}
                 <div class="video-wrapper">
-                    {% if rec.youtube_id %}
-                    <div class="video-facade" onclick="openVideoModal('youtube', '{{ rec.youtube_id }}', '{{ rec.title|escapejs }}')">
-                        <img src="{% if rec.thumb %}{{ rec.thumb }}{% else %}https://img.youtube.com/vi/{{ rec.youtube_id }}/hqdefault.jpg{% endif %}" alt="{{ rec.title }}" class="video-thumb">
-                        <div class="play-button">
-                            <i class="fas fa-play"></i>
+                    {% if rec.type == 'youtube' %}
+                        {% if rec.youtube_id %}
+                        <div class="video-facade recording-item"
+                             data-type="youtube"
+                             data-youtube-id="{{ rec.youtube_id }}"
+                             data-title="{{ rec.title }}"
+                             onclick="playRecording(this)">
+                            <img src="{% if rec.thumb %}{{ rec.thumb }}{% else %}https://img.youtube.com/vi/{{ rec.youtube_id }}/hqdefault.jpg{% endif %}" alt="{{ rec.title }}" class="video-thumb">
+                            <div class="play-button">
+                                <i class="fas fa-play" style="margin-left: 3px;"></i>
+                            </div>
                         </div>
-                    </div>
+                        {% else %}
+                        <div class="no-content d-flex align-items-center justify-content-center" style="height: 100%; padding: 20px;">
+                            <p class="mb-0 text-white">Invalid YouTube Link</p>
+                        </div>
+                        {% endif %}
                     {% else %}
-                    <div class="no-content" style="padding: 20px;">
-                        <p>Invalid YouTube URL</p>
-                    </div>
+                        {% if rec.url %}
+                        <div class="video-facade recording-item"
+                             data-type="video"
+                             data-url="{{ rec.url }}"
+                             data-title="{{ rec.title }}"
+                             onclick="playRecording(this)">
+                            {% if rec.thumb %}
+                                <img src="{{ rec.thumb }}" alt="{{ rec.title }}" class="video-thumb">
+                            {% else %}
+                                <video src="{{ rec.url }}#t=0.5" style="width:100%; height:100%; object-fit:cover; pointer-events:none;" preload="metadata" muted></video>
+                            {% endif %}
+                            <div class="play-button">
+                                <i class="fas fa-play" style="margin-left: 3px;"></i>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="no-content d-flex align-items-center justify-content-center" style="height: 100%; padding: 20px;">
+                            <p class="mb-0 text-white">Video file unavailable</p>
+                        </div>
+                        {% endif %}
                     {% endif %}
                 </div>
-                {% elif rec.type == 'video' %}
-                <div class="video-wrapper">
-                    <div class="video-facade" onclick="openVideoModal('local', '{{ rec.url }}', '{{ rec.title|escapejs }}')">
-                         <div class="play-button">
-                            <i class="fas fa-play"></i>
-                        </div>
-                        <video style="width:100%; height:100%; object-fit:cover;">
-                             <source src="{{ rec.url }}" type="video/mp4">
-                        </video>
-                       
-                    </div>
-                </div>
-                {% else %}
-                <div class="file-container">
-                    <i class="fas fa-file-alt file-icon"></i>
-                    <a href="{{ rec.url }}" class="btn btn-outline-primary btn-sm" target="_blank" download>
-                        <i class="fas fa-download"></i> Download File
-                    </a>
-                </div>
-                {% endif %}
             </div>
             <div class="card-body">
                 <div class="rec-title">{{ rec.title }}</div>
@@ -196,9 +194,9 @@
 <!-- Video Modal -->
 <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content" style="background-color: #000; color: #fff;">
-      <div class="modal-header" style="border-bottom: 1px solid #333;">
-        <h5 class="modal-title" id="videoModalLabel">Video Player</h5>
+    <div class="modal-content" style="background-color: #000; color: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
+      <div class="modal-header" style="border-bottom: 1px solid #222; padding: 12px 20px;">
+        <h5 class="modal-title fs-6" id="videoModalLabel">Video Player</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
@@ -215,25 +213,51 @@
     const modalVideoContainer = document.getElementById('modalVideoContainer');
     const modalTitle = document.getElementById('videoModalLabel');
 
-    function openVideoModal(type, source, title) {
+    function playRecording(element) {
+        const type = element.getAttribute('data-type');
+        let url = element.getAttribute('data-url') || '';
+        const youtubeId = element.getAttribute('data-youtube-id');
+        const title = element.getAttribute('data-title') || 'Class Recording';
+
         modalTitle.textContent = title;
         
-        if (type === 'youtube') {
-            // Changed to standard www.youtube.com and added autoplay=1
-            modalVideoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${source}?rel=0&modestbranding=1&autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
-        } else if (type === 'local') {
+        if (type === 'youtube' && youtubeId) {
+            modalVideoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%; height:100%; border:0;"></iframe>`;
+        } else if (url) {
+            let cleanUrl = url.trim().replace(/ /g, '%20');
             modalVideoContainer.innerHTML = `
-                <video controls autoplay controlsList="nodownload" oncontextmenu="return false;" style="width: 100%; height: 100%;">
-                    <source src="${source}" type="video/mp4">
-                    Your browser does not support the video tag.
+                <video id="classVideoPlayer" controls autoplay playsinline preload="auto" controlsList="nodownload" disablePictureInPicture oncontextmenu="return false;" style="width: 100%; height: 100%; object-fit: contain; background: #000;">
+                    <source src="${cleanUrl}" type="video/mp4">
+                    <source src="${cleanUrl}" type="video/webm">
+                    <source src="${cleanUrl}">
+                    Your browser does not support HTML5 video playback.
                 </video>`;
+            
+            const player = document.getElementById('classVideoPlayer');
+            if (player) {
+                let errorHandled = false;
+                player.onerror = function() {
+                    if (!errorHandled) {
+                        errorHandled = true;
+                        console.warn("HTML5 native video decoding failed, switching to embedded player fallback...");
+                        modalVideoContainer.innerHTML = `
+                            <iframe src="${cleanUrl}" style="width:100%; height:100%; border:0; background:#000;" allow="autoplay" allowfullscreen></iframe>
+                        `;
+                    }
+                };
+
+                player.load();
+                player.play().catch(function(e) {
+                    console.log("Autoplay unmuted blocked by browser policy:", e);
+                });
+            }
         }
         
         const modal = new bootstrap.Modal(videoModal);
         modal.show();
     }
 
-    // Clear video on modal close to stop playback
+    // Clear video on modal close to stop playback immediately
     videoModal.addEventListener('hidden.bs.modal', function () {
         modalVideoContainer.innerHTML = '';
     });
