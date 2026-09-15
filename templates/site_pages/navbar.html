@@ -12,6 +12,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                            <a class="nav-link" 
+                               href="{%url 'index' %}"
+                               >
+                                Home
+                            </a>
+                        </li>
                 {% for item in header_menu_items %}
                     {% if item.has_children %}
                         <!-- Parent item with children (dropdown) -->
