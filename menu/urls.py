@@ -243,6 +243,7 @@ urlpatterns = [
     path("admin/contact",views.contact_list, name='contact_list'),
     path('admin/contact/<int:contact_id>/view/', views.contact_view, name='contact_view'),
     path('contacts/delete/<int:id>/', views.contact_delete, name='contact_delete'),
+    path('contacts/bulk-delete/', views.contact_bulk_delete, name='contact_bulk_delete'),
     path('contacts/permanent-delete/<int:id>/', views.contact_permanent_delete, name='contact_permanent_delete'),
 
 

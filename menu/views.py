@@ -4708,6 +4708,23 @@ def contact_delete(request, id):
     return redirect('contact_list')
 
 @login_required
+@require_POST
+def contact_bulk_delete(request):
+    """
+    Soft delete multiple contact requests
+    """
+    contact_ids = request.POST.getlist('contact_ids')
+    
+    if contact_ids:
+        # Soft delete selected contacts
+        Contacts.objects.filter(id__in=contact_ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(contact_ids)} contact requests!')
+    else:
+        messages.warning(request, 'No contact requests selected for deletion.')
+        
+    return redirect('contact_list')
+
+@login_required
 def contact_permanent_delete(request, id):
     """
     Permanently delete a contact request from database

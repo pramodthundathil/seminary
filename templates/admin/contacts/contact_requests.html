@@ -25,33 +25,43 @@
     }
     
     .modal-body strong {
-        color: #333;
-        font-size: 14px;
+        color: #495057;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
+        font-weight: 600;
     }
     
     .modal-body p {
-        color: #666;
-        font-size: 14px;
+        color: #212529;
+        font-size: 1rem;
         margin: 0;
-        padding: 8px;
+        padding: 10px 12px;
         background: #f8f9fa;
-        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
     }
 </style>
 
 <div class="gallery-container">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h1>Contact Requests</h1>
+        <button type="submit" form="bulkDeleteForm" class="btn btn-danger" id="bulkDeleteBtn" disabled onclick="return confirm('Are you sure you want to delete selected contact requests?')">
+            <i class="fas fa-trash"></i> Delete Selected
+        </button>
     </div>
 
     <div class="table-container">
-        <table id="contactsTable" class="display" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
+        <form id="bulkDeleteForm" method="POST" action="{% url 'contact_bulk_delete' %}">
+            {% csrf_token %}
+            <table id="contactsTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                        <th>ID</th>
+                        <th>Name</th>
                     <!-- <th>Email</th> -->
                     <th>Subject</th>
                     <th>Created At</th>
@@ -62,6 +72,9 @@
             <tbody>
                 {% for contact in contacts %}
                 <tr>
+                    <td class="text-center">
+                        <input type="checkbox" name="contact_ids" class="contact-checkbox" value="{{ contact.id }}">
+                    </td>
                     <td>{{ contact.id }}</td>
 
                     <td>
@@ -118,6 +131,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </form>
     </div>
 </div>
 
@@ -127,10 +141,10 @@
      aria-labelledby="contactModalLabel{{ contact.id }}" aria-hidden="true"
      data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel{{ contact.id }}">
-                    <i class="fas fa-envelope"></i> Contact Request Details
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title font-weight-bold" id="contactModalLabel{{ contact.id }}">
+                    <i class="fas fa-envelope text-primary mr-2"></i> Contact Request Details
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -199,7 +213,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Close
                 </button>
@@ -225,21 +239,24 @@
         
         if (modalElement) {
             // Using Bootstrap 5 modal API
-            const modal = new bootstrap.Modal(modalElement, {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
+            let modal = bootstrap.Modal.getInstance(modalElement);
+            if (!modal) {
+                modal = new bootstrap.Modal(modalElement, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+            }
             modal.show();
         }
     }
 
     $(document).ready(function() {
         // Initialize DataTable
-        $('#contactsTable').DataTable({
+        var table = $('#contactsTable').DataTable({
             pageLength: 12,
             lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']], // Order by ID descending (index 1 now)
             language: {
                 search: "Search:",
                 lengthMenu: "Show _MENU_ contacts",
@@ -250,25 +267,92 @@
                 emptyTable: "No contact requests available"
             },
             columnDefs: [
-                { orderable: false, targets: [5] }, // Actions not sortable
-                { width: '60px',  targets: 0 },  // ID
-                { width: '200px', targets: 1 },  // Name
-                // { width: '180px', targets: 2 },  // Email
-                { width: '200px', targets: 2 },  // Subject
-                { width: '150px', targets: 3 },  // Created At
-                { width: '100px', targets: 4 },  // Status
-                { width: '120px', targets: 5 }   // Actions
+                { orderable: false, targets: [0, 6] }, // Checkbox and Actions not sortable
+                { width: '40px',  targets: 0 },  // Checkbox
+                { width: '60px',  targets: 1 },  // ID
+                { width: '200px', targets: 2 },  // Name
+                // { width: '180px', targets: 3 },  // Email
+                { width: '200px', targets: 3 },  // Subject
+                { width: '150px', targets: 4 },  // Created At
+                { width: '100px', targets: 5 },  // Status
+                { width: '120px', targets: 6 }   // Actions
             ]
         });
 
+        // Select All Checkbox functionality
+        $('#selectAll').on('click', function() {
+            var rows = table.rows({ 'page': 'current' }).nodes();
+            $('input[type="checkbox"].contact-checkbox', rows).prop('checked', this.checked);
+            updateBulkDeleteButton();
+        });
+
+        // Individual Checkbox functionality
+        $('#contactsTable tbody').on('change', 'input[type="checkbox"].contact-checkbox', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
+        });
+        
+        // Update header checkbox state based on current page
+        function updateSelectAllCheckbox() {
+            var currentRows = table.rows({ 'page': 'current' }).nodes();
+            var checkboxes = $('input[type="checkbox"].contact-checkbox', currentRows);
+            var totalCount = checkboxes.length;
+            var checkedCount = checkboxes.filter(':checked').length;
+
+            var el = $('#selectAll').get(0);
+            if (el) {
+                if (totalCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === totalCount) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else if (checkedCount > 0) {
+                    el.checked = false;
+                    el.indeterminate = true;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = false;
+                }
+            }
+        }
+
+        // Update delete button state
+        function updateBulkDeleteButton() {
+            // Check if any checkbox in the table is checked
+            var anyChecked = table.$('.contact-checkbox:checked').length > 0;
+            $('#bulkDeleteBtn').prop('disabled', !anyChecked);
+        }
+
+        // Handle form submission to include all checked checkboxes across pages
+        $('#bulkDeleteForm').on('submit', function(e) {
+            var form = this;
+            
+            // Iterate over all checkboxes in the table
+            table.$('.contact-checkbox:checked').each(function(){
+                // If checkbox doesn't exist in DOM (e.g. on another page)
+                if(!$.contains(document, this)){
+                    // Create a hidden element
+                    $(form).append(
+                        $('<input>')
+                            .attr('type', 'hidden')
+                            .attr('name', this.name)
+                            .val(this.value)
+                    );
+                }
+            });
+        });
+
         // Ensure modals work properly with DataTables
-        $('#contactsTable').on('draw.dt', function() {
+        table.on('draw.dt', function() {
             // Re-attach modal functionality after table redraw
             $('.action-btn.view').off('click').on('click', function(e) {
                 e.preventDefault();
                 const contactId = $(this).attr('onclick').match(/\d+/)[0];
                 openContactModal(contactId);
             });
+            updateSelectAllCheckbox(); // Update header checkbox state for new page
+            updateBulkDeleteButton(); // Re-check button state on redraw
         });
     });
 </script>
