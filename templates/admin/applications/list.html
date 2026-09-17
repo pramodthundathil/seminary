@@ -7,6 +7,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1 id="pageTitleHeader">
             <i class="fas fa-file-signature"></i>
             Application Management
@@ -32,6 +33,7 @@
         <table id="applicationTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Photo</th>
                     <th>Applicant Info</th>
@@ -410,6 +412,7 @@
                 }
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 {
                     data: null,
                     width: '30px',
@@ -426,7 +429,16 @@
                 { data: 'created_at', width: '120px' },
                 { data: 'actions', orderable: false, searchable: false, width: '150px' }
             ],
-            order: [[5, 'desc']], // Sort by Date Created by default
+            order: [[5, 'desc']],
+            rowCallback: function(row, data) {
+                if (window.selectedapplicationTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_applicationTable();
+            },
+ // Sort by Date Created by default
             pageLength: 12,
             language: {
                 search: "Search Applications:",
@@ -701,6 +713,87 @@
             }
         });
     }
+
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', applicationTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedapplicationTableIds.add(this.value);
+                } else {
+                    window.selectedapplicationTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_applicationTable();
+        });
+
+        $('#applicationTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedapplicationTableIds.add(this.value);
+            } else {
+                window.selectedapplicationTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_applicationTable();
+            updateBulkDeleteButton_applicationTable();
+        });
+
+        window.updateSelectAllCheckbox_applicationTable = function() {
+            var currentRows = applicationTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_applicationTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedapplicationTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedapplicationTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedapplicationTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedapplicationTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedapplicationTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_applicationTable();
+                    applicationTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
 
 </script>
 {% endblock %}

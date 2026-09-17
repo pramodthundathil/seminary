@@ -109,6 +109,7 @@
 
 <div class="exams-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="bi bi-journal-check"></i>
             {{ page_title }}
@@ -119,6 +120,7 @@
         <table id="examsTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>Student Name</th>
                     <th>Exam Name</th>
                     <th>Subject</th>
@@ -139,7 +141,8 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-    $(document).ready(function () {
+    window.selectedtableIds = new Set();
+$(document).ready(function () {
         const table = $('#examsTable').DataTable({
             processing: true,
             serverSide: true,
@@ -148,6 +151,7 @@
                 type: 'GET'
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'student_name' },
                 { data: 'exam_name' },
                 { data: 'subject_name' },
@@ -159,6 +163,15 @@
                 { data: 'actions', orderable: false, searchable: false }
             ],
             order: [[4, 'desc']],
+            rowCallback: function(row, data) {
+                if (window.selectedtableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_table();
+            },
+
             pageLength: 25,
             language: {
                 emptyTable: "No submitted exams found",
@@ -170,5 +183,86 @@
     function viewAnswerSheet(examId) {
         window.location.href = '/menu/admin/students/exam-answer-sheet/' + examId + '/';
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', table.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedtableIds.add(this.value);
+                } else {
+                    window.selectedtableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_table();
+        });
+
+        $('#examsTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedtableIds.add(this.value);
+            } else {
+                window.selectedtableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_table();
+            updateBulkDeleteButton_table();
+        });
+
+        window.updateSelectAllCheckbox_table = function() {
+            var currentRows = table.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_table = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedtableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedtableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedtableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_submitted_exams_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedtableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedtableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_table();
+                    table.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}

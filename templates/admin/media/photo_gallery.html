@@ -5,9 +5,14 @@
 
 <div class="gallery-container">
 
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h1>Photo Gallery</h1>
-        <button class="btn btn-primary" onclick="openCreateModal()">Add Photo</button>
+        <div>
+            <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            <button class="btn btn-primary" onclick="openCreateModal()">Add Photo</button>
+        </div>
     </div>
 
     <div class="gallery-filters">
@@ -26,6 +31,7 @@
         <table id="photoTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Preview</th>
                     <th>Info</th>
@@ -178,6 +184,7 @@
     let selectedMediaId = null;
     let uploadedFile = null;
     let mediaSource = 'library'; // 'library' or 'upload'
+    let selectedPhotoIds = new Set();
 
     $(document).ready(function () {
         photoTable = $('#photoTable').DataTable({
@@ -191,6 +198,7 @@
                 }
             },
             columns: [
+                { data: 'checkbox', orderable: false, searchable: false, width: '40px', className: 'text-center' },
                 { data: 'id', width: '60px' },
                 { data: 'preview', orderable: false, searchable: false, width: '100px' },
                 { data: 'info', width: '200px' },
@@ -198,7 +206,7 @@
                 { data: 'created_at', width: '120px' },
                 { data: 'actions', orderable: false, searchable: false, width: '120px' }
             ],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']],
             pageLength: 12,
             lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
             language: {
@@ -206,7 +214,95 @@
                 lengthMenu: "Show _MENU_ photos",
                 info: "Showing _START_ to _END_ of _TOTAL_ photos",
             }
+
+            rowCallback: function(row, data) {
+                if (selectedPhotoIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox();
+            }
         });
+
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', photoTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    selectedPhotoIds.add(this.value);
+                } else {
+                    selectedPhotoIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton();
+        });
+
+        $('#photoTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                selectedPhotoIds.add(this.value);
+            } else {
+                selectedPhotoIds.delete(this.value);
+            }
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
+        });
+
+        function updateSelectAllCheckbox() {
+            var currentRows = photoTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        function updateBulkDeleteButton() {
+            $('#bulkDeleteBtn').prop('disabled', selectedPhotoIds.size === 0);
+        }
+
+        window.executeBulkDelete = function() {
+            if (selectedPhotoIds.size === 0) return;
+            if (!confirm(`Are you sure you want to delete ${selectedPhotoIds.size} selected photos?`)) return;
+
+            $.ajax({
+                url: '{% url "photo_bulk_delete" %}',
+                type: 'POST',
+                data: JSON.stringify({ ids: Array.from(selectedPhotoIds) }),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        selectedPhotoIds.clear();
+                        $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                        updateBulkDeleteButton();
+                        photoTable.ajax.reload();
+                        alert(response.message);
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error deleting photos.');
+                }
+            });
+        };
+
 
         // Setup drag and drop
         setupDragAndDrop();

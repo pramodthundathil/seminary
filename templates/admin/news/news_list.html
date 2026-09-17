@@ -304,7 +304,9 @@
 
 <script>
 $(document).ready(function() {
-    $('#newsTable').DataTable({
+    window.selectedNewsIds = new Set();
+    window.newsTable = 
+    
         processing: true,
         serverSide: true,
         ajax: {
@@ -312,6 +314,7 @@ $(document).ready(function() {
             type: 'GET'
         },
         columns: [
+            { data: 'checkbox', orderable: false, searchable: false, width: '40px', className: 'text-center' },
             { data: 'id', width: '50px' },
             { data: 'media', orderable: false, searchable: false, width: '80px' },
             { data: 'title', width: '250px' },
@@ -320,7 +323,7 @@ $(document).ready(function() {
             { data: 'created_at', width: '120px' },
             { data: 'actions', orderable: false, searchable: false, width: '120px' }
         ],
-        order: [[0, 'desc']],
+        order: [[1, 'desc']],
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         language: {
@@ -333,8 +336,95 @@ $(document).ready(function() {
                 next: "Next",
                 previous: "Previous"
             }
+
+        rowCallback: function(row, data) {
+            if (window.selectedNewsIds.has(data.id.toString())) {
+                $('input.bulk-checkbox', row).prop('checked', true);
+            }
+        },
+        drawCallback: function() {
+            updateSelectAllCheckbox();
         }
     });
+
+    $('#selectAll').on('click', function() {
+        var isChecked = this.checked;
+        $('input.bulk-checkbox', window.newsTable.rows().nodes()).each(function() {
+            this.checked = isChecked;
+            if (isChecked) {
+                window.selectedNewsIds.add(this.value);
+            } else {
+                window.selectedNewsIds.delete(this.value);
+            }
+        });
+        updateBulkDeleteButton();
+    });
+
+    $('#newsTable tbody').on('change', 'input.bulk-checkbox', function() {
+        if (this.checked) {
+            window.selectedNewsIds.add(this.value);
+        } else {
+            window.selectedNewsIds.delete(this.value);
+        }
+        updateSelectAllCheckbox();
+        updateBulkDeleteButton();
+    });
+
+    function updateSelectAllCheckbox() {
+        var currentRows = window.newsTable.rows().nodes();
+        var checkboxes = $('input.bulk-checkbox', currentRows);
+        var el = $('#selectAll').get(0);
+        if (el && checkboxes.length > 0) {
+            var checkedCount = checkboxes.filter(':checked').length;
+            if (checkedCount === 0) {
+                el.checked = false;
+                el.indeterminate = false;
+            } else if (checkedCount === checkboxes.length) {
+                el.checked = true;
+                el.indeterminate = false;
+            } else {
+                el.checked = false;
+                el.indeterminate = true;
+            }
+        } else if (el) {
+            el.checked = false;
+            el.indeterminate = false;
+        }
+    }
+
+    function updateBulkDeleteButton() {
+        $('#bulkDeleteBtn').prop('disabled', window.selectedNewsIds.size === 0);
+    }
+
+    window.executeBulkDelete = function() {
+        if (window.selectedNewsIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedNewsIds.size} selected news?`)) return;
+
+        $.ajax({
+            url: '{% url "news_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedNewsIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedNewsIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton();
+                    window.newsTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting news.');
+            }
+        });
+    };
+
 });
 
 function getCookie(name) {

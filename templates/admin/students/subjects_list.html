@@ -107,6 +107,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-book"></i>
             {{ page_title }}
@@ -134,7 +135,7 @@
         <table id="subjectsTable" class="display" style="width:100%">
             <thead>
                 <tr>
-                <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>S.No</th>
                     <th>Student Name</th>
                     <th>Subject Name</th>
@@ -218,7 +219,8 @@
 <script>
     let subjectsTable;
 
-    $(document).ready(function () {
+    window.selectedsubjectsTableIds = new Set();
+$(document).ready(function () {
         // Init filter from URL
         const urlParams = new URLSearchParams(window.location.search);
         const statusParam = urlParams.get('status');
@@ -238,6 +240,7 @@
                 }
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'sno', orderable: false },
                 { data: 'student_name' },
                 { data: 'subject_name' },
@@ -245,7 +248,16 @@
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
-            order: [[0, 'desc']], // Order by S.No (newest first) by default
+            order: [[1, "desc"]],
+            rowCallback: function(row, data) {
+                if (window.selectedsubjectsTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_subjectsTable();
+            },
+ // Order by S.No (newest first) by default
             pageLength: 10,
             language: {
                 search: "Search Assignments:",
@@ -416,5 +428,86 @@
             }
         });
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', subjectsTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedsubjectsTableIds.add(this.value);
+                } else {
+                    window.selectedsubjectsTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_subjectsTable();
+        });
+
+        $('#subjectsTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedsubjectsTableIds.add(this.value);
+            } else {
+                window.selectedsubjectsTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_subjectsTable();
+            updateBulkDeleteButton_subjectsTable();
+        });
+
+        window.updateSelectAllCheckbox_subjectsTable = function() {
+            var currentRows = subjectsTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_subjectsTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedsubjectsTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedsubjectsTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedsubjectsTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_subjects_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedsubjectsTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedsubjectsTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_subjectsTable();
+                    subjectsTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}

@@ -4,17 +4,25 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 <div class="gallery-container">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h1>Branches List</h1>
-        <a href="{% url 'branches_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Branch
-        </a>
+        <div>
+            <button type="submit" form="bulkDeleteForm" class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="return confirm('Are you sure you want to delete selected branches?')">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            <a href="{% url 'branches_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Branch
+            </a>
+        </div>
     </div>
 
     <div class="table-container">
-        <table id="branchesTable" class="display" style="width:100%">
+        <form id="bulkDeleteForm" method="POST" action="{% url 'branches_bulk_delete' %}">
+            {% csrf_token %}
+            <table id="branchesTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Branch Name</th>
                     <th>Branch Code</th>
@@ -27,6 +35,9 @@
             <tbody>
                 {% for branch in branches %}
                 <tr>
+                    <td class="text-center">
+                        <input type="checkbox" name="ids" class="bulk-checkbox" value="{{ branch.id }}">
+                    </td>
                     <td>{{ branch.id }}</td>
 
                     <td>
@@ -85,6 +96,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </form>
     </div>
 </div>
 
@@ -111,11 +123,11 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#branchesTable').DataTable({
+        $(document).ready(function () {
+        var table = $('#branchesTable').DataTable({
             pageLength: 12,
             lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']],
             language: {
                 search: "Search:",
                 lengthMenu: "Show _MENU_ branches",
@@ -126,15 +138,69 @@
                 emptyTable: "No branches available"
             },
             columnDefs: [
-                { orderable: false, targets: [1, 6] }, // Branch Name + Actions not sortable
-                { width: '60px',  targets: 0 },  // ID
-                { width: '220px', targets: 1 },  // Branch Name
-                { width: '140px', targets: 2 },  // Branch Code
-                { width: '140px', targets: 3 },  // Associate Degree
-                { width: '160px', targets: 4 },  // Created At
-                { width: '90px',  targets: 5 },  // Status
-                { width: '150px', targets: 6 }   // Actions
+                { orderable: false, targets: [0, 7] },
+                { width: '40px', targets: 0 },
+                { width: '60px', targets: 1 },
+                { width: '200px', targets: 2 },
+                { width: '150px', targets: 3 },
+                { width: '150px', targets: 4 },
+                { width: '150px', targets: 5 },
+                { width: '100px', targets: 6 },
+                { width: '120px', targets: 7 }
             ]
+        });
+
+        $('#selectAll').on('click', function() {
+            var rows = table.rows({ 'page': 'current' }).nodes();
+            $('input[type="checkbox"].bulk-checkbox', rows).prop('checked', this.checked);
+            updateBulkDeleteButton();
+        });
+
+        $('#branchesTable tbody').on('change', 'input[type="checkbox"].bulk-checkbox', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
+        });
+        
+        function updateSelectAllCheckbox() {
+            var currentRows = table.rows({ 'page': 'current' }).nodes();
+            var checkboxes = $('input[type="checkbox"].bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el) {
+                if (checkboxes.length === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkboxes.filter(':checked').length === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else if (checkboxes.filter(':checked').length > 0) {
+                    el.checked = false;
+                    el.indeterminate = true;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = false;
+                }
+            }
+        }
+
+        function updateBulkDeleteButton() {
+            var anyChecked = table.$('.bulk-checkbox:checked').length > 0;
+            $('#bulkDeleteBtn').prop('disabled', !anyChecked);
+        }
+
+        $('#bulkDeleteForm').on('submit', function(e) {
+            var form = this;
+            table.$('.bulk-checkbox:checked').each(function(){
+                if(!$.contains(document, this)){
+                    $(form).append(
+                        $('<input>').attr('type', 'hidden').attr('name', this.name).val(this.value)
+                    );
+                }
+            });
+        });
+
+        table.on('draw.dt', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
         });
     });
 </script>

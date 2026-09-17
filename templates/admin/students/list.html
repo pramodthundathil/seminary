@@ -7,6 +7,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-user-graduate"></i>
             Student Management
@@ -38,6 +39,7 @@
         <table id="studentTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Photo</th>
                     <th>Student Info</th>
@@ -379,7 +381,8 @@
 <script>
     let studentTable;
 
-    $(document).ready(function () {
+    window.selectedstudentTableIds = new Set();
+$(document).ready(function () {
         // Check URL params for status filter
         const urlParams = new URLSearchParams(window.location.search);
         const statusParam = urlParams.get('status');
@@ -405,6 +408,7 @@
                 }
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 {
                     data: null,
                     width: '30px',
@@ -421,7 +425,16 @@
                 { data: 'created_at', width: '120px' },
                 { data: 'actions', orderable: false, searchable: false, width: '150px' }
             ],
-            order: [[5, 'desc']], // Sort by Date Created by default
+            order: [[5, 'desc']],
+            rowCallback: function(row, data) {
+                if (window.selectedstudentTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_studentTable();
+            },
+ // Sort by Date Created by default
             pageLength: 12,
             language: {
                 search: "Search Students:",
@@ -719,6 +732,87 @@
             }
         });
     }
+
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', studentTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedstudentTableIds.add(this.value);
+                } else {
+                    window.selectedstudentTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_studentTable();
+        });
+
+        $('#studentTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedstudentTableIds.add(this.value);
+            } else {
+                window.selectedstudentTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_studentTable();
+            updateBulkDeleteButton_studentTable();
+        });
+
+        window.updateSelectAllCheckbox_studentTable = function() {
+            var currentRows = studentTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_studentTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedstudentTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedstudentTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedstudentTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedstudentTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedstudentTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_studentTable();
+                    studentTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
 
 </script>
 {% endblock %}

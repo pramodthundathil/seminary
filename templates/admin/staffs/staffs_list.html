@@ -6,6 +6,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button type="submit" form="bulkDeleteForm" class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="return confirm(\'Are you sure you want to delete selected items?\')"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>Staff List</h1>
         {% if request.user|has_permission:'create-staffs' %}
         <a href="{% url 'staffs_create' %}" class="btn btn-primary">
@@ -15,9 +16,12 @@
     </div>
 
     <div class="table-container">
-        <table id="staffsTable" class="display" style="width:100%">
+        <form id="bulkDeleteForm" method="POST" action="{% url 'staff_bulk_delete' %}">
+            {% csrf_token %}
+            <table id="staffsTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Staff Name</th>
                     <!-- <th>Staff ID</th> -->
@@ -33,6 +37,7 @@
             <tbody>
                 {% for staff in staffs %}
                 <tr>
+                    <td class="text-center"><input type="checkbox" name="ids" class="bulk-checkbox" value="{{ staff.id }}"></td>
                     <td>{{ staff.id }}</td>
 
                     <td>
@@ -105,6 +110,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </form>
     </div>
 </div>
 
@@ -138,6 +144,68 @@
                 { width: '150px', targets: 7 }   // Actions
             ]
         });
+    });
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            var dt_table = $('#staffsTable').DataTable();
+            
+            $('#selectAll').on('click', function() {
+                var rows = dt_table.rows({ 'page': 'current' }).nodes();
+                $('input[type="checkbox"].bulk-checkbox', rows).prop('checked', this.checked);
+                updateBulkDeleteButton();
+            });
+
+            $('#staffsTable tbody').on('change', 'input[type="checkbox"].bulk-checkbox', function() {
+                updateSelectAllCheckbox();
+                updateBulkDeleteButton();
+            });
+            
+            function updateSelectAllCheckbox() {
+                var currentRows = dt_table.rows({ 'page': 'current' }).nodes();
+                var checkboxes = $('input[type="checkbox"].bulk-checkbox', currentRows);
+                var el = $('#selectAll').get(0);
+                if (el) {
+                    if (checkboxes.length === 0) {
+                        el.checked = false;
+                        el.indeterminate = false;
+                    } else if (checkboxes.filter(':checked').length === checkboxes.length) {
+                        el.checked = true;
+                        el.indeterminate = false;
+                    } else if (checkboxes.filter(':checked').length > 0) {
+                        el.checked = false;
+                        el.indeterminate = true;
+                    } else {
+                        el.checked = false;
+                        el.indeterminate = false;
+                    }
+                }
+            }
+
+            function updateBulkDeleteButton() {
+                var anyChecked = dt_table.$('.bulk-checkbox:checked').length > 0;
+                $('#bulkDeleteBtn').prop('disabled', !anyChecked);
+            }
+
+            $('#bulkDeleteForm').on('submit', function(e) {
+                var form = this;
+                dt_table.$('.bulk-checkbox:checked').each(function(){
+                    if(!$.contains(document, this)){
+                        $(form).append(
+                            $('<input>').attr('type', 'hidden').attr('name', this.name).val(this.value)
+                        );
+                    }
+                });
+            });
+
+            dt_table.on('draw.dt', function() {
+                updateSelectAllCheckbox();
+                updateBulkDeleteButton();
+            });
+        }, 500);
     });
 </script>
 

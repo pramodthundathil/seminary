@@ -37,6 +37,7 @@ urlpatterns = [
     path('edit/<int:news_id>/', views.news_edit, name='news_edit'),
     path('get/<int:news_id>/', views.news_get, name='news_get'),
     path('delete/<int:news_id>/', views.news_delete, name='news_delete'),
+    path('bulk-delete/', views.news_bulk_delete, name='news_bulk_delete'),
     path('toggle-status/<int:news_id>/', views.news_toggle_status, name='news_toggle_status'),
 
     # Media Library Management
@@ -67,6 +68,7 @@ urlpatterns = [
     path('photos/get/<int:photo_id>/', views.photo_get, name='photo_get'),
     path('photos/update/<int:photo_id>/', views.photo_update, name='photo_update'),
     path('photos/delete/<int:photo_id>/', views.photo_delete, name='photo_delete'),
+    path('photos/bulk-delete/', views.photo_bulk_delete, name='photo_bulk_delete'),
     path('photos/media-list/', views.media_library_list, name='media_library_list'),
 
 
@@ -92,7 +94,7 @@ urlpatterns = [
     path('categories/edit/<int:category_id>/', views.category_edit, name='category_edit'),
     path('categories/view/<int:category_id>/', views.category_view, name='category_view'),
     path('categories/delete/<int:category_id>/', views.category_delete, name='category_delete'),
-
+    path('categories/bulk-delete/', views.category_bulk_delete, name='category_bulk_delete'),
 
     # Course management
     path('admin/courses/', views.course_list, name='course_list'),
@@ -203,6 +205,7 @@ urlpatterns = [
     path('videos/<int:video_id>/edit/', views.video_edit, name='video_edit'),
     path('videos/<int:video_id>/view/', views.video_view, name='video_view'),
     path('videos/<int:video_id>/delete/', views.video_delete, name='video_delete'),
+    path('videos/bulk-delete/', views.video_bulk_delete, name='video_bulk_delete'),
 
 
     #roles and permissions
@@ -211,6 +214,7 @@ urlpatterns = [
     path("roles/<int:id>/view/", views.roles_view, name="roles_view"),
     path("roles/<int:id>/edit/", views.roles_edit, name="roles_edit"),
     path("roles/<int:id>/delete/", views.roles_delete, name="roles_delete"),
+    path("roles/bulk-delete/", views.roles_bulk_delete, name="roles_bulk_delete"),
 
 
     # languages
@@ -220,6 +224,7 @@ urlpatterns = [
     path("admin/language/<int:language_id>/view", views.language_view, name="language_view"),
     path("admin/language/<int:language_id>/edit", views.language_edit, name="language_edit"),
     path("admin/language/<int:language_id>/delete", views.language_delete, name="language_delete"),
+    path("admin/language/bulk-delete", views.language_bulk_delete, name="language_bulk_delete"),
 
     #subjects
 
@@ -229,6 +234,7 @@ urlpatterns = [
     path("admin/subjects/<int:subjects_id>/view", views.subjects_view, name="subjects_view"),
     path("admin/subjects/<int:subjects_id>/edit", views.subjects_edit, name="subjects_edit"),
     path("admin/subjects/<int:subjects_id>/delete", views.subjects_delete, name="subjects_delete"),
+    path("admin/subjects/bulk-delete", views.subjects_bulk_delete, name="subjects_bulk_delete"),
 
 
     #branches
@@ -238,6 +244,7 @@ urlpatterns = [
     path("admin/branches/<int:branch_id>/view", views.branches_view, name="branches_view"),
     path("admin/branches/<int:branch_id>/edit", views.branches_edit, name="branches_edit"),
     path("admin/branches/<int:branch_id>/delete", views.branches_delete, name="branches_delete"),
+    path("admin/branches/bulk-delete", views.branches_bulk_delete, name="branches_bulk_delete"),
 
     #contact request
     path("admin/contact",views.contact_list, name='contact_list'),
@@ -254,6 +261,7 @@ urlpatterns = [
     path('exams/<int:exam_id>/view/', views.exam_view, name='exams_view'),
     path('exams/<int:exam_id>/edit/', views.exam_edit, name='exams_edit'),
     path('exams/<int:exam_id>/delete/', views.exam_delete, name='exams_delete'),
+    path('exams/bulk-delete/', views.exams_bulk_delete, name='exams_bulk_delete'),
     
     # Exam Questions
     path('exams/<int:exam_id>/question/descriptive/create/', views.question_descriptive_create, name='question_descriptive_create'),
@@ -351,4 +359,23 @@ urlpatterns = [
     path('admin/church-admin-applications/approve/<int:application_id>/', views.approve_church_admin, name='approve_church_admin'),
     path('admin/church-admin-applications/reject/<int:application_id>/', views.reject_church_admin, name='reject_church_admin'),
     path('admin/church-admin-applications/<int:application_id>/details/', views.get_church_admin_application_details, name='get_church_admin_application_details'),
+
+    # --- BULK DELETE URLS --- 
+    path('admin/courses/bulk-delete/', views.course_bulk_delete, name='course_bulk_delete'),
+    path('students/books/bulk-delete/', views.student_books_bulk_delete, name='student_books_bulk_delete'),
+    path('students/subjects/bulk-delete/', views.student_subjects_bulk_delete, name='student_subjects_bulk_delete'),
+    path('students/instructor/bulk-delete/', views.student_instructors_bulk_delete, name='student_instructors_bulk_delete'),
+    path('students/uploads/bulk-delete/', views.student_uploads_bulk_delete, name='student_uploads_bulk_delete'),
+    path('students/exams/bulk-delete/', views.student_exams_bulk_delete, name='student_exams_bulk_delete'),
+    path('students/assignment/bulk-delete/', views.student_assignment_bulk_delete, name='student_assignment_bulk_delete'),
+    path('admin/students/bulk-delete/', views.student_bulk_delete, name='student_bulk_delete'),
+    path('admin/staffs/bulk-delete/', views.staff_bulk_delete, name='staff_bulk_delete'),
+    path('admin/assignments/bulk-delete/', views.assignment_bulk_delete, name='assignment_bulk_delete'),
+    path('admin/references/bulk-delete/', views.reference_bulk_delete, name='reference_bulk_delete'),
+    path('admin/payments/bulk-delete/', views.payments_bulk_delete, name='payments_bulk_delete'),
+    path('admin/church-codes/bulk-delete/', views.church_codes_usage_bulk_delete, name='church_codes_usage_bulk_delete'),
+    path('admin/users/bulk-delete/', views.users_bulk_delete, name='users_bulk_delete'),
+    path('admin/codes/bulk-delete/', views.church_code_bulk_delete, name='church_code_bulk_delete'),
+    path('admin/support/bulk-delete/', views.support_bulk_delete, name='support_bulk_delete'),
+    path('admin/uploads/bulk-delete/', views.uploads_bulk_delete, name='uploads_bulk_delete'),
 ]

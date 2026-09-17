@@ -881,7 +881,10 @@ def news_datatable(request):
     </div>
         '''
         
+        checkbox = f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{news.id}">'
+        
         data.append({
+            'checkbox': checkbox,
             'id': news.id,
             'media': media_preview,
             'title': f'<div class="news-title">{news.title}</div><div class="news-code">{news.code}</div>',
@@ -1020,6 +1023,26 @@ def news_delete(request, news_id):
             'success': False,
             'message': str(e)
         }, status=400)
+
+@login_required
+@require_POST
+def news_bulk_delete(request):
+    """Soft delete multiple news via AJAX"""
+    try:
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+        
+        if ids:
+            News.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully deleted {len(ids)} news items'
+            })
+        else:
+            return JsonResponse({'success': False, 'message': 'No news selected'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
 
 @login_required
 @require_POST
@@ -1459,7 +1482,10 @@ def photo_datatable(request):
             </div>
         '''
         
+        checkbox = f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{photo.id}">'
+
         data.append({
+            'checkbox': checkbox,
             'id': photo.id,
             'preview': preview,
             'info': info,
@@ -1685,6 +1711,29 @@ def photo_delete(request, photo_id):
             'success': False,
             'message': str(e)
         }, status=500)
+
+@login_required
+@require_POST
+def photo_bulk_delete(request):
+    """Soft delete multiple photos via AJAX"""
+    try:
+        import json
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+        
+        if ids:
+            Photos.objects.filter(id__in=ids).update(
+                deleted_at=datetime.now(),
+                updated_by=request.user
+            )
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully deleted {len(ids)} photos'
+            })
+        else:
+            return JsonResponse({'success': False, 'message': 'No photos selected'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @login_required
 def media_library_list(request):
@@ -2754,7 +2803,8 @@ def student_datatable(request):
             '''
             
             data.append({
-                'id': student.id,
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{student.id}">',
+            'id': student.id,
                 'student_id': student.student_id or 'N/A',
                 'preview': preview,
                 'student_info': info_html,
@@ -4076,6 +4126,18 @@ def category_delete(request, category_id):
     messages.success(request, 'Category deleted successfully!')
     return redirect('category_list')
 
+@login_required
+@require_POST
+def category_bulk_delete(request):
+    """Soft delete multiple categories"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Categories.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} categories!')
+    else:
+        messages.warning(request, 'No categories selected for deletion.')
+    return redirect('category_list')
+
 # videos
 
 @login_required
@@ -4268,6 +4330,18 @@ def video_delete(request, video_id):
     messages.success(request, 'Video deleted successfully!')
     return redirect('video_list')
 
+@login_required
+@require_POST
+def video_bulk_delete(request):
+    """Soft delete multiple videos"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Videos.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} videos!')
+    else:
+        messages.warning(request, 'No videos selected for deletion.')
+    return redirect('video_list')
+
 # roles and permissions 
 @login_required
 def roles(request):
@@ -4425,6 +4499,18 @@ def roles_delete(request, id):
     messages.success(request, 'Role deleted successfully!')
     return redirect('roles')
 
+@login_required
+@require_POST
+def roles_bulk_delete(request):
+    """Soft delete multiple roles"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Roles.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} roles!')
+    else:
+        messages.warning(request, 'No roles selected for deletion.')
+    return redirect('roles')
+
 # languages
 @login_required
 def languages(request):
@@ -4487,6 +4573,18 @@ def language_delete(request, language_id):
     language.deleted_at = timezone.now()
     language.save()
     messages.success(request, 'Language deleted successfully!')
+    return redirect('languages_list')
+
+@login_required
+@require_POST
+def language_bulk_delete(request):
+    """Soft delete multiple languages"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Languages.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} languages!')
+    else:
+        messages.warning(request, 'No languages selected for deletion.')
     return redirect('languages_list')
 
 #subjects 
@@ -4587,6 +4685,18 @@ def subjects_delete(request, subjects_id):
     messages.success(request, 'Subject deleted successfully!')
     return redirect('subjects_list')
 
+@login_required
+@require_POST
+def subjects_bulk_delete(request):
+    """Soft delete multiple subjects"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Subjects.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} subjects!')
+    else:
+        messages.warning(request, 'No subjects selected for deletion.')
+    return redirect('subjects_list')
+
 # branches 
 
 @login_required
@@ -4663,6 +4773,18 @@ def branches_delete(request, branch_id):
     branch.deleted_at = timezone.now()
     branch.save()
     messages.success(request, 'Branch deleted successfully!')
+    return redirect('branches_list')
+
+@login_required
+@require_POST
+def branches_bulk_delete(request):
+    """Soft delete multiple branches"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Branches.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} branches!')
+    else:
+        messages.warning(request, 'No branches selected for deletion.')
     return redirect('branches_list')
 
 #contact requests 
@@ -5053,6 +5175,18 @@ def exam_delete(request, exam_id):
     exam.deleted_at = timezone.now()
     exam.save()
     messages.success(request, 'Exam deleted successfully!')
+    return redirect('exams_list')
+
+@login_required
+@require_POST
+def exams_bulk_delete(request):
+    """Soft delete multiple exams"""
+    ids = request.POST.getlist('ids')
+    if ids:
+        Exams.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        messages.success(request, f'Successfully deleted {len(ids)} exams!')
+    else:
+        messages.warning(request, 'No exams selected for deletion.')
     return redirect('exams_list')
 
 #staffs 
@@ -6521,7 +6655,8 @@ def student_books_datatable(request):
             '''
             
             data.append({
-                'id': item.id,
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
+            'id': item.id,
                 'student_name': student_name,
                 'book_title': item.book.title if item.book else 'Unknown Book',
                 'status': status_badge,
@@ -6725,6 +6860,8 @@ def student_subjects_datatable(request):
         '''
         
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
+            'id': item.id,
             'sno': start + i + 1,
             'student_name': student_name,
             'subject_name': item.subject.subject_name if item.subject else 'Unknown Subject',
@@ -6923,6 +7060,7 @@ def student_instructors_datatable(request):
         '''
         
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
             'id': item.id,
             'student_name': student_name,
             'subject_name': item.subject.subject_name if item.subject else 'General / No Subject',
@@ -7143,6 +7281,7 @@ def student_uploads_datatable(request):
         '''
         
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
             'id': item.id,
             'student_name': student_name,
             'subject_name': item.upload.subject.subject_name if item.upload and item.upload.subject else 'General',
@@ -7434,6 +7573,7 @@ def student_exams_datatable(request):
             marks_display = f'{total_obtained}/{total_possible}'
 
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
             'id': item.id,
             'student_name': student_name,
             'course_name': item.course.course_name if item.course else '-',
@@ -7841,6 +7981,8 @@ def student_submitted_exams_datatable(request):
 
         '''
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
+            'id': item.id,
         
             'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
             'subject_name': item.subject.subject_name if item.subject else '-',
@@ -8054,6 +8196,8 @@ def student_assignment_datatable(request):
         sno = start + index + 1
 
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
+            'id': item.id,
             'sno': sno,
             'student_name': student_name,
             'assignment_name': item.assignment.assignment_name if item.assignment else 'Unknown',
@@ -10063,3 +10207,871 @@ def church_students_list(request):
         "page_title": "Church Users",
     }
     return render(request, "admin/users/church_students_list.html", context)
+
+@login_required
+@require_POST
+def pages_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Pages.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('pages_list')
+
+@login_required
+@require_POST
+def course_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Courses.objects.filter(id__in=ids).delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('course_list')
+
+@login_required
+@require_POST
+def student_books_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentBooks.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_books_list')
+
+@login_required
+@require_POST
+def student_subjects_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentSubjects.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_subjects_list')
+
+@login_required
+@require_POST
+def student_instructors_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentInstructors.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_instructors_list')
+
+@login_required
+@require_POST
+def student_uploads_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentUploads.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_uploads_list')
+
+@login_required
+@require_POST
+def student_submitted_exams_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentSubmittedExams.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_submitted_exams_list')
+
+@login_required
+@require_POST
+def student_submitted_assignment_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentSubmittedAssignment.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_submitted_assignment_list')
+
+@login_required
+@require_POST
+def student_exams_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentExams.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_exams_list')
+
+@login_required
+@require_POST
+def student_assignment_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentAssignment.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_assignment_list')
+
+@login_required
+@require_POST
+def student_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Students.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('student_list')
+
+@login_required
+@require_POST
+def application_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Applications.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('application_list')
+
+@login_required
+@require_POST
+def staff_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Staffs.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('staff_list')
+
+@login_required
+@require_POST
+def assignment_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Assignments.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('assignment_list')
+
+@login_required
+@require_POST
+def reference_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        References.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('reference_list')
+
+@login_required
+@require_POST
+def support_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Support.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('support_list')
+
+@login_required
+@require_POST
+def uploads_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Uploads.objects.filter(id__in=ids).delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('uploads_list')
+
+@login_required
+@require_POST
+def payments_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Payments.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('payments_list')
+
+@login_required
+@require_POST
+def church_codes_usage_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        ChurchCodesUsage.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('church_codes_usage_list')
+
+@login_required
+@require_POST
+def users_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Users.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('users_list')
+
+@login_required
+@require_POST
+def church_code_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        ChurchCodes.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('church_code_list')
+
+@login_required
+@require_POST
+def church_admin_applications_bulk_delete(request):
+    ids = request.POST.getlist('ids')
+    if not ids:
+        import json
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        ChurchAdminApplications.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    return redirect('church_admin_applications_list')
+
+
+@login_required
+@require_POST
+def course_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Courses.objects.filter(id__in=ids).delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_books_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsBooks.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_subjects_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsSubjects.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_instructors_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsInstructor.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_uploads_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsUploads.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_exams_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsExams.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_assignment_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        StudentsAssignment.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def student_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Students.objects.filter(id__in=ids).delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def staff_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Staffs.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def assignment_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Assignments.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def reference_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        BookReferences.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def payments_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Payments.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def church_codes_usage_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        ChurchAdmins.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def users_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Users.objects.filter(id__in=ids).update(deleted_at=timezone.now(), is_active=False)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+@login_required
+@require_POST
+def church_code_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        ChurchLoginCodeSettings.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    # We must redirect to the correct list view, but if it's AJAX, we already returned JsonResponse.
+    # We'll just redirect to HTTP_REFERER if available, else a safe default.
+    return redirect(request.META.get('HTTP_REFERER', '/menu/admin/'))
+
+
+@login_required
+@require_POST
+def support_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Support.objects.filter(id__in=ids).update(deleted_at=timezone.now())
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    return redirect('support_list')
+
+@login_required
+@require_POST
+def uploads_bulk_delete(request):
+    import json
+    ids = request.POST.getlist('ids')
+    if not ids:
+        try:
+            ids = json.loads(request.body).get('ids', [])
+        except:
+            pass
+    if ids:
+        Uploads.objects.filter(id__in=ids).delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Successfully deleted {len(ids)} items'})
+        messages.success(request, f'Successfully deleted {len(ids)} items!')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'No items selected'}, status=400)
+        messages.warning(request, 'No items selected for deletion.')
+    
+    return redirect('uploads_list')

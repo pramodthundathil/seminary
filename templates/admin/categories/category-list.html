@@ -5,19 +5,29 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 <div class="gallery-container">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h1>Category List</h1>
-        {% if request.user|has_permission:'create-category' %}
-        <a href="{% url 'category_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Category
-        </a>
-        {% endif %}
+        <div>
+            {% if request.user|has_permission:'delete-category' %}
+            <button type="submit" form="bulkDeleteForm" class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="return confirm('Are you sure you want to delete selected categories?')">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+            {% endif %}
+            {% if request.user|has_permission:'create-category' %}
+            <a href="{% url 'category_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Category
+            </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="table-container">
-        <table id="categoryTable" class="display" style="width:100%">
-            <thead>
-                <tr>
+        <form id="bulkDeleteForm" method="POST" action="{% url 'category_bulk_delete' %}">
+            {% csrf_token %}
+            <table id="categoryTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Preview</th>
                     <th>Info</th>
@@ -29,6 +39,9 @@
             <tbody>
                 {% for category in categories %}
                 <tr>
+                    <td class="text-center">
+                        <input type="checkbox" name="ids" class="bulk-checkbox" value="{{ category.id }}">
+                    </td>
                     <td>{{ category.id }}</td>
                     <td>
                         {% if category.media and category.media.thumb_file_path %}
@@ -101,6 +114,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </form>
     </div>
 </div>
 
@@ -130,11 +144,11 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-        $('#categoryTable').DataTable({
+        $(document).ready(function () {
+        var table = $('#categoryTable').DataTable({
             pageLength: 12,
             lengthMenu: [[12, 24, 48, 96], [12, 24, 48, 96]],
-            order: [[0, 'desc']],
+            order: [[1, 'desc']],
             language: {
                 search: "Search:",
                 lengthMenu: "Show _MENU_ categories",
@@ -145,13 +159,67 @@
                 emptyTable: "No categories available"
             },
             columnDefs: [
-                { orderable: false, targets: [1, 5] }, // Preview and Actions columns not sortable
-                { width: '60px', targets: 0 },
-                { width: '100px', targets: 1 },
-                { width: '200px', targets: 2 },
-                { width: '100px', targets: 4 },
-                { width: '150px', targets: 5 }
+                { orderable: false, targets: [0, 2, 6] },
+                { width: '40px', targets: 0 },
+                { width: '60px', targets: 1 },
+                { width: '100px', targets: 2 },
+                { width: '200px', targets: 3 },
+                { width: '100px', targets: 5 },
+                { width: '150px', targets: 6 }
             ]
+        });
+
+        $('#selectAll').on('click', function() {
+            var rows = table.rows({ 'page': 'current' }).nodes();
+            $('input[type="checkbox"].bulk-checkbox', rows).prop('checked', this.checked);
+            updateBulkDeleteButton();
+        });
+
+        $('#categoryTable tbody').on('change', 'input[type="checkbox"].bulk-checkbox', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
+        });
+        
+        function updateSelectAllCheckbox() {
+            var currentRows = table.rows({ 'page': 'current' }).nodes();
+            var checkboxes = $('input[type="checkbox"].bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el) {
+                if (checkboxes.length === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkboxes.filter(':checked').length === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else if (checkboxes.filter(':checked').length > 0) {
+                    el.checked = false;
+                    el.indeterminate = true;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = false;
+                }
+            }
+        }
+
+        function updateBulkDeleteButton() {
+            var anyChecked = table.$('.bulk-checkbox:checked').length > 0;
+            $('#bulkDeleteBtn').prop('disabled', !anyChecked);
+        }
+
+        $('#bulkDeleteForm').on('submit', function(e) {
+            var form = this;
+            table.$('.bulk-checkbox:checked').each(function(){
+                if(!$.contains(document, this)){
+                    $(form).append(
+                        $('<input>').attr('type', 'hidden').attr('name', this.name).val(this.value)
+                    );
+                }
+            });
+        });
+
+        table.on('draw.dt', function() {
+            updateSelectAllCheckbox();
+            updateBulkDeleteButton();
         });
     });
 </script>

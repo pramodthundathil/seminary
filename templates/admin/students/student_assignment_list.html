@@ -89,6 +89,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-file-alt"></i>
             {{ page_title }}
@@ -102,6 +103,7 @@
         <table id="assignmentsTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>S.No</th>
                     <th>Student Name</th>
                     <th>Assignment Name</th>
@@ -177,7 +179,8 @@
     let assignmentsTable;
     let assignModal;
 
-    $(document).ready(function () {
+    window.selectedassignmentsTableIds = new Set();
+$(document).ready(function () {
         assignmentsTable = $('#assignmentsTable').DataTable({
             processing: true,
             serverSide: true,
@@ -190,6 +193,7 @@
                 }
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'sno', orderable: false, searchable: false },
                 { data: 'student_name' },
                 { data: 'assignment_name' },
@@ -384,5 +388,86 @@
             }
         })
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', assignmentsTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedassignmentsTableIds.add(this.value);
+                } else {
+                    window.selectedassignmentsTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_assignmentsTable();
+        });
+
+        $('#assignmentsTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedassignmentsTableIds.add(this.value);
+            } else {
+                window.selectedassignmentsTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_assignmentsTable();
+            updateBulkDeleteButton_assignmentsTable();
+        });
+
+        window.updateSelectAllCheckbox_assignmentsTable = function() {
+            var currentRows = assignmentsTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_assignmentsTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedassignmentsTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedassignmentsTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedassignmentsTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_assignment_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedassignmentsTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedassignmentsTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_assignmentsTable();
+                    assignmentsTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}

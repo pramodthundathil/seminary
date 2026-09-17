@@ -111,6 +111,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-file-upload"></i>
             {{ page_title }}
@@ -127,6 +128,7 @@
         <table id="uploadsTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Student Name</th>
                     <th>Subject Name</th>
@@ -228,7 +230,8 @@
 <script>
     let uploadsTable;
 
-    $(document).ready(function () {
+    window.selecteduploadsTableIds = new Set();
+$(document).ready(function () {
         uploadsTable = $('#uploadsTable').DataTable({
             processing: true,
             serverSide: true,
@@ -238,6 +241,7 @@
                 type: 'GET'
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'id' },
                 { data: 'student_name' },
                 { data: 'subject_name' },
@@ -255,7 +259,16 @@
                 { width: '120px', targets: 5 },
                 { width: '80px', targets: 6 }
             ],
-            order: [[0, 'desc']],
+            order: [[1, "desc"]],
+            rowCallback: function(row, data) {
+                if (window.selecteduploadsTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_uploadsTable();
+            },
+
             pageLength: 10
         });
     });
@@ -404,5 +417,86 @@
             }
         });
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', uploadsTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selecteduploadsTableIds.add(this.value);
+                } else {
+                    window.selecteduploadsTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_uploadsTable();
+        });
+
+        $('#uploadsTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selecteduploadsTableIds.add(this.value);
+            } else {
+                window.selecteduploadsTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_uploadsTable();
+            updateBulkDeleteButton_uploadsTable();
+        });
+
+        window.updateSelectAllCheckbox_uploadsTable = function() {
+            var currentRows = uploadsTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_uploadsTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selecteduploadsTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selecteduploadsTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selecteduploadsTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_uploads_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selecteduploadsTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selecteduploadsTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_uploadsTable();
+                    uploadsTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}

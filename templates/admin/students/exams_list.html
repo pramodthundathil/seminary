@@ -144,6 +144,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-file-alt"></i>
             {{ page_title }}
@@ -160,6 +161,7 @@
         <table id="examsTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Student Name</th>
                     <th>Course</th>
@@ -342,7 +344,8 @@
 <script>
     let examsTable;
 
-    $(document).ready(function () {
+    window.selectedexamsTableIds = new Set();
+$(document).ready(function () {
         examsTable = $('#examsTable').DataTable({
             processing: true,
             serverSide: true,
@@ -352,6 +355,7 @@
                 type: 'GET'
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'id' },
                 { data: 'student_name' },
                 { data: 'course_name' },
@@ -362,7 +366,16 @@
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
-            order: [[0, 'desc']],
+            order: [[1, "desc"]],
+            rowCallback: function(row, data) {
+                if (window.selectedexamsTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_examsTable();
+            },
+
             pageLength: 10
         });
     });
@@ -673,5 +686,86 @@
             }
         });
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', examsTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedexamsTableIds.add(this.value);
+                } else {
+                    window.selectedexamsTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_examsTable();
+        });
+
+        $('#examsTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedexamsTableIds.add(this.value);
+            } else {
+                window.selectedexamsTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_examsTable();
+            updateBulkDeleteButton_examsTable();
+        });
+
+        window.updateSelectAllCheckbox_examsTable = function() {
+            var currentRows = examsTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_examsTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedexamsTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedexamsTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedexamsTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_exams_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedexamsTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedexamsTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_examsTable();
+                    examsTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}

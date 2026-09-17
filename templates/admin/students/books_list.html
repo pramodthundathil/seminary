@@ -107,6 +107,7 @@
 
 <div class="gallery-container">
     <div class="page-header">
+        <button class="btn btn-danger mr-2" id="bulkDeleteBtn" disabled onclick="executeBulkDelete()" style="float:left; margin-top:5px;"><i class="fas fa-trash"></i> Delete Selected</button>
         <h1>
             <i class="fas fa-book-reader"></i>
             {{ page_title }}
@@ -134,6 +135,7 @@
         <table id="booksTable" class="display" style="width:100%">
             <thead>
                 <tr>
+                    <th class="text-center" style="width: 40px;"><input type="checkbox" id="selectAll"></th>
                     <th>ID</th>
                     <th>Student Name</th>
                     <th>Book Title</th>
@@ -229,7 +231,8 @@
 <script>
     let booksTable;
 
-    $(document).ready(function () {
+    window.selectedbooksTableIds = new Set();
+$(document).ready(function () {
         // Init filter from URL
         const urlParams = new URLSearchParams(window.location.search);
         const statusParam = urlParams.get('status');
@@ -249,6 +252,7 @@
                 }
             },
             columns: [
+                { data: "checkbox", orderable: false, searchable: false, width: "40px", className: "text-center" },
                 { data: 'id' },
                 { data: 'student_name' },
                 { data: 'book_title' },
@@ -256,7 +260,16 @@
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
-            order: [[0, 'desc']],
+            order: [[1, "desc"]],
+            rowCallback: function(row, data) {
+                if (window.selectedbooksTableIds.has(data.id.toString())) {
+                    $('input.bulk-checkbox', row).prop('checked', true);
+                }
+            },
+            drawCallback: function() {
+                updateSelectAllCheckbox_booksTable();
+            },
+
             pageLength: 10,
             language: {
                 search: "Search Assignments:",
@@ -449,5 +462,86 @@
             }
         });
     }
+
+    $(document).ready(function() {
+        $('#selectAll').on('click', function() {
+            var isChecked = this.checked;
+            $('input.bulk-checkbox', booksTable.rows().nodes()).each(function() {
+                this.checked = isChecked;
+                if (isChecked) {
+                    window.selectedbooksTableIds.add(this.value);
+                } else {
+                    window.selectedbooksTableIds.delete(this.value);
+                }
+            });
+            updateBulkDeleteButton_booksTable();
+        });
+
+        $('#booksTable tbody').on('change', 'input.bulk-checkbox', function() {
+            if (this.checked) {
+                window.selectedbooksTableIds.add(this.value);
+            } else {
+                window.selectedbooksTableIds.delete(this.value);
+            }
+            updateSelectAllCheckbox_booksTable();
+            updateBulkDeleteButton_booksTable();
+        });
+
+        window.updateSelectAllCheckbox_booksTable = function() {
+            var currentRows = booksTable.rows().nodes();
+            var checkboxes = $('input.bulk-checkbox', currentRows);
+            var el = $('#selectAll').get(0);
+            if (el && checkboxes.length > 0) {
+                var checkedCount = checkboxes.filter(':checked').length;
+                if (checkedCount === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                } else if (checkedCount === checkboxes.length) {
+                    el.checked = true;
+                    el.indeterminate = false;
+                } else {
+                    el.checked = false;
+                    el.indeterminate = true;
+                }
+            } else if (el) {
+                el.checked = false;
+                el.indeterminate = false;
+            }
+        }
+
+        window.updateBulkDeleteButton_booksTable = function() {
+            $('#bulkDeleteBtn').prop('disabled', window.selectedbooksTableIds.size === 0);
+        }
+    });
+
+    window.executeBulkDelete = function() {
+        if (window.selectedbooksTableIds.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${window.selectedbooksTableIds.size} selected items?`)) return;
+
+        $.ajax({
+            url: '{% url "student_books_bulk_delete" %}',
+            type: 'POST',
+            data: JSON.stringify({ ids: Array.from(window.selectedbooksTableIds) }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    window.selectedbooksTableIds.clear();
+                    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+                    updateBulkDeleteButton_booksTable();
+                    booksTable.ajax.reload();
+                    alert(response.message);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error deleting items.');
+            }
+        });
+    };
+
 </script>
 {% endblock %}
