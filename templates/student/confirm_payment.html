@@ -261,22 +261,11 @@
 
     <div class="payment-info-title">Complete Payment</div>
     <div class="payment-info-text">
-        Click below to process and confirm your payment directly on this screen.
+        Click below to process and confirm your payment securely via PayPal.
     </div>
 
-    <!-- Direct Same-Screen Payment Button -->
-    <button class="btn-direct-pay" id="payNowBtn" onclick="processDirectPayment()">
-        <i class="bi bi-shield-lock-fill"></i> Pay ${{ payment.amount|default:'0.00' }} USD Now
-    </button>
-
-    <div class="text-center mt-3">
-        <a href="javascript:void(0)" onclick="togglePaypalContainer()" style="font-size: 0.82rem; color: var(--primary-dark); text-decoration: underline; font-weight: 500;">
-            <i class="bi bi-paypal"></i> Or Pay via PayPal Express
-        </a>
-    </div>
-
-    <!-- Collapsible PayPal Container -->
-    <div id="paypal-button-wrapper" style="display: none; margin-top: 15px; min-height: 50px;">
+    <!-- PayPal Container -->
+    <div id="paypal-button-wrapper" style="margin-top: 15px; min-height: 50px;">
         <div id="paypal-button-container"></div>
     </div>
 
@@ -293,46 +282,6 @@
 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID|default:'sb' }}&currency=USD"></script>
 
 <script>
-    function processDirectPayment() {
-        const btn = document.getElementById("payNowBtn");
-        if (btn) btn.disabled = true;
-        
-        document.getElementById("loadingOverlay").style.display = "flex";
-
-        fetch("{% url 'process_direct_payment' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({
-                amount: "{{ payment.amount }}"
-            })
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.status === "success") {
-                window.location.href = result.redirect_url || "/student/payment-success/";
-            } else {
-                document.getElementById("loadingOverlay").style.display = "none";
-                if (btn) btn.disabled = false;
-                alert("Payment processing failed: " + (result.message || "Unknown error"));
-            }
-        })
-        .catch(err => {
-            console.error("Direct payment error:", err);
-            document.getElementById("loadingOverlay").style.display = "none";
-            if (btn) btn.disabled = false;
-            alert("Error processing payment. Please try again.");
-        });
-    }
-
-    function togglePaypalContainer() {
-        const wrapper = document.getElementById("paypal-button-wrapper");
-        if (wrapper) {
-            wrapper.style.display = wrapper.style.display === "none" ? "block" : "none";
-        }
-    }
 
     paypal.Buttons({
         createOrder: function (data, actions) {

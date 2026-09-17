@@ -2131,7 +2131,8 @@ def student_my_payments(request):
     subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
     # Fetch all retest exams for this student
     retest_fees_total = sum(float(se.retest_fee or 0) for se in StudentsExams.objects.filter(student=student, is_retest=True, retest_fee__gt=0, deleted_at__isnull=True))
-    total_fee_expected = course_fee + subject_fees_total + retest_fees_total
+    admin_fees_total = sum(float(p.amount or 0) for p in payments if p.code == "ADMIN_FEE")
+    total_fee_expected = course_fee + subject_fees_total + retest_fees_total + admin_fees_total
     
     discount = student.get_discount()
     total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
@@ -2157,6 +2158,7 @@ def student_my_payments(request):
         'course_fee': course_fee,
         'subject_fees_total': subject_fees_total,
         'retest_fees_total': retest_fees_total,
+        'admin_fees_total': admin_fees_total,
         'total_fee_expected': total_fee_expected,
         'discount': discount,
         'total_paid': total_paid,
@@ -2473,6 +2475,11 @@ def capture_paypal_order(request):
                 payment_obj = Payments.objects.get(id=payment_id)
                 payment_obj.is_paid = True
                 payment_obj.save()
+                
+                try:
+                    send_admin_payment_notification(payment_obj)
+                except Exception as e:
+                    logger.error(f"Failed to send admin notification: {e}")
 
                 if payment_obj.student:
                     try:
@@ -2535,6 +2542,11 @@ def process_direct_payment(request):
         # Mark payment cleared
         payment_obj.is_paid = True
         payment_obj.save()
+        
+        try:
+            send_admin_payment_notification(payment_obj)
+        except Exception as e:
+            logger.error(f"Failed to send admin notification: {e}")
 
         # Mark student paid
         if payment_obj.student:
@@ -2623,7 +2635,7 @@ def capture_retest_payment(request):
             
             # 2. Log in Payments table
             from home.models import Payments
-            Payments.objects.create(
+            payment_obj = Payments.objects.create(
                 code=f"RETEST-{student_exam.id}",
                 name=student_exam.student.get_full_name(),
                 email=student_exam.student.email or '',
@@ -2634,6 +2646,11 @@ def capture_retest_payment(request):
                 is_paid=True,
                 student=student_exam.student,
             )
+            
+            try:
+                send_admin_payment_notification(payment_obj)
+            except Exception as e:
+                logger.error(f"Failed to send admin notification: {e}")
             
             # 3. Send approval email to student
             subject = "Retest Exam Request Approved"
@@ -3634,3 +3651,15 @@ def student_request_retest(request, exam_id):
     except Exception as e:
         logger.error(f"Error requesting retest: {e}")
         return JsonResponse({"status": "error", "message": f"Failed to request retest: {str(e)}"}, status=500)
+
+def send_admin_payment_notification(payment):
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import logging
+    logger = logging.getLogger(__name__)
+    subject = f"New Payment Received: {payment.name}"
+    message = f"A new payment has been received.\n\nDetails:\nStudent/Payer: {payment.name}\nEmail: {payment.email}\nAmount: ${payment.amount}\nReference: {payment.code}\nMessage: {payment.message}\n\nPlease check the admin dashboard for more details."
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ["info@mytts.org"])
+    except Exception as e:
+        logger.error(f"Failed to send admin payment email: {e}")

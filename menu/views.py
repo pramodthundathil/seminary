@@ -3053,7 +3053,8 @@ def student_detail(request, student_id):
     course_fee = student.get_course_fee_at_registration()
     subject_fees_total = sum(float(ss.subject.fees or 0) for ss in subjects if ss.subject)
     retest_fees_total = sum(float(se.retest_fee or 0) for se in exams if se.is_retest and se.retest_fee and se.retest_fee > 0)
-    total_fee_expected = course_fee + subject_fees_total + retest_fees_total
+    admin_fees_total = sum(float(p.amount or 0) for p in payments if p.code == "ADMIN_FEE")
+    total_fee_expected = course_fee + subject_fees_total + retest_fees_total + admin_fees_total
     
     discount = student.get_discount()
     total_paid = sum(float(p.amount or 0) for p in payments if p.is_paid)
@@ -3068,6 +3069,7 @@ def student_detail(request, student_id):
         'course_fee': course_fee,
         'subject_fees_total': subject_fees_total,
         'retest_fees_total': retest_fees_total,
+        'admin_fees_total': admin_fees_total,
         'total_fee_expected': total_fee_expected,
         'discount': discount,
         'total_paid': total_paid,
@@ -11075,3 +11077,53 @@ def uploads_bulk_delete(request):
         messages.warning(request, 'No items selected for deletion.')
     
     return redirect('uploads_list')
+
+@login_required
+def admin_add_student_fee(request, student_id):
+    from home.models import Students, Payments, Notifications
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import logging
+    logger = logging.getLogger(__name__)
+
+    if request.method == 'POST':
+        student = get_object_or_404(Students, id=student_id)
+        amount = request.POST.get('amount')
+        reason = request.POST.get('reason')
+        
+        if amount and reason:
+            # Create payment record
+            Payments.objects.create(
+                student=student,
+                code="ADMIN_FEE",
+                name=f"{student.first_name} {student.last_name or ''}".strip(),
+                email=student.email,
+                person_group="student",
+                amount=amount,
+                message=reason,
+                is_paid=False
+            )
+            
+            # Send Email
+            subject = "New Fee Added to Your Account"
+            message = f"Dear {student.first_name},\n\nAn amount of ${amount} has been added to your payable balance for the following reason:\n{reason}\n\nPlease log in to your account to pay this amount.\n\nThank you."
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email], fail_silently=True)
+            except Exception as e:
+                logger.error(f"Failed to send fee addition email: {e}")
+                
+            # Send notification
+            try:
+                Notifications.objects.create(
+                    student=student,
+                    notification_type="Fee Addition",
+                    message=f"An amount of ${amount} has been added for: {reason}"
+                )
+            except Exception as e:
+                logger.error(f"Failed to create notification: {e}")
+                
+            messages.success(request, f"Successfully added fee of ${amount} to {student.first_name}'s account and notified them.")
+        else:
+            messages.error(request, "Amount and reason are required.")
+            
+    return redirect('student_detail', student_id=student_id)

@@ -1427,7 +1427,7 @@
                                 <h6 class="text-uppercase mb-1" style="opacity: 0.8; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;">Total Fees Expected</h6>
                                 <h2 class="mb-2 font-weight-bold">${{ total_fee_expected|floatformat:2 }}</h2>
                                 <div class="small" style="opacity: 0.85; font-size: 0.78rem;">
-                                    Program: ${{ course_fee|floatformat:2 }} | Add-ons: ${{ subject_fees_total|floatformat:2 }}{% if retest_fees_total > 0 %} | Exams/Retests: ${{ retest_fees_total|floatformat:2 }}{% endif %}{% if discount > 0 %} | Discount: ${{ discount|floatformat:2 }}{% endif %}
+                                    Program: ${{ course_fee|floatformat:2 }} | Add-ons: ${{ subject_fees_total|floatformat:2 }}{% if retest_fees_total > 0 %} | Exams/Retests: ${{ retest_fees_total|floatformat:2 }}{% endif %}{% if admin_fees_total > 0 %} | Admin Fees: ${{ admin_fees_total|floatformat:2 }}{% endif %}{% if discount > 0 %} | Discount: ${{ discount|floatformat:2 }}{% endif %}
                                 </div>
                                 <i class="fas fa-file-invoice-dollar stat-card-bg-icon"></i>
                             </div>
@@ -1583,6 +1583,35 @@
                                     </div>
                                     <button type="submit" class="btn-custom btn-custom-primary w-100 py-3">
                                         <i class="fas fa-tag"></i> Apply Price Adjustment
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Row for Add Payable Amount -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="p-4 border rounded-4 bg-light h-100" style="border-radius: 16px;">
+                                <h5 class="text-dark font-weight-bold mb-3 d-flex align-items-center gap-2" style="font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    <i class="fas fa-plus-circle text-info"></i> Add Payable Amount
+                                </h5>
+                                <p class="text-muted small mb-4">Add an extra fee/amount payable by this student. This will be reflected in their account.</p>
+                                
+                                <form action="{% url 'admin_add_student_fee' student.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Amount ($)</label>
+                                            <input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-custom w-100" placeholder="e.g. 50.00" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Reason / Message</label>
+                                            <input type="text" name="reason" class="form-control form-control-custom w-100" placeholder="e.g. Late Fee, Graduation Fee" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn-custom btn-custom-primary w-100 py-3" style="background-color: var(--primary-cyan); color: white;">
+                                        <i class="fas fa-plus"></i> Add Amount to Student
                                     </button>
                                 </form>
                             </div>

@@ -114,6 +114,7 @@ urlpatterns = [
     # Student Detail & Actions
     path('students/view/<int:student_id>/', views.student_detail, name='student_detail'),
     path('students/view/<int:student_id>/score-card/', views.admin_student_score_card, name='admin_student_score_card'),
+    path('students/view/<int:student_id>/add-fee/', views.admin_add_student_fee, name='admin_add_student_fee'),
     path('admin/students/edit/<int:student_id>/', views.student_edit_view, name='student_edit'),
     path('students/action/approve/<int:student_id>/', views.student_approve_action, name='student_approve_action'),
     path('students/action/disapprove/<int:student_id>/', views.student_disapprove_action, name='student_disapprove_action'),
