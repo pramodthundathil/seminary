@@ -68,6 +68,84 @@ from home.permissions import student_only, student_or_church_user
 # Set up logger
 logger = logging.getLogger(__name__)
 
+# ──────────────────────────────────────────────────────────────────────────────
+# EXAM_TIMEZONES — single source of truth for both the request-exam form
+# and the reschedule modal.
+#
+# Uses IANA timezone names so pytz handles DST automatically:
+#   America/New_York → UTC-5 in winter (EST), UTC-4 in summer (EDT)
+#   Europe/London    → UTC+0 in winter (GMT), UTC+1 in summer (BST)
+# This avoids the "I'm in Eastern US but picked UTC-5 in September" bug.
+#
+# Format: (iana_name, human_label)
+# ──────────────────────────────────────────────────────────────────────────────
+EXAM_TIMEZONES = [
+    # ── North America ──────────────────────────────────────────────────────────
+    ("America/New_York",                "(UTC-5/-4) US/Canada Eastern — New York, Toronto, Miami, Boston"),
+    ("America/Chicago",                 "(UTC-6/-5) US/Canada Central — Chicago, Dallas, Houston, Winnipeg"),
+    ("America/Denver",                  "(UTC-7/-6) US/Canada Mountain — Denver, Calgary, Salt Lake City"),
+    ("America/Phoenix",                 "(UTC-7)    US Mountain (no DST) — Phoenix, Arizona"),
+    ("America/Los_Angeles",             "(UTC-8/-7) US/Canada Pacific — Los Angeles, Seattle, Vancouver"),
+    ("America/Anchorage",               "(UTC-9/-8) US Alaska — Anchorage"),
+    ("Pacific/Honolulu",                "(UTC-10)   US Hawaii — Honolulu"),
+    ("America/Halifax",                 "(UTC-4/-3) Canada Atlantic — Halifax, Moncton"),
+    ("America/St_Johns",                "(UTC-3:30/-2:30) Canada Newfoundland — St. John's"),
+    ("America/Puerto_Rico",             "(UTC-4)    Caribbean — Puerto Rico, US Virgin Islands"),
+    # ── Central & South America ────────────────────────────────────────────────
+    ("America/Mexico_City",             "(UTC-6/-5) Mexico Central — Mexico City, Guadalajara"),
+    ("America/Bogota",                  "(UTC-5)    Colombia — Bogotá, Medellín"),
+    ("America/Lima",                    "(UTC-5)    Peru — Lima"),
+    ("America/Sao_Paulo",               "(UTC-3/-2) Brazil — São Paulo, Rio de Janeiro, Brasília"),
+    ("America/Argentina/Buenos_Aires",  "(UTC-3)    Argentina — Buenos Aires"),
+    ("America/Santiago",                "(UTC-4/-3) Chile — Santiago"),
+    # ── Europe ─────────────────────────────────────────────────────────────────
+    ("Europe/London",                   "(UTC+0/+1) UK & Ireland — London, Dublin, Edinburgh"),
+    ("Europe/Lisbon",                   "(UTC+0/+1) Portugal — Lisbon"),
+    ("Europe/Paris",                    "(UTC+1/+2) Central Europe — Paris, Berlin, Rome, Madrid, Amsterdam"),
+    ("Europe/Helsinki",                 "(UTC+2/+3) Eastern Europe — Helsinki, Athens, Kyiv, Tallinn"),
+    ("Europe/Istanbul",                 "(UTC+3)    Turkey — Istanbul, Ankara"),
+    ("Europe/Moscow",                   "(UTC+3)    Russia — Moscow, St. Petersburg"),
+    # ── Africa ─────────────────────────────────────────────────────────────────
+    ("Africa/Abidjan",                  "(UTC+0)    West Africa (no DST) — Accra, Dakar, Abidjan"),
+    ("Africa/Lagos",                    "(UTC+1)    West/Central Africa — Lagos, Kinshasa"),
+    ("Africa/Cairo",                    "(UTC+2)    Egypt — Cairo, Alexandria"),
+    ("Africa/Johannesburg",             "(UTC+2)    South Africa — Johannesburg, Cape Town"),
+    ("Africa/Nairobi",                  "(UTC+3)    East Africa — Nairobi, Addis Ababa, Dar es Salaam"),
+    # ── Middle East ────────────────────────────────────────────────────────────
+    ("Asia/Jerusalem",                  "(UTC+2/+3) Israel — Jerusalem, Tel Aviv"),
+    ("Asia/Riyadh",                     "(UTC+3)    Saudi Arabia — Riyadh, Jeddah, Mecca"),
+    ("Asia/Kuwait",                     "(UTC+3)    Kuwait, Bahrain, Qatar — Kuwait City, Doha"),
+    ("Asia/Tehran",                     "(UTC+3:30/+4:30) Iran — Tehran"),
+    ("Asia/Dubai",                      "(UTC+4)    UAE & Oman — Dubai, Abu Dhabi, Muscat"),
+    # ── South & Central Asia ───────────────────────────────────────────────────
+    ("Asia/Kabul",                      "(UTC+4:30) Afghanistan — Kabul"),
+    ("Asia/Karachi",                    "(UTC+5)    Pakistan — Karachi, Lahore, Islamabad"),
+    ("Asia/Yekaterinburg",              "(UTC+5)    Russia Ural — Yekaterinburg"),
+    ("Asia/Kolkata",                    "(UTC+5:30) India — Mumbai, Delhi, Kolkata, Chennai, Bengaluru"),
+    ("Asia/Colombo",                    "(UTC+5:30) Sri Lanka — Colombo"),
+    ("Asia/Kathmandu",                  "(UTC+5:45) Nepal — Kathmandu"),
+    ("Asia/Dhaka",                      "(UTC+6)    Bangladesh — Dhaka, Chittagong"),
+    ("Asia/Rangoon",                    "(UTC+6:30) Myanmar — Yangon, Mandalay"),
+    # ── Southeast & East Asia ──────────────────────────────────────────────────
+    ("Asia/Bangkok",                    "(UTC+7)    Indochina — Bangkok, Ho Chi Minh City, Jakarta"),
+    ("Asia/Singapore",                  "(UTC+8)    Singapore, Malaysia, Brunei — Singapore, Kuala Lumpur"),
+    ("Asia/Manila",                     "(UTC+8)    Philippines — Manila, Cebu"),
+    ("Asia/Shanghai",                   "(UTC+8)    China — Beijing, Shanghai, Guangzhou"),
+    ("Asia/Taipei",                     "(UTC+8)    Taiwan — Taipei"),
+    ("Asia/Hong_Kong",                  "(UTC+8)    Hong Kong"),
+    ("Asia/Seoul",                      "(UTC+9)    South Korea — Seoul, Busan"),
+    ("Asia/Tokyo",                      "(UTC+9)    Japan — Tokyo, Osaka, Nagoya"),
+    # ── Pacific & Oceania ──────────────────────────────────────────────────────
+    ("Australia/Perth",                 "(UTC+8)    Australia Western — Perth"),
+    ("Australia/Darwin",                "(UTC+9:30) Australia Central — Darwin"),
+    ("Australia/Adelaide",              "(UTC+9:30/+10:30) Australia Central — Adelaide"),
+    ("Australia/Sydney",                "(UTC+10/+11) Australia Eastern — Sydney, Melbourne, Brisbane"),
+    ("Pacific/Auckland",                "(UTC+12/+13) New Zealand — Auckland, Wellington"),
+    ("Pacific/Fiji",                    "(UTC+12)   Fiji"),
+    # ── UTC ────────────────────────────────────────────────────────────────────
+    ("UTC",                             "(UTC+0)    Coordinated Universal Time"),
+]
+
 def localize_datetime(naive_dt, tz_str):
     if not tz_str:
         return make_aware(naive_dt)
@@ -208,7 +286,7 @@ def student_home(request):
     
     for se in active_exams_qs:
         if se.start_time:
-            expiry_time = se.start_time + timedelta(minutes=se.exam_duration or 120)
+            expiry_time = se.start_time + timedelta(hours=2)
             if se.start_time <= now <= expiry_time:
                 active_exam = {
                     "id": se.id,
@@ -654,10 +732,10 @@ def student_subject_detail(request, subject_id):
                 retest_paid = se.retest_paid
                 retest_status = se.retest_status
                 
-                # Check expiry
+                # Check expiry (2-hour start window)
                 is_expired = False
                 if se.start_time:
-                    expiry_time = se.start_time + timedelta(minutes=duration)
+                    expiry_time = se.start_time + timedelta(hours=2)
                     if now > expiry_time:
                         is_expired = True
                 
@@ -912,6 +990,7 @@ def student_exam_hall(request):
             "created_at",
             "start_time",
             "timezone",
+            "exam_duration",
             "is_exam_started",
             "is_exam_ended",
             "is_approved",
@@ -946,7 +1025,7 @@ def student_exam_hall(request):
     
     for se in active_exams_qs:
         if se.start_time:
-            expiry_time = se.start_time + timedelta(minutes=se.exam_duration or 120)
+            expiry_time = se.start_time + timedelta(hours=2)
             if se.start_time <= now <= expiry_time:
                 active_exam = {
                     "id": se.id,
@@ -961,10 +1040,10 @@ def student_exam_hall(request):
             exam_obj = e.exam
             subject_obj = exam_obj.subject if exam_obj else None
             
-            # Calculate expiry time: start_time + duration
+            # Calculate expiry time: start_time + 2 hours active window
             is_expired = False
             if e.start_time:
-                expiry_time = e.start_time + timedelta(minutes=e.exam_duration or 120)
+                expiry_time = e.start_time + timedelta(hours=2)
                 if now > expiry_time:
                     is_expired = True
             
@@ -988,7 +1067,7 @@ def student_exam_hall(request):
                 status = "Retest Approved"
                 action = "Wait"
                 can_start = False
-            # 3. Approved and Ready (Within duration window)
+            # 3. Approved and Ready (Within 2 hours active window)
             elif e.is_approved and e.start_time and e.start_time <= now:
                 status = "Ongoing"
                 action = "Start"
@@ -1016,9 +1095,10 @@ def student_exam_hall(request):
                 
             # Localize requested_time for rendering
             local_time_str = "N/A"
+            tz_display = e.timezone or "UTC"
             if e.start_time:
                 try:
-                    if e.timezone.startswith("UTC"):
+                    if e.timezone and e.timezone.startswith("UTC"):
                         offset_str = e.timezone[3:]
                         if offset_str:
                             sign = 1 if offset_str[0] == '+' else -1
@@ -1029,10 +1109,16 @@ def student_exam_hall(request):
                             tz = pytz.FixedOffset(sign * int(td.total_seconds() / 60))
                         else:
                             tz = pytz.UTC
-                    else:
+                    elif e.timezone:
                         tz = pytz.timezone(e.timezone)
+                    else:
+                        tz = pytz.UTC
                     local_dt = e.start_time.astimezone(tz)
                     local_time_str = local_dt.strftime("%b %d, %Y %I:%M %p")
+                    if e.timezone and "/" in e.timezone:
+                        tz_display = e.timezone.split("/")[-1].replace("_", " ")
+                    else:
+                        tz_display = e.timezone
                 except Exception as tz_ex:
                     logger.error(f"Error converting start_time to local tz: {tz_ex}")
                     local_time_str = e.start_time.strftime("%b %d, %Y %I:%M %p")
@@ -1041,39 +1127,39 @@ def student_exam_hall(request):
             logger.error(f"Failed to read exam/subject for exam entry {e.id}: {ex}")
             continue
 
+        # Compute UTC timestamp (ms) of start_time for client-side countdown
+        start_time_utc_ms = None
+        if e.start_time:
+            import calendar
+            start_time_utc_ms = int(calendar.timegm(e.start_time.utctimetuple())) * 1000
+
         exam_list.append({
             "id": e.id,
             "exam_name": getattr(exam_obj, "exam_name", "N/A"),
             "subject_name": getattr(subject_obj, "subject_name", "N/A"),
             "requested_time": e.start_time, # Keep raw datetime for any other uses
             "requested_time_str": local_time_str, # Use this string in template
-            "timezone": e.timezone,
+            "timezone": tz_display,
+            "timezone_raw": e.timezone,
             "status": status,
             "is_rescheduled": e.is_rescheduled,
             "is_approved": e.is_approved,
             "is_exam_ended": e.is_exam_ended,
+            "is_exam_started": e.is_exam_started,   # True if student attended
             "is_retest": e.is_retest,
             "retest_status": e.retest_status,
             "retest_fee": str(e.retest_fee) if e.retest_fee else None,
             "retest_paid": e.retest_paid,
             "can_start": can_start,
-            "action": action
+            "action": action,
+            "start_time_utc_ms": start_time_utc_ms,  # UTC epoch ms for countdown
+            "exam_duration_minutes": 120,  # Active start window: 2 hours (120 minutes)
+            # Reschedule type: 'free' for missed (no-show), 'retest' for attended
+            "reschedule_type": "retest" if e.is_exam_started else "free",
         })
 
-    # Minimal curated set of common timezones to keep the selection simple and clear
-    common_timezones = [
-        'UTC',
-        'Asia/Kolkata',        # India Standard Time
-        'Asia/Dubai',          # Gulf Standard Time
-        'Asia/Singapore',      # Singapore Standard Time
-        'Europe/London',       # Western European / Greenwich Mean Time
-        'America/New_York',    # Eastern Standard Time
-        'America/Chicago',     # Central Standard Time
-        'America/Denver',      # Mountain Standard Time
-        'America/Los_Angeles', # Pacific Standard Time
-        'Africa/Nairobi',      # East Africa Time
-        'Australia/Sydney'     # Australian Eastern Standard Time
-    ]
+    # IANA timezone names — DST-aware, shared with the request-exam form
+    common_timezones = EXAM_TIMEZONES
 
     return render(request, "student/exam_hall.html", {
         "student": student,
@@ -1104,7 +1190,7 @@ def student_reschedule_exam(request):
         student = Students.objects.get(user=request.user)
         student_exam = get_object_or_404(StudentsExams, id=exam_id, student=student)
 
-        # Combine date + time
+        # Combine date + time → localize to chosen timezone
         try:
             datetime_str = f"{exam_date} {start_time}"
             final_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
@@ -1112,15 +1198,51 @@ def student_reschedule_exam(request):
         except ValueError:
             return JsonResponse({"status": "error", "message": "Invalid date or time format"}, status=400)
 
-        # Update the exam record (rescheduling requires admin approval)
-        student_exam.start_time = final_datetime
-        student_exam.timezone = timezone_val
-        student_exam.is_approved = False  
-        student_exam.is_rescheduled = True
-        student_exam.updated_by = request.user
-        student_exam.save()
+        # ──────────────────────────────────────────────────────────────────
+        # RESCHEDULE LOGIC
+        # Case 1 — Student MISSED / DID NOT ATTEND (exam never started):
+        #   • No fee required
+        #   • Auto-approved immediately (same as a fresh exam request)
+        #   • Not marked as a retest
+        #
+        # Case 2 — Student ATTENDED (exam was started / completed):
+        #   • Treated as a RETEST
+        #   • Requires admin approval
+        #   • Retest fee may apply (set by admin)
+        # ──────────────────────────────────────────────────────────────────
+        if not student_exam.is_exam_started:
+            # Missed / no-show → free reschedule, instant approval
+            student_exam.start_time = final_datetime
+            student_exam.timezone = timezone_val
+            student_exam.is_approved = True       # auto-approve
+            student_exam.is_rescheduled = True
+            student_exam.is_retest = False        # not a retest
+            student_exam.retest_fee = None        # no fee
+            student_exam.retest_paid = False
+            student_exam.retest_status = 'none'
+            student_exam.updated_by = request.user
+            student_exam.save()
 
-        return JsonResponse({"status": "success", "message": "Exam reschedule request submitted. Waiting for admin approval."})
+            return JsonResponse({
+                "status": "success",
+                "message": "Exam rescheduled successfully! Your new exam time has been confirmed."
+            })
+        else:
+            # Student attended → retest, needs admin approval + possible fee
+            student_exam.start_time = final_datetime
+            student_exam.timezone = timezone_val
+            student_exam.is_approved = False      # requires admin approval
+            student_exam.is_rescheduled = True
+            student_exam.is_retest = True
+            student_exam.retest_status = 'pending'
+            student_exam.retest_requested_at = timezone.now()
+            student_exam.updated_by = request.user
+            student_exam.save()
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Retest request submitted. Please wait for admin approval. A retest fee may apply."
+            })
 
     except Students.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Student not found"}, status=404)
@@ -1625,6 +1747,7 @@ def student_request_exam(request):
         "student_exam": student_exam,
         "hours": hours,
         "minutes": minutes,
+        "timezones": EXAM_TIMEZONES,  # IANA timezone names — DST-aware
     }
 
     return render(request, "student/request_exam.html", context)

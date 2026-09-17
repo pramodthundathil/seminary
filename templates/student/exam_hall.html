@@ -728,15 +728,23 @@
 
                     <td data-label="Requested Date">
                         <div class="exam-time">{{ e.requested_time_str }} ({{ e.timezone }})</div>
+                        {% if e.status == "Approved" and e.start_time_utc_ms %}
+                        {# Countdown div — JS fills in "Starts in Xh Xm Xs" using UTC epoch comparison #}
+                        <div id="countdown-{{ e.id }}"
+                             data-start-utc-ms="{{ e.start_time_utc_ms }}"
+                             data-scheduled-time="{{ e.requested_time_str }}"
+                             data-scheduled-tz="{{ e.timezone }}"
+                             style="font-size:11px;color:#6366f1;margin-top:3px;font-weight:600;"></div>
+                        {% endif %}
                     </td>
 
                     <td data-label="Status">
                         {% if e.status == "Completed" %}
                         <span class="status-badge approved">Completed</span>
                         {% elif e.status == "Ongoing" %}
-                        <span class="status-badge ongoing">Ongoing</span>
+                        <span class="status-badge ongoing" id="status-badge-{{ e.id }}">Ongoing</span>
                         {% elif e.status == "Approved" %}
-                        <span class="status-badge approved">Approved</span>
+                        <span class="status-badge approved" id="status-badge-{{ e.id }}" data-start-utc-ms="{{ e.start_time_utc_ms }}" data-duration-min="{{ e.exam_duration_minutes }}" data-exam-id="{{ e.id }}">Approved</span>
                         {% elif e.status == "Rescheduled" %}
                         <span class="status-badge rescheduled">Rescheduled</span>
                         {% elif e.status == "Pending Approval" %}
@@ -758,18 +766,32 @@
                             <i class="bi bi-paypal"></i> Pay Fee: ${{ e.retest_fee }}
                         </button>
                         {% elif e.can_start %}
-                        <a href="{% url 'take_exam' e.id %}" class="action-btn"
+                        <a href="{% url 'take_exam' e.id %}" class="action-btn" id="start-btn-{{ e.id }}"
                             style="background:#10b981; color:white; padding:8px 12px; text-decoration:none; display:inline-block;">Start
                             Exam</a>
                         {% elif e.status == "Completed" %}
                         <a href="{% url 'student_score_card' %}" class="action-btn" style="color:#3b82f6;">View
                             Result</a>
                         {% else %}
-                        <div class="action-buttons">
+                        <div class="action-buttons" id="action-area-{{ e.id }}">
                             {% if not e.is_exam_ended %}
-                            <button class="action-btn edit" onclick="openRescheduleModal({{ e.id }}, '{{ e.exam_name|escapejs }}')" title="Reschedule">
-                                <i class="bi bi-calendar-event"></i> Reschedule
-                            </button>
+                                {% if e.reschedule_type == 'free' %}
+                                {# Missed / no-show → free reschedule, instant approval #}
+                                <button class="action-btn edit"
+                                    onclick="openRescheduleModal({{ e.id }}, '{{ e.exam_name|escapejs }}', 'free')"
+                                    title="Reschedule (Free – no approval needed)"
+                                    style="background:#10b981;color:white;border:none;">
+                                    <i class="bi bi-calendar-check"></i> Reschedule
+                                </button>
+                                {% else %}
+                                {# Attended → retest, needs approval + fee #}
+                                <button class="action-btn edit"
+                                    onclick="openRescheduleModal({{ e.id }}, '{{ e.exam_name|escapejs }}', 'retest')"
+                                    title="Request Retest (requires admin approval and may incur a fee)"
+                                    style="background:#f59e0b;color:white;border:none;">
+                                    <i class="bi bi-arrow-repeat"></i> Request Retest
+                                </button>
+                                {% endif %}
                             {% endif %}
                             <span style="font-size:12px; color:#9ca3af;">{{ e.action }}</span>
                         </div>
@@ -896,20 +918,35 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-0">
-                <h5 class="modal-title fw-bold" id="rescheduleModalLabel">Reschedule Exam</h5>
+                <div>
+                    <h5 class="modal-title fw-bold" id="rescheduleModalLabel">Reschedule Exam</h5>
+                    <p class="text-secondary small mb-0" id="rescheduleModalSubtitle"></p>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body px-4 py-3">
                 <div id="rescheduleAlert" class="alert d-none" role="alert"></div>
+
+                {# Info banner changes based on reschedule type #}
+                <div id="rescheduleInfoFree" class="alert alert-success d-none" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>Free Reschedule:</strong> You did not attend this exam, so rescheduling is free and will be confirmed immediately — no approval needed.
+                </div>
+                <div id="rescheduleInfoRetest" class="alert alert-warning d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Retest Request:</strong> Since you attended this exam, a retest requires admin approval and a retest fee may be charged by the admin.
+                </div>
+
                 <form id="rescheduleForm">
                     {% csrf_token %}
                     <input type="hidden" name="exam_id" id="rescheduleExamId">
-                    
+                    <input type="hidden" name="reschedule_type" id="rescheduleType">
+
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-semibold">Exam Name</label>
                         <p id="rescheduleExamName" class="fw-bold mb-0 text-dark"></p>
                     </div>
-                    
+
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="rescheduleDate" class="form-label small fw-semibold">New Date*</label>
@@ -920,12 +957,13 @@
                             <input type="time" class="form-control" name="startTime" id="rescheduleTime" required>
                         </div>
                     </div>
-                    
+
                     <div class="mt-3">
                         <label for="rescheduleTimezone" class="form-label small fw-semibold">Timezone*</label>
                         <select class="form-select" name="timezone" id="rescheduleTimezone" required>
-                            {% for tz in timezones %}
-                            <option value="{{ tz }}" {% if student.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                            <option value="">--- Select Timezone ---</option>
+                            {% for tz_val, tz_label in timezones %}
+                            <option value="{{ tz_val }}">{{ tz_label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -987,7 +1025,97 @@
                 this.classList.add('active');
             });
         });
+
+        // ──────────────────────────────────────────────────────────────
+        // Live Exam Countdown — runs every SECOND
+        //
+        // For every "Approved" exam with a known start time:
+        // • Shows the student's LOCAL start time (browser clock, DST-aware)
+        // • Shows live "Starts in Xh Xm Xs" countdown
+        // • When time arrives: flips badge → Ongoing, shows Start button
+        // • Reloads the page 5s later as a safety fallback
+        //
+        // KEY FIX: Date.now() is always UTC, so the comparison is correct
+        // regardless of what timezone the student is in or whether DST is active.
+        // ──────────────────────────────────────────────────────────────
+        let reloadScheduled = false;
+
+        function checkApprovedExams() {
+            const badges = document.querySelectorAll('.status-badge[data-start-utc-ms]');
+            const nowMs = Date.now();  // always UTC epoch ms
+
+            badges.forEach(function(badge) {
+                const startMs  = parseInt(badge.dataset.startUtcMs, 10);
+                const durationMin = parseInt(badge.dataset.durationMin, 10) || 120;
+                const examId   = badge.dataset.examId;
+                const expiryMs = startMs + durationMin * 60 * 1000;
+
+                if (isNaN(startMs)) return;
+
+                // Update the visible countdown in the date cell
+                const cdEl = document.getElementById('countdown-' + examId);
+                if (cdEl) {
+                    const scheduledTime = cdEl.dataset.scheduledTime || '';
+                    const scheduledTz   = cdEl.dataset.scheduledTz   || '';
+                    // Shorten long IANA names to just the city part for display
+                    const tzShort = scheduledTz.includes('/') ? scheduledTz.split('/').pop().replace('_', ' ') : scheduledTz;
+
+                    if (nowMs < startMs) {
+                        // Show scheduled timezone time + countdown
+                        const diffSec = Math.round((startMs - nowMs) / 1000);
+                        const h = Math.floor(diffSec / 3600);
+                        const m = Math.floor((diffSec % 3600) / 60);
+                        const s = diffSec % 60;
+                        let countdown = '';
+                        if (h > 0) countdown += h + 'h ';
+                        if (m > 0 || h > 0) countdown += m + 'm ';
+                        countdown += s + 's';
+                        // Show scheduled time (in exam's timezone), NOT browser local time
+                        cdEl.innerHTML = '&#128337; Starts in <strong>' + countdown + '</strong>'
+                            + (scheduledTime ? ' &bull; <span style="color:#374151">' + scheduledTime + ' (' + tzShort + ')</span>' : '');
+                        cdEl.style.color = '#6366f1';
+                    } else if (nowMs <= expiryMs) {
+                        cdEl.innerHTML = '&#9989; Exam is now open &bull; Click <strong>Start Exam</strong>';
+                        cdEl.style.color = '#10b981';
+                    }
+                }
+
+
+                if (nowMs >= startMs && nowMs <= expiryMs) {
+                    // Exam window is open — flip badge to Ongoing
+                    badge.className = 'status-badge ongoing';
+                    badge.textContent = 'Ongoing';
+                    badge.removeAttribute('data-start-utc-ms');  // stop re-checking
+
+                    // Replace the action area with a Start Exam button
+                    const actionArea = document.getElementById('action-area-' + examId);
+                    if (actionArea) {
+                        actionArea.outerHTML =
+                            '<a href="/student/take-exam/' + examId + '/" class="action-btn" ' +
+                            'style="background:#10b981;color:white;padding:8px 12px;' +
+                            'text-decoration:none;display:inline-block;">&#9654; Start Exam</a>';
+                    }
+
+                    // Fallback: reload the page after 5s to get full server-rendered state
+                    if (!reloadScheduled) {
+                        reloadScheduled = true;
+                        setTimeout(() => location.reload(), 5000);
+                    }
+                } else if (nowMs > expiryMs) {
+                    // Window expired while student was on the page
+                    badge.className = 'status-badge rejected';
+                    badge.textContent = 'Missed';
+                    badge.removeAttribute('data-start-utc-ms');
+                    if (cdEl) cdEl.innerHTML = '';
+                }
+            });
+        }
+
+        // Run immediately, then every 1 second for accurate countdown
+        checkApprovedExams();
+        setInterval(checkApprovedExams, 1000);
     });
+
 
     function viewExam(name) {
         alert("Viewing exam: " + name);
@@ -1004,18 +1132,46 @@
         }
     }
 
-    function openRescheduleModal(id, name) {
+    function openRescheduleModal(id, name, type) {
         document.getElementById('rescheduleExamId').value = id;
         document.getElementById('rescheduleExamName').innerText = name;
+        document.getElementById('rescheduleType').value = type || 'free';
+
+        // Reset info banners
+        document.getElementById('rescheduleInfoFree').classList.add('d-none');
+        document.getElementById('rescheduleInfoRetest').classList.add('d-none');
+        document.getElementById('rescheduleAlert').classList.add('d-none');
+
+        const titleEl = document.getElementById('rescheduleModalLabel');
+        const subtitleEl = document.getElementById('rescheduleModalSubtitle');
+        const confirmBtn = document.getElementById('confirmRescheduleBtn');
+
+        if (type === 'retest') {
+            titleEl.textContent = 'Request Retest';
+            subtitleEl.textContent = 'You attended this exam — admin approval required';
+            confirmBtn.textContent = 'Submit Retest Request';
+            confirmBtn.className = 'btn btn-warning px-4 fw-semibold';
+            document.getElementById('rescheduleInfoRetest').classList.remove('d-none');
+        } else {
+            titleEl.textContent = 'Reschedule Exam';
+            subtitleEl.textContent = 'You missed this exam — free, instant reschedule';
+            confirmBtn.textContent = 'Confirm Reschedule';
+            confirmBtn.className = 'btn btn-success px-4 fw-semibold';
+            document.getElementById('rescheduleInfoFree').classList.remove('d-none');
+        }
+
         const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
         modal.show();
     }
 
+
     function submitReschedule() {
         const form = document.getElementById('rescheduleForm');
         const btn = document.getElementById('confirmRescheduleBtn');
-        const alert = document.getElementById('rescheduleAlert');
-        
+        const alertEl = document.getElementById('rescheduleAlert');
+        const rescheduleType = document.getElementById('rescheduleType').value;
+        const btnOriginalText = btn.textContent;
+
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
@@ -1023,9 +1179,10 @@
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-        
+        alertEl.classList.add('d-none');
+
         const formData = new FormData(form);
-        
+
         fetch("{% url 'student_reschedule_exam' %}", {
             method: 'POST',
             body: formData,
@@ -1036,27 +1193,27 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert.className = 'alert alert-success';
-                alert.innerText = data.message;
-                alert.classList.remove('d-none');
+                alertEl.className = 'alert alert-success';
+                alertEl.innerText = data.message;
+                alertEl.classList.remove('d-none');
                 setTimeout(() => {
                     location.reload();
-                }, 1500);
+                }, 1800);
             } else {
-                alert.className = 'alert alert-danger';
-                alert.innerText = data.message;
-                alert.classList.remove('d-none');
+                alertEl.className = 'alert alert-danger';
+                alertEl.innerText = data.message;
+                alertEl.classList.remove('d-none');
                 btn.disabled = false;
-                btn.innerText = 'Confirm Reschedule';
+                btn.textContent = btnOriginalText;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert.className = 'alert alert-danger';
-            alert.innerText = 'An error occurred. Please try again.';
-            alert.classList.remove('d-none');
+            alertEl.className = 'alert alert-danger';
+            alertEl.innerText = 'An error occurred. Please try again.';
+            alertEl.classList.remove('d-none');
             btn.disabled = false;
-            btn.innerText = 'Confirm Reschedule';
+            btn.textContent = btnOriginalText;
         });
     }
 

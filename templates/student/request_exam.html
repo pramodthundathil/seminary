@@ -267,36 +267,21 @@
 
             <!-- TIMEZONE -->
             <div class="exam-form-group">
-                <label for="timezone">Timezone *</label>
+                <label for="timezone">Timezone *
+                    <span style="font-size:11px;color:#6b7280;font-weight:400;">
+                        — select the country/region where the exam time applies
+                    </span>
+                </label>
                 <select id="timezone" name="timezone" required>
-                    <option value="">--- Select Timezone ---</option>
-                    <option value="UTC-12:00">(UTC-12:00) International Date Line West</option>
-                    <option value="UTC-11:00">(UTC-11:00) Coordinated Universal Time-11</option>
-                    <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
-                    <option value="UTC-09:00">(UTC-09:00) Alaska</option>
-                    <option value="UTC-08:00">(UTC-08:00) Pacific Time (US & Canada)</option>
-                    <option value="UTC-07:00">(UTC-07:00) Mountain Time (US & Canada)</option>
-                    <option value="UTC-06:00">(UTC-06:00) Central Time (US & Canada)</option>
-                    <option value="UTC-05:00">(UTC-05:00) Eastern Time (US & Canada)</option>
-                    <option value="UTC-04:00">(UTC-04:00) Atlantic Time (Canada)</option>
-                    <option value="UTC-03:00">(UTC-03:00) Buenos Aires</option>
-                    <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
-                    <option value="UTC-01:00">(UTC-01:00) Azores</option>
-                    <option value="UTC+00:00">(UTC+00:00) Dublin, London</option>
-                    <option value="UTC+01:00">(UTC+01:00) Amsterdam, Berlin, Paris</option>
-                    <option value="UTC+02:00">(UTC+02:00) Athens, Istanbul</option>
-                    <option value="UTC+03:00">(UTC+03:00) Moscow, St. Petersburg</option>
-                    <option value="UTC+04:00">(UTC+04:00) Abu Dhabi, Muscat</option>
-                    <option value="UTC+05:00">(UTC+05:00) Islamabad, Karachi</option>
-                    <option value="UTC+05:30">(UTC+05:30) India Standard Time</option>
-                    <option value="UTC+06:00">(UTC+06:00) Dhaka</option>
-                    <option value="UTC+07:00">(UTC+07:00) Bangkok, Hanoi</option>
-                    <option value="UTC+08:00">(UTC+08:00) Beijing, Singapore</option>
-                    <option value="UTC+09:00">(UTC+09:00) Tokyo, Seoul</option>
-                    <option value="UTC+10:00">(UTC+10:00) Sydney</option>
-                    <option value="UTC+11:00">(UTC+11:00) Solomon Islands</option>
-                    <option value="UTC+12:00">(UTC+12:00) Auckland, Wellington</option>
+                    <option value="">--- Select Country / Timezone ---</option>
+                    {% for tz_val, tz_label in timezones %}
+                    <option value="{{ tz_val }}">{{ tz_label }}</option>
+                    {% endfor %}
                 </select>
+                <p style="font-size:11px;color:#6b7280;margin-top:4px;">
+                    &#9432; DST is handled automatically — e.g. selecting
+                    <em>US/Canada Eastern</em> uses UTC-5 in winter and UTC-4 in summer.
+                </p>
             </div>
 
             <!-- EXAM DATE -->
@@ -441,6 +426,7 @@
             subjectSelect.dispatchEvent(new Event('change'));
         }
     });
+
 </script>
 
 {% endblock %}

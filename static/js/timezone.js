@@ -1,77 +1,131 @@
-// ---------- Timezone List (Limited curated set) ----------
+// ---------- Comprehensive DST-Aware Timezone List ----------
 window.TIMEZONE_LIST = [
-    "UTC-12:00",
-    "UTC-11:00",
-    "UTC-10:00",
-    "UTC-09:00",
-    "UTC-08:00",
-    "UTC-07:00",
-    "UTC-06:00",
-    "UTC-05:00",
-    "UTC-04:00",
-    "UTC-03:00",
-    "UTC-02:00",
-    "UTC-01:00",
-    "UTC+00:00",
-    "UTC+01:00",
-    "UTC+02:00",
-    "UTC+03:00",
-    "UTC+04:00",
-    "UTC+05:00",
-    "UTC+05:30",
-    "UTC+06:00",
-    "UTC+07:00",
-    "UTC+08:00",
-    "UTC+09:00",
-    "UTC+10:00",
-    "UTC+11:00",
-    "UTC+12:00"
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Phoenix",
+    "America/Los_Angeles",
+    "America/Anchorage",
+    "Pacific/Honolulu",
+    "America/Halifax",
+    "America/St_Johns",
+    "America/Puerto_Rico",
+    "America/Mexico_City",
+    "America/Bogota",
+    "America/Lima",
+    "America/Sao_Paulo",
+    "America/Argentina/Buenos_Aires",
+    "America/Santiago",
+    "Europe/London",
+    "Europe/Lisbon",
+    "Europe/Paris",
+    "Europe/Helsinki",
+    "Europe/Istanbul",
+    "Europe/Moscow",
+    "Africa/Abidjan",
+    "Africa/Lagos",
+    "Africa/Cairo",
+    "Africa/Johannesburg",
+    "Africa/Nairobi",
+    "Asia/Jerusalem",
+    "Asia/Riyadh",
+    "Asia/Kuwait",
+    "Asia/Tehran",
+    "Asia/Dubai",
+    "Asia/Kabul",
+    "Asia/Karachi",
+    "Asia/Yekaterinburg",
+    "Asia/Kolkata",
+    "Asia/Colombo",
+    "Asia/Kathmandu",
+    "Asia/Dhaka",
+    "Asia/Rangoon",
+    "Asia/Bangkok",
+    "Asia/Singapore",
+    "Asia/Manila",
+    "Asia/Shanghai",
+    "Asia/Taipei",
+    "Asia/Hong_Kong",
+    "Asia/Seoul",
+    "Asia/Tokyo",
+    "Australia/Perth",
+    "Australia/Darwin",
+    "Australia/Adelaide",
+    "Australia/Sydney",
+    "Australia/Brisbane",
+    "Pacific/Auckland",
+    "Pacific/Fiji",
+    "UTC"
 ];
 
 const TIMEZONE_LABELS = {
-    "UTC-12:00": "(UTC-12:00) International Date Line West",
-    "UTC-11:00": "(UTC-11:00) Coordinated Universal Time-11",
-    "UTC-10:00": "(UTC-10:00) Hawaii",
-    "UTC-09:00": "(UTC-09:00) Alaska",
-    "UTC-08:00": "(UTC-08:00) Pacific Time (US & Canada)",
-    "UTC-07:00": "(UTC-07:00) Mountain Time (US & Canada)",
-    "UTC-06:00": "(UTC-06:00) Central Time (US & Canada)",
-    "UTC-05:00": "(UTC-05:00) Eastern Time (US & Canada)",
-    "UTC-04:00": "(UTC-04:00) Atlantic Time (Canada)",
-    "UTC-03:00": "(UTC-03:00) Buenos Aires",
-    "UTC-02:00": "(UTC-02:00) Mid-Atlantic",
-    "UTC-01:00": "(UTC-01:00) Azores",
-    "UTC+00:00": "(UTC+00:00) Dublin, London",
-    "UTC+01:00": "(UTC+01:00) Amsterdam, Berlin, Paris",
-    "UTC+02:00": "(UTC+02:00) Athens, Istanbul",
-    "UTC+03:00": "(UTC+03:00) Moscow, St. Petersburg",
-    "UTC+04:00": "(UTC+04:00) Abu Dhabi, Muscat",
-    "UTC+05:00": "(UTC+05:00) Islamabad, Karachi",
-    "UTC+05:30": "(UTC+05:30) India Standard Time",
-    "UTC+06:00": "(UTC+06:00) Dhaka",
-    "UTC+07:00": "(UTC+07:00) Bangkok, Hanoi",
-    "UTC+08:00": "(UTC+08:00) Beijing, Singapore",
-    "UTC+09:00": "(UTC+09:00) Tokyo, Seoul",
-    "UTC+10:00": "(UTC+10:00) Sydney",
-    "UTC+11:00": "(UTC+11:00) Solomon Islands",
-    "UTC+12:00": "(UTC+12:00) Auckland, Wellington"
+    "America/New_York": "(UTC-5/-4) US/Canada Eastern — New York, Toronto, Miami, Boston",
+    "America/Chicago": "(UTC-6/-5) US/Canada Central — Chicago, Dallas, Houston, Winnipeg",
+    "America/Denver": "(UTC-7/-6) US/Canada Mountain — Denver, Calgary, Salt Lake City",
+    "America/Phoenix": "(UTC-7) US Mountain (no DST) — Phoenix, Arizona",
+    "America/Los_Angeles": "(UTC-8/-7) US/Canada Pacific — Los Angeles, Seattle, Vancouver",
+    "America/Anchorage": "(UTC-9/-8) US Alaska — Anchorage",
+    "Pacific/Honolulu": "(UTC-10) US Hawaii — Honolulu",
+    "America/Halifax": "(UTC-4/-3) Canada Atlantic — Halifax, Moncton",
+    "America/St_Johns": "(UTC-3:30/-2:30) Canada Newfoundland — St. John's",
+    "America/Puerto_Rico": "(UTC-4) Caribbean — Puerto Rico, US Virgin Islands",
+    "America/Mexico_City": "(UTC-6/-5) Mexico Central — Mexico City, Guadalajara",
+    "America/Bogota": "(UTC-5) Colombia — Bogotá, Medellín",
+    "America/Lima": "(UTC-5) Peru — Lima",
+    "America/Sao_Paulo": "(UTC-3/-2) Brazil — São Paulo, Rio de Janeiro, Brasília",
+    "America/Argentina/Buenos_Aires": "(UTC-3) Argentina — Buenos Aires",
+    "America/Santiago": "(UTC-4/-3) Chile — Santiago",
+    "Europe/London": "(UTC+0/+1) UK & Ireland — London, Dublin, Edinburgh",
+    "Europe/Lisbon": "(UTC+0/+1) Portugal — Lisbon",
+    "Europe/Paris": "(UTC+1/+2) Central Europe — Paris, Berlin, Rome, Madrid, Amsterdam",
+    "Europe/Helsinki": "(UTC+2/+3) Eastern Europe — Helsinki, Athens, Kyiv, Tallinn",
+    "Europe/Istanbul": "(UTC+3) Turkey — Istanbul, Ankara",
+    "Europe/Moscow": "(UTC+3) Russia — Moscow, St. Petersburg",
+    "Africa/Abidjan": "(UTC+0) West Africa (no DST) — Accra, Dakar, Abidjan",
+    "Africa/Lagos": "(UTC+1) West/Central Africa — Lagos, Kinshasa",
+    "Africa/Cairo": "(UTC+2) Egypt — Cairo, Alexandria",
+    "Africa/Johannesburg": "(UTC+2) South Africa — Johannesburg, Cape Town",
+    "Africa/Nairobi": "(UTC+3) East Africa — Nairobi, Addis Ababa, Dar es Salaam",
+    "Asia/Jerusalem": "(UTC+2/+3) Israel — Jerusalem, Tel Aviv",
+    "Asia/Riyadh": "(UTC+3) Saudi Arabia — Riyadh, Jeddah, Mecca",
+    "Asia/Kuwait": "(UTC+3) Kuwait, Bahrain, Qatar — Kuwait City, Doha",
+    "Asia/Tehran": "(UTC+3:30/+4:30) Iran — Tehran",
+    "Asia/Dubai": "(UTC+4) UAE & Oman — Dubai, Abu Dhabi, Muscat",
+    "Asia/Kabul": "(UTC+4:30) Afghanistan — Kabul",
+    "Asia/Karachi": "(UTC+5) Pakistan — Karachi, Lahore, Islamabad",
+    "Asia/Yekaterinburg": "(UTC+5) Russia Ural — Yekaterinburg",
+    "Asia/Kolkata": "(UTC+5:30) India — Mumbai, Delhi, Kolkata, Chennai, Bengaluru",
+    "Asia/Colombo": "(UTC+5:30) Sri Lanka — Colombo",
+    "Asia/Kathmandu": "(UTC+5:45) Nepal — Kathmandu",
+    "Asia/Dhaka": "(UTC+6) Bangladesh — Dhaka, Chittagong",
+    "Asia/Rangoon": "(UTC+6:30) Myanmar — Yangon, Mandalay",
+    "Asia/Bangkok": "(UTC+7) Indochina — Bangkok, Ho Chi Minh City, Jakarta",
+    "Asia/Singapore": "(UTC+8) Singapore, Malaysia, Brunei — Singapore, Kuala Lumpur",
+    "Asia/Manila": "(UTC+8) Philippines — Manila, Cebu",
+    "Asia/Shanghai": "(UTC+8) China — Beijing, Shanghai, Guangzhou",
+    "Asia/Taipei": "(UTC+8) Taiwan — Taipei",
+    "Asia/Hong_Kong": "(UTC+8) Hong Kong",
+    "Asia/Seoul": "(UTC+9) South Korea — Seoul, Busan",
+    "Asia/Tokyo": "(UTC+9) Japan — Tokyo, Osaka, Nagoya",
+    "Australia/Perth": "(UTC+8) Australia Western — Perth",
+    "Australia/Darwin": "(UTC+9:30) Australia Central — Darwin",
+    "Australia/Adelaide": "(UTC+9:30/+10:30) Australia South — Adelaide",
+    "Australia/Sydney": "(UTC+10/+11) Australia Eastern — Sydney, Melbourne, Canberra",
+    "Australia/Brisbane": "(UTC+10) Australia Queensland (no DST) — Brisbane",
+    "Pacific/Auckland": "(UTC+12/+13) New Zealand — Auckland, Wellington",
+    "Pacific/Fiji": "(UTC+12) Fiji — Suva",
+    "UTC": "(UTC+0) Coordinated Universal Time"
 };
 
-// Map old tz format/aliases to UTC format for compatibility
+// Aliases mapping old or legacy tz representations to canonical IANA timezone names
 const TIMEZONE_MAPPING_ALIASES = {
-    "UTC": "UTC+00:00",
-    "GMT": "UTC+00:00",
-    "Asia/Kolkata": "UTC+05:30",
-    "Asia/Calcutta": "UTC+05:30",
-    "Asia/Dubai": "UTC+04:00",
-    "Asia/Singapore": "UTC+08:00",
-    "Europe/London": "UTC+00:00",
-    "America/New_York": "UTC-05:00",
-    "America/Chicago": "UTC-06:00",
-    "America/Denver": "UTC-07:00",
-    "America/Los_Angeles": "UTC-08:00",
-    "Africa/Nairobi": "UTC+03:00",
-    "Australia/Sydney": "UTC+10:00"
+    "Asia/Calcutta": "Asia/Kolkata",
+    "UTC-05:00": "America/New_York",
+    "UTC-06:00": "America/Chicago",
+    "UTC-07:00": "America/Denver",
+    "UTC-08:00": "America/Los_Angeles",
+    "UTC+00:00": "UTC",
+    "UTC+05:30": "Asia/Kolkata"
 };
 
 // Inject CSS styles for the themed searchable dropdown
@@ -309,27 +363,61 @@ function createSearchableDropdown(selectEl) {
         selectedVal = TIMEZONE_MAPPING_ALIASES[selectedVal];
     }
 
-    // Empty and populate selectEl with target offset options
-    selectEl.innerHTML = "";
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "";
-    defaultOpt.textContent = selectEl.getAttribute("placeholder") || "--- Select Timezone ---";
-    selectEl.appendChild(defaultOpt);
+    // Check if selectEl already has server-rendered options
+    const existingOptions = Array.from(selectEl.options).filter(opt => opt.value !== "");
+    let optionData = [];
+    let defaultOptText = selectEl.getAttribute("placeholder") || "--- Select Timezone ---";
 
-    window.TIMEZONE_LIST.forEach(tzVal => {
-        const option = document.createElement("option");
-        option.value = tzVal;
-        option.textContent = TIMEZONE_LABELS[tzVal];
-        if (selectedVal === tzVal) {
-            option.selected = true;
+    if (existingOptions.length > 0) {
+        // PRESERVE SERVER-RENDERED OPTIONS! Do not wipe selectEl.innerHTML!
+        const firstOpt = selectEl.options[0];
+        if (firstOpt && !firstOpt.value) {
+            defaultOptText = firstOpt.textContent;
         }
-        selectEl.appendChild(option);
-    });
+        existingOptions.forEach(opt => {
+            optionData.push({
+                value: opt.value,
+                label: opt.textContent.trim()
+            });
+        });
+    } else {
+        // Fallback: Populate selectEl from window.TIMEZONE_LIST
+        selectEl.innerHTML = "";
+        const defaultOpt = document.createElement("option");
+        defaultOpt.value = "";
+        defaultOpt.textContent = defaultOptText;
+        selectEl.appendChild(defaultOpt);
+
+        window.TIMEZONE_LIST.forEach(tzVal => {
+            const optLabel = TIMEZONE_LABELS[tzVal] || tzVal;
+            optionData.push({
+                value: tzVal,
+                label: optLabel
+            });
+            const option = document.createElement("option");
+            option.value = tzVal;
+            option.textContent = optLabel;
+            if (selectedVal === tzVal) {
+                option.selected = true;
+            }
+            selectEl.appendChild(option);
+        });
+    }
 
     if (selectedVal) {
         selectEl.value = selectedVal;
     }
 
+    // Determine initial trigger text
+    let initialLabel = defaultOptText;
+    if (selectedVal) {
+        const found = optionData.find(d => d.value === selectedVal);
+        if (found) {
+            initialLabel = found.label;
+        } else if (TIMEZONE_LABELS[selectedVal]) {
+            initialLabel = TIMEZONE_LABELS[selectedVal];
+        }
+    }
 
     // Create wrapper container
     const container = document.createElement("div");
@@ -342,7 +430,7 @@ function createSearchableDropdown(selectEl) {
 
     const triggerText = document.createElement("span");
     triggerText.className = "custom-tz-trigger-text";
-    triggerText.textContent = TIMEZONE_LABELS[selectedVal] || defaultOpt.textContent;
+    triggerText.textContent = initialLabel;
     trigger.appendChild(triggerText);
 
     const arrow = document.createElement("span");
@@ -358,7 +446,7 @@ function createSearchableDropdown(selectEl) {
     const searchBox = document.createElement("div");
     searchBox.className = "custom-tz-search-box";
     searchBox.innerHTML = `
-        <svg class="custom-tz-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <svg class="custom-tz-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 11.99 14 9.5 14z"/></svg>
     `;
     const searchInput = document.createElement("input");
     searchInput.type = "text";
@@ -384,18 +472,18 @@ function createSearchableDropdown(selectEl) {
     defaultItem.className = `custom-tz-option ${!selectedVal ? "selected" : ""}`;
     defaultItem.dataset.value = "";
     defaultItem.innerHTML = `
-        <span>${defaultOpt.textContent}</span>
+        <span>${defaultOptText}</span>
         <span class="custom-tz-option-check">✓</span>
     `;
     optionsList.appendChild(defaultItem);
     optionItems.push(defaultItem);
 
-    window.TIMEZONE_LIST.forEach(tzVal => {
+    optionData.forEach(itemData => {
         const item = document.createElement("li");
-        item.className = `custom-tz-option ${selectedVal === tzVal ? "selected" : ""}`;
-        item.dataset.value = tzVal;
+        item.className = `custom-tz-option ${selectedVal === itemData.value ? "selected" : ""}`;
+        item.dataset.value = itemData.value;
         item.innerHTML = `
-            <span>${TIMEZONE_LABELS[tzVal]}</span>
+            <span>${itemData.label}</span>
             <span class="custom-tz-option-check">✓</span>
         `;
         optionsList.appendChild(item);
