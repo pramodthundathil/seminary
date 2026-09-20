@@ -13,19 +13,20 @@
 /* Mobile adjustments */
 @media (max-width: 968px) {
     body {
-        padding-top: 120px;
-        /* Adjust for mobile navbar height */
+        padding-top: 70px !important;
+        /* Matches fixed navbar height */
     }
 
     .main-nav {
-        top: 40px;
-        /* Keep consistent with desktop */
+        top: 0 !important;
+        /* Sit directly at top on mobile */
     }
 
     /* Mobile menu should scroll if it's too tall */
     .nav-links.active {
-        max-height: calc(100vh - 80px);
+        max-height: calc(100vh - 70px);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -41,7 +42,7 @@ html {
 }
 
 body {
-    padding-top: 60px !important;
+    padding-top: 70px !important;
 }
 
 
@@ -1079,30 +1080,45 @@ body.no-right .container {
         background: var(--bg-card);
         flex-direction: column;
         gap: 0;
-        box-shadow: var(--shadow-md);
-        padding: 1rem;
+        box-shadow: var(--shadow-lg);
+        padding: 0.75rem 1rem 1.5rem;
         border-top: 1px solid var(--border);
+        border-bottom: 2px solid var(--border);
+        z-index: 1000;
     }
 
     .nav-links.active {
         display: flex;
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .nav-item {
         border-bottom: 1px solid var(--border);
-        padding: 0.75rem 0;
+        padding: 0.625rem 0;
+        width: 100%;
+        margin-left: 0 !important;
     }
 
     .nav-link {
-        padding: 0.5rem 0;
+        padding: 0.625rem 0.5rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.95rem;
     }
 
     .dropdown {
-        position: static;
-        box-shadow: none;
-        margin-top: 0.75rem;
-        background: var(--bg-page);
-        border: none;
+        position: static !important;
+        box-shadow: none !important;
+        margin-top: 0.5rem;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 0.5rem !important;
+        width: 100% !important;
     }
 
     .nav-item.active .dropdown {
@@ -1110,37 +1126,92 @@ body.no-right .container {
     }
 
     .right-submenu {
-        position: static;
-        margin-left: 1rem;
-        margin-top: 0.5rem;
-        box-shadow: none;
-        background: var(--bg-page);
-        border: none;
+        position: static !important;
+        margin-left: 0.75rem;
+        margin-top: 0.35rem;
+        box-shadow: none !important;
+        background: #f1f5f9 !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.5rem !important;
+        display: none;
     }
 
+    .sub-parent.active .right-submenu {
+        display: block !important;
+    }
+
+    /* Fix specificity on mobile container - MUST BE FULL WIDTH STACKED */
+    body .container,
     .container {
-        max-width: 100%;
-        grid-template-columns: 1fr;
-        padding: 1rem;
-        gap: 1rem;
-        margin: 0;
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: 1fr !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 1rem !important;
+        gap: 1.25rem !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+    }
+
+    body .container > .profile-banner-column,
+    body .container > .middle-column,
+    body .container > .right-column {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
 
     .detail-item {
-        grid-template-columns: 140px 1fr;
-        gap: 0.75rem;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.25rem !important;
+        padding: 0.75rem 0.5rem !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .detail-label {
+        font-size: 0.82rem !important;
+        color: var(--text-secondary) !important;
+    }
+
+    .detail-value {
+        font-size: 0.95rem !important;
+        color: var(--text-primary) !important;
+        font-weight: 500 !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
     }
 
     .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .quick-actions {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .user-profile-header {
-        display: none !important;
+    /* Account Dropdown in Mobile Drawer */
+    .account-nav-item .user-dropdown {
+        position: static !important;
+        box-shadow: none !important;
+        margin-top: 0.5rem;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 0.5rem !important;
+        width: 100% !important;
+    }
+
+    .account-nav-item.active .user-dropdown {
+        display: block !important;
     }
 }
 
@@ -1149,6 +1220,13 @@ body.no-right .container {
     .top-bar-content,
     .nav-content {
         padding: 0 0.75rem;
+        height: 62px;
+    }
+
+    .logo-section img {
+        max-width: 145px !important;
+        height: auto !important;
+        max-height: 40px !important;
     }
 
     .logo-text h1 {
@@ -1161,33 +1239,32 @@ body.no-right .container {
         font-size: 1rem;
     }
 
+    body .container,
     .container {
-        max-width: 100%;
-        padding: 0.75rem;
-        margin: 0;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0.75rem 0.625rem !important;
+        gap: 1rem !important;
+        margin: 0 auto !important;
     }
 
     .profile-card,
     .details-card,
     .query-card,
     .alerts-card {
-        padding: 1.25rem;
-    }
-
-    .detail-item {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
+        padding: 1.25rem 1rem !important;
+        border-radius: 12px !important;
     }
 
     .profile-avatar {
-        width: 88px;
-        height: 88px;
-        font-size: 2.25rem;
+        width: 78px !important;
+        height: 78px !important;
+        font-size: 2rem !important;
     }
 
     .stats-grid,
     .quick-actions {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
     }
 }
 

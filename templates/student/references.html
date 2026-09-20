@@ -110,6 +110,86 @@
             width: 100%;
         }
     }
+
+    /* PDF Viewer Scroll Controls */
+    .pdf-modal-scroll-controls {
+        position: absolute;
+        right: 24px;
+        bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1060;
+    }
+
+    .pdf-scroll-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50% !important;
+        background: #0d6efd;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 14px rgba(13, 110, 253, 0.45), 0 2px 6px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        opacity: 0.92;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .pdf-scroll-btn:hover {
+        background: #0b5ed7;
+        color: #ffffff;
+        transform: translateY(-2px) scale(1.06);
+        box-shadow: 0 6px 18px rgba(13, 110, 253, 0.55), 0 3px 8px rgba(0, 0, 0, 0.25);
+        opacity: 1;
+    }
+
+    .pdf-scroll-btn:active {
+        transform: translateY(0) scale(0.95);
+    }
+
+    #pdfViewerContainer {
+        scrollbar-width: thin;
+        scrollbar-color: #0d6efd #e9ecef;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    #pdfViewerContainer::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    #pdfViewerContainer::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-radius: 6px;
+    }
+
+    #pdfViewerContainer::-webkit-scrollbar-thumb {
+        background: #0d6efd;
+        border-radius: 6px;
+    }
+
+    #pdfViewerContainer::-webkit-scrollbar-thumb:hover {
+        background: #0b5ed7;
+    }
+
+    @media (max-width: 576px) {
+        .pdf-modal-scroll-controls {
+            right: 16px;
+            bottom: 16px;
+            gap: 8px;
+        }
+        .pdf-scroll-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+        }
+    }
 </style>
 
     <div class="exam-header">
@@ -174,7 +254,7 @@
 <!-- PDF Viewer Modal -->
 <div class="modal fade" id="fileViewerModal" tabindex="-1" aria-labelledby="fileViewerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none;">
+        <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none; position: relative;">
             
             <!-- Modal Header with Site Theme -->
             <div class="modal-header text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #00CED1 100%); border-bottom: none;">
@@ -193,16 +273,29 @@
                     </span>
                 </div>
                 
-                <div class="btn-group" role="group" aria-label="Zoom Controls">
-                    <button type="button" class="btn btn-outline-primary" id="zoomOut">
-                        <i class="bi bi-dash-lg"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-primary active" style="pointer-events: none; border-color: #0d6efd;">
-                        <span id="zoomLevel">100%</span>
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" id="zoomIn">
-                        <i class="bi bi-plus-lg"></i>
-                    </button>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Zoom Controls -->
+                    <div class="btn-group" role="group" aria-label="Zoom Controls">
+                        <button type="button" class="btn btn-outline-primary" id="zoomOut" title="Zoom Out">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary active" style="pointer-events: none; border-color: #0d6efd;">
+                            <span id="zoomLevel">100%</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="zoomIn" title="Zoom In">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Toolbar Scroll Controls -->
+                    <div class="btn-group" role="group" aria-label="Scroll Controls">
+                        <button type="button" class="btn btn-outline-primary" id="toolbarScrollUp" title="Scroll Up">
+                            <i class="bi bi-chevron-up"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="toolbarScrollDown" title="Scroll Down">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
@@ -213,7 +306,7 @@
                 </div>
             </div>
 
-            <div class="modal-body p-4" id="pdfViewerContainer" style="min-height: 80vh; max-height: 85vh; overflow-y: auto; background-color: #f8f9fa;">
+            <div class="modal-body p-4" id="pdfViewerContainer" style="height: 75vh; max-height: 75vh; overflow-y: auto !important; background-color: #f8f9fa;">
                 <!-- PDF Canvas placeholder -->
                 <div id="pdf-loader" class="text-center py-5">
                     <div class="spinner-grow text-info" role="status" style="width: 3rem; height: 3rem;">
@@ -222,6 +315,16 @@
                     <p class="mt-3 text-muted fw-bold">Loading Document...</p>
                 </div>
                 <div id="pdf-render-area" class="d-flex flex-column align-items-center gap-4"></div>
+            </div>
+
+            <!-- Floating Fixed Scroll Controls inside Modal -->
+            <div class="pdf-modal-scroll-controls" aria-label="Scroll Navigation">
+                <button type="button" class="pdf-scroll-btn pdf-scroll-up" id="pdfScrollUpBtn" title="Scroll Up" aria-label="Scroll Up">
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+                <button type="button" class="pdf-scroll-btn pdf-scroll-down" id="pdfScrollDownBtn" title="Scroll Down" aria-label="Scroll Down">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -281,6 +384,11 @@
                 pageCountSpan.textContent = '0';
                 currentScale = 1.0;
                 zoomLevelSpan.textContent = '100%';
+                
+                const container = document.getElementById('pdfViewerContainer');
+                if (container) {
+                    container.scrollTop = 0;
+                }
                 
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
@@ -372,6 +480,75 @@
         modalElement.addEventListener('hidden.bs.modal', function () {
             pdfRenderArea.innerHTML = '';
             currentPdfDoc = null;
+        });
+
+        // --- Scroll Navigation Logic ---
+        function scrollPdfViewer(direction, distance = 350) {
+            const container = document.getElementById('pdfViewerContainer');
+            if (!container) return;
+            const delta = direction === 'up' ? -distance : distance;
+            container.scrollBy({ top: delta, behavior: 'smooth' });
+        }
+
+        function bindContinuousScroll(btn, direction) {
+            if (!btn) return;
+            let timer = null;
+            let interval = null;
+
+            const start = (e) => {
+                if (e) e.preventDefault();
+                scrollPdfViewer(direction, 300);
+                timer = setTimeout(() => {
+                    interval = setInterval(() => {
+                        scrollPdfViewer(direction, 120);
+                    }, 60);
+                }, 300);
+            };
+
+            const stop = () => {
+                if (timer) clearTimeout(timer);
+                if (interval) clearInterval(interval);
+                timer = null;
+                interval = null;
+            };
+
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', stop);
+            btn.addEventListener('mouseleave', stop);
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', stop);
+            btn.addEventListener('touchcancel', stop);
+        }
+
+        const scrollUpBtn = document.getElementById('pdfScrollUpBtn');
+        const scrollDownBtn = document.getElementById('pdfScrollDownBtn');
+        const toolbarScrollUp = document.getElementById('toolbarScrollUp');
+        const toolbarScrollDown = document.getElementById('toolbarScrollDown');
+
+        bindContinuousScroll(scrollUpBtn, 'up');
+        bindContinuousScroll(scrollDownBtn, 'down');
+        bindContinuousScroll(toolbarScrollUp, 'up');
+        bindContinuousScroll(toolbarScrollDown, 'down');
+
+        // Keyboard arrow navigation
+        document.addEventListener('keydown', function(e) {
+            if (modalElement && modalElement.classList.contains('show')) {
+                const container = document.getElementById('pdfViewerContainer');
+                if (!container) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    scrollPdfViewer('down', 180);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    scrollPdfViewer('up', 180);
+                } else if (e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
+                    e.preventDefault();
+                    scrollPdfViewer('down', container.clientHeight * 0.8);
+                } else if (e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
+                    e.preventDefault();
+                    scrollPdfViewer('up', container.clientHeight * 0.8);
+                }
+            }
         });
     });
 </script>

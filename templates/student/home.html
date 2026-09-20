@@ -138,14 +138,93 @@
     }
 
 
-    @media screen and (max-width: 576px) {
+    @media screen and (max-width: 768px) {
+        .query-form-card {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
         .form-row {
             flex-direction: column;
             align-items: stretch;
+            gap: 10px;
+        }
+
+        .form-row > div {
+            width: 100% !important;
+        }
+
+        .category-select {
+            width: 100% !important;
         }
 
         .submit-btn {
-            width: 100%;
+            width: 100% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .details-card {
+            padding: 16px !important;
+            border-radius: 12px !important;
+        }
+
+        .detail-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px !important;
+            padding: 10px 4px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .detail-label {
+            font-size: 0.82rem !important;
+            color: var(--text-secondary) !important;
+        }
+
+        .detail-value {
+            font-size: 0.95rem !important;
+            font-weight: 500 !important;
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        .alerts-card {
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .alert-text {
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        .small-box {
+            margin-top: 16px;
+            border-radius: 12px;
+        }
+
+        .exam-alert-banner {
+            padding: 14px 12px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .exam-alert-banner .btn-lg {
+            width: 100% !important;
+            text-align: center;
+            font-size: 1rem !important;
+            padding: 10px 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
     }
 
