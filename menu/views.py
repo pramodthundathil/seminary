@@ -3141,11 +3141,19 @@ def admin_student_score_card(request, student_id):
                 
         obtained_marks = highest_score
         
+        # Check if exam has descriptive questions and whether they have been graded
+        has_descriptive = exam.descriptive_questions.exists() or (total_desc_marks > 0)
+        descriptive_graded = False
+        if has_descriptive:
+            descriptive_graded = DescriptiveAnswers.objects.filter(assignment=se, updated_at__isnull=False).exists()
+
         # Calculate Percentage
         percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
         # Determine Grade
-        if percentage >= 90: grade = "A+"
+        if has_descriptive and not descriptive_graded:
+            grade = "Submitted for Result"
+        elif percentage >= 90: grade = "A+"
         elif percentage >= 80: grade = "A"
         elif percentage >= 70: grade = "B"
         elif percentage >= 60: grade = "C"
@@ -7433,22 +7441,24 @@ def student_exams_datatable(request):
             Q(student__student_id__icontains=search_value)
         )
     
-    order_col = '-created_at'
-    if order_column_index == 0:
+    order_col = '-start_time'
+    if order_column_index == 1:
         order_col = 'id'
-    elif order_column_index == 1:
-        order_col = 'student__first_name'
     elif order_column_index == 2:
-        order_col = 'course__course_name'
+        order_col = 'student__first_name'
     elif order_column_index == 3:
-        order_col = 'subject__subject_name'
+        order_col = 'course__course_name'
     elif order_column_index == 4:
-        order_col = 'exam__exam_name'
+        order_col = 'subject__subject_name'
     elif order_column_index == 5:
-        order_col = 'start_time'
+        order_col = 'exam__exam_name'
     elif order_column_index == 6:
-        order_col = 'is_approved'
+        order_col = 'start_time'
     elif order_column_index == 7:
+        order_col = 'is_approved'
+    elif order_column_index == 8:
+        order_col = 'is_exam_ended'
+    elif order_column_index == 9:
         order_col = 'updated_by__username'
 
     if order_direction == 'desc' and not order_col.startswith('-'):
@@ -7458,6 +7468,15 @@ def student_exams_datatable(request):
     filtered_records = query.count()
     data_list = query.order_by(order_col)[start:start+length]
     
+    # Pre-fetch graded assignments for batch valuation check
+    item_ids = [item.id for item in data_list]
+    graded_assignments = set(
+        DescriptiveAnswers.objects.filter(
+            assignment_id__in=item_ids,
+            updated_at__isnull=False
+        ).values_list('assignment_id', flat=True)
+    )
+
     data = []
     for item in data_list:
         student_name = f"{item.student.first_name} {item.student.last_name or ''}"
@@ -7479,6 +7498,20 @@ def student_exams_datatable(request):
             status = '<span class="badge bg-success">Approved</span>'
         else:
             status = '<span class="badge bg-warning">Pending</span>'
+
+        # Valuation Status Badge
+        if not item.exam:
+            valuation_status = '<span class="badge bg-secondary">-</span>'
+        elif not item.is_exam_ended:
+            valuation_status = '<span class="badge bg-secondary">Pending Exam</span>'
+        elif item.exam.exam_type == 'objective':
+            valuation_status = '<span class="badge bg-success" title="Automatic valuation for objective type"><i class="fas fa-check-circle"></i> Completed (Auto)</span>'
+        else:
+            # descriptive or both
+            if item.id in graded_assignments:
+                valuation_status = '<span class="badge bg-success" title="Manual valuation completed"><i class="fas fa-check-circle"></i> Valuation Complete</span>'
+            else:
+                valuation_status = '<span class="badge bg-warning text-dark" title="Manual valuation required for descriptive type"><i class="fas fa-exclamation-triangle"></i> Pending Manual Valuation</span>'
 
         # Conditional action buttons based on approval status
         primary_btn = ''
@@ -7584,6 +7617,7 @@ def student_exams_datatable(request):
             'start_time': start_time,
             'duration': f'{item.exam_duration} min',
             'status': status,
+            'valuation_status': valuation_status,
             'marks': marks_display,
             'updated_by': updated_info,
             'actions': actions
@@ -7622,7 +7656,9 @@ def student_exams_bulk_assign(request):
         exam_date = request.POST.get('exam_date')
         start_time_str = request.POST.get('start_time')
         timezone_val = request.POST.get('timezone', 'UTC')
-        duration = int(request.POST.get('duration', 60))
+        duration = int(request.POST.get('duration', 120))
+        if duration < 120:
+            duration = 120
         retest_fee_val = request.POST.get('retest_fee')
         
         if not student_id or not exam_id or not exam_date or not start_time_str:
@@ -7851,23 +7887,16 @@ def update_answer_marks(request):
             answer.save()
 
         elif answer_type == 'descriptive':
-
             answer = get_object_or_404(DescriptiveAnswers, id=answer_id)
-
             # Validate marks don't exceed question marks
-
             if marks > float(answer.question.mark):
-
                 return JsonResponse({
-
                     'success': False, 
-
                     'message': f'Marks cannot exceed {answer.question.mark}'
-
                 }, status=400)
 
             answer.mark = marks
-
+            answer.updated_at = timezone.now()
             answer.save()
 
         else:
@@ -8033,15 +8062,15 @@ def student_submitted_exams_datatable(request):
     
     # Ordering
     order_col = '-created_at'
-    if order_column_index == 0:
+    if order_column_index == 1:
         order_col = 'student__first_name'
-    elif order_column_index == 1:
-        order_col = 'exam__exam_name'
     elif order_column_index == 2:
-        order_col = 'subject__subject_name'
+        order_col = 'exam__exam_name'
     elif order_column_index == 3:
-        order_col = 'course__course_name'
+        order_col = 'subject__subject_name'
     elif order_column_index == 4:
+        order_col = 'course__course_name'
+    elif order_column_index == 5:
         order_col = 'start_time'
 
     if order_direction == 'desc' and not order_col.startswith('-'):
@@ -8093,6 +8122,8 @@ def student_submitted_exams_datatable(request):
     </div>
         '''   
         data.append({
+            'checkbox': f'<input type="checkbox" name="ids" class="bulk-checkbox" value="{item.id}">',
+            'id': item.id,
             'student_name': student_name,
             'exam_name': item.exam.exam_name if item.exam else 'Unknown Exam',
             'subject_name': item.subject.subject_name if item.subject else '-',

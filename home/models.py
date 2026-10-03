@@ -1487,7 +1487,7 @@ class StudentsExams(models.Model):
     exam = models.ForeignKey(Exams, on_delete=models.DO_NOTHING, related_name='students')
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
-    exam_duration = models.IntegerField()
+    exam_duration = models.IntegerField(default=120)
     timezone = models.CharField(max_length=50)
     requested_by = models.ForeignKey(Users,on_delete=models.SET_NULL, blank=True, null=True, related_name='exam_requested')
     is_approved = models.BooleanField(default=False)

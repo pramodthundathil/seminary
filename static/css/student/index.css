@@ -1094,14 +1094,14 @@ body.no-right .container {
         -webkit-overflow-scrolling: touch;
     }
 
-    .nav-item {
+    .nav-links .nav-item {
         border-bottom: 1px solid var(--border);
         padding: 0.625rem 0;
         width: 100%;
         margin-left: 0 !important;
     }
 
-    .nav-link {
+    .nav-links .nav-link {
         padding: 0.625rem 0.5rem;
         width: 100%;
         display: flex;
@@ -1110,7 +1110,7 @@ body.no-right .container {
         font-size: 0.95rem;
     }
 
-    .dropdown {
+    .nav-links .dropdown {
         position: static !important;
         box-shadow: none !important;
         margin-top: 0.5rem;
@@ -1121,7 +1121,7 @@ body.no-right .container {
         width: 100% !important;
     }
 
-    .nav-item.active .dropdown {
+    .nav-links .nav-item.active .dropdown {
         display: block;
     }
 

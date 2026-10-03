@@ -352,6 +352,12 @@
         border: 1px solid #fca5a5;
     }
 
+    .grade-pending {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
     /* ENHANCED ACTION BUTTONS */
     .action-btns {
         display: flex;
@@ -1169,7 +1175,7 @@
                         <td data-label="Score">{{ item.score }}</td>
                         <td data-label="Percentage">{{ item.percentage }}%</td>
                         <td data-label="Grade"><span
-                                class="grade-badge {% if item.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">{{item.grade }}</span></td>
+                                class="grade-badge {% if item.grade == 'Submitted for Result' or item.grade == 'Pending Evaluation' %}grade-pending{% elif item.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">{{ item.grade }}</span></td>
                         <td data-label="Action">
                             {% if item.retest_status == 'pending' %}
                                 {% if not is_church_user and item.retest_fee and not item.retest_paid %}
@@ -1288,7 +1294,7 @@
                             <td data-label="Score">{{ exam_summary.score }}</td>
                             <td data-label="Percentage">{{ exam_summary.percentage }}%</td>
                             <td data-label="Grade">
-                                <span class="grade-badge {% if exam_summary.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">
+                                <span class="grade-badge {% if exam_summary.grade == 'Submitted for Result' or exam_summary.grade == 'Pending Evaluation' %}grade-pending{% elif exam_summary.grade == 'F' %}grade-failed{% else %}grade-a{% endif %}">
                                     {{ exam_summary.grade }}
                                 </span>
                             </td>

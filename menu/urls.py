@@ -183,6 +183,8 @@ urlpatterns = [
     # Student Submitted Exams (Admin-facing)
     path('admin/students/student-submitted-exams/', views.student_submitted_exams_list, name='student_submitted_exams_list'),
     path('admin/students/student-submitted-exams/datatable/', views.student_submitted_exams_datatable, name='student_submitted_exams_datatable'),
+    path('admin/students/student-submitted-exams/bulk-delete/', views.student_submitted_exams_bulk_delete, name='student_submitted_exams_bulk_delete'),
+    path('admin/students/student-submitted-assignment/bulk-delete/', views.student_submitted_assignment_bulk_delete, name='student_submitted_assignment_bulk_delete'),
 
     # Student Assignments (Admin-Facing)
     path('admin/students/student-submitted-assignment/', views.student_assignment_list, {'submitted_only': True}, name='student_submitted_assignment_list'), # Alias

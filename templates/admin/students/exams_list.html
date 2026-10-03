@@ -169,6 +169,7 @@
                     <th>Exam Name</th>
                     <th>Date & Time</th>
                     <th>Status</th>
+                    <th>Valuation Status</th>
                     <th>Updated By</th>
                     <th>Actions</th>
                 </tr>
@@ -363,10 +364,11 @@ $(document).ready(function () {
                 { data: 'exam_name' },
                 { data: 'start_time' },
                 { data: 'status' },
+                { data: 'valuation_status' },
                 { data: 'updated_by' },
                 { data: 'actions', orderable: false, searchable: false }
             ],
-            order: [[1, "desc"]],
+            order: [[6, "desc"]],
             rowCallback: function(row, data) {
                 if (window.selectedexamsTableIds.has(data.id.toString())) {
                     $('input.bulk-checkbox', row).prop('checked', true);

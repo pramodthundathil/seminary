@@ -861,6 +861,8 @@ def church_user_take_exam(request, exam_id):
 
     if not student_exam.is_exam_started:
         student_exam.is_exam_started = True
+        student_exam.start_time = now
+        student_exam.exam_duration = 120
         student_exam.save()
 
     exam_obj = student_exam.exam
@@ -885,6 +887,8 @@ def church_user_take_exam(request, exam_id):
         )
     
     duration_mins = student_exam.exam_duration or 120
+    if duration_mins < 120:
+        duration_mins = 120
     exam_end_time = student_exam.start_time + timedelta(minutes=duration_mins)
     remaining_seconds = (exam_end_time - now).total_seconds()
         
@@ -1041,9 +1045,19 @@ def church_user_score_card(request):
         ).aggregate(Max('show_on_score'))['show_on_score__max'] or 0
         
         obtained_marks = highest_score
+
+        # Check if exam has descriptive questions and whether they have been graded
+        has_descriptive = exam.descriptive_questions.exists() or (total_desc_marks > 0)
+        from home.models import DescriptiveAnswers
+        descriptive_graded = False
+        if has_descriptive:
+            descriptive_graded = DescriptiveAnswers.objects.filter(assignment=se, updated_at__isnull=False).exists()
+
         percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
-        if percentage >= 90: grade = "A+"
+        if has_descriptive and not descriptive_graded:
+            grade = "Submitted for Result"
+        elif percentage >= 90: grade = "A+"
         elif percentage >= 80: grade = "A"
         elif percentage >= 70: grade = "B"
         elif percentage >= 60: grade = "C"

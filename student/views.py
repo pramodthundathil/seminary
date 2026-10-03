@@ -1306,11 +1306,20 @@ def student_score_card(request):
         
         obtained_marks = highest_score
         
+        # Check if exam has descriptive questions and whether they have been graded by admin
+        has_descriptive = exam.descriptive_questions.exists() or (total_desc_marks > 0)
+        from home.models import DescriptiveAnswers
+        descriptive_graded = False
+        if has_descriptive:
+            descriptive_graded = DescriptiveAnswers.objects.filter(assignment=se, updated_at__isnull=False).exists()
+
         # Calculate Percentage
         percentage = (obtained_marks / float(total_marks) * 100) if total_marks > 0 else 0
         
         # Determine Grade
-        if percentage >= 90: grade = "A+"
+        if has_descriptive and not descriptive_graded:
+            grade = "Submitted for Result"
+        elif percentage >= 90: grade = "A+"
         elif percentage >= 80: grade = "A"
         elif percentage >= 70: grade = "B"
         elif percentage >= 60: grade = "C"
@@ -1906,6 +1915,8 @@ def take_exam(request, exam_id):
     # 4. Mark as Started if not already
     if not student_exam.is_exam_started:
         student_exam.is_exam_started = True
+        student_exam.start_time = now
+        student_exam.exam_duration = 120
         student_exam.save()
 
     # 5. Fetch Questions (Objective + Descriptive)
@@ -1914,8 +1925,10 @@ def take_exam(request, exam_id):
     objective_questions = exam_obj.objective_questions.all()
     descriptive_questions = exam_obj.descriptive_questions.all()
     
-    # 6. Calc Remaining Seconds
+    # 6. Calc Remaining Seconds (Ensure 2 Hours / 120 Minutes)
     duration_mins = student_exam.exam_duration or 120
+    if duration_mins < 120:
+        duration_mins = 120
     exam_end_time = student_exam.start_time + timedelta(minutes=duration_mins)
     remaining_seconds = (exam_end_time - now).total_seconds()
         
@@ -2050,6 +2063,11 @@ def submit_exam(request, exam_id):
                 logger.error(f"Error saving answer for key {key} in exam {exam_id}: {inner_e}")
                 has_errors = True
         
+        # Recalculate total objective + descriptive score
+        total_obj_marks = ObjectiveAnswers.objects.filter(assignment=student_exam).aggregate(total=Sum('mark'))['total'] or 0
+        total_desc_marks = DescriptiveAnswers.objects.filter(assignment=student_exam).aggregate(total=Sum('mark'))['total'] or 0
+        student_exam.show_on_score = total_obj_marks + total_desc_marks
+
         # End Exam
         student_exam.is_exam_ended = True
         student_exam.end_time = timezone.now()
