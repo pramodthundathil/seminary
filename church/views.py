@@ -842,6 +842,91 @@ def church_user_start_exam(request, exam_id):
         return redirect('church_user_subjects')
 
 @login_required
+@login_required
+def church_ping_session(request):
+    request.session.modified = True
+    return JsonResponse({"status": "ok"})
+
+
+@login_required
+def church_autosave_exam(request, exam_id):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "POST required"}, status=400)
+    
+    try:
+        student = Students.objects.get(user=request.user)
+        student_exam = StudentsExams.objects.get(id=exam_id, student=student)
+        
+        if student_exam.is_exam_ended:
+            return JsonResponse({"status": "ended", "message": "Exam has already ended"}, status=400)
+        
+        count_saved = 0
+        from home.models import ObjectiveQuestions, ObjectiveAnswers, DescriptiveQuestions, DescriptiveAnswers
+        
+        for key, value in request.POST.items():
+            if not (key.startswith("obj_q_") or key.startswith("desc_q_")):
+                continue
+                
+            try:
+                if key.startswith("obj_q_"):
+                    q_id = key.split("_")[2]
+                    if not q_id.isdigit():
+                        continue
+                        
+                    question = ObjectiveQuestions.objects.get(id=q_id)
+                    val_str = str(value).strip()
+                    selected_option_index = None
+                    if val_str in ("1", "2", "3", "4"):
+                        selected_option_index = val_str
+                    elif val_str.lower() in ("option1", "option2", "option3", "option4"):
+                        selected_option_index = val_str.lower().replace("option", "")
+                    else:
+                        if question.option1 and val_str == str(question.option1).strip(): selected_option_index = "1"
+                        elif question.option2 and val_str == str(question.option2).strip(): selected_option_index = "2"
+                        elif question.option3 and val_str == str(question.option3).strip(): selected_option_index = "3"
+                        elif question.option4 and val_str == str(question.option4).strip(): selected_option_index = "4"
+                    
+                    correct_opt = str(question.answer_option).strip().lower().replace("option", "")
+                    is_correct = (selected_option_index == correct_opt) if selected_option_index else False
+                    qm = question.marks if question.marks else 0
+                    marks_awarded = int(float(qm if is_correct else 0))
+                    db_answer_val = selected_option_index if selected_option_index else val_str
+                    
+                    ObjectiveAnswers.objects.update_or_create(
+                        assignment=student_exam,
+                        question=question,
+                        defaults={
+                            'answer': db_answer_val[:250],
+                            'mark': marks_awarded
+                        }
+                    )
+                    count_saved += 1
+                    
+                elif key.startswith("desc_q_"):
+                    q_id = key.split("_")[2]
+                    if not q_id.isdigit():
+                        continue
+                        
+                    question = DescriptiveQuestions.objects.get(id=q_id)
+                    DescriptiveAnswers.objects.update_or_create(
+                        assignment=student_exam,
+                        question=question,
+                        defaults={
+                            'answer': str(value),
+                            'mark': 0
+                        }
+                    )
+                    count_saved += 1
+            except Exception as inner_e:
+                logger.error(f"Autosave error for key {key} in exam {exam_id}: {inner_e}")
+                
+        request.session.modified = True
+        return JsonResponse({"status": "success", "saved": count_saved})
+    except Exception as e:
+        logger.error(f"Autosave exception for exam {exam_id}: {e}")
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 def church_user_take_exam(request, exam_id):
     try:
         student = Students.objects.get(user=request.user)
@@ -862,12 +947,12 @@ def church_user_take_exam(request, exam_id):
     if not student_exam.is_exam_started:
         student_exam.is_exam_started = True
         student_exam.start_time = now
-        student_exam.exam_duration = 120
+        student_exam.exam_duration = 150
         student_exam.save()
 
     exam_obj = student_exam.exam
-    objective_questions = exam_obj.objective_questions.all()
-    descriptive_questions = exam_obj.descriptive_questions.all()
+    objective_questions = list(exam_obj.objective_questions.all())
+    descriptive_questions = list(exam_obj.descriptive_questions.all())
     
     from home.models import ObjectiveAnswers, DescriptiveAnswers
     
@@ -885,10 +970,20 @@ def church_user_take_exam(request, exam_id):
             question=desc_q,
             defaults={'answer': '', 'mark': 0}
         )
+
+    # Pre-fetch saved answers so student's progress is visible if page is reloaded
+    saved_obj = {ans.question_id: ans.answer for ans in ObjectiveAnswers.objects.filter(assignment=student_exam)}
+    saved_desc = {ans.question_id: ans.answer for ans in DescriptiveAnswers.objects.filter(assignment=student_exam)}
+
+    for q in objective_questions:
+        q.saved_answer = saved_obj.get(q.id, "")
+
+    for q in descriptive_questions:
+        q.saved_answer = saved_desc.get(q.id, "")
     
-    duration_mins = student_exam.exam_duration or 120
-    if duration_mins < 120:
-        duration_mins = 120
+    duration_mins = student_exam.exam_duration or 150
+    if duration_mins < 150:
+        duration_mins = 150
     exam_end_time = student_exam.start_time + timedelta(minutes=duration_mins)
     remaining_seconds = (exam_end_time - now).total_seconds()
         

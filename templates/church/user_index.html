@@ -233,15 +233,18 @@
     <script>
         // Inactivity Logout Logic
         (function() {
+            if (window.disableInactivityLogout) return;
             let timeout;
-            const inactivityTime = 10 * 60 * 1000; // 10 minutes
+            const inactivityTime = 2.5 * 60 * 60 * 1000; // 2.5 hours
 
             function logout() {
+                if (window.disableInactivityLogout) return;
                 console.log("Inactivity detected. Logging out...");
                 window.location.href = "{% url 'signout' %}";
             }
 
             function resetTimer() {
+                if (window.disableInactivityLogout) return;
                 clearTimeout(timeout);
                 timeout = setTimeout(logout, inactivityTime);
             }
@@ -250,6 +253,8 @@
             window.onload = resetTimer;
             document.onmousemove = resetTimer;
             document.onkeypress = resetTimer;
+            document.onkeydown = resetTimer;
+            document.oninput = resetTimer;
             document.onclick = resetTimer;
             document.onscroll = resetTimer;
         })();
