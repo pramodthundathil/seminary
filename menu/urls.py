@@ -7,6 +7,7 @@ urlpatterns = [
 
     #admin index
     path("admin/dashboard",views.admin_index,name="admin_index"),
+    path("admin/help/", views.admin_help, name="admin_help"),
 
     # Menu Management
     path('admin/menus/', views.menu_list, name='menu_list'),

@@ -120,6 +120,27 @@ def convert_to_timezone(dt, tz_str):
 
 @role_redirection
 @login_required
+def admin_help(request):
+    try:
+        AdminPages.objects.get_or_create(
+            slug='admin/help',
+            defaults={
+                'title': 'Help & Documentation',
+                'icon': 'fas fa-question-circle',
+                'menu_order': 99,
+                'permission': '',
+                'created_by': request.user if hasattr(request.user, 'id') else None,
+                'updated_by': request.user if hasattr(request.user, 'id') else None
+            }
+        )
+    except Exception:
+        pass
+    return render(request, 'admin/help.html', {
+        'page_title': 'Admin Help & Documentation'
+    })
+
+@role_redirection
+@login_required
 def admin_index(request):
     # Get total students
     total_students = Students.objects.filter(active=1).count()

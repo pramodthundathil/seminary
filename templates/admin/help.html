@@ -1,0 +1,1305 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% load admin_tags %}
+
+{% block content %}
+<style>
+    :root {
+        --help-primary: #1e3a8a;
+        --help-primary-light: #eff6ff;
+        --help-accent: #3b82f6;
+        --help-border: #e2e8f0;
+        --help-text: #1e293b;
+        --help-muted: #64748b;
+    }
+
+    .help-container {
+        padding: 24px;
+        background-color: #f8fafc;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Top Search & Header Bar */
+    .help-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 16px;
+        padding: 32px;
+        color: #ffffff;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.15);
+    }
+
+    .help-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .help-header p {
+        font-size: 15px;
+        opacity: 0.9;
+        margin-bottom: 24px;
+        max-width: 750px;
+        line-height: 1.6;
+    }
+
+    .help-search-box {
+        position: relative;
+        max-width: 650px;
+    }
+
+    .help-search-box input {
+        width: 100%;
+        padding: 16px 20px 16px 52px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: none;
+        outline: none;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        color: #0f172a;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .help-search-box input:focus {
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .help-search-box i.search-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #64748b;
+    }
+
+    .help-search-box .clear-btn {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: #f1f5f9;
+        color: #64748b;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Main Help Grid Layout */
+    .help-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .help-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Sticky Sidebar Navigation */
+    .help-sidebar {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid var(--help-border);
+        padding: 16px 12px;
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .help-sidebar-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--help-muted);
+        padding: 8px 12px;
+        margin-bottom: 4px;
+    }
+
+    .help-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border-radius: 8px;
+        color: #334155;
+        font-weight: 500;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        margin-bottom: 2px;
+        cursor: pointer;
+    }
+
+    .help-nav-item:hover {
+        background-color: #f1f5f9;
+        color: var(--help-primary);
+        text-decoration: none;
+    }
+
+    .help-nav-item.active {
+        background-color: var(--help-primary-light);
+        color: var(--help-primary);
+        font-weight: 600;
+    }
+
+    .help-nav-item i {
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .help-nav-item.active i {
+        color: var(--help-primary);
+    }
+
+    /* Content Cards Area */
+    .help-content-area {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .help-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid var(--help-border);
+        padding: 28px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        scroll-margin-top: 24px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .help-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .help-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .help-card-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .help-card-title i {
+        color: var(--help-primary);
+        background: var(--help-primary-light);
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+
+    .help-badge {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-crud-create { background: #dcfce7; color: #15803d; }
+    .badge-crud-view { background: #e0f2fe; color: #0369a1; }
+    .badge-crud-edit { background: #fef3c7; color: #b45309; }
+    .badge-crud-delete { background: #fee2e2; color: #b91c1c; }
+    .badge-crud-approve { background: #f3e8ff; color: #6b21a8; }
+    .badge-crud-config { background: #e2e8f0; color: #334155; }
+
+    .help-section-desc {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+
+    /* CRUD Operations & Fields Tables */
+    .field-table, .crud-matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+        font-size: 14px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .field-table th, .crud-matrix-table th {
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 600;
+        text-align: left;
+        padding: 11px 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .field-table td, .crud-matrix-table td {
+        padding: 11px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #475569;
+        vertical-align: top;
+    }
+
+    .field-table tr:last-child td, .crud-matrix-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .field-name {
+        font-weight: 600;
+        color: #0f172a;
+        font-family: monospace;
+        font-size: 13px;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .required-tag {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+
+    /* Step-by-Step Instructions List */
+    .step-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .step-item {
+        display: flex;
+        gap: 16px;
+        background: #f8fafc;
+        padding: 18px 20px;
+        border-radius: 10px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .step-number {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        background: var(--help-primary);
+        color: #ffffff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .step-content {
+        flex: 1;
+    }
+
+    .step-title {
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+
+    .step-desc {
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    /* Workflow Flowchart Box */
+    .workflow-box {
+        background: #0f172a;
+        color: #38bdf8;
+        padding: 20px 24px;
+        border-radius: 10px;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+        overflow-x: auto;
+    }
+
+    .workflow-box .wf-title {
+        color: #f8fafc;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Callout & Warning Alerts */
+    .help-alert {
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .help-alert i {
+        font-size: 20px;
+        margin-top: 2px;
+    }
+
+    .help-alert-info {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+    }
+
+    .help-alert-warning {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .help-alert-tip {
+        background: #f0fdf4;
+        border-left: 4px solid #22c55e;
+        color: #166534;
+    }
+
+    .help-alert-danger {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+    }
+
+    /* Screenshots Styling */
+    .screenshot-container {
+        margin: 20px 0 28px 0;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        background: #ffffff;
+    }
+
+    .screenshot-caption {
+        background: #f1f5f9;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .help-img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .section-subtitle {
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 24px;
+        margin-bottom: 12px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 48px;
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px dashed #cbd5e1;
+        display: none;
+    }
+</style>
+
+<div class="help-container">
+    <!-- Header Section with Search Bar -->
+    <div class="help-header">
+        <h1><i class="fas fa-book-open"></i> Admin Panel Interactive Documentation & User Manual</h1>
+        <p>Comprehensive operational manual explaining every module, form input field, CRUD lifecycle (Create, View, Edit, Save, Delete), and system workflow inside the Trinity Theological Seminary Admin Panel.</p>
+        
+        <div class="help-search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="helpSearchInput" placeholder="Search any topic (e.g. 'add menu', 'create page', 'edit student', 'delete exam', 'payment')..." onkeyup="filterHelpTopics()">
+            <button class="clear-btn" id="clearSearchBtn" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <div class="help-grid">
+        <!-- Sticky Sidebar Navigation -->
+        <div class="help-sidebar">
+            <div class="help-sidebar-title">Documentation Modules</div>
+            
+            <a class="help-nav-item active" onclick="scrollToSection('sec-menus')">
+                <i class="fas fa-bars"></i> Menu Management
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-pages')">
+                <i class="fas fa-file-invoice"></i> Pages & Content
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard Overview
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-students')">
+                <i class="fas fa-user-graduate"></i> Student Management
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-exams')">
+                <i class="fas fa-file-alt"></i> Exam Management
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-questions')">
+                <i class="fas fa-question-circle"></i> Question Setup
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-exam-approval')">
+                <i class="fas fa-check-double"></i> Exam Approval Workflow
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-student-requests')">
+                <i class="fas fa-user-plus"></i> Student Requests
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-payments')">
+                <i class="fas fa-credit-card"></i> Payments Management
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-media')">
+                <i class="fas fa-photo-video"></i> Media Library
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-settings')">
+                <i class="fas fa-cog"></i> Settings & Codes
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-reports')">
+                <i class="fas fa-chart-bar"></i> Reports & Analytics
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-notifications')">
+                <i class="fas fa-bell"></i> Notifications & Support
+            </a>
+            <a class="help-nav-item" onclick="scrollToSection('sec-admin-users')">
+                <i class="fas fa-user-shield"></i> Admin Users & Roles
+            </a>
+        </div>
+
+        <!-- Documentation Content Sections -->
+        <div class="help-content-area" id="helpContentArea">
+
+            <!-- No Results Placeholder -->
+            <div class="no-results" id="noResultsBox">
+                <i class="fas fa-search-minus" style="font-size: 48px; color: #94a3b8; margin-bottom: 16px;"></i>
+                <h3 style="color: #334155; margin-bottom: 8px;">No matching documentation found</h3>
+                <p style="color: #64748b;">Try searching for keywords like "menu", "page", "student", "exam", "payment", or "settings".</p>
+            </div>
+
+            <!-- 1. MENU MANAGEMENT (FEATURED EXPANDED SECTION) -->
+            <div class="help-card" id="sec-menus">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-bars"></i> Menu Management & Menu Engineer</h2>
+                    <div>
+                        <span class="help-badge badge-crud-create">Create Menu</span>
+                        <span class="help-badge badge-crud-create">Add Items</span>
+                        <span class="help-badge badge-crud-edit">Edit</span>
+                        <span class="help-badge badge-crud-delete">Delete</span>
+                        <span class="help-badge badge-crud-config">Reorder</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    The <strong>Menu Management System</strong> enables administrators to configure and structure all public navigation menus across the website (Main Navigation Bar, Header Top Menu, Footer Quick Links, and Sidebar Menus). You can create nested drop-down menus, attach custom icons, position menus, link menu items to dynamic pages or external URLs, and drag-and-drop or re-order menu sequence live.
+                </div>
+
+                <!-- Workflow Diagram -->
+                <div class="workflow-box">
+                    <div class="wf-title"><i class="fas fa-sitemap"></i> Full Menu Construction & Linking Workflow</div>
+1. Create/Publish Web Page (/page/about-us/)
+     ↓
+2. Go to Admin → Menu Management (/menu/admin/menus/)
+     ↓
+3. Click "Menu Engineer" on target Menu (e.g., Main Header Menu)
+     ↓
+4. Click "Add Menu Item" → Fill Item Form (Title, URL/Page, Icon, Order, Parent)
+     ↓
+5. Click "Save Item" → Backend Updates `menu_items` DB Table
+     ↓
+6. Instant Website Update: Menu Item appears in Website Header/Footer/Sidebar
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/menus_list.png' %}" alt="Menu Management List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 1: Menu Management Overview list showing menu titles, positions (header/footer/sidebar), active status, and Menu Engineer links.</div>
+                </div>
+
+                <!-- Operations Breakdown -->
+                <div class="section-subtitle"><i class="fas fa-tasks"></i> Menu Management CRUD Operations & Field Breakdown</div>
+
+                <table class="crud-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Where to Click</th>
+                            <th>Form / Modal Fields & Input Parameters</th>
+                            <th>What Happens After Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Create New Menu</strong></td>
+                            <td>Click <code>+ Add Menu</code> button on <code>/menu/admin/menus/</code></td>
+                            <td>
+                                • <span class="field-name">Menu Title</span> <span class="required-tag">*</span> (e.g. Header Main Menu)<br>
+                                • <span class="field-name">Position</span> <span class="required-tag">*</span> (Header, Footer, Sidebar)<br>
+                                • <span class="field-name">Status</span> (Active / Disabled switch)
+                            </td>
+                            <td>Creates a new menu container in the database. You can now add individual navigation items inside it via the Menu Engineer.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Add Menu Item</strong></td>
+                            <td>Click <code>Menu Engineer</code> → <code>+ Add Item</code></td>
+                            <td>
+                                • <span class="field-name">Title</span> <span class="required-tag">*</span> (e.g. "About Seminary")<br>
+                                • <span class="field-name">Link Type</span> (Existing Page dropdown or Custom URL)<br>
+                                • <span class="field-name">URL / Slug</span> <span class="required-tag">*</span> (e.g. <code>/page/about-us/</code> or <code>https://...</code>)<br>
+                                • <span class="field-name">Parent Item</span> (Select existing menu item to create dropdown sub-menu)<br>
+                                • <span class="field-name">Menu Order</span> (Numerical sequence e.g., 1, 2, 3)<br>
+                                • <span class="field-name">Target</span> (<code>_self</code> = same window, <code>_blank</code> = new tab)<br>
+                                • <span class="field-name">Icon</span> (FontAwesome icon class e.g., <code>fas fa-info-circle</code>)
+                            </td>
+                            <td>Appends a new item to the chosen menu. If a Parent Item is selected, it appears as a nested drop-down submenu on the website.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Edit Menu Item</strong></td>
+                            <td>Click <code><i class="fas fa-edit"></i> Edit</code> icon on item row</td>
+                            <td>Pre-fills existing item fields. Modify Title, URL, Parent dropdown, Icon, or Display Order.</td>
+                            <td>Updates the menu item in real-time. Changes reflect immediately on public website navigation upon saving.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reorder Items</strong></td>
+                            <td>Change <code>Menu Order</code> field or drag order handle</td>
+                            <td>Enter integer order weight (e.g., Order 1 appears before Order 2). Click <code>Save Order</code>.</td>
+                            <td>Re-sequences the items from left-to-right (Header) or top-to-bottom (Footer/Sidebar).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Refresh URLs</strong></td>
+                            <td>Click <code>Refresh Page URLs</code> button</td>
+                            <td>N/A (Automated system sync)</td>
+                            <td>Scans all dynamic Pages in database and updates any out-of-date page links attached to menu items.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Delete Item / Menu</strong></td>
+                            <td>Click <code><i class="fas fa-trash"></i> Delete</code> button</td>
+                            <td>Confirmation popup alert ("Are you sure you want to delete this menu item?")</td>
+                            <td>Permanently deletes the menu item. If a parent item is deleted, child sub-menu items are detached or deleted automatically.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/menu_engineer.png' %}" alt="Menu Engineer Builder" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 2: Menu Engineer builder console for managing nested parent-child items, display positions, and icons.</div>
+                </div>
+
+                <h4 class="section-subtitle"><i class="fas fa-list-ol"></i> Step-by-Step Guide: How to Add a New Menu Item and Link it to a Page</h4>
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Step 1: Open Menu Management</div>
+                            <div class="step-desc">In the Admin Sidebar, click <strong>Menu Management</strong> (URL: <code>/menu/admin/menus/</code>). You will see a list of menus configured for Header, Footer, and Sidebar.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Step 2: Click "Menu Engineer"</div>
+                            <div class="step-desc">Click the blue <strong>Menu Engineer</strong> button next to the menu you wish to modify (e.g. <em>Header Main Navigation</em>).</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Step 3: Click "Add Item" & Enter Details</div>
+                            <div class="step-desc">
+                                In the Menu Engineer form:<br>
+                                • Enter <strong>Title</strong> (e.g. <code>Academic Courses</code>)<br>
+                                • Under <strong>Link Type</strong>, select <code>Existing Page</code> and choose your page from the dropdown menu, OR select <code>Custom URL</code> and enter the web address.<br>
+                                • Select <strong>Parent Item</strong> if you want this to be a drop-down child menu under a parent item (e.g. under <em>Academics</em>). Leave blank for a top-level menu item.<br>
+                                • Enter <strong>Menu Order</strong> number (e.g., <code>1</code> for first position, <code>2</code> for second).
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Step 4: Click Save</div>
+                            <div class="step-desc">Click <strong>Save Menu Item</strong>. Go to the public website front-end and refresh—your new menu item will be live!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PAGES / WEBSITE CONTENT (FEATURED EXPANDED SECTION) -->
+            <div class="help-card" id="sec-pages">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-file-invoice"></i> Pages & Website Content Management</h2>
+                    <div>
+                        <span class="help-badge badge-crud-create">Create Page</span>
+                        <span class="help-badge badge-crud-view">View</span>
+                        <span class="help-badge badge-crud-edit">Edit</span>
+                        <span class="help-badge badge-crud-delete">Delete</span>
+                        <span class="help-badge badge-crud-approve">Publish</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    The <strong>Pages Module</strong> allows admins to build and manage static or dynamic website pages (e.g., <em>About Us</em>, <em>History</em>, <em>Statement of Faith</em>, <em>Library Information</em>). Content is authored visually using an integrated CKEditor 5 rich text editor supporting headings, images, tables, video embeds, and formatted copy.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/pages_list.png' %}" alt="Pages Management List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 3: Pages Management list table showing page IDs, thumbnail previews, title/code info, descriptions, active status tags, and action buttons.</div>
+                </div>
+
+                <!-- Fields Specification -->
+                <div class="section-subtitle"><i class="fas fa-edit"></i> Create / Edit Page Form Fields & Specifications</div>
+
+                <table class="field-table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Field Type</th>
+                            <th>Requirement</th>
+                            <th>Description & Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="field-name">Page Title</span></td>
+                            <td>Text Input</td>
+                            <td><span class="required-tag">Required *</span></td>
+                            <td>The main headline of the page displayed at the top of the webpage and in browser title bar.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Code / Slug</span></td>
+                            <td>Text Input</td>
+                            <td><span class="required-tag">Required *</span></td>
+                            <td>Unique URL identifier (e.g., <code>about-us</code>). Resulting public URL will be <code>http://127.0.0.1:8000/page/about-us/</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Page Content</span></td>
+                            <td>CKEditor 5 Rich Text</td>
+                            <td><span class="required-tag">Required *</span></td>
+                            <td>Main body content. Authors can insert formatted text, HTML tables, media images, banners, hyperlinks, and bullet points.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Feature Banner Image</span></td>
+                            <td>Media Selector / Upload</td>
+                            <td>Optional</td>
+                            <td>Header background image displayed at the top hero section of the public page.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Meta Keywords</span></td>
+                            <td>Text Input</td>
+                            <td>Optional</td>
+                            <td>Comma-separated SEO keywords for search engine indexing.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Meta Description</span></td>
+                            <td>Textarea</td>
+                            <td>Optional</td>
+                            <td>Brief summary used by Google and social media preview cards.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Status (Active)</span></td>
+                            <td>Toggle Switch</td>
+                            <td><span class="required-tag">Required *</span></td>
+                            <td><strong>Active:</strong> Page is published and accessible to public visitors.<br><strong>Inactive:</strong> Draft mode; returns 404/Private to visitors.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/page_create.png' %}" alt="Create Page Form" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 4: Create Page form interface with Page Title, Slug code, CKEditor text area, banner image selector, and Publish controls.</div>
+                </div>
+
+                <!-- Detailed CRUD Explanation -->
+                <div class="section-subtitle"><i class="fas fa-cogs"></i> Page Operations & Consequences</div>
+
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number"><i class="fas fa-eye"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">View Page Operation</div>
+                            <div class="step-desc">Clicking <strong><i class="fas fa-eye"></i> View</strong> opens a preview modal or opens the live public page at <code>/page/&lt;slug&gt;/</code> as visitors see it.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number"><i class="fas fa-edit"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">Edit / Update Page Operation</div>
+                            <div class="step-desc">Clicking <strong><i class="fas fa-edit"></i> Edit</strong> loads the existing title, slug, content, and image into the page editor. Click <strong>Update Page</strong> to save changes. The <code>updated_at</code> timestamp and <code>updated_by</code> user reference are logged automatically.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number"><i class="fas fa-trash"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">Delete Page Operation</div>
+                            <div class="step-desc">Clicking <strong><i class="fas fa-trash"></i> Delete</strong> triggers a browser confirmation dialog. If confirmed, the page record is deleted from the database. Any menu items linked to this page will automatically display an unlinked state until updated.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. DASHBOARD -->
+            <div class="help-card" id="sec-dashboard">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-tachometer-alt"></i> Dashboard Overview & Metrics</h2>
+                    <span class="help-badge badge-crud-view">Overview</span>
+                </div>
+
+                <div class="help-section-desc">
+                    The Admin Dashboard is the central command hub of Trinity Theological Seminary Admin Panel. It gives instant real-time visibility into overall student enrollments, active courses, pending approval counts, exam status, recent activities, and key metrics.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/dashboard.png' %}" alt="Admin Dashboard Overview" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 5: Admin Panel Dashboard interface showing live KPI cards, notifications, and navigation bar.</div>
+                </div>
+
+                <table class="crud-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Dashboard Element</th>
+                            <th>Data Source</th>
+                            <th>Function & Interactive Behavior</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Total Active Students Card</strong></td>
+                            <td><code>Students.objects.filter(active=1)</code></td>
+                            <td>Calculates total active student body count. Clicking opens Student List.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Notification Bell</strong></td>
+                            <td>Pending applications, exams & book approvals</td>
+                            <td>Displays red badge count of pending actions. Clicking reveals dropdown list with direct approval links.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sidebar Navigation</strong></td>
+                            <td><code>AdminPages</code> DB table</td>
+                            <td>Collapsible dynamic menu listing all admin modules allowed by current user role.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. USER / STUDENT MANAGEMENT -->
+            <div class="help-card" id="sec-students">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-user-graduate"></i> User & Student Management</h2>
+                    <div>
+                        <span class="help-badge badge-crud-create">Create</span>
+                        <span class="help-badge badge-crud-view">View</span>
+                        <span class="help-badge badge-crud-edit">Edit</span>
+                        <span class="help-badge badge-crud-delete">Delete</span>
+                        <span class="help-badge badge-crud-approve">Approve</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    Comprehensive student lifecycle management. Admins can view enrolled students, register new students manually, edit student profiles, toggle account active/inactive statuses, approve registrations, manage fee payments, apply custom discounts, view scorecards, and assign books/subjects/exams.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/students_list.png' %}" alt="Students Management List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 6: All Students table showing student IDs, names, assigned courses, active statuses, and action buttons.</div>
+                </div>
+
+                <div class="section-subtitle"><i class="fas fa-user-plus"></i> Create / Edit Student Form Fields</div>
+                <table class="field-table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Field Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="field-name">First Name & Last Name</span></td>
+                            <td>Text Inputs <span class="required-tag">*</span></td>
+                            <td>Legal name of student. Used on official certificates and scorecards.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Email Address</span></td>
+                            <td>Email Input <span class="required-tag">*</span></td>
+                            <td>Student account login username and notification dispatch email address. Must be unique.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Course</span></td>
+                            <td>Dropdown Select <span class="required-tag">*</span></td>
+                            <td>Enrolled academic program (e.g. Master of Divinity, Diploma in Theology).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Branch</span></td>
+                            <td>Dropdown Select <span class="required-tag">*</span></td>
+                            <td>Assigned campus branch or online distance learning division.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Password</span></td>
+                            <td>Password Input</td>
+                            <td>Set initial account password. Required for creation; leave blank during edit to keep current password.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Active Status</span></td>
+                            <td>Checkbox Toggle</td>
+                            <td>When checked (Active), student can log into student portal. Unchecked blocks login.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 class="section-subtitle"><i class="fas fa-book"></i> Student Sub-Module Workflows</h4>
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Assign Books (<code>/menu/admin/students/student-books</code>)</div>
+                            <div class="step-desc">Bulk assign course textbooks and syllabus reference materials to specific students. Toggle approval for book access.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Assign Subjects (<code>/menu/admin/students/student-subjects</code>)</div>
+                            <div class="step-desc">Assign specific academic subjects to students based on their enrolled program.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Assign Exams (<code>/menu/admin/students/student-exams</code>)</div>
+                            <div class="step-desc">Grant access for specific exams to students once prerequisites are verified.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/assign_books.png' %}" alt="Assign Books Workflow" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 7: Assign Books management console.</div>
+                </div>
+            </div>
+
+            <!-- 5. EXAM MANAGEMENT -->
+            <div class="help-card" id="sec-exams">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-file-alt"></i> Exam Management</h2>
+                    <div>
+                        <span class="help-badge badge-crud-create">Create</span>
+                        <span class="help-badge badge-crud-edit">Edit</span>
+                        <span class="help-badge badge-crud-delete">Delete</span>
+                        <span class="help-badge badge-crud-config">Configure</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    Allows administrators to design exams, configure exam duration, set pass marks, configure objective/descriptive question papers, assign exams to students, view answer sheets, and publish exam results.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/exams_list.png' %}" alt="Exams Management List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 8: Exams Management list showing code, exam title, subject, duration, and question setup options.</div>
+                </div>
+
+                <div class="section-subtitle"><i class="fas fa-pen-nib"></i> Create Exam Form Fields</div>
+                <table class="field-table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="field-name">Exam Code</span></td>
+                            <td>Text <span class="required-tag">*</span></td>
+                            <td>Unique exam reference code (e.g. <code>EXAM-DIV-101</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Exam Title</span></td>
+                            <td>Text <span class="required-tag">*</span></td>
+                            <td>Full name of the exam displayed on student portal (e.g. <em>Old Testament Survey Midterm</em>).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Subject</span></td>
+                            <td>Dropdown <span class="required-tag">*</span></td>
+                            <td>Associated academic subject.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Duration (Minutes)</span></td>
+                            <td>Number <span class="required-tag">*</span></td>
+                            <td>Time limit given to students once they click "Start Exam" (e.g. <code>90</code> minutes).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Total Marks</span></td>
+                            <td>Number <span class="required-tag">*</span></td>
+                            <td>Maximum achievable score (e.g. <code>100</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="field-name">Passing Score</span></td>
+                            <td>Number <span class="required-tag">*</span></td>
+                            <td>Minimum marks required to pass (e.g. <code>50</code>). Scores below this mark student as Failed.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/exam_create.png' %}" alt="Create Exam Form" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 9: Create Exam form interface.</div>
+                </div>
+            </div>
+
+            <!-- 6. QUESTION MANAGEMENT -->
+            <div class="help-card" id="sec-questions">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-question-circle"></i> Question Setup & Management</h2>
+                    <span class="help-badge badge-crud-create">Configure Questions</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Exams can contain two types of questions: <strong>Objective (Multiple Choice Questions - MCQs)</strong> and <strong>Descriptive (Essay Questions)</strong>.
+                </div>
+
+                <table class="field-table">
+                    <thead>
+                        <tr>
+                            <th>Question Type</th>
+                            <th>Required Form Fields</th>
+                            <th>Evaluation & Grading Mechanism</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Objective (MCQ)</strong></td>
+                            <td>Question text, Option A, Option B, Option C, Option D, Correct Option select, Marks.</td>
+                            <td><strong>Automated Auto-Grading:</strong> System instantly evaluates student response upon exam submission.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Descriptive (Essay)</strong></td>
+                            <td>Question prompt text, maximum character limit, Marks allocation.</td>
+                            <td><strong>Manual Admin Grading:</strong> Student essay appears in <em>Submitted Exams</em> for admin score entry.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 7. EXAM APPROVAL WORKFLOW -->
+            <div class="help-card" id="sec-exam-approval">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-check-double"></i> Exam Approval Workflow</h2>
+                    <span class="help-badge badge-crud-approve">Approval</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Submitted student exams require administrative grading and review before final marks are recorded on student scorecards.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/submitted_exams.png' %}" alt="Submitted Student Exams List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 10: Submitted Exams list showing student submissions, total score, and grading action link.</div>
+                </div>
+
+                <h4 style="font-weight:700; color:#1e293b; margin-top:20px; margin-bottom:12px;">Grading & Approval Steps</h4>
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Navigate to Submitted Exams</div>
+                            <div class="step-desc">Go to <code>/menu/admin/students/student-submitted-exams/</code>.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Click Answer Sheet</div>
+                            <div class="step-desc">Click <strong>View Answer Sheet</strong> next to the target student's submission.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Grade Descriptive Answers & Save</div>
+                            <div class="step-desc">Review student essay responses, enter awarded marks, and click <strong>Submit Marks / Approve Exam</strong>.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. STUDENT REQUESTS / APPLICATIONS -->
+            <div class="help-card" id="sec-student-requests">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-user-plus"></i> Student Requests & Applications</h2>
+                    <span class="help-badge badge-crud-approve">Approve / Reject</span>
+                </div>
+
+                <div class="help-section-desc">
+                    When prospective students submit registration forms or program admission requests on the website, they arrive in the <strong>Applications Module</strong> for administrator review and approval.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/student_requests.png' %}" alt="Applications and Student Requests" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 11: Student admission applications table.</div>
+                </div>
+
+                <div class="help-alert help-alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>What happens on Approval/Rejection?</strong><br>
+                        • <strong>Approve:</strong> The student status is set to Active, a formal student account is generated, and a confirmation email is dispatched.<br>
+                        • <strong>Reject:</strong> The request is marked Disapproved with optional feedback comments recorded in the application log.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. PAYMENTS MANAGEMENT -->
+            <div class="help-card" id="sec-payments">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-credit-card"></i> Payments Management</h2>
+                    <div>
+                        <span class="help-badge badge-crud-view">View</span>
+                        <span class="help-badge badge-crud-approve">Manual Paid</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    Tracks student tuition fees, exam re-test fees, registration charges, payment transaction IDs, and manual fee adjustments.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/payments_list.png' %}" alt="Payments List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 12: Payments register showing transaction IDs, student names, amounts, payment gateway status, and manual approval tools.</div>
+                </div>
+
+                <div class="section-subtitle"><i class="fas fa-money-check-alt"></i> Manual Mark Paid Operation</div>
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">Overriding Offline Payments</div>
+                            <div class="step-desc">If a student pays cash or direct bank transfer, click <strong>Mark Paid</strong> on the payment record or student profile to manually reconcile their balance.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. MEDIA LIBRARY -->
+            <div class="help-card" id="sec-media">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-photo-video"></i> Media & Image Library</h2>
+                    <div>
+                        <span class="help-badge badge-crud-create">Upload</span>
+                        <span class="help-badge badge-crud-delete">Delete</span>
+                    </div>
+                </div>
+
+                <div class="help-section-desc">
+                    Centralized repository for images, banners, logos, documents, and reference PDFs used across pages, news posts, sliders, and courses.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/media_list.png' %}" alt="Media Library Grid" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 13: Media Library file grid showing uploaded images, copy URL button, thumbnail preview, and delete controls.</div>
+                </div>
+            </div>
+
+            <!-- 11. SETTINGS & CHURCH CODES -->
+            <div class="help-card" id="sec-settings">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-cog"></i> Settings & Code Configurations</h2>
+                    <span class="help-badge badge-crud-config">Settings</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Controls systemic administrative options including Church Login Codes, Code Usage Limits, Church Admin Applications, and General Site Metadata.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/code_settings.png' %}" alt="Code Settings Console" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 14: Church Code settings and usage quota configuration.</div>
+                </div>
+            </div>
+
+            <!-- 12. REPORTS & ANALYTICS -->
+            <div class="help-card" id="sec-reports">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-chart-bar"></i> Reports & Analytics</h2>
+                    <span class="help-badge badge-crud-view">Reports</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Export academic and financial records. Available reports include:
+                    <ul style="margin-top:8px; line-height:1.7;">
+                        <li><strong>Subjects Export:</strong> Download full list of subjects as CSV / Excel (<code>/menu/admin/subjects/export</code>).</li>
+                        <li><strong>Student Scorecards:</strong> Detailed academic performance breakdown for each student.</li>
+                        <li><strong>Payment Dashboard Summaries:</strong> Financial revenue totals, completed vs pending payment balances.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 13. NOTIFICATIONS & SUPPORT -->
+            <div class="help-card" id="sec-notifications">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-bell"></i> Notifications & Support Tickets</h2>
+                    <span class="help-badge badge-crud-view">Support</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Manage student inquiries, technical support tickets, and system notification alerts.
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/support_list.png' %}" alt="Support Tickets List" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 15: Support ticket management queue.</div>
+                </div>
+            </div>
+
+            <!-- 14. ADMIN USERS & ROLES -->
+            <div class="help-card" id="sec-admin-users">
+                <div class="help-card-header">
+                    <h2 class="help-card-title"><i class="fas fa-user-shield"></i> Admin Users, Roles & Permissions</h2>
+                    <span class="help-badge badge-crud-config">Permissions</span>
+                </div>
+
+                <div class="help-section-desc">
+                    Manage administrator credentials, create custom roles (e.g. Exam Manager, Content Editor, Registrar), and toggle granular module permissions (Create Pages, Delete Students, Grade Exams, View Payments).
+                </div>
+
+                <div class="screenshot-container">
+                    <img src="{% static 'img/help/roles_list.png' %}" alt="Roles and Permissions Matrix" class="help-img">
+                    <div class="screenshot-caption"><i class="fas fa-image"></i> Figure 16: Roles & Permissions management table.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll to section smoothly and highlight sidebar item
+    function scrollToSection(sectionId) {
+        const target = document.getElementById(sectionId);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Update sidebar active link
+            document.querySelectorAll('.help-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+        }
+    }
+
+    // Instant search & topic filter function
+    function filterHelpTopics() {
+        const input = document.getElementById('helpSearchInput');
+        const filter = input.value.toLowerCase().trim();
+        const clearBtn = document.getElementById('clearSearchBtn');
+        const cards = document.querySelectorAll('.help-card');
+        const navItems = document.querySelectorAll('.help-nav-item');
+        const noResultsBox = document.getElementById('noResultsBox');
+
+        if (filter.length > 0) {
+            clearBtn.style.display = 'flex';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        let visibleCount = 0;
+
+        cards.forEach((card, index) => {
+            const cardText = card.innerText.toLowerCase();
+            const navItem = navItems[index];
+
+            if (filter === '' || cardText.includes(filter)) {
+                card.style.display = 'block';
+                if (navItem) navItem.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+                if (navItem) navItem.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResultsBox.style.display = 'block';
+        } else {
+            noResultsBox.style.display = 'none';
+        }
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('helpSearchInput');
+        input.value = '';
+        filterHelpTopics();
+        input.focus();
+    }
+
+    // Auto scroll based on URL query parameter or hash
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sectionParam = urlParams.get('section');
+        const hash = window.location.hash;
+
+        let targetId = null;
+        if (sectionParam) {
+            targetId = 'sec-' + sectionParam;
+        } else if (hash) {
+            targetId = 'sec-' + hash.replace('#', '');
+        }
+
+        if (targetId) {
+            const el = document.getElementById(targetId);
+            if (el) {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
+        }
+    });
+</script>
+{% endblock %}
