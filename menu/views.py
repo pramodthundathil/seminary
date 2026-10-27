@@ -9396,17 +9396,18 @@ def bulk_upload_church_users(request):
                     io_string = io.StringIO(file_data)
                     reader = csv.DictReader(io_string)
                     if reader.fieldnames:
-                        reader.fieldnames = [h.strip() for h in reader.fieldnames if h]
+                        reader.fieldnames = [str(h).strip().lower() for h in reader.fieldnames if h]
                     for row in reader:
-                        rows_dict.append(row)
+                        cleaned_row = {str(k).strip().lower(): (str(v).strip() if v is not None else '') for k, v in row.items() if k}
+                        rows_dict.append(cleaned_row)
                 elif filename.endswith('.xlsx') or filename.endswith('.xls'):
                     import openpyxl
                     wb = openpyxl.load_workbook(csv_file, data_only=True)
                     ws = wb.active
                     excel_rows = list(ws.iter_rows(values_only=True))
                     if len(excel_rows) > 0:
-                        # Clean headers
-                        headers = [str(cell).strip() if cell is not None else '' for cell in excel_rows[0]]
+                        # Clean headers (case-insensitive and trimmed)
+                        headers = [str(cell).strip().lower() if cell is not None else '' for cell in excel_rows[0]]
                         headers = [h for h in headers if h]
                         
                         for r in excel_rows[1:]:
@@ -9428,23 +9429,22 @@ def bulk_upload_church_users(request):
                 default_language = Languages.objects.filter(language_name__iexact='English').first() or Languages.objects.first()
                 default_timezone = getattr(settings, 'TIME_ZONE', 'UTC')
 
-
-
                 for row_idx, row in enumerate(rows_dict, start=1):
                     total_rows += 1
                     
-                    # Clean the row dict keys and values
-                    row = {k.strip(): (v.strip() if v else '') for k, v in row.items() if k}
+                    # Clean the row dict keys and values (keys lowercased and trimmed)
+                    row = {str(k).strip().lower(): (str(v).strip() if v is not None else '') for k, v in row.items() if k}
                     
                     if upload_type in ('church_admin', 'church_user'):
-                        email = row.get('email')
-                        first_name = row.get('first_name')
-                        last_name = row.get('last_name', '')
+                        raw_email = row.get('email', '')
+                        email = raw_email.strip().lower()
+                        first_name = row.get('first_name', '').strip()
+                        last_name = row.get('last_name', '').strip()
                         
                         row_report = {
                             'row_number': row_idx,
-                            'email': email or 'N/A',
-                            'name': f"{first_name or ''} {last_name or ''}".strip() or 'N/A',
+                            'email': raw_email or 'N/A',
+                            'name': f"{first_name} {last_name}".strip() or 'N/A',
                             'type_info': 'Church Admin' if upload_type == 'church_admin' else 'Church User',
                             'status': 'failed',
                             'message': ''
@@ -9462,15 +9462,15 @@ def bulk_upload_church_users(request):
                             failed_count += 1
                             continue
 
-                        # Check unique email in Users
-                        if Users.objects.filter(email=email).exists():
-                            row_report['message'] = f"Account with email {email} already registered."
+                        # Check unique email in Users & Students case-insensitively
+                        if Users.objects.filter(email__iexact=email).exists() or Students.objects.filter(email__iexact=email).exists():
+                            row_report['message'] = f"Account with email {raw_email} already registered."
                             details.append(row_report)
                             failed_count += 1
                             continue
 
                         if upload_type == 'church_admin':
-                            name_of_church = row.get('name_of_church')
+                            name_of_church = row.get('name_of_church', '').strip()
                             if not name_of_church:
                                 row_report['message'] = "Missing name_of_church."
                                 details.append(row_report)
@@ -9490,20 +9490,20 @@ def bulk_upload_church_users(request):
                                 continue
 
                             # Resolve church code
-                            code = row.get('code')
+                            code = row.get('code', '').strip()
                             if code:
-                                if ChurchAdmins.objects.filter(code=code, deleted_at__isnull=True).exists():
+                                if ChurchAdmins.objects.filter(code__iexact=code, deleted_at__isnull=True).exists():
                                     row_report['message'] = f"Church code '{code}' already in use."
                                     details.append(row_report)
                                     failed_count += 1
                                     continue
                             else:
                                 code = get_random_string(6).upper()
-                                while ChurchAdmins.objects.filter(code=code, deleted_at__isnull=True).exists():
+                                while ChurchAdmins.objects.filter(code__iexact=code, deleted_at__isnull=True).exists():
                                     code = get_random_string(6).upper()
 
-                            name_of_paster = row.get('name_of_paster') or None
-                            church_address = row.get('church_address') or None
+                            name_of_paster = row.get('name_of_paster', '').strip() or None
+                            church_address = row.get('church_address', '').strip() or None
 
                             # DB Insertions inside transaction
                             try:
@@ -9559,15 +9559,15 @@ def bulk_upload_church_users(request):
                                 failed_count += 1
 
                         elif upload_type == 'church_user':
-                            church_code = row.get('church_code')
+                            church_code = row.get('church_code', '').strip()
                             if not church_code:
                                 row_report['message'] = "Missing church_code."
                                 details.append(row_report)
                                 failed_count += 1
                                 continue
 
-                            # Fetch Church Admin
-                            church_admin_obj = ChurchAdmins.objects.filter(code=church_code, deleted_at__isnull=True).first()
+                            # Fetch Church Admin (case-insensitive code)
+                            church_admin_obj = ChurchAdmins.objects.filter(code__iexact=church_code, deleted_at__isnull=True).first()
                             if not church_admin_obj:
                                 row_report['message'] = f"Church code '{church_code}' does not exist."
                                 details.append(row_report)
@@ -9631,12 +9631,13 @@ def bulk_upload_church_users(request):
                         details.append(row_report)
 
                     elif upload_type == 'assign_exams':
-                        student_email = row.get('student_email')
-                        exam_code = row.get('exam_code')
+                        raw_student_email = row.get('student_email', '')
+                        student_email = raw_student_email.strip().lower()
+                        exam_code = row.get('exam_code', '').strip()
                         
                         row_report = {
                             'row_number': row_idx,
-                            'email': student_email or 'N/A',
+                            'email': raw_student_email or 'N/A',
                             'name': f"Exam Code: {exam_code or 'N/A'}",
                             'type_info': 'Assign Exam',
                             'status': 'failed',
@@ -9654,17 +9655,19 @@ def bulk_upload_church_users(request):
                             failed_count += 1
                             continue
 
-                        # Resolve Student
-                        student = Students.objects.filter(email=student_email).first()
+                        # Resolve Student (case-insensitive search on email and user__email)
+                        student = Students.objects.filter(email__iexact=student_email).first()
                         if not student:
-                            row_report['message'] = f"Student with email {student_email} not found."
+                            student = Students.objects.filter(user__email__iexact=student_email).first()
+                        if not student:
+                            row_report['message'] = f"Student with email {raw_student_email} not found."
                             details.append(row_report)
                             failed_count += 1
                             continue
 
-                        # Resolve Exam
+                        # Resolve Exam (case-insensitive code)
                         from home.models import Exams
-                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        exam = Exams.objects.filter(code__iexact=exam_code, deleted_at__isnull=True).first()
                         if not exam:
                             row_report['message'] = f"Exam with code {exam_code} not found."
                             details.append(row_report)
@@ -9682,9 +9685,9 @@ def bulk_upload_church_users(request):
                         # Create the assignment
                         try:
                             # Parse dates/duration if provided
-                            start_time_str = row.get('start_time')
-                            end_time_str = row.get('end_time')
-                            duration_str = row.get('exam_duration')
+                            start_time_str = row.get('start_time', '').strip()
+                            end_time_str = row.get('end_time', '').strip()
+                            duration_str = row.get('exam_duration', '').strip()
                             
                             duration = 180
                             if duration_str:
@@ -9743,13 +9746,14 @@ def bulk_upload_church_users(request):
                         details.append(row_report)
 
                     elif upload_type == 'upload_marks':
-                        student_email = row.get('student_email')
-                        exam_code = row.get('exam_code')
-                        marks_str = row.get('marks_obtained')
+                        raw_student_email = row.get('student_email', '')
+                        student_email = raw_student_email.strip().lower()
+                        exam_code = row.get('exam_code', '').strip()
+                        marks_str = row.get('marks_obtained', '').strip()
                         
                         row_report = {
                             'row_number': row_idx,
-                            'email': student_email or 'N/A',
+                            'email': raw_student_email or 'N/A',
                             'name': f"Exam Code: {exam_code or 'N/A'}, Marks: {marks_str or 'N/A'}",
                             'type_info': 'Upload Marks',
                             'status': 'failed',
@@ -9781,17 +9785,19 @@ def bulk_upload_church_users(request):
                             failed_count += 1
                             continue
 
-                        # Resolve Student
-                        student = Students.objects.filter(email=student_email).first()
+                        # Resolve Student (case-insensitive search on email and user__email)
+                        student = Students.objects.filter(email__iexact=student_email).first()
                         if not student:
-                            row_report['message'] = f"Student with email {student_email} not found."
+                            student = Students.objects.filter(user__email__iexact=student_email).first()
+                        if not student:
+                            row_report['message'] = f"Student with email {raw_student_email} not found."
                             details.append(row_report)
                             failed_count += 1
                             continue
 
-                        # Resolve Exam
+                        # Resolve Exam (case-insensitive code)
                         from home.models import Exams
-                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        exam = Exams.objects.filter(code__iexact=exam_code, deleted_at__isnull=True).first()
                         if not exam:
                             row_report['message'] = f"Exam with code '{exam_code}' not found."
                             details.append(row_report)
@@ -9804,9 +9810,9 @@ def bulk_upload_church_users(request):
 
                         try:
                             # Parse dates/duration if provided
-                            start_time_str = row.get('start_time')
-                            end_time_str = row.get('end_time')
-                            duration_str = row.get('exam_duration')
+                            start_time_str = row.get('start_time', '').strip()
+                            end_time_str = row.get('end_time', '').strip()
+                            duration_str = row.get('exam_duration', '').strip()
                             
                             duration = 180
                             if duration_str:
@@ -9884,10 +9890,10 @@ def bulk_upload_church_users(request):
                         details.append(row_report)
 
                     elif upload_type == 'upload_exams':
-                        subject_code = row.get('subject_code')
-                        exam_code = row.get('exam_code')
-                        exam_name = row.get('exam_name')
-                        exam_type = row.get('exam_type', '').lower()
+                        subject_code = row.get('subject_code', '').strip()
+                        exam_code = row.get('exam_code', '').strip()
+                        exam_name = row.get('exam_name', '').strip()
+                        exam_type = row.get('exam_type', '').strip().lower()
                         
                         row_report = {
                             'row_number': row_idx,
@@ -9914,17 +9920,17 @@ def bulk_upload_church_users(request):
                             failed_count += 1
                             continue
 
-                        # Resolve Subject
-                        subject = Subjects.objects.filter(subject_code=subject_code, deleted_at__isnull=True).first()
+                        # Resolve Subject (case-insensitive subject_code)
+                        subject = Subjects.objects.filter(subject_code__iexact=subject_code, deleted_at__isnull=True).first()
                         if not subject:
                             row_report['message'] = f"Subject with code '{subject_code}' not found."
                             details.append(row_report)
                             failed_count += 1
                             continue
 
-                        # Check if exam with exam_code already exists
+                        # Check if exam with exam_code already exists (case-insensitive exam_code)
                         from home.models import Exams
-                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        exam = Exams.objects.filter(code__iexact=exam_code, deleted_at__isnull=True).first()
                         
                         try:
                             with transaction.atomic():
@@ -9959,9 +9965,9 @@ def bulk_upload_church_users(request):
                         details.append(row_report)
 
                     elif upload_type == 'upload_questions':
-                        exam_code = row.get('exam_code')
-                        question_text = row.get('question_text')
-                        marks_str = row.get('marks')
+                        exam_code = row.get('exam_code', '').strip()
+                        question_text = row.get('question_text', '').strip()
+                        marks_str = row.get('marks', '').strip()
                         
                         row_report = {
                             'row_number': row_idx,
@@ -9983,9 +9989,9 @@ def bulk_upload_church_users(request):
                             failed_count += 1
                             continue
 
-                        # Resolve Exam
+                        # Resolve Exam (case-insensitive)
                         from home.models import Exams
-                        exam = Exams.objects.filter(code=exam_code, deleted_at__isnull=True).first()
+                        exam = Exams.objects.filter(code__iexact=exam_code, deleted_at__isnull=True).first()
                         if not exam:
                             row_report['message'] = f"Exam with code '{exam_code}' not found. Please upload the Exam definition first."
                             details.append(row_report)
@@ -10013,11 +10019,11 @@ def bulk_upload_church_users(request):
                                 
                                 elif exam.exam_type == 'objective':
                                     from home.models import ObjectiveQuestions
-                                    option1 = row.get('option1')
-                                    option2 = row.get('option2')
-                                    option3 = row.get('option3') or None
-                                    option4 = row.get('option4') or None
-                                    answer_option = row.get('answer_option')
+                                    option1 = row.get('option1', '').strip()
+                                    option2 = row.get('option2', '').strip()
+                                    option3 = row.get('option3', '').strip() or None
+                                    option4 = row.get('option4', '').strip() or None
+                                    answer_option = row.get('answer_option', '').strip()
                                     
                                     if not option1 or not option2:
                                         row_report['message'] = "Objective questions require option1 and option2."
