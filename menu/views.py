@@ -31,6 +31,7 @@ from home.models import News, MediaLibrary
 from home.models import *
 from .forms import *
 from home.decorators import role_redirection
+from home.emails import notify_admin_student_approved
 from datetime import datetime, timedelta
 
 from django.views.decorators.csrf import csrf_exempt
@@ -3528,7 +3529,7 @@ IMPORTANT: Please change your password immediately after your first login.
 
 Best regards,
 Administration'''
-                from_email = 'contact@byteboot.in' # Request specific sender
+                from_email = settings.DEFAULT_FROM_EMAIL
                 recipient_list = [user.email]
                 send_mail(subject, message, from_email, recipient_list)
             except Exception as e:
@@ -3537,18 +3538,11 @@ Administration'''
             # Notify both Super Admin and Church Admin if it is a church user
             if user.church_admin:
                 # 1. Notify Super Admin
-                try:
-                    admin_email = 'contact@byteboot.in'
-                    admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
-                    admin_message = f"""Hello Admin,
-
-You have successfully approved the registration for church user {student.first_name} {student.last_name} ({user.email}).
-
-Best regards,
-Trinity Theological Seminary"""
-                    send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
-                except Exception as admin_err:
-                    print(f"Failed to send admin approval notification: {str(admin_err)}")
+                notify_admin_student_approved(
+                    student,
+                    approved_by="Super Admin",
+                    is_church_user=True,
+                )
 
                 # 2. Notify Corresponding Church Admin
                 if user.church_admin.student and user.church_admin.student.email:
@@ -3561,7 +3555,7 @@ The registration for {student.first_name} {student.last_name} ({user.email}) und
 
 Best regards,
 Trinity Theological Seminary"""
-                        send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                        send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
                     except Exception as ca_err:
                         print(f"Failed to send church admin approval notification: {str(ca_err)}")
         else:
@@ -3936,7 +3930,7 @@ IMPORTANT: Please change your password immediately after your first login.
 
 Best regards,
 Administration'''
-                        from_email = 'contact@byteboot.in' # Request specific sender
+                        from_email = settings.DEFAULT_FROM_EMAIL
                         recipient_list = [user.email]
                         send_mail(subject, message, from_email, recipient_list)
                     except Exception as e:
@@ -3945,18 +3939,11 @@ Administration'''
                     # Notify both Super Admin and Church Admin if it is a church user
                     if user.church_admin:
                         # 1. Notify Super Admin
-                        try:
-                            admin_email = 'contact@byteboot.in'
-                            admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
-                            admin_message = f"""Hello Admin,
-
-You have successfully approved the registration for church user {student.first_name} {student.last_name} ({user.email}).
-
-Best regards,
-Trinity Theological Seminary"""
-                            send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
-                        except Exception as admin_err:
-                            print(f"Failed to send admin approval notification: {str(admin_err)}")
+                        notify_admin_student_approved(
+                            student,
+                            approved_by="Super Admin",
+                            is_church_user=True,
+                        )
 
                         # 2. Notify Corresponding Church Admin
                         if user.church_admin.student and user.church_admin.student.email:
@@ -3969,7 +3956,7 @@ The registration for {student.first_name} {student.last_name} ({user.email}) und
 
 Best regards,
 Trinity Theological Seminary"""
-                                send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                                send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
                             except Exception as ca_err:
                                 print(f"Failed to send church admin approval notification: {str(ca_err)}")
                 else:

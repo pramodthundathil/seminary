@@ -4,8 +4,27 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum
+from django.conf import settings
 from datetime import timedelta
-from home.models import ChurchAdmins, Students, Branches, Subjects, StudentsExams, Exams, StudentsAssignment
+from home.models import (
+    AssignmentAnswers,
+    Branches,
+    ChurchAdmins,
+    Exams,
+    Students,
+    StudentsAssignment,
+    StudentsExams,
+    Subjects,
+    Support,
+    SupportReplies,
+)
+from home.emails import (
+    notify_admin_assignment_submission,
+    notify_admin_chat_or_support,
+    notify_admin_exam_submission,
+    notify_admin_request,
+    notify_admin_student_approved,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -370,6 +389,8 @@ def church_user_view_assignment(request, assignment_id):
 
                 student_assignment.submitted_on = timezone.now()
                 student_assignment.save()
+
+                notify_admin_assignment_submission(student_assignment, is_church_user=True)
                 
                 messages.success(request, "Assignment submitted successfully!")
                 return redirect('church_user_submitted_assignment')
@@ -620,6 +641,8 @@ def church_submit_assignment(request, pk):
                 # Update StudentsAssignment status
                 student_assignment.submitted_on = timezone.now()
                 student_assignment.save()
+
+                notify_admin_assignment_submission(student_assignment, is_church_user=True)
                 
                 messages.success(request, "Assignment submitted successfully!")
                 return redirect('church_user_submitted_assignment')
@@ -835,6 +858,18 @@ def church_user_start_exam(request, exam_id):
                 defaults={'answer': '', 'mark': 0}
             )
 
+        if created:
+            notify_admin_request(
+                "Church User Exam Started",
+                student=student,
+                details=[
+                    ("Subject", exam.subject.subject_name if exam.subject else "N/A"),
+                    ("Exam", exam.exam_name),
+                    ("Status", "Started"),
+                ],
+                action_path="/menu/admin/students/student-exams",
+            )
+
         return redirect('church_user_take_exam', exam_id=student_exam.id)
         
     except Exception as e:
@@ -989,7 +1024,9 @@ def church_user_take_exam(request, exam_id):
         
     if remaining_seconds <= 0:
         student_exam.is_exam_ended = True
+        student_exam.end_time = student_exam.end_time or now
         student_exam.save()
+        notify_admin_exam_submission(student_exam, is_church_user=True, auto_ended=True)
         messages.error(request, "Exam duration has expired.")
         return redirect("church_user_exam_hall")
 
@@ -1091,10 +1128,16 @@ def church_user_submit_exam(request, exam_id):
                 logger.error(f"Error saving answer for key {key} in exam {exam_id}: {inner_e}")
                 has_errors = True
         
+        total_obj_marks = ObjectiveAnswers.objects.filter(assignment=student_exam).aggregate(total=Sum('mark'))['total'] or 0
+        total_desc_marks = DescriptiveAnswers.objects.filter(assignment=student_exam).aggregate(total=Sum('mark'))['total'] or 0
+        student_exam.show_on_score = total_obj_marks + total_desc_marks
+
         student_exam.is_exam_ended = True
         student_exam.end_time = timezone.now()
         student_exam.is_approved = True
         student_exam.save()
+
+        notify_admin_exam_submission(student_exam, has_errors=has_errors, is_church_user=True)
         
         if has_errors: messages.warning(request, "Exam submitted, but some answers might not have been saved. Please contact support.")
         else: messages.success(request, "Exam submitted successfully!")
@@ -1329,6 +1372,17 @@ def church_user_doubt_view(request, id):
             if doubt.status == 'completed':
                 doubt.status = 'in_progress'
                 doubt.save()
+
+            notify_admin_chat_or_support(
+                action_type="Church User Support / Doubt Chat Reply",
+                sender_name=doubt.student.get_full_name() if doubt.student else request.user.name,
+                sender_email=doubt.student.email if doubt.student else request.user.email,
+                student=doubt.student,
+                category=doubt.category,
+                subject_text=doubt.doubt_question,
+                message_text=doubt_answer,
+                action_path=f"/menu/support/{doubt.id}/view/",
+            )
                 
             messages.success(request, 'Reply sent successfully!')
             return redirect('church_user_doubt_view', id=id)
@@ -1349,10 +1403,22 @@ def church_user_support_create(request):
     if doubt:
         try:
             student = Students.objects.get(user=request.user)
-            Support.objects.create(
+            support_obj = Support.objects.create(
                 student=student,
                 doubt_question=doubt,
-                categories=category
+                category=category,
+                status="open",
+                created_by=request.user,
+                updated_by=request.user,
+            )
+            notify_admin_chat_or_support(
+                action_type="New Church User Support / Doubt Query",
+                sender_name=student.get_full_name(),
+                sender_email=student.email,
+                student=student,
+                category=category or "general",
+                message_text=doubt,
+                action_path=f"/menu/support/{support_obj.id}/view/",
             )
             return JsonResponse({'success': True})
         except Students.DoesNotExist:
@@ -1741,24 +1807,17 @@ def church_student_approve(request, id):
             try:
                 subject = 'Welcome to Trinity Seminary - Registration Approved'
                 message = f'''Dear {student.first_name},\n\nYour registration has been approved by your Church Administrator.\n\nLogin Details:\nURL: https://trinityseminary.in/login\nUsername: {user.email}\nPassword: {password}\n\nIMPORTANT: Please change your password immediately after your first login.\n\nBest regards,\nAdministration'''
-                from_email = 'contact@byteboot.in'
+                from_email = settings.DEFAULT_FROM_EMAIL
                 send_mail(subject, message, from_email, [user.email])
             except Exception as e:
                 pass # Fail silently for email block
 
             # Send notification email to Super Admin
-            try:
-                admin_email = 'contact@byteboot.in'
-                admin_subject = f"Church User Approved - {student.first_name} {student.last_name}"
-                admin_message = f"""Hello Admin,
-
-The church user registration for {student.first_name} {student.last_name} ({user.email}) has been approved by their Church Administrator.
-
-Best regards,
-Trinity Theological Seminary"""
-                send_mail(admin_subject, admin_message, 'contact@byteboot.in', [admin_email], fail_silently=True)
-            except Exception as admin_err:
-                logger.error(f"Failed to send admin approval notification: {admin_err}")
+            notify_admin_student_approved(
+                student,
+                approved_by=f"Church Admin ({admin.name_of_church or request.user.email})",
+                is_church_user=True,
+            )
 
             # Send notification email to corresponding Church Admin
             if user.church_admin and user.church_admin.student and user.church_admin.student.email:
@@ -1773,7 +1832,7 @@ An email containing login credentials has been sent to the student.
 
 Best regards,
 Trinity Theological Seminary"""
-                    send_mail(ca_subject, ca_message, 'contact@byteboot.in', [ca_email], fail_silently=True)
+                    send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
                 except Exception as ca_err:
                     logger.error(f"Failed to send church admin approval notification: {ca_err}")
 

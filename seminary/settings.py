@@ -350,5 +350,7 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "mytrinitytheologicalseminary@gmail.com")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "ditrhppeobmxpqzw")
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 10))
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000/")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@mytts.org")

@@ -64,6 +64,14 @@ from home.models import (
 )
 
 from home.permissions import student_only, student_or_church_user
+from home.emails import (
+    notify_admin_assignment_submission,
+    notify_admin_chat_or_support,
+    notify_admin_exam_submission,
+    notify_admin_payment,
+    notify_admin_request,
+    notify_admin_student_registration,
+)
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -1223,6 +1231,18 @@ def student_reschedule_exam(request):
             student_exam.updated_by = request.user
             student_exam.save()
 
+            notify_admin_request(
+                "Exam Reschedule (Missed Exam)",
+                student=student,
+                details=[
+                    ("Exam", student_exam.exam.exam_name if student_exam.exam else "N/A"),
+                    ("New Date & Time", f"{exam_date} {start_time}"),
+                    ("Timezone", timezone_val),
+                    ("Status", "Auto-Approved"),
+                ],
+                action_path="/menu/admin/students/student-exams",
+            )
+
             return JsonResponse({
                 "status": "success",
                 "message": "Exam rescheduled successfully! Your new exam time has been confirmed."
@@ -1238,6 +1258,18 @@ def student_reschedule_exam(request):
             student_exam.retest_requested_at = timezone.now()
             student_exam.updated_by = request.user
             student_exam.save()
+
+            notify_admin_request(
+                "Exam Retest Request (Reschedule)",
+                student=student,
+                details=[
+                    ("Exam", student_exam.exam.exam_name if student_exam.exam else "N/A"),
+                    ("Requested Date & Time", f"{exam_date} {start_time}"),
+                    ("Timezone", timezone_val),
+                    ("Status", "Pending Admin Approval"),
+                ],
+                action_path="/menu/admin/students/student-exams",
+            )
 
             return JsonResponse({
                 "status": "success",
@@ -1538,6 +1570,12 @@ def student_profile_view(request):
                 
                 student.photo = file_path
                 student.save()
+                notify_admin_request(
+                    "Profile Photo Updated",
+                    student=student,
+                    details=[("Photo Path", file_path)],
+                    action_path=f"/menu/students/view/{student.id}/",
+                )
                 messages.success(request, "Profile picture updated successfully!")
             except Exception as e:
                 logger.error(f"Error saving profile picture: {e}")
@@ -1573,6 +1611,13 @@ def student_profile_view(request):
                         setattr(student, field, val)
                 
                 student.save()
+                updated_fields = [f for f in allowed_fields if f in data]
+                notify_admin_request(
+                    "Student Profile Updated",
+                    student=student,
+                    details=[("Updated Fields", ", ".join(updated_fields) or "Profile details")],
+                    action_path=f"/menu/students/view/{student.id}/",
+                )
                 return JsonResponse({'success': True})
             except Exception as e:
                 logger.error(f"Error saving profile details: {e}")
@@ -1615,13 +1660,22 @@ def student_support_create(request):
         return JsonResponse({"error": "Doubt field is required"}, status=400)
 
     # ----- Create record -----
-    Support.objects.create(
+    support_obj = Support.objects.create(
         student=student,
         doubt_question=doubt,
         category=category,
         status="1",
         created_by=request.user,
         updated_by=request.user,
+    )
+    notify_admin_chat_or_support(
+        action_type="New Support / Doubt Query",
+        sender_name=student.get_full_name(),
+        sender_email=student.email,
+        student=student,
+        category=category or "general",
+        message_text=doubt,
+        action_path=f"/menu/support/{support_obj.id}/view/",
     )
     return JsonResponse({"success": True}, status=201)
 
@@ -1691,7 +1745,8 @@ def request_subject_view(request):
         )
 
     # Validate subject exists
-    if not Subjects.objects.filter(id=subject_id).exists():
+    subject_obj = Subjects.objects.filter(id=subject_id).first()
+    if not subject_obj:
         return JsonResponse(
             {"status": "error", "message": "Invalid subject"},
             status=400
@@ -1720,6 +1775,17 @@ def request_subject_view(request):
         is_optional=False,
         created_by=request.user,
         updated_by=request.user,
+    )
+
+    notify_admin_request(
+        "Subject Request",
+        student=student,
+        details=[
+            ("Requested Subject", subject_obj.subject_name),
+            ("Subject Fee", f"${float(subject_obj.fees or 0):.2f}" if hasattr(subject_obj, "fees") else "N/A"),
+            ("Status", "Pending Admin Approval"),
+        ],
+        action_path="/menu/admin/students/student-subjects/",
     )
 
     return JsonResponse(
@@ -1834,7 +1900,7 @@ def submit_request_exam(request):
         # CREATE THE RECORD
         # ---------------------------
         try:
-            StudentsExams.objects.create(
+            student_exam_obj = StudentsExams.objects.create(
                 student=student,
                 exam=exam,
                 start_time=final_datetime,
@@ -1846,6 +1912,19 @@ def submit_request_exam(request):
                 updated_by=request.user,
                 show_on_score=0,
                 is_approved=True,  # Auto-approve exam requests
+            )
+
+            notify_admin_request(
+                "Exam Schedule Request",
+                student=student,
+                details=[
+                    ("Subject", exam.subject.subject_name if exam.subject else "N/A"),
+                    ("Exam", exam.exam_name),
+                    ("Scheduled Date & Time", f"{exam_date} {start_time}"),
+                    ("Timezone", timezone_val),
+                    ("Status", "Auto-Approved"),
+                ],
+                action_path="/menu/admin/students/student-exams",
             )
 
             messages.success(request, "Exam request submitted successfully!")
@@ -2034,7 +2113,9 @@ def take_exam(request, exam_id):
     if remaining_seconds <= 0:
         # Time expired logic
         student_exam.is_exam_ended = True
+        student_exam.end_time = student_exam.end_time or now
         student_exam.save()
+        notify_admin_exam_submission(student_exam, auto_ended=True)
         messages.error(request, "Exam duration has expired.")
         return redirect("student_exam_hall")
 
@@ -2172,6 +2253,8 @@ def submit_exam(request, exam_id):
         student_exam.end_time = timezone.now()
         student_exam.is_approved = True
         student_exam.save()
+
+        notify_admin_exam_submission(student_exam, has_errors=has_errors)
         
         if has_errors:
             messages.warning(request, "Exam submitted, but some answers might not have been saved. Please contact support.")
@@ -2373,6 +2456,17 @@ def student_doubt_view(request, id):
             if ticket.status == 'completed':
                 ticket.status = 'in_progress'
                 ticket.save()
+
+            notify_admin_chat_or_support(
+                action_type="Support / Doubt Chat Reply",
+                sender_name=student.get_full_name(),
+                sender_email=student.email,
+                student=student,
+                category=ticket.category,
+                subject_text=ticket.doubt_question,
+                message_text=doubt_answer,
+                action_path=f"/menu/support/{ticket.id}/view/",
+            )
                 
             messages.success(request, 'Reply sent successfully!')
             return redirect('student_doubt_view', id=id)
@@ -2388,7 +2482,7 @@ def make_payment(request):
     if request.method == "POST":
         student = request.user.student.first()  # Logged-in student
 
-        Payments.objects.create(
+        payment_obj = Payments.objects.create(
             name=request.POST.get("name"),
             email=request.POST.get("email"),
             phone=request.POST.get("phone"),
@@ -2398,6 +2492,7 @@ def make_payment(request):
             student=student,
             is_paid=False  # still pending
         )
+        notify_admin_payment(payment_obj, payment_status="Submitted (Pending Verification)")
 
         return render(request, "payment_success.html")
 
@@ -3260,6 +3355,16 @@ Trinity Theological Seminary
                 except Exception as e:
                     logger.error(f"Failed to send student registration email: {e}")
 
+                notify_admin_student_registration(
+                    student=student,
+                    registration_type="Student Registration",
+                    details=[
+                        ("Registration Fee", f"${float(course_fee):.2f}"),
+                        ("Payment Status", "Pending Payment"),
+                    ],
+                    action_path=f"/menu/students/view/{student.id}/",
+                )
+
                 return redirect("registration_payment")
             else:
                 # Auto-approve payment status (since fee is 0 or empty)
@@ -3360,16 +3465,15 @@ Trinity Theological Seminary
                     logger.error(f"Failed to send student login details email: {e}")
 
                 # Send Email to Admin
-                try:
-                    admin_subject = 'New Student Application Received'
-                    admin_message = f'''A new student application has been submitted.
-Name: {student.first_name} {student.last_name}
-Course: {student.course_applied.course_name if student.course_applied else 'N/A'}
-
-Please login to the admin panel to review.'''
-                    send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'])
-                except Exception as e:
-                    logger.error(f"Failed to send admin email: {e}")
+                notify_admin_student_registration(
+                    student=student,
+                    registration_type="Student Registration",
+                    details=[
+                        ("Registration Fee", "$0.00"),
+                        ("Payment Status", "Paid / No Fee"),
+                    ],
+                    action_path=f"/menu/students/view/{student.id}/",
+                )
 
                 return redirect("student_application_success", student_id=student.student_id)
 
@@ -3603,6 +3707,8 @@ def submit_assignment(request, pk):
                 # Update StudentsAssignment status
                 student_assignment.submitted_on = timezone.now()
                 student_assignment.save()
+
+                notify_admin_assignment_submission(student_assignment)
                 
                 messages.success(request, "Assignment submitted successfully!")
                 return redirect('student_submitted_assignment')
@@ -3678,6 +3784,17 @@ def apply_church_admin(request):
                     name_of_pastor=name_of_pastor,
                     church_address=church_address,
                     church_code_settings=package
+                )
+                notify_admin_request(
+                    "Church Admin Application",
+                    student=student,
+                    details=[
+                        ("Church Name", name_of_church),
+                        ("Pastor Name", name_of_pastor or "N/A"),
+                        ("Church Address", church_address or "N/A"),
+                        ("Package", package.name if hasattr(package, "name") else str(package)),
+                    ],
+                    action_path="/menu/admin/church-admin-applications/",
                 )
                 messages.success(request, "Application submitted successfully! Please wait for admin approval.")
                 return redirect('student_profile_view')
@@ -3760,6 +3877,19 @@ def student_request_retest(request, exam_id):
             retest_requested_at=timezone.now(),
             attempt_number=attempt_count + 1
         )
+
+        notify_admin_request(
+            "Exam Retest Request",
+            student=student,
+            details=[
+                ("Exam", student_exam.exam.exam_name if student_exam.exam else "N/A"),
+                ("Attempt", f"#{attempt_count + 1}"),
+                ("Requested Date & Time", f"{exam_date} {start_time_str}"),
+                ("Timezone", timezone_val),
+                ("Status", "Pending Admin Approval"),
+            ],
+            action_path="/menu/admin/students/student-exams",
+        )
         
         return JsonResponse({"status": "success", "message": "Retest request submitted successfully! Pending admin approval."})
         
@@ -3770,13 +3900,4 @@ def student_request_retest(request, exam_id):
         return JsonResponse({"status": "error", "message": f"Failed to request retest: {str(e)}"}, status=500)
 
 def send_admin_payment_notification(payment):
-    from django.core.mail import send_mail
-    from django.conf import settings
-    import logging
-    logger = logging.getLogger(__name__)
-    subject = f"New Payment Received: {payment.name}"
-    message = f"A new payment has been received.\n\nDetails:\nStudent/Payer: {payment.name}\nEmail: {payment.email}\nAmount: ${payment.amount}\nReference: {payment.code}\nMessage: {payment.message}\n\nPlease check the admin dashboard for more details."
-    try:
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, ["info@mytts.org"])
-    except Exception as e:
-        logger.error(f"Failed to send admin payment email: {e}")
+    return notify_admin_payment(payment, payment_status="Paid")

@@ -32,6 +32,13 @@ from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 
+from home.emails import (
+    notify_admin_chat_or_support,
+    notify_admin_payment,
+    notify_admin_request,
+    notify_admin_student_registration,
+)
+
 # -------------------------------
 # Local App Imports
 # -------------------------------
@@ -281,7 +288,7 @@ def reference_form(request):
             # Save to database
             # -------------------------------
             try:
-                ReferenceForm.objects.create(
+                ref_obj = ReferenceForm.objects.create(
                     first_name=first_name,
                     middle_name=middle_name,
                     last_name=last_name,
@@ -306,6 +313,19 @@ def reference_form(request):
                     personal_comment=comments
                 )
                 logger.info(f"Reference Form saved successfully for {first_name} {last_name}")
+                notify_admin_request(
+                    "Reference Form Submission",
+                    details=[
+                        ("Applicant Name", applicant_name),
+                        ("Referee Name", f"{first_name or ''} {middle_name or ''} {last_name or ''}".replace("  ", " ").strip()),
+                        ("Referee Email", email),
+                        ("Contact Number", contact),
+                        ("Relationship", relationship),
+                        ("Recommendation", recommendation),
+                        ("Comments", comments),
+                    ],
+                    action_path="/menu/admin/dashboard",
+                )
                 messages.success(request, "Reference Form submitted successfully!")
                 return redirect("reference_form")
             except Exception as e:
@@ -813,22 +833,10 @@ def signup_student(request):
                 else:
                     messages.warning(request, 'Student created but email could not be sent.')
                     logger.warning(f'Email failed to send to {student.email}')
-                        
-            # except BadHeaderError:
-            #     messages.error(request, 'Invalid header found in email.')
-            #     logger.error('Bad header in email')
-                
-            # except Exception as e:
-            #     messages.error(request, f'Error sending email: {str(e)}')
-            #     logger.error(f'Email error: {str(e)}')
-                
+
+            send_admin_notification_email(student)
+
             return redirect('student_application_success', student_id=student_id)
-            
-            # Optional: Send email notification to student
-            # send_application_confirmation_email(student)
-            
-            # Optional: Send email notification to admin
-            # send_admin_notification_email(student)
             
            
                 
@@ -902,32 +910,11 @@ def send_admin_notification_email(student):
     """
     Send notification email to admin when new application is submitted
     """
-    from django.core.mail import send_mail
-    from django.conf import settings
-    
-    subject = f'New Student Application - {student.student_id}'
-    message = f"""
-    A new student application has been submitted.
-    
-    Student ID: {student.student_id}
-    Name: {student.first_name} {student.last_name}
-    Email: {student.email}
-    Course Applied: {student.course_applied}
-    Submitted: {student.created_at}
-    
-    Please review the application in the admin panel.
-    """
-    
-    try:
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [settings.ADMIN_EMAIL],
-            fail_silently=False,
-        )
-    except Exception as e:
-        print(f"Failed to send admin notification: {str(e)}")
+    return notify_admin_student_registration(
+        student=student,
+        registration_type="Student Application",
+        action_path=f"/menu/students/view/{student.id}/" if getattr(student, "id", None) else "/menu/admin/applications/",
+    )
 
 def contact(request):
     if request.method == 'POST':
@@ -950,12 +937,20 @@ def contact(request):
 
         if result.get('success'):
             # Save contact form
-            Contacts.objects.create(
+            contact_obj = Contacts.objects.create(
                 name=request.POST.get('name'),
                 email=request.POST.get('email'),
                 subject=request.POST.get('subject'),
                 message=request.POST.get('message'),
                 created_at=datetime.now()
+            )
+            notify_admin_chat_or_support(
+                action_type="Contact Us Inquiry",
+                sender_name=contact_obj.name,
+                sender_email=contact_obj.email,
+                subject_text=contact_obj.subject,
+                message_text=contact_obj.message,
+                action_path=f"/menu/admin/contact/{contact_obj.id}/view/",
             )
 
             messages.success(request, "Your message has been sent successfully!")
@@ -1023,11 +1018,12 @@ def forgot_password(request):
         except Exception as e:
             print("Password update error:", e)
 
-        student_data = Students.objects.get(email=email)
+        student_data = Students.objects.filter(email=email).first()
+        recipient_first_name = student_data.first_name if student_data else (student.name or "User")
         # Email content (same format as your register email)
         subject = "Your Password Reset Request"
         message = f"""
-        Hello {student_data.first_name},
+        Hello {recipient_first_name},
                
         We received a request to reset your password.
 
@@ -1051,6 +1047,16 @@ def forgot_password(request):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[student.email],
             fail_silently=False,
+        )
+
+        notify_admin_request(
+            "Password Reset Request",
+            student=student_data,
+            details=[
+                ("Account Email", student.email),
+                ("Reset Email Sent", "Yes" if email_sent else "No"),
+            ],
+            action_path=f"/menu/students/view/{student_data.id}/" if student_data else "/menu/admin/users/",
         )
 
         if email_sent:
@@ -1184,10 +1190,10 @@ def signup_guest(request):
                 # Generate random password
                 password = get_random_string(10)               
                 
-                first_name=request.POST.get('first_name'),
-                middle_name=request.POST.get('middle_name') or None,
-                last_name=request.POST.get('last_name'),
-                email=request.POST.get('email'),
+                first_name = request.POST.get('first_name')
+                middle_name = request.POST.get('middle_name') or None
+                last_name = request.POST.get('last_name')
+                email = request.POST.get('email')
                 user = Users.objects.create(
                     name=f"{first_name} {last_name or ''}".strip(),
                     email=email,
@@ -1240,6 +1246,19 @@ def signup_guest(request):
                 except Exception as e:
                     messages.warning(request, f'Guest account created but error sending email: {str(e)}')
                     logger.error(f'Email error: {str(e)}')
+
+                notify_admin_student_registration(
+                    registration_type="Guest Registration",
+                    details=[
+                        ("Guest ID", guest_id),
+                        ("Name", f"{first_name or ''} {middle_name or ''} {last_name or ''}".replace("  ", " ").strip()),
+                        ("Email", email),
+                        ("Phone", f"{request.POST.get('phone_code') or ''} {request.POST.get('phone_number') or ''}".strip()),
+                        ("Language", language.language_name),
+                        ("Church Affiliation", request.POST.get('church_affiliation')),
+                    ],
+                    action_path="/menu/admin/users/",
+                )
                 
                 return redirect('guest_registration_success', guest_id=guest_id)
                 
@@ -1472,6 +1491,17 @@ def signup_church_admin(request):
                         church_admin=church_admin_obj
                     )
                     request.session['registration_payment_id'] = payment.id
+                    notify_admin_student_registration(
+                        student=student,
+                        registration_type="Church Admin Registration",
+                        details=[
+                            ("Church Name", church_admin_obj.name_of_church if church_admin_obj else "N/A"),
+                            ("Church Code", church_admin_obj.code if church_admin_obj else "N/A"),
+                            ("Registration Fee", f"${float(church_admin_obj.amount or 0):.2f}"),
+                            ("Payment Status", "Pending Payment"),
+                        ],
+                        action_path="/menu/admin/church-codes",
+                    )
                     return redirect('registration_payment')
                 else:
                     # Send email and redirect to success for Church User
@@ -1506,26 +1536,15 @@ def signup_church_admin(request):
                             logger.warning(f'Email failed to send to {email}')
 
                         # Send approval request email to Super Admin
-                        try:
-                            admin_email = 'contact@byteboot.in'
-                            admin_subject = "New Church User Registration - Approval Required"
-                            admin_message = f"""Hello Admin,
-
-A new church user has registered and requires approval.
-
-Details:
-Name: {first_name} {last_name}
-Email: {email}
-Church: {church_admin_obj.name_of_church if church_admin_obj else 'N/A'}
-Church Admin: {church_admin_obj.student.first_name if (church_admin_obj and church_admin_obj.student) else 'N/A'}
-
-Please log in to the admin panel to review and approve this user.
-
-Best regards,
-Trinity Theological Seminary"""
-                            send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, [admin_email], fail_silently=True)
-                        except Exception as admin_err:
-                            logger.error(f"Failed to send admin signup notification: {admin_err}")
+                        notify_admin_student_registration(
+                            student=student,
+                            registration_type="Church User Registration (Approval Required)",
+                            details=[
+                                ("Church", church_admin_obj.name_of_church if church_admin_obj else "N/A"),
+                                ("Church Admin", church_admin_obj.student.first_name if (church_admin_obj and church_admin_obj.student) else "N/A"),
+                            ],
+                            action_path=f"/menu/students/view/{student.id}/",
+                        )
 
                         # Send approval request email to corresponding Church Admin
                         if church_admin_obj and church_admin_obj.student and church_admin_obj.student.email:
@@ -1790,16 +1809,13 @@ Administration'''
                         logger.error(f"Failed to send student confirmation email: {e}")
 
                     # Send Email to Admin
-                    try:
-                        admin_subject = 'New Student Application Received'
-                        admin_message = f'''A new student application has been submitted.
-Name: {student.first_name} {student.last_name}
-Course: {student.course_applied.course_name if student.course_applied else 'N/A'}
-
-Please login to the admin panel to review.'''
-                        send_mail(admin_subject, admin_message, settings.DEFAULT_FROM_EMAIL, ['contact@byteboot.in'], fail_silently=True)
-                    except Exception as e:
-                        logger.error(f"Failed to send admin notification email: {e}")
+                    notify_admin_payment(
+                        payment_obj,
+                        payment_status="Paid (Student Registration)",
+                        extra_details=[
+                            ("Course", student.course_applied.course_name if student.course_applied else "N/A"),
+                        ],
+                    )
 
                     if request.user.is_authenticated:
                         redirect_url = "/student/"
@@ -1828,6 +1844,15 @@ Please login to the admin panel to review.'''
                         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [church_admin.student.email], fail_silently=True)
                     except Exception as e:
                         logger.error(f"Failed to send church admin confirmation email: {e}")
+
+                    notify_admin_payment(
+                        payment_obj,
+                        payment_status="Paid (Church Admin Registration)",
+                        extra_details=[
+                            ("Church Name", church_admin.name_of_church or "N/A"),
+                            ("Church Code", church_admin.code or "N/A"),
+                        ],
+                    )
 
                     if request.user.is_authenticated:
                         redirect_url = "/church-admin/dashboard/"
@@ -1875,6 +1900,30 @@ def chatbot_api_view(request):
 
         # Generate response using Gemini AI service
         result = generate_chat_reply(user_message, history=history)
+
+        chat_student = (
+            Students.objects.filter(user=request.user).first()
+            if request.user.is_authenticated
+            else None
+        )
+        sender_name = (
+            (request.user.name or request.user.email or request.user.username)
+            if request.user.is_authenticated
+            else "Website Visitor"
+        )
+        sender_email = request.user.email if request.user.is_authenticated else None
+        notify_admin_chat_or_support(
+            action_type="AI Chatbot Message",
+            sender_name=sender_name,
+            sender_email=sender_email,
+            student=chat_student,
+            message_text=user_message,
+            extra_details=[
+                ("AI Reply", result.get("reply") or ""),
+                ("History Turns", len(history) if isinstance(history, list) else 0),
+            ],
+            action_path=f"/menu/students/view/{chat_student.id}/" if chat_student else "/menu/admin/dashboard",
+        )
 
         return JsonResponse({
             "status": "success" if result.get("success") else "partial",
