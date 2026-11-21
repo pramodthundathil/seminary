@@ -602,10 +602,22 @@ def student_subject_detail(request, subject_id):
 
         # 3. Fetch Study Materials (BookReferences) assigned to this student
         from home.models import StudentsBooks, BookReferences
-        assigned_book_ids = StudentsBooks.objects.filter(
+        assigned_book_ids = list(StudentsBooks.objects.filter(
             student=student,
             deleted_at=None
-        ).values_list('book_id', flat=True)
+        ).values_list('book_id', flat=True))
+
+        # Auto-link textbooks for this approved subject if not yet linked
+        subject_books = BookReferences.objects.filter(subject=subject, status=True, deleted_at=None)
+        missing_books = [sb for sb in subject_books if sb.id not in assigned_book_ids]
+        if missing_books:
+            for mb in missing_books:
+                StudentsBooks.objects.get_or_create(
+                    student=student,
+                    book=mb,
+                    defaults={'is_approved': True, 'created_by': request.user, 'updated_by': request.user}
+                )
+                assigned_book_ids.append(mb.id)
 
         references = BookReferences.objects.filter(
             id__in=assigned_book_ids,

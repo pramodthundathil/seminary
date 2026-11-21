@@ -6898,6 +6898,21 @@ def student_subjects_toggle_approval(request, id):
         subject.updated_by = request.user
         subject.save()
         
+        # Auto-assign textbooks when a subject is approved
+        if subject.is_approved:
+            from home.models import BookReferences, StudentsBooks
+            books = BookReferences.objects.filter(subject=subject.subject, status=True, deleted_at__isnull=True)
+            for book in books:
+                StudentsBooks.objects.get_or_create(
+                    student=subject.student,
+                    book=book,
+                    defaults={
+                        'is_approved': True,
+                        'created_by': request.user,
+                        'updated_by': request.user
+                    }
+                )
+        
         return JsonResponse({'success': True, 'message': 'Status updated successfully'})
     except StudentsSubjects.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Subject assignment not found'})
@@ -6964,6 +6979,20 @@ def student_subjects_bulk_assign(request):
                         student=student,
                         upload=upload,
                         defaults={
+                            'created_by': request.user,
+                            'updated_by': request.user
+                        }
+                    )
+                
+                # Auto-assign textbooks when a subject is assigned
+                from home.models import BookReferences, StudentsBooks
+                books = BookReferences.objects.filter(subject_id=subject_id, status=True, deleted_at__isnull=True)
+                for book in books:
+                    StudentsBooks.objects.get_or_create(
+                        student=student,
+                        book=book,
+                        defaults={
+                            'is_approved': True,
                             'created_by': request.user,
                             'updated_by': request.user
                         }
