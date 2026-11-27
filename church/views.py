@@ -24,6 +24,7 @@ from home.emails import (
     notify_admin_exam_submission,
     notify_admin_request,
     notify_admin_student_approved,
+    send_student_approval_email,
 )
 import logging
 
@@ -1805,12 +1806,13 @@ def church_student_approve(request, id):
                 logger.error(f"Failed to assign role on church admin approval: {role_err}")
 
             try:
-                subject = 'Welcome to Trinity Seminary - Registration Approved'
-                message = f'''Dear {student.first_name},\n\nYour registration has been approved by your Church Administrator.\n\nLogin Details:\nURL: https://trinityseminary.in/login\nUsername: {user.email}\nPassword: {password}\n\nIMPORTANT: Please change your password immediately after your first login.\n\nBest regards,\nAdministration'''
-                from_email = settings.DEFAULT_FROM_EMAIL
-                send_mail(subject, message, from_email, [user.email])
+                send_student_approval_email(
+                    student,
+                    temp_password=password,
+                    approved_by=f"Church Administrator ({admin.name_of_church or request.user.email})",
+                )
             except Exception as e:
-                pass # Fail silently for email block
+                logger.error(f"Error sending church user approval email: {e}")
 
             # Send notification email to Super Admin
             notify_admin_student_approved(

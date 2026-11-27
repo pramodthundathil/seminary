@@ -45,8 +45,7 @@ urlpatterns = [
     path("signout",views.signout,name="signout"),
     path("register/",views.register,name="register"),
     path("contact-us/",views.contact,name="contact-us"),
-    # path("signup_student/",views.signup_student,name="signup_student"),
-    # path("signup_student/",views.signup_student,name="signup_student"),
+    path("signup_student/",views.signup_student,name="home_signup_student"),
 
     # Admissions dropdown pages   
     path('reference-form/', views.reference_form, name='reference_form'),

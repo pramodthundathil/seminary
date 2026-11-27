@@ -33,10 +33,17 @@ from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 
 from home.emails import (
+    build_site_url,
     notify_admin_chat_or_support,
     notify_admin_payment,
     notify_admin_request,
     notify_admin_student_registration,
+    send_student_registration_email,
+    send_payment_receipt_email,
+    send_church_user_welcome_email,
+    send_church_admin_welcome_email,
+    send_church_admin_approval_request_email,
+    send_guest_welcome_email,
 )
 
 # -------------------------------
@@ -581,287 +588,9 @@ def signout(request):
     return redirect("index")
 
 def signup_student(request):
-    """
-    Handle student application form submission
-    GET: Display the registration form
-    POST: Process and save the application
-    """
-    
-    if request.method == 'POST':
-        try:
-            with transaction.atomic():
-                # Generate unique student ID based on course
-                course_id = request.POST.get('course_applied')
-                course_code = 'GEN'
-                if course_id:
-                    try:
-                        course = Courses.objects.get(id=course_id)
-                        course_code = course.course_code
-                    except Courses.DoesNotExist:
-                        pass
-                
-                # Find maximum existing count for this course code prefix
-                last_student = Students.objects.filter(student_id__startswith=f"TTS{course_code}").order_by('-student_id').first()
-                if last_student and last_student.student_id:
-                    try:
-                        last_num = int(last_student.student_id.replace(f"TTS{course_code}", ""))
-                        new_num = last_num + 1
-                    except ValueError:
-                        new_num = 1
-                else:
-                    new_num = 1
-                
-                student_id = f"TTS{course_code}{new_num:04d}"
-                print("Generated student_id:", student_id)
-                
-                # Validate required fields
-                required_fields = ['first_name', 'email', 'date_of_birth', 'gender', 
-                                 'phone_number', 'timezone', 'language']
-                missing_fields = []
-                
-                for field in required_fields:
-                    if not request.POST.get(field):
-                        missing_fields.append(field.replace('_', ' ').title())
-                
-                if missing_fields:
-                    messages.error(request, f"Missing required fields: {', '.join(missing_fields)}")
-                    return render(request, 'site_pages/student_register.html')
-                
-                # Handle file uploads
-                photo_path = None
-                certificate_paths = [None] * 5
-                
-                # Upload photo
-                if request.FILES.get('photo'):
-                    photo = request.FILES['photo']
-                    # Validate file size (max 5MB)
-                    if photo.size > 5 * 1024 * 1024:
-                        messages.error(request, 'Photo file size must be less than 5MB.')
-                        return render(request, 'site_pages/student_register.html')
-                    
-                    # Validate file extension
-                    ext = os.path.splitext(photo.name)[1].lower()
-                    if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
-                        messages.error(request, 'Photo must be in JPG, PNG, or GIF format.')
-                        return render(request, 'site_pages/student_register.html')
-                    
-                    filename = default_storage.save(f"student_photos/{student_id}_{photo.name}", photo)
-                    photo_path = filename
-                
-                # Upload certificates
-                for i in range(1, 6):
-                    cert_key = f'certificate{i}'
-                    if request.FILES.get(cert_key):
-                        cert = request.FILES[cert_key]
-                        
-                        # Validate file size (max 10MB)
-                        if cert.size > 10 * 1024 * 1024:
-                            messages.error(request, f'Certificate {i} file size must be less than 10MB.')
-                            return render(request, 'site_pages/student_register.html')
-                        
-                        # Validate file extension
-                        ext = os.path.splitext(cert.name)[1].lower()
-                        if ext not in ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx']:
-                            messages.error(request, f'Certificate {i} must be in PDF, JPG, PNG, DOC, or DOCX format.')
-                            return render(request, 'site_pages/student_register.html')
-                        
-                        filename = default_storage.save(f"student_certificates/{student_id}_cert{i}_{cert.name}", cert)
-                        certificate_paths[i-1] = filename
-                
-                # Get language instance
-                language_id = request.POST.get('language')
-                print("lang",language_id)
-                try:
-                    language = Languages.objects.get(id=language_id)
-                    print("lang",language_id)
-                except Languages.DoesNotExist:
-                    messages.error(request, 'Invalid language selection.')
-                    return render(request, 'site_pages/student_register.html')
-                
-                # Check if email already exists
-                if Students.objects.filter(email=request.POST.get('email')).exists():
-                    messages.error(request, 'An application with this email already exists.')
-                    return render(request, 'site_pages/student_register.html')
-                
-                # Get reCAPTCHA response           
-                recaptcha_response = request.POST.get('g-recaptcha-response')
-
-                try:
-                    data = {
-                        'secret': settings.RECAPTCHA_SECRET_KEY,
-                        'response': recaptcha_response
-                    }
-
-                    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data, timeout=5)
-                    result = r.json()
-
-                    # If Google says "failed"
-                    if not result.get('success'):
-                        messages.error(request, "Invalid reCAPTCHA. Please try again.")
-                        return render(request, 'site_pages/student_register.html')
-                except requests.exceptions.RequestException:
-                    # Network or API failure
-                    messages.error(request, "reCAPTCHA verification failed due to a network issue. Please try again.")
-                    return render(request, 'site_pages/student_register.html')
-
-                except ValueError:
-                    # JSON decoding failed
-                    messages.error(request, "Unexpected reCAPTCHA response. Please try again.")
-                    return render(request, 'site_pages/student_register.html')
-                
-                # Create student record
-                student = Students.objects.create(
-                    student_id=student_id,
-                    
-                    # Personal Information
-                    first_name=request.POST.get('first_name'),
-                    middle_name=request.POST.get('middle_name') or None,
-                    last_name=request.POST.get('last_name') or None,
-                    email=request.POST.get('email'),
-                    gender=request.POST.get('gender'),
-
-                    citizenship_id=request.POST.get('citizenship') or None,
-                    country_id=request.POST.get('country') or None,
-                    course_applied_id=request.POST.get('course_applied') or None,                    
-                    
-                    date_of_birth=request.POST.get('date_of_birth') or None,
-                    mrital_status=request.POST.get('mrital_status') or None,
-                    spouse_name=request.POST.get('spouse_name') or None,
-                    children=int(request.POST.get('children')) if request.POST.get('children') else None,
-                    photo=photo_path,
-                    
-                    # Contact Information
-                    phone_code=int(request.POST.get('phone_code')) if request.POST.get('phone_code') else None,
-                    phone_number=request.POST.get('phone_number') or None,
-                    mailing_address=request.POST.get('mailing_address') or None,
-                    city=request.POST.get('city') or None,
-                    state=request.POST.get('state') or None,
-                   
-                    zip_code=request.POST.get('zip_code') or None,
-                    timezone=request.POST.get('timezone'),
-                    
-                    # Educational & Ministry Background
-                    highest_education=request.POST.get('highest_education') or None,
-                
-                    starting_year=int(request.POST.get('starting_year')) if request.POST.get('starting_year') else None,
-                    language_id=language.id,
-                    ministerial_status=request.POST.get('ministerial_status') or None,
-                    church_affiliation=request.POST.get('church_affiliation') or None,
-                    
-                    # Financial Information
-                    scholarship_needed=request.POST.get('scholarship_needed') or None,
-                    currently_employed=request.POST.get('currently_employed') or None,
-                    income=request.POST.get('income') or None,
-                    affordable_amount=request.POST.get('affordable_amount') or None,
-                    
-                    # References
-                    reference_name1=request.POST.get('reference_name1') or None,
-                    reference_email1=request.POST.get('reference_email1') or None,
-                    reference_phone1=request.POST.get('reference_phone1') or None,
-                    reference_name2=request.POST.get('reference_name2') or None,
-                    reference_email2=request.POST.get('reference_email2') or None,
-                    reference_phone2=request.POST.get('reference_phone2') or None,
-                    reference_name3=request.POST.get('reference_name3') or None,
-                    reference_email3=request.POST.get('reference_email3') or None,
-                    reference_phone3=request.POST.get('reference_phone3') or None,
-                    
-                    # Certificates
-                    certificate1=certificate_paths[0],
-                    certificate2=certificate_paths[1],
-                    certificate3=certificate_paths[2],
-                    certificate4=certificate_paths[3],
-                    certificate5=certificate_paths[4],
-                    
-                    # Additional Information
-                    message=request.POST.get('message') or None,
-                    
-                    # System fields
-                    created_at=timezone.now(),
-                    updated_at=timezone.now(),
-                    status=False,  # Pending approval
-                    active=False   # Not active until approved
-                )
-                # Generate random password
-                password = get_random_string(10)   # Example: "A8sd92LkPq"
-
-                print("pass",password)
-
-                # Create user record
-                user = Users.objects.create(
-                    name=f"{student.first_name} {student.last_name or ''}".strip(),
-                    email=student.email,
-                    username=student.student_id,   # Student ID becomes username
-                    created_at=timezone.now(),
-                    updated_at=timezone.now(),
-                    is_active=False,
-                    image=photo_path,
-                )
-
-                # Set hashed password
-                user.set_password(password)
-                user.save()
-                # Send email
-                subject = "Your Student Login Details"
-                message = f"""
-                Hello {student.first_name},
-
-                Your student account has been created successfully.
-
-                Login Details:
-                Email: {student.email}
-                Temporary Password: {password}
-
-                Please log in and change your password immediately for security reasons.
-
-                Login here: {request.build_absolute_uri('/signin/')}
-
-                Best regards,
-                Trinity Theological Seminary
-                        """
-                        
-                email_sent = send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[student.email],
-                    fail_silently=False,
-                )
-                print("email sent",email_sent)
-                if email_sent:
-                    messages.success(request, f'Student created and login details sent to {student.email}')
-                    logger.info(f'Email sent successfully to {student.email}')
-                else:
-                    messages.warning(request, 'Student created but email could not be sent.')
-                    logger.warning(f'Email failed to send to {student.email}')
-
-            send_admin_notification_email(student)
-
-            return redirect('student_application_success', student_id=student_id)
-            
-           
-                
-        except Languages.DoesNotExist:
-            messages.error(request, 'Invalid language selection.')
-            return render(request, 'site_pages/student_register.html')
-            
-        except ValueError as e:
-            messages.error(request, f'Invalid data format: {str(e)}')
-            return render(request, 'site_pages/student_register.html')
-            
-        except Exception as e:
-            messages.error(request, f'An error occurred while submitting your application. Please try again.')
-            print(f"Error in student registration: {str(e)}")  # Log the error
-            return render(request, 'site_pages/student_register.html')
-    
-    # GET request - display the form
-    else:
-        context = {
-            'languages': Languages.objects.filter(status=True) if hasattr(Languages, 'status') else Languages.objects.all(),          
-            'countries': Countries.objects.all(),
-            'courses': Courses.objects.all(),
-            "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY
-        }
-        return render(request, 'site_pages/student_register.html', context)
+    """Delegate student registration to student app handler with full error handling and email notifications."""
+    from student.views import signup_student as student_app_signup
+    return student_app_signup(request)
 
 
 def student_application_success(request,  student_id):
@@ -872,38 +601,13 @@ def student_application_success(request,  student_id):
 # Optional: Email notification functions
 def send_application_confirmation_email(student):
     """
-    Send confirmation email to student after application submission
+    Send beautiful confirmation email to student after application submission
     """
-    from django.core.mail import send_mail
-    from django.conf import settings
-    
-    subject = 'Application Received - Student Registration'
-    message = f"""
-    Dear {student.first_name},
-    
-    Thank you for submitting your student application.
-    
-    Your Student ID: {student.student_id}
-    
-    We have received your application and our admissions team will review it within 3-5 business days.
-    You will receive an email notification once your application status is updated.
-    
-    If you have any questions, please contact us at admissions@yourdomain.com
-    
-    Best regards,
-    Admissions Team
-    """
-    
-    try:
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [student.email],
-            fail_silently=False,
-        )
-    except Exception as e:
-        print(f"Failed to send confirmation email: {str(e)}")
+    return send_student_registration_email(
+        student=student,
+        course=getattr(student, "course_applied", None),
+        course_fee=0.0,
+    )
 
 
 def send_admin_notification_email(student):
@@ -1034,7 +738,7 @@ def forgot_password(request):
 
         Please log in and change your password immediately for security purposes.
 
-        Login here: {request.build_absolute_uri('/signin/')}
+        Login here: {build_site_url('/signin/')}
 
         Best regards,
         Trinity Theological Seminary
@@ -1207,45 +911,14 @@ def signup_guest(request):
                 user.set_password(password)
                 user.save()
                 
-                # Send email
-                try:
-                    subject = "Your Guest Account Login Details"
-                    message = f"""
-                    Hello {first_name},
-
-                    Your guest account has been created successfully.
-
-                    Login Details:
-                    Email: {email}
-                    Username: {guest_id}
-                    Temporary Password: {password}
-
-                    Please log in and change your password immediately for security reasons.
-
-                    Login here: {request.build_absolute_uri('/signin/')}
-
-                    Best regards,
-                    Trinity Theological Seminary
-                                        """
-                    
-                    email_sent = send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[email],
-                        fail_silently=False,
-                    )
-                    
-                    if email_sent:
-                        messages.success(request, f'Guest account created successfully! Login details sent to {email}')
-                        logger.info(f'Email sent successfully to {email}')
-                    else:
-                        messages.warning(request, 'Guest account created but email could not be sent.')
-                        logger.warning(f'Email failed to send to {email}')
-                        
-                except Exception as e:
-                    messages.warning(request, f'Guest account created but error sending email: {str(e)}')
-                    logger.error(f'Email error: {str(e)}')
+                # Send beautiful themed welcome email to guest
+                email_sent = send_guest_welcome_email(user, guest_id, password)
+                if email_sent:
+                    messages.success(request, f'Guest account created successfully! Login details sent to {email}')
+                    logger.info(f'Email sent successfully to {email}')
+                else:
+                    messages.warning(request, 'Guest account created but email could not be sent.')
+                    logger.warning(f'Email failed to send to {email}')
 
                 notify_admin_student_registration(
                     registration_type="Guest Registration",
@@ -1491,6 +1164,16 @@ def signup_church_admin(request):
                         church_admin=church_admin_obj
                     )
                     request.session['registration_payment_id'] = payment.id
+
+                    # 1. Send beautiful welcome & payment email to Church Admin
+                    send_church_admin_welcome_email(
+                        church_admin_obj=church_admin_obj,
+                        student=student,
+                        temp_password=password,
+                        payment_link=build_site_url('/register/payment/'),
+                    )
+
+                    # 2. Send notification to Seminary Admin (admin@mytts.org)
                     notify_admin_student_registration(
                         student=student,
                         registration_type="Church Admin Registration",
@@ -1504,68 +1187,32 @@ def signup_church_admin(request):
                     )
                     return redirect('registration_payment')
                 else:
-                    # Send email and redirect to success for Church User
+                    # Send beautiful email and redirect to success for Church User
                     role_display = "Church User"
                     try:
-                        subject = f"Your {role_display} Account Login Details"
-                        message = f"""
-                        Hello {first_name},
-
-                        Your {role_display.lower()} account has been created successfully.
-
-                        Please wait for approval of Trinity Theological Seminary.
-
-
-                        Best regards,
-                        Trinity Theological Seminary
-                        """
-                        
-                        email_sent = send_mail(
-                            subject=subject,
-                            message=message,
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[email],
-                            fail_silently=False,
+                        # 1. Send beautiful welcome email to Church User
+                        send_church_user_welcome_email(
+                            student=student,
+                            church_admin_obj=church_admin_obj,
+                            temp_password=password,
                         )
-                        
-                        if email_sent:
-                            messages.success(request, f'{role_display} account created successfully! Login details sent to {email}')
-                            logger.info(f'Email sent successfully to {email}')
-                        else:
-                            messages.warning(request, f'{role_display} account created but email could not be sent.')
-                            logger.warning(f'Email failed to send to {email}')
+                        messages.success(request, f'{role_display} account created successfully! Details sent to {email}')
+                        logger.info(f'Church user registration email sent to {email}')
 
-                        # Send approval request email to Super Admin
+                        # 2. Send approval request email to Super Admin (admin@mytts.org)
                         notify_admin_student_registration(
                             student=student,
                             registration_type="Church User Registration (Approval Required)",
                             details=[
                                 ("Church", church_admin_obj.name_of_church if church_admin_obj else "N/A"),
+                                ("Church Code", church_admin_obj.code if church_admin_obj else "N/A"),
                                 ("Church Admin", church_admin_obj.student.first_name if (church_admin_obj and church_admin_obj.student) else "N/A"),
                             ],
                             action_path=f"/menu/students/view/{student.id}/",
                         )
 
-                        # Send approval request email to corresponding Church Admin
-                        if church_admin_obj and church_admin_obj.student and church_admin_obj.student.email:
-                            try:
-                                church_admin_email = church_admin_obj.student.email
-                                ca_subject = "New Church User Registration - Approval Required"
-                                ca_message = f"""Hello {church_admin_obj.student.first_name},
-
-A new user has registered under your church code and requires your approval.
-
-Details:
-Name: {first_name} {last_name}
-Email: {email}
-
-Please log in to your Church Admin Dashboard to review and approve this user.
-
-Best regards,
-Trinity Theological Seminary"""
-                                send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [church_admin_email], fail_silently=True)
-                            except Exception as ca_err:
-                                logger.error(f"Failed to send church admin signup notification: {ca_err}")
+                        # 3. Send approval request email to corresponding Church Admin / Pastor
+                        send_church_admin_approval_request_email(church_admin_obj, student)
                             
                     except Exception as e:
                         messages.warning(request, f'{role_display} account created but error sending email: {str(e)}')
@@ -1794,21 +1441,13 @@ def capture_registration_payment(request):
                     student.is_paid = True
                     student.save()
 
-                    # Send Email to Student
+                    # Send Official Receipt Email to Student
                     try:
-                        subject = 'Application Received - Trinity Seminary'
-                        message = f'''Dear {student.first_name},
-
-Thank you for applying to Trinity Seminary. Your application has been received and is currently under review.
-You will receive another email once your application status changes.
-
-Best regards,
-Administration'''
-                        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email], fail_silently=True)
+                        send_payment_receipt_email(payment_obj, student=student, is_registration=True)
                     except Exception as e:
                         logger.error(f"Failed to send student confirmation email: {e}")
 
-                    # Send Email to Admin
+                    # Send Email to Admin (admin@mytts.org)
                     notify_admin_payment(
                         payment_obj,
                         payment_status="Paid (Student Registration)",
@@ -1827,21 +1466,9 @@ Administration'''
                     church_admin.is_paid = True
                     church_admin.save()
 
-                    # Send welcome email for Church Admin
+                    # Send Official Receipt & Welcome Email to Church Admin
                     try:
-                        subject = "Your Church Admin Account Login Details"
-                        message = f"""
-                        Hello {church_admin.student.first_name},
-
-                        Your church admin account has been created successfully.
-
-                        Please wait for approval of Trinity Theological Seminary.
-
-
-                        Best regards,
-                        Trinity Theological Seminary
-                        """
-                        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [church_admin.student.email], fail_silently=True)
+                        send_payment_receipt_email(payment_obj, church_admin=church_admin, is_registration=True)
                     except Exception as e:
                         logger.error(f"Failed to send church admin confirmation email: {e}")
 

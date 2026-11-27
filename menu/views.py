@@ -31,7 +31,13 @@ from home.models import News, MediaLibrary
 from home.models import *
 from .forms import *
 from home.decorators import role_redirection
-from home.emails import notify_admin_student_approved
+from home.emails import (
+    notify_admin_student_approved,
+    notify_admin_payment,
+    send_payment_receipt_email,
+    notify_admin_student_registration,
+    send_student_approval_email,
+)
 from datetime import datetime, timedelta
 
 from django.views.decorators.csrf import csrf_exempt
@@ -3364,6 +3370,12 @@ def manual_mark_paid(request, student_id):
         payment.message = f"{payment.message or ''} | Manually marked paid: {payment_note}".strip(' | ')
         payment.save()
         
+    try:
+        send_payment_receipt_email(payment, student=student)
+        notify_admin_payment(payment, payment_status="Manually Marked Paid by Admin")
+    except Exception as e:
+        logger.error(f"Error sending manual mark paid notifications for student {student.id}: {e}")
+
     messages.success(request, "Student registration marked as PAID successfully.")
     return redirect('student_detail', student_id=student_id)
 
@@ -3409,6 +3421,21 @@ def manual_mark_payment_paid(request, payment_id):
         student.is_paid = True
         student.save()
         
+    # If this was a church admin payment, update church admin status
+    if payment.church_admin:
+        try:
+            ca = payment.church_admin
+            ca.is_paid = True
+            ca.save()
+        except Exception as e:
+            logger.error(f"Error activating church admin on payment mark paid: {e}")
+
+    try:
+        send_payment_receipt_email(payment, student=payment.student, church_admin=payment.church_admin)
+        notify_admin_payment(payment, payment_status="Manually Marked Paid by Admin")
+    except Exception as e:
+        logger.error(f"Error sending manual mark payment paid notifications for payment {payment.id}: {e}")
+
     messages.success(request, "Transaction marked as PAID successfully.")
     if payment.student:
         return redirect('student_detail', student_id=payment.student.id)
@@ -3513,51 +3540,36 @@ def student_approve_action(request, student_id):
             except Exception as role_err:
                 print(f"Failed to assign role on superadmin approval: {role_err}")
 
-            # Send Approval Email with Credentials
+            # Send Beautiful Themed Approval Email with Credentials
             try:
-                subject = 'Welcome to Trinity Seminary - Registration Approved'
-                message = f'''Dear {student.first_name},
-
-Your registration has been approved. You can now login to the portal.
-
-Login Details:
-URL: https://trinityseminary.in/login (or your login URL)
-Username: {user.email}
-Password: {password}
-
-IMPORTANT: Please change your password immediately after your first login.
-
-Best regards,
-Administration'''
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [user.email]
-                send_mail(subject, message, from_email, recipient_list)
+                send_student_approval_email(student, temp_password=password, approved_by="Administration")
             except Exception as e:
-                print(f"Email sending failed: {str(e)}")
+                logger.error(f"Student approval email sending failed: {str(e)}")
 
-            # Notify both Super Admin and Church Admin if it is a church user
-            if user.church_admin:
-                # 1. Notify Super Admin
+            # Notify Super Admin (admin@mytts.org)
+            try:
                 notify_admin_student_approved(
                     student,
                     approved_by="Super Admin",
-                    is_church_user=True,
+                    is_church_user=bool(user.church_admin),
                 )
+            except Exception as admin_err:
+                logger.error(f"Failed to send admin student approval notification: {str(admin_err)}")
 
-                # 2. Notify Corresponding Church Admin
-                if user.church_admin.student and user.church_admin.student.email:
-                    try:
-                        ca_email = user.church_admin.student.email
-                        ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
-                        ca_message = f"""Hello {user.church_admin.student.first_name},
+            # Notify Corresponding Church Admin if applicable
+            if user.church_admin and user.church_admin.student and user.church_admin.student.email:
+                try:
+                    ca_email = user.church_admin.student.email
+                    ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                    ca_message = f"""Hello {user.church_admin.student.first_name},
 
 The registration for {student.first_name} {student.last_name} ({user.email}) under your church code has been approved by the Administration.
 
 Best regards,
 Trinity Theological Seminary"""
-                        send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
-                    except Exception as ca_err:
-                        print(f"Failed to send church admin approval notification: {str(ca_err)}")
+                    send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
+                except Exception as ca_err:
+                    logger.error(f"Failed to send church admin approval notification: {str(ca_err)}")
         else:
             print(f"Warning: No user linked or created for student {student.id}")
         # ----------------END APPROVAL LOGIC----------------
@@ -3914,51 +3926,36 @@ def student_toggle_approval(request, student_id):
                     except Exception as role_err:
                         print(f"Failed to assign role on toggle approval: {role_err}")
 
-                    # Send Approval Email with Credentials
+                    # Send Beautiful Themed Approval Email with Credentials
                     try:
-                        subject = 'Welcome to Trinity Seminary - Registration Approved'
-                        message = f'''Dear {student.first_name},
-
-Your registration has been approved. You can now login to the portal.
-
-Login Details:
-URL: https://trinityseminary.in/login (or your login URL)
-Username: {user.email}
-Password: {password}
-
-IMPORTANT: Please change your password immediately after your first login.
-
-Best regards,
-Administration'''
-                        from_email = settings.DEFAULT_FROM_EMAIL
-                        recipient_list = [user.email]
-                        send_mail(subject, message, from_email, recipient_list)
+                        send_student_approval_email(student, temp_password=password, approved_by="Super Admin")
                     except Exception as e:
-                        print(f"Email sending failed: {str(e)}")
+                        logger.error(f"Student approval email sending failed: {str(e)}")
 
-                    # Notify both Super Admin and Church Admin if it is a church user
-                    if user.church_admin:
-                        # 1. Notify Super Admin
+                    # Notify Super Admin (admin@mytts.org)
+                    try:
                         notify_admin_student_approved(
                             student,
                             approved_by="Super Admin",
-                            is_church_user=True,
+                            is_church_user=bool(user.church_admin),
                         )
+                    except Exception as admin_err:
+                        logger.error(f"Failed to send admin student approval notification: {str(admin_err)}")
 
-                        # 2. Notify Corresponding Church Admin
-                        if user.church_admin.student and user.church_admin.student.email:
-                            try:
-                                ca_email = user.church_admin.student.email
-                                ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
-                                ca_message = f"""Hello {user.church_admin.student.first_name},
+                    # Notify Corresponding Church Admin if applicable
+                    if user.church_admin and user.church_admin.student and user.church_admin.student.email:
+                        try:
+                            ca_email = user.church_admin.student.email
+                            ca_subject = f"Church User Approved - {student.first_name} {student.last_name}"
+                            ca_message = f"""Hello {user.church_admin.student.first_name},
 
 The registration for {student.first_name} {student.last_name} ({user.email}) under your church code has been approved by the Administration.
 
 Best regards,
 Trinity Theological Seminary"""
-                                send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
-                            except Exception as ca_err:
-                                print(f"Failed to send church admin approval notification: {str(ca_err)}")
+                            send_mail(ca_subject, ca_message, settings.DEFAULT_FROM_EMAIL, [ca_email], fail_silently=True)
+                        except Exception as ca_err:
+                            logger.error(f"Failed to send church admin approval notification: {str(ca_err)}")
                 else:
                     print(f"Warning: No user linked or created for student {student.id}")
 
@@ -6550,6 +6547,23 @@ def church_admin_toggle_payment(request, admin_id):
         admin.is_paid = not admin.is_paid
         admin.save()
         status = "Paid/Waived" if admin.is_paid else "Unpaid"
+
+        # Notify Seminary Admin (admin@mytts.org)
+        try:
+            notify_admin_student_registration(
+                student=admin.student,
+                registration_type=f"Church Admin Payment Status ({status})",
+                details=[
+                    ("Church Name", admin.name_of_church or "N/A"),
+                    ("Church Code", admin.code or "N/A"),
+                    ("Payment Status", status),
+                    ("Max Users", str(admin.max_user_no or "N/A")),
+                ],
+                action_path="/menu/admin/church-codes",
+            )
+        except Exception as mail_err:
+            logger.error(f"Error sending church admin payment toggle notification: {mail_err}")
+
         messages.success(request, f"Payment status updated to {status}.")
     except Exception as e:
         messages.error(request, f"Error updating payment status: {str(e)}")

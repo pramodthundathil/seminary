@@ -65,12 +65,15 @@ from home.models import (
 
 from home.permissions import student_only, student_or_church_user
 from home.emails import (
+    build_site_url,
     notify_admin_assignment_submission,
     notify_admin_chat_or_support,
     notify_admin_exam_submission,
     notify_admin_payment,
     notify_admin_request,
     notify_admin_student_registration,
+    send_student_registration_email,
+    send_payment_receipt_email,
 )
 
 # Set up logger
@@ -2500,7 +2503,7 @@ def make_payment(request):
         )
         notify_admin_payment(payment_obj, payment_status="Submitted (Pending Verification)")
 
-        return render(request, "payment_success.html")
+        return render(request, "student/payment_success.html")
 
     return render(request, "make_payment.html")
 
@@ -2696,8 +2699,9 @@ def capture_paypal_order(request):
                 
                 try:
                     send_admin_payment_notification(payment_obj)
+                    send_payment_receipt_email(payment_obj, student=payment_obj.student)
                 except Exception as e:
-                    logger.error(f"Failed to send admin notification: {e}")
+                    logger.error(f"Failed to send admin/student payment notification: {e}")
 
                 if payment_obj.student:
                     try:
@@ -2763,8 +2767,9 @@ def process_direct_payment(request):
         
         try:
             send_admin_payment_notification(payment_obj)
+            send_payment_receipt_email(payment_obj, student=payment_obj.student)
         except Exception as e:
-            logger.error(f"Failed to send admin notification: {e}")
+            logger.error(f"Failed to send admin/student payment notification: {e}")
 
         # Mark student paid
         if payment_obj.student:
@@ -2867,20 +2872,13 @@ def capture_retest_payment(request):
             
             try:
                 send_admin_payment_notification(payment_obj)
+                send_payment_receipt_email(
+                    payment_obj,
+                    student=student_exam.student,
+                    extra_info=f"Retest Exam: {student_exam.exam.exam_name}",
+                )
             except Exception as e:
-                logger.error(f"Failed to send admin notification: {e}")
-            
-            # 3. Send approval email to student
-            subject = "Retest Exam Request Approved"
-            message = f"Hello {student_exam.student.first_name},\n\nYour payment of ${student_exam.retest_fee} has been received and your retest request for the exam '{student_exam.exam.exam_name}' has been approved.\n\nYou can now take the exam at the scheduled time.\n\nBest regards,\nTrinity Theological Seminary"
-            
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [student_exam.student.email],
-                fail_silently=True
-            )
+                logger.error(f"Failed to send retest payment notifications: {e}")
             
             return JsonResponse({"status": "success", "details": capture_json})
             
@@ -2917,190 +2915,173 @@ def signup_student(request):
     # Aliased to student_register logic
     return student_register(request)
 
+def get_student_register_context():
+    """Helper to populate dropdowns and keys for the student registration template."""
+    return {
+        "countries": Countries.objects.all().order_by("name"),
+        "courses": Courses.objects.filter(status=1).order_by("id") if hasattr(Courses, "status") else Courses.objects.all(),
+        "languages": Languages.objects.filter(deleted_at__isnull=True).order_by("language_name"),
+        "RECAPTCHA_SITE_KEY": getattr(settings, "RECAPTCHA_SITE_KEY", ""),
+        "timezones": pytz.common_timezones,
+    }
+
+
 def student_register(request):
     """
-    New admission form for students with full error handling
+    Admission registration form for students with complete validation,
+    atomic transaction safety, branded student welcome emails, and admin alerts.
     """
-    
-    # Debug logging
-    logger.info(f"Request method: {request.method}")  
-    # Determine the user (if logged in)
-    user_obj = request.user if request.user.is_authenticated else None
-    
+    logger.info("student_register view reached - method: %s", request.method)
+
     if request.method == "POST":
-        logger.info(f"POST data received: {list(request.POST.keys())}")
-        logger.info(f"FILES received: {list(request.FILES.keys())}")
+        logger.info("POST keys received: %s", list(request.POST.keys()))
+
+        first_name = (request.POST.get("first_name") or "").strip()
+        middle_name = (request.POST.get("middle_name") or "").strip()
+        last_name = (request.POST.get("last_name") or "").strip()
+        email = (request.POST.get("email") or "").strip().lower()
+        gender = request.POST.get("gender")
+        citizenship_str = request.POST.get("citizenship")
+        phone_code_raw = request.POST.get("phone_code")
+        phone = (request.POST.get("phone_number") or "").strip()
+        dob_raw = request.POST.get("date_of_birth")
+        marital_status = request.POST.get("mrital_status")
+        spouse_name = (request.POST.get("spouse_name") or "").strip()
+        children_raw = request.POST.get("children")
+        mailing_address = (request.POST.get("mailing_address") or "").strip()
+        city = (request.POST.get("city") or "").strip()
+        state = (request.POST.get("state") or "").strip()
+        country_str = request.POST.get("country")
+        zipcode = (request.POST.get("zip_code") or "").strip()
+        timezone_str = request.POST.get("timezone")
+        education = request.POST.get("highest_education")
+        course_str = request.POST.get("course_applied")
+        language = request.POST.get("language")
+        starting_year_raw = request.POST.get("starting_year")
+        ministerial_status = request.POST.get("ministerial_status")
+        church = (request.POST.get("church_affiliation") or "").strip()
+        scholarship = request.POST.get("scholarship_needed")
+        employed = request.POST.get("currently_employed")
+        income = request.POST.get("income")
+        afford = request.POST.get("affordable_amount")
+        message = (request.POST.get("message") or "").strip()
+
+        # References
+        ref1_name = (request.POST.get("reference_name1") or "").strip()
+        ref1_email = (request.POST.get("reference_email1") or "").strip()
+        ref1_phone = (request.POST.get("reference_phone1") or "").strip()
+        ref2_name = (request.POST.get("reference_name2") or "").strip()
+        ref2_email = (request.POST.get("reference_email2") or "").strip()
+        ref2_phone = (request.POST.get("reference_phone2") or "").strip()
+        ref3_name = (request.POST.get("reference_name3") or "").strip()
+        ref3_email = (request.POST.get("reference_email3") or "").strip()
+        ref3_phone = (request.POST.get("reference_phone3") or "").strip()
 
         # -------------------------------
-        # READ FORM DATA SAFELY
+        # 1. Basic Required Fields Check
         # -------------------------------
-        try:
-            first_name = request.POST.get("first_name")
-            middle_name = request.POST.get("middle_name")
-            last_name = request.POST.get("last_name")            
-            email = request.POST.get("email")
-            gender = request.POST.get("gender")
-            citizenship_str = request.POST.get("citizenship")
-            phone_code = request.POST.get("phone_code") # Changed from country_code
-            phone = request.POST.get("phone_number") # Changed from phone
-            dob = request.POST.get("date_of_birth") # Changed from dob
-            marital_status = request.POST.get("mrital_status") # Changed from marital_status (template uses mrital_status)
-            spouse_name = request.POST.get("spouse_name")
-            children = request.POST.get("children")
-            mailing_address = request.POST.get("mailing_address")
-            city = request.POST.get("city")
-            state = request.POST.get("state")
-            country_str = request.POST.get("country")
-            zipcode = request.POST.get("zip_code") # Changed from zipcode
-            timezone_str = request.POST.get("timezone")
-            education = request.POST.get("highest_education") # Changed from education
-            course_str = request.POST.get("course_applied") # Changed from course
-            language = request.POST.get("language")
-            starting_year = request.POST.get("starting_year") # Changed from start_year
-            ministerial_status = request.POST.get("ministerial_status")
-            church = request.POST.get("church_affiliation") # Changed from church
-            scholarship = request.POST.get("scholarship_needed") # Changed from scholarship
-            employed = request.POST.get("currently_employed") # Changed from employed
-            income = request.POST.get("income")
-            afford = request.POST.get("affordable_amount") # Changed from afford
-            message = request.POST.get("message")
-
-            # References
-            ref1_name = request.POST.get("reference_name1") # Changed from ref1_name
-            ref1_email = request.POST.get("reference_email1") # Changed from ref1_email
-            ref1_phone = request.POST.get("reference_phone1") # Changed from ref1_phone
-            ref2_name = request.POST.get("reference_name2")
-            ref2_email = request.POST.get("reference_email2")
-            ref2_phone = request.POST.get("reference_phone2")
-            ref3_name = request.POST.get("reference_name3")
-            ref3_email = request.POST.get("reference_email3")
-            ref3_phone = request.POST.get("reference_phone3")
-
-            logger.info("Form data read successfully")
-
-        except Exception as e:
-            logger.error(f"Error reading form fields: {e}", exc_info=True)
-            messages.error(request, f"Error reading form fields: {e}")
-            return render(request, "site_pages/register.html")
+        if not first_name or not email:
+            messages.error(request, "First Name and Email are required.")
+            return render(request, "site_pages/student_register.html", get_student_register_context())
 
         # -------------------------------
-        # CONVERT STRING VALUES TO OBJECTS
+        # 2. Check Existing Email in DB
         # -------------------------------
-        try:         
-            if children == '':
-                children = None
-            # Convert citizenship string (ID) to Country OBJECT
-            citizenship_obj = None
-            if citizenship_str:
+        if Users.objects.filter(email=email).exists():
+            messages.error(request, "An account with this email already exists. Please log in or use a different email.")
+            return render(request, "site_pages/student_register.html", get_student_register_context())
+
+        if Students.objects.filter(email=email).exists():
+            messages.error(request, "A student application with this email already exists. Please contact admissions.")
+            return render(request, "site_pages/student_register.html", get_student_register_context())
+
+        # -------------------------------
+        # 3. Clean and Sanitize Types
+        # -------------------------------
+        clean_phone_code = None
+        if phone_code_raw:
+            digits_only = re.sub(r"[^\d]", "", str(phone_code_raw))
+            if digits_only:
                 try:
-                    citizenship_obj = Countries.objects.get(id=int(citizenship_str))
-                    logger.info(f" Citizenship converted: {citizenship_str} -> {citizenship_obj.name}")
-                except (Countries.DoesNotExist, ValueError):
-                    logger.warning(f" Citizenship not found: {citizenship_str}")
-            
-            # Convert country string (ID) to Country OBJECT
-            country_obj = None
-            if country_str:
-                try:
-                    country_obj = Countries.objects.get(id=int(country_str))
-                    logger.info(f"Country converted: {country_str} -> {country_obj.name}")
-                except (Countries.DoesNotExist, ValueError):
-                    logger.warning(f"Country not found: {country_str}")
-            
-            # Convert course string (ID) to Course OBJECT
-            course_obj = None
-            if course_str:
-                try:
-                    course_obj = Courses.objects.get(id=int(course_str))
-                    logger.info(f"Course converted: {course_str} -> {course_obj.course_name}")
-                except Courses.DoesNotExist:
-                    logger.warning(f"Course not found: {course_str}")
-                    messages.warning(request, f"Course ID '{course_str}' not found.")
+                    clean_phone_code = int(digits_only)
+                except (ValueError, TypeError):
+                    clean_phone_code = None
 
-        except Exception as e:
-            logger.error(f" Error converting values to objects: {e}", exc_info=True)
-            messages.error(request, f"Error processing form data: {e}")
-            return render(request, "site_pages/register.html")
+        clean_starting_year = None
+        if starting_year_raw:
+            sy_digits = str(starting_year_raw).strip()
+            if sy_digits.isdigit():
+                clean_starting_year = int(sy_digits)
+
+        clean_children = None
+        if children_raw:
+            ch_digits = str(children_raw).strip()
+            if ch_digits.isdigit():
+                clean_children = int(ch_digits)
+
+        clean_dob = None
+        if dob_raw and str(dob_raw).strip():
+            clean_dob = str(dob_raw).strip()
 
         # -------------------------------
-        # FILE UPLOAD HANDLING
+        # 4. Resolve Foreign Keys
         # -------------------------------
-        try:
-            profile_pic = request.FILES.get("photo")
-            cert1 = request.FILES.get("certificate1")
-            cert2 = request.FILES.get("certificate2")
-            cert3 = request.FILES.get("certificate3")
-            cert4 = request.FILES.get("certificate4")
-            cert5 = request.FILES.get("certificate5")
-            
-            logger.info(f"Files received - Profile: {bool(profile_pic)}, Certs: {bool(cert1)}, {bool(cert2)}, {bool(cert3)}, {bool(cert4)}, {bool(cert5)}")
-
-        except Exception as e:
-            logger.error(f" File upload error: {e}", exc_info=True)
-            messages.error(request, f"File upload error: {e}")
-            return render(request, "site_pages/new_admission_form.html")
-
-        # Function to save file
-        def save_file(f):
+        citizenship_obj = None
+        if citizenship_str:
             try:
-                if not f:
-                    return None
+                citizenship_obj = Countries.objects.filter(id=int(citizenship_str)).first()
+            except (ValueError, TypeError):
+                citizenship_obj = None
 
-                from django.core.files.storage import default_storage
-                file_path = f"uploads/students/{get_random_string(8)}_{f.name}"
-                saved_path = default_storage.save(file_path, f)
-                logger.info(f"File saved to storage: {saved_path}")
-                return saved_path
+        country_obj = None
+        if country_str:
+            try:
+                country_obj = Countries.objects.filter(id=int(country_str)).first()
+            except (ValueError, TypeError):
+                country_obj = None
 
-            except Exception as e:
-                logger.error(f" Error saving file '{f.name}': {e}", exc_info=True)
-                messages.error(request, f"Error saving file '{f.name}': {e}")
+        course_obj = None
+        if course_str:
+            try:
+                course_obj = Courses.objects.filter(id=int(course_str)).first()
+            except (ValueError, TypeError):
+                course_obj = None
+
+        lang_obj = None
+        if language:
+            try:
+                lang_obj = Languages.objects.filter(id=int(language)).first()
+            except (ValueError, TypeError):
+                lang_obj = None
+
+        # -------------------------------
+        # 5. File Uploads (Storage)
+        # -------------------------------
+        from django.core.files.storage import default_storage
+
+        def save_uploaded_file(file_obj, prefix):
+            if not file_obj:
+                return None
+            try:
+                unique_name = f"uploads/students/{get_random_string(8)}_{file_obj.name}"
+                return default_storage.save(unique_name, file_obj)
+            except Exception as up_err:
+                logger.error("Error saving file %s: %s", getattr(file_obj, "name", "unknown"), up_err)
                 return None
 
-        # Try saving all files
+        photo_path = save_uploaded_file(request.FILES.get("photo"), "photo")
+        c1 = save_uploaded_file(request.FILES.get("certificate1"), "cert1")
+        c2 = save_uploaded_file(request.FILES.get("certificate2"), "cert2")
+        c3 = save_uploaded_file(request.FILES.get("certificate3"), "cert3")
+        c4 = save_uploaded_file(request.FILES.get("certificate4"), "cert4")
+        c5 = save_uploaded_file(request.FILES.get("certificate5"), "cert5")
+
+        # -------------------------------
+        # 6. Generate Unique Student ID
+        # -------------------------------
+        course_code = (course_obj.course_code or "GEN").strip().upper() if course_obj else "GEN"
         try:
-            photo_path = save_file(profile_pic)
-            c1 = save_file(cert1)
-            c2 = save_file(cert2)
-            c3 = save_file(cert3)
-            c4 = save_file(cert4)
-            c5 = save_file(cert5)
-            
-            logger.info("All files processed")
-
-        except Exception as e:
-            logger.error(f" Error processing uploaded files: {e}", exc_info=True)
-            messages.error(request, f"Error processing uploaded files: {e}")
-            return render(request, "site_pages/new_admission_form.html")
-
-        # -------------------------------
-        # LANGUAGE FOREIGN KEY
-        # -------------------------------
-        try:
-            lang_obj = None
-            if language:
-                # lang_obj = Languages.objects.filter(language_name__icontains=language).first()
-                lang_obj = Languages.objects.filter(id=language).first()
-                if lang_obj:
-                    logger.info(f" Language lookup: {lang_obj.language_name} (ID: {lang_obj.id})")
-                else:
-                    logger.warning(f" Language not found: {language}")
-
-        except Exception as e:
-            logger.error(f" Language lookup error: {e}", exc_info=True)
-            messages.error(request, f"Language lookup error: {e}")
-            lang_obj = None
-
-        # -------------------------------
-        # GENERATE STUDENT ID
-        # -------------------------------
-        try:
-            course_code = 'GEN'
-            if 'course_obj' in locals() and course_obj:
-                course_code = course_obj.course_code
-                
-            # Find maximum existing count for this course code prefix
-            last_student = Students.objects.filter(student_id__startswith=f"TTS{course_code}").order_by('-student_id').first()
+            last_student = Students.objects.filter(student_id__startswith=f"TTS{course_code}").order_by("-student_id").first()
             if last_student and last_student.student_id:
                 try:
                     last_num = int(last_student.student_id.replace(f"TTS{course_code}", ""))
@@ -3109,407 +3090,170 @@ def student_register(request):
                     new_num = 1
             else:
                 new_num = 1
-            
             student_id = f"TTS{course_code}{new_num:04d}"
-            logger.info(f"Generated student ID: {student_id}")
-            
-        except Exception as e:
-            logger.error(f" Error generating student ID: {e}", exc_info=True)
-            messages.error(request, f"Error generating student ID: {e}")
-            student_id = "STD-000000"
+        except Exception:
+            student_id = f"TTS{course_code}{random.randint(1000, 9999)}"
 
-        # -------------------------------
-        # USER CREATION & VALIDATION
-        # -------------------------------
-        email = request.POST.get('email')
-        
-        if Users.objects.filter(email=email).exists():
-            messages.error(request, "A user with this email already exists. Please login or use a different email.")
-            return render(request, "site_pages/student_register.html")
-            
-        if Students.objects.filter(email=email).exists():
-             messages.error(request, "A student application with this email already exists.")
-             return render(request, "site_pages/student_register.html")
-
-        # Create System User
-        user_obj = None
+        # -------------------------------------------------------------
+        # 7. Atomic User & Student Creation (Rollback Together on Failure)
+        # -------------------------------------------------------------
         temp_password = get_random_string(10)
+
         try:
             with transaction.atomic():
+                # A. Create System User
                 user_obj = Users()
                 user_obj.name = f"{first_name} {last_name}".strip()
                 user_obj.email = email
-                user_obj.username = email
+                user_obj.username = student_id
                 user_obj.set_password(temp_password)
-                user_obj.is_active = True  # Enable login for payment redirection
+                user_obj.is_active = True
                 user_obj.created_at = timezone.now()
                 user_obj.updated_at = timezone.now()
+                if photo_path:
+                    user_obj.image = photo_path
                 user_obj.save()
-                
-                # Assign Student Role
-                student_role = Roles.objects.filter(name__iexact='Student').first()
+
+                student_role = Roles.objects.filter(name__iexact="Student").first()
                 if student_role:
                     RoleUsers.objects.create(user=user_obj, role=student_role)
-                else:
-                    logger.error("Role 'student' not found in database.")
 
-        except Exception as e:
-            logger.error(f"Error creating user for student: {e}", exc_info=True)
-            messages.error(request, "Error creating user account. Please try again.")
-            return render(request, "site_pages/student_register.html")
+                # B. Create Student Record
+                student = Students.objects.create(
+                    student_id=student_id,
+                    user=user_obj,
+                    first_name=first_name,
+                    middle_name=middle_name or None,
+                    last_name=last_name or None,
+                    email=email,
+                    gender=gender or None,
+                    citizenship=citizenship_obj,
+                    phone_code=clean_phone_code,
+                    phone_number=phone or None,
+                    date_of_birth=clean_dob,
+                    mrital_status=marital_status or None,
+                    spouse_name=spouse_name or None,
+                    children=clean_children,
+                    mailing_address=mailing_address or None,
+                    city=city or None,
+                    state=state or None,
+                    country=country_obj,
+                    zip_code=zipcode or None,
+                    timezone=timezone_str or None,
+                    highest_education=education or None,
+                    course_applied=course_obj,
+                    language=lang_obj,
+                    starting_year=clean_starting_year,
+                    ministerial_status=ministerial_status or None,
+                    church_affiliation=church or None,
+                    scholarship_needed=scholarship or None,
+                    currently_employed=employed or None,
+                    income=income or None,
+                    affordable_amount=afford or None,
+                    message=message or None,
 
-        # -------------------------------
-        # SAVE INTO DATABASE
-        # -------------------------------
-        try:
-            student = Students.objects.create(
-                student_id=student_id,
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                user=user_obj, # Link created user
-                email=email,
-                gender=gender,
-                citizenship=citizenship_obj,  # Pass OBJECT not string/ID
-                phone_code=phone_code.replace("+", "") if phone_code else None,
-                phone_number=phone,
-                date_of_birth=dob,
-                mrital_status=marital_status,
-                spouse_name=spouse_name,
-                children=children,
-                mailing_address=mailing_address,
-                city=city,
-                state=state,
-                country=country_obj,  # Pass OBJECT not string/ID
-                zip_code=zipcode,
-                timezone=timezone_str,
-                highest_education=education,
-                course_applied=course_obj,  # Pass OBJECT not string/ID
-                language=lang_obj,
-                starting_year=starting_year,
-                ministerial_status=ministerial_status,
-                church_affiliation=church,
-                scholarship_needed=scholarship,
-                currently_employed=employed,
-                income=income,
-                affordable_amount=afford,
-                message=message,
+                    # References
+                    reference_name1=ref1_name or None,
+                    reference_email1=ref1_email or None,
+                    reference_phone1=ref1_phone or None,
+                    reference_name2=ref2_name or None,
+                    reference_email2=ref2_email or None,
+                    reference_phone2=ref2_phone or None,
+                    reference_name3=ref3_name or None,
+                    reference_email3=ref3_email or None,
+                    reference_phone3=ref3_phone or None,
 
-                # References
-                reference_name1=ref1_name,
-                reference_email1=ref1_email,
-                reference_phone1=ref1_phone,
-
-                reference_name2=ref2_name,
-                reference_email2=ref2_email,
-                reference_phone2=ref2_phone,
-
-                reference_name3=ref3_name,
-                reference_email3=ref3_email,
-                reference_phone3=ref3_phone,
-
-                # Files
-                photo=photo_path,
-                certificate1=c1,
-                certificate2=c2,
-                certificate3=c3,
-                certificate4=c4,
-                certificate5=c5,
-                is_paid=False,
-            )
-            
-            logger.info(f"Student saved successfully!")
-            logger.info(f"Database ID: {student.id}")
-            logger.info(f"Student ID: {student.student_id}")
-
-            course_fee = course_obj.fees if course_obj and course_obj.fees else 0.00
-
-            if course_fee > 0.00:
-                # Create a pending payment
-                from home.models import Payments
-                payment = Payments.objects.create(
-                    name=f"{student.first_name} {student.last_name or ''}".strip(),
-                    email=student.email,
-                    phone=student.phone_number,
-                    person_group="student",
-                    amount=course_fee,
+                    # Uploaded Certificates & Photo
+                    photo=photo_path,
+                    certificate1=c1,
+                    certificate2=c2,
+                    certificate3=c3,
+                    certificate4=c4,
+                    certificate5=c5,
                     is_paid=False,
-                    student=student
+                    status=False,
+                    active=False,
                 )
-                request.session['registration_payment_id'] = payment.id
 
-                # Send Email to Student with credentials and payment details
-                try:
-                    subject = "Your Student Registration & Payment Details"
-                    payment_link = request.build_absolute_uri('/register/payment/')
-                    
-                    html_content = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                    <style>
-                      body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }}
-                      .email-container {{ max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e5e7eb; }}
-                      .header {{ background: linear-gradient(135deg, #1e3a8a, #0d9488); padding: 30px 20px; text-align: center; color: #ffffff; }}
-                      .header h1 {{ margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; }}
-                      .header p {{ margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }}
-                      .content {{ padding: 30px 25px; color: #374151; line-height: 1.6; }}
-                      .content h2 {{ color: #1e3a8a; font-size: 18px; margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; }}
-                      .details-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
-                      .details-table th, .details-table td {{ padding: 12px; text-align: left; border-bottom: 1px solid #f3f4f6; }}
-                      .details-table th {{ background-color: #f9fafb; font-weight: 600; color: #4b5563; width: 40%; }}
-                      .details-table td {{ color: #1f2937; }}
-                      .credentials-box {{ background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 15px; margin: 20px 0; }}
-                      .credentials-box p {{ margin: 5px 0; font-size: 14px; color: #065f46; }}
-                      .btn-container {{ text-align: center; margin: 30px 0 10px 0; }}
-                      .btn {{ display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s; }}
-                      .btn:hover {{ background-color: #059669; }}
-                      .footer {{ background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }}
-                    </style>
-                    </head>
-                    <body>
-                      <div class="email-container">
-                        <div class="header">
-                          <h1>Trinity Theological Seminary</h1>
-                          <p>Student Registration & Payment Details</p>
-                        </div>
-                        <div class="content">
-                          <h2>Welcome, {student.first_name}!</h2>
-                          <p>Thank you for registering at Trinity Theological Seminary. Your student application has been successfully created. Please find your registration details and login credentials below.</p>
-                          
-                          <table class="details-table">
-                            <tr>
-                              <th>Student ID</th>
-                              <td>{student.student_id}</td>
-                            </tr>
-                            <tr>
-                              <th>Course Applied</th>
-                              <td>{course_obj.course_name if course_obj else 'N/A'}</td>
-                            </tr>
-                            <tr>
-                              <th>Registration Fee</th>
-                              <td><strong>${course_fee:.2f}</strong></td>
-                            </tr>
-                            <tr>
-                              <th>Payment Status</th>
-                              <td><span style="color: #ef4444; font-weight: bold;">Pending Payment</span></td>
-                            </tr>
-                          </table>
-                          
-                          <div class="credentials-box">
-                            <p><strong>Your Account Login Credentials:</strong></p>
-                            <p><strong>Username / Email:</strong> {student.email}</p>
-                            <p><strong>Temporary Password:</strong> <code style="font-family: monospace; font-size: 15px; font-weight: bold; background-color: #d1fae5; padding: 2px 6px; border-radius: 4px;">{temp_password}</code></p>
-                            <p style="font-size: 12px; margin-top: 8px; color: #047857;"><em>Note: You can use these details to log in to complete your payment or check your application status.</em></p>
-                          </div>
+                course_fee = float(course_obj.fees or 0.0) if (course_obj and course_obj.fees) else 0.0
 
-                          <p>To finalize your registration, please complete the payment using the link below:</p>
-                          
-                          <div class="btn-container">
-                            <a href="{payment_link}" class="btn" style="color: #ffffff;">Proceed to Payment</a>
-                          </div>
-                        </div>
-                        <div class="footer">
-                          <p>&copy; 2026 Trinity Theological Seminary. All rights reserved.</p>
-                          <p>This is an automated email, please do not reply directly to this message.</p>
-                        </div>
-                      </div>
-                    </body>
-                    </html>
-                    """
-                    
-                    text_content = f"""
-Dear {student.first_name},
-
-Thank you for registering at Trinity Theological Seminary. Your application has been received.
-
-Registration Details:
-Student ID: {student.student_id}
-Course Applied: {course_obj.course_name if course_obj else 'N/A'}
-Registration Fee: ${course_fee:.2f}
-Payment Status: Pending Payment
-
-Your Account Login Credentials:
-Username / Email: {student.email}
-Temporary Password: {temp_password}
-
-To complete your registration, please proceed to the payment page:
-{payment_link}
-
-Best regards,
-Trinity Theological Seminary
-                    """
-                    
-                    send_mail(
-                        subject=subject,
-                        message=text_content,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[student.email],
-                        html_message=html_content,
-                        fail_silently=False
+                if course_fee > 0.0:
+                    # Paid Course -> Create Pending Payment & Redirect
+                    from home.models import Payments
+                    payment = Payments.objects.create(
+                        name=f"{student.first_name} {student.last_name or ''}".strip(),
+                        email=student.email,
+                        phone=student.phone_number,
+                        person_group="student",
+                        amount=course_fee,
+                        is_paid=False,
+                        student=student,
                     )
-                    logger.info(f"Registration & payment email sent to {student.email}")
-                except Exception as e:
-                    logger.error(f"Failed to send student registration email: {e}")
+                    request.session["registration_payment_id"] = payment.id
 
-                notify_admin_student_registration(
-                    student=student,
-                    registration_type="Student Registration",
-                    details=[
-                        ("Registration Fee", f"${float(course_fee):.2f}"),
-                        ("Payment Status", "Pending Payment"),
-                    ],
-                    action_path=f"/menu/students/view/{student.id}/",
-                )
-
-                return redirect("registration_payment")
-            else:
-                # Auto-approve payment status (since fee is 0 or empty)
-                student.is_paid = True
-                student.save()
-
-                # Send Email to Student with credentials
-                try:
-                    subject = "Your Student Login Details"
-                    html_content = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                    <style>
-                      body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }}
-                      .email-container {{ max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e5e7eb; }}
-                      .header {{ background: linear-gradient(135deg, #1e3a8a, #0d9488); padding: 30px 20px; text-align: center; color: #ffffff; }}
-                      .header h1 {{ margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; }}
-                      .header p {{ margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }}
-                      .content {{ padding: 30px 25px; color: #374151; line-height: 1.6; }}
-                      .content h2 {{ color: #1e3a8a; font-size: 18px; margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px; }}
-                      .details-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
-                      .details-table th, .details-table td {{ padding: 12px; text-align: left; border-bottom: 1px solid #f3f4f6; }}
-                      .details-table th {{ background-color: #f9fafb; font-weight: 600; color: #4b5563; width: 40%; }}
-                      .details-table td {{ color: #1f2937; }}
-                      .credentials-box {{ background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 15px; margin: 20px 0; }}
-                      .credentials-box p {{ margin: 5px 0; font-size: 14px; color: #065f46; }}
-                      .footer {{ background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }}
-                    </style>
-                    </head>
-                    <body>
-                      <div class="email-container">
-                        <div class="header">
-                          <h1>Trinity Theological Seminary</h1>
-                          <p>Student Registration Confirmation</p>
-                        </div>
-                        <div class="content">
-                          <h2>Welcome, {student.first_name}!</h2>
-                          <p>Thank you for registering at Trinity Theological Seminary. Your student application has been successfully received and is currently under review. Please find your registration details and login credentials below.</p>
-                          
-                          <table class="details-table">
-                            <tr>
-                              <th>Student ID</th>
-                              <td>{student.student_id}</td>
-                            </tr>
-                            <tr>
-                              <th>Course Applied</th>
-                              <td>{course_obj.course_name if course_obj else 'N/A'}</td>
-                            </tr>
-                            <tr>
-                              <th>Payment Status</th>
-                              <td><span style="color: #10b981; font-weight: bold;">Paid / No Fee</span></td>
-                            </tr>
-                          </table>
-                          
-                          <div class="credentials-box">
-                            <p><strong>Your Account Login Credentials:</strong></p>
-                            <p><strong>Username / Email:</strong> {student.email}</p>
-                            <p><strong>Temporary Password:</strong> <code style="font-family: monospace; font-size: 15px; font-weight: bold; background-color: #d1fae5; padding: 2px 6px; border-radius: 4px;">{temp_password}</code></p>
-                          </div>
-                        </div>
-                        <div class="footer">
-                          <p>&copy; 2026 Trinity Theological Seminary. All rights reserved.</p>
-                          <p>This is an automated email, please do not reply directly to this message.</p>
-                        </div>
-                      </div>
-                    </body>
-                    </html>
-                    """
-                    
-                    text_content = f"""
-Dear {student.first_name},
-
-Thank you for registering at Trinity Theological Seminary. Your application has been received and is currently under review.
-
-Registration Details:
-Student ID: {student.student_id}
-Course Applied: {course_obj.course_name if course_obj else 'N/A'}
-Payment Status: Paid / No Fee
-
-Your Account Login Credentials:
-Username / Email: {student.email}
-Temporary Password: {temp_password}
-
-Best regards,
-Trinity Theological Seminary
-                    """
-                    
-                    send_mail(
-                        subject=subject,
-                        message=text_content,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[student.email],
-                        html_message=html_content,
-                        fail_silently=False
+                    # 1. Send Beautiful Registration & Payment Email to Student
+                    send_student_registration_email(
+                        student=student,
+                        temp_password=temp_password,
+                        course=course_obj,
+                        course_fee=course_fee,
+                        payment_link=build_site_url("/register/payment/"),
                     )
-                except Exception as e:
-                    logger.error(f"Failed to send student login details email: {e}")
 
-                # Send Email to Admin
-                notify_admin_student_registration(
-                    student=student,
-                    registration_type="Student Registration",
-                    details=[
-                        ("Registration Fee", "$0.00"),
-                        ("Payment Status", "Paid / No Fee"),
-                    ],
-                    action_path=f"/menu/students/view/{student.id}/",
-                )
+                    # 2. Send Notification to Admin (admin@mytts.org)
+                    notify_admin_student_registration(
+                        student=student,
+                        registration_type="Student Registration",
+                        details=[
+                            ("Course Applied", course_obj.course_name if course_obj else "N/A"),
+                            ("Registration Fee", f"${course_fee:.2f}"),
+                            ("Payment Status", "Pending Payment"),
+                        ],
+                        action_path=f"/menu/students/view/{student.id}/",
+                    )
 
-                return redirect("student_application_success", student_id=student.student_id)
+                    messages.success(request, f"Registration submitted! Please complete the registration payment. Account details sent to {student.email}.")
+                    return redirect("registration_payment")
+
+                else:
+                    # Free / Sponsored Course -> Auto-mark paid and complete
+                    student.is_paid = True
+                    student.save()
+
+                    # 1. Send Beautiful Registration Confirmation Email to Student
+                    send_student_registration_email(
+                        student=student,
+                        temp_password=temp_password,
+                        course=course_obj,
+                        course_fee=0.0,
+                    )
+
+                    # 2. Send Notification to Admin (admin@mytts.org)
+                    notify_admin_student_registration(
+                        student=student,
+                        registration_type="Student Registration",
+                        details=[
+                            ("Course Applied", course_obj.course_name if course_obj else "N/A"),
+                            ("Registration Fee", "$0.00"),
+                            ("Payment Status", "Complete / Enrolled"),
+                        ],
+                        action_path=f"/menu/students/view/{student.id}/",
+                    )
+
+                    messages.success(request, f"Application submitted successfully! Your account details have been emailed to {student.email}.")
+                    return redirect("student_application_success", student_id=student.student_id)
 
         except IntegrityError as e:
-            logger.error(f" Database integrity error: {e}", exc_info=True)
-            messages.error(request, f"Database integrity error: This email or student ID may already exist. {e}")
-            return render(request, "site_pages/student_register.html")
-            
-        except ValidationError as e:
-            logger.error(f" Validation error: {e}", exc_info=True)
-            messages.error(request, f"Validation error: {e}")
-            return render(request, "site_pages/student_register.html")
-            
-        except TypeError as e:
-            logger.error(f"Type error (probably wrong data type): {e}", exc_info=True)
-            messages.error(request, f"Data type error: {e}. Please check your form inputs.")
-            return render(request, "site_pages/new_admission_form.html")
-            
+            logger.error("Database integrity error on student register: %s", e, exc_info=True)
+            messages.error(request, "This email or student ID may already be registered. Please verify your details.")
+            return render(request, "site_pages/student_register.html", get_student_register_context())
         except Exception as e:
-            logger.error(f"Database save error: {e}", exc_info=True)
-            messages.error(request, f"Database save error: {e}")
-            return render(request, "site_pages/student_register.html")
+            logger.error("Error during student registration: %s", e, exc_info=True)
+            messages.error(request, f"An error occurred while saving your application: {e}. Please check your inputs and try again.")
+            return render(request, "site_pages/student_register.html", get_student_register_context())
 
-        # -------------------------------
-        # SUCCESS
-        # -------------------------------
-        logger.info(f" Application submitted successfully for {first_name} {last_name}")
-        messages.success(request, "Your application has been submitted successfully!")
-        return redirect("student_application_success")  # <--- POST/Redirect/GET    
-
-    # Default GET
-    logger.info("Rendering new admission form (GET request)")
-    return render(request, "site_pages/student_register.html", {
-        "countries": Countries.objects.all(),
-        "courses": Courses.objects.all(),
-        "languages": Languages.objects.filter(deleted_at__isnull=True),
-        "RECAPTCHA_SITE_KEY": settings.RECAPTCHA_SITE_KEY,
-        "timezones": pytz.common_timezones  
-    })
+    # Default GET Request
+    return render(request, "site_pages/student_register.html", get_student_register_context())
 
 
 

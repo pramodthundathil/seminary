@@ -44,7 +44,7 @@ from student.views import send_admin_payment_notification
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     ADMIN_EMAIL="admin@mytts.org",
     DEFAULT_FROM_EMAIL="mytrinitytheologicalseminary@gmail.com",
-    SITE_URL="http://127.0.0.1:8000/",
+    SITE_URL="https://mytts.org/",
 )
 class AdminEmailNotificationSystemTests(TestCase):
     def setUp(self):
@@ -283,6 +283,10 @@ class AdminEmailNotificationSystemTests(TestCase):
     def test_settings_and_helper_defaults(self):
         self.assertEqual(settings.ADMIN_EMAIL, "admin@mytts.org")
         self.assertEqual(get_admin_emails(), ["admin@mytts.org"])
+        from home.emails import build_site_url
+        self.assertEqual(settings.SITE_URL, "https://mytts.org/")
+        self.assertEqual(build_site_url("/signin/"), "https://mytts.org/signin/")
+        self.assertEqual(build_site_url("http://127.0.0.1:8000/register/payment/"), "https://mytts.org/register/payment/")
 
         ok = send_admin_notification(
             subject="Test Subject",
@@ -952,3 +956,76 @@ class AdminEmailNotificationSystemTests(TestCase):
         self.assertTrue(expired_se.is_exam_ended)
         self.assertEqual(len(self._admin_emails()), 1)
         self.assertIn("Exam Submitted", self._admin_emails()[0].subject)
+
+    def test_manual_marking_and_church_admin_toggle_send_notifications(self):
+        # 1. Admin manually marks student paid via manual_mark_paid
+        mail.outbox = []
+        self.client.force_login(self.admin_user)
+        unpaid_user = Users.objects.create(
+            name="Unpaid Student",
+            email="unpaid@example.com",
+            username="unpaid@example.com",
+            is_active=False,
+        )
+        unpaid_student = Students.objects.create(
+            student_id="TTSUNP0001",
+            user=unpaid_user,
+            first_name="Unpaid",
+            last_name="Student",
+            email="unpaid@example.com",
+            timezone="UTC",
+            language=self.language,
+            course_applied=self.course_paid,
+            status=False,
+            active=False,
+            is_paid=False,
+        )
+
+        res = self.client.post(reverse("manual_mark_paid", args=[unpaid_student.id]), {"payment_note": "Cash received"})
+        self.assertEqual(res.status_code, 302)
+        unpaid_student.refresh_from_db()
+        self.assertTrue(unpaid_student.is_paid)
+        # Should have sent admin notification and student receipt
+        self.assertTrue(any("Fee Payment Manually Marked Paid" in m.subject for m in self._admin_emails()))
+        self.assertTrue(any("unpaid@example.com" in m.to for m in mail.outbox))
+
+        # 2. Admin manually marks a payment record paid via manual_mark_payment_paid
+        mail.outbox = []
+        payment = Payments.objects.create(
+            name="Unpaid Student",
+            email="unpaid@example.com",
+            amount=Decimal("150.00"),
+            is_paid=False,
+            student=unpaid_student,
+            church_admin=self.church_admin,
+        )
+        res_pay = self.client.post(reverse("manual_mark_payment_paid", args=[payment.id]))
+        self.assertEqual(res_pay.status_code, 302)
+        payment.refresh_from_db()
+        self.assertTrue(payment.is_paid)
+        self.assertTrue(any("Fee Payment Manually Marked Paid" in m.subject for m in self._admin_emails()))
+        self.assertTrue(any("unpaid@example.com" in m.to for m in mail.outbox))
+
+        # 3. Admin approves student via student_approve_action
+        mail.outbox = []
+        res_app = self.client.post(reverse("student_approve_action", args=[unpaid_student.id]))
+        self.assertEqual(res_app.status_code, 302)
+        unpaid_student.refresh_from_db()
+        self.assertTrue(unpaid_student.status)
+        self.assertTrue(unpaid_student.active)
+        # Verify student received branded approval email
+        student_emails = [m for m in mail.outbox if "unpaid@example.com" in m.to]
+        self.assertTrue(len(student_emails) >= 1)
+        self.assertIn("Registration Approved", student_emails[0].subject)
+        # Verify super admin received approval notification
+        self.assertTrue(any("Student Approved" in m.subject for m in self._admin_emails()))
+
+        # 4. Admin toggles church admin payment status
+        mail.outbox = []
+        initial_paid = self.church_admin.is_paid
+        res_toggle = self.client.get(reverse("church_admin_toggle_payment", args=[self.church_admin.id]))
+        self.assertEqual(res_toggle.status_code, 302)
+        self.church_admin.refresh_from_db()
+        self.assertNotEqual(self.church_admin.is_paid, initial_paid)
+        self.assertEqual(len(self._admin_emails()), 1)
+        self.assertIn("Church Admin Payment Status", self._admin_emails()[0].subject)
