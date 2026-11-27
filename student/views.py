@@ -1562,25 +1562,19 @@ def student_profile_view(request):
         if 'photo' in request.FILES:
             photo_file = request.FILES['photo']
             try:
+                from django.core.files.storage import default_storage
                 # Generate unique file name
                 file_path = f"uploads/students/{get_random_string(8)}_{photo_file.name}"
-                full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-                os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                
-                with open(full_path, "wb+") as destination:
-                    for chunk in photo_file.chunks():
-                        destination.write(chunk)
+                saved_path = default_storage.save(file_path, photo_file)
                 
                 # Delete old photo if it exists
-                if student.photo:
-                    old_path = os.path.join(settings.MEDIA_ROOT, student.photo)
-                    if os.path.exists(old_path) and os.path.isfile(old_path):
-                        try:
-                            os.remove(old_path)
-                        except Exception as delete_err:
-                            logger.error(f"Failed to delete old profile photo: {delete_err}")
+                if student.photo and default_storage.exists(student.photo):
+                    try:
+                        default_storage.delete(student.photo)
+                    except Exception as delete_err:
+                        logger.warning(f"Failed to delete old profile photo from storage: {delete_err}")
                 
-                student.photo = file_path
+                student.photo = saved_path
                 student.save()
                 notify_admin_request(
                     "Profile Photo Updated",
@@ -3052,20 +3046,11 @@ def student_register(request):
                 if not f:
                     return None
 
-                # Generate unique file name
+                from django.core.files.storage import default_storage
                 file_path = f"uploads/students/{get_random_string(8)}_{f.name}"
-                full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-                
-                # Create directory if it doesn't exist
-                os.makedirs(os.path.dirname(full_path), exist_ok=True)
-
-                # Save file manually
-                with open(full_path, "wb+") as destination:
-                    for chunk in f.chunks():
-                        destination.write(chunk)
-                
-                logger.info(f"File saved: {file_path}")
-                return file_path
+                saved_path = default_storage.save(file_path, f)
+                logger.info(f"File saved to storage: {saved_path}")
+                return saved_path
 
             except Exception as e:
                 logger.error(f" Error saving file '{f.name}': {e}", exc_info=True)

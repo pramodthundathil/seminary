@@ -3758,15 +3758,15 @@ def student_edit_view(request, student_id):
                 profile_pic = request.FILES.get('photo')
                 if profile_pic:
                     from django.utils.crypto import get_random_string
-                    import os
-                    from django.conf import settings
+                    from django.core.files.storage import default_storage
                     file_path = f"uploads/students/{get_random_string(8)}_{profile_pic.name}"
-                    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-                    os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                    with open(full_path, "wb+") as destination:
-                        for chunk in profile_pic.chunks():
-                            destination.write(chunk)
-                    student.photo = file_path
+                    if student.photo and default_storage.exists(student.photo):
+                        try:
+                            default_storage.delete(student.photo)
+                        except Exception:
+                            pass
+                    saved_path = default_storage.save(file_path, profile_pic)
+                    student.photo = saved_path
                     
             # Certificates - handle clear or upload
             for i in range(1, 6):
